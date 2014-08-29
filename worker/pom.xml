@@ -71,6 +71,13 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>dk.dbc.testutils</groupId>
+            <artifactId>maven-javascript-unit-test-runner</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <type>tar.gz</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>7.0</version>
@@ -97,9 +104,9 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
-                    <compilerArguments>
-                        <endorseddirs>${endorsed.dir}</endorseddirs>
-                    </compilerArguments>
+                    <compilerArgs>
+                        <arg>-Djava.endorsed.dirs=${endorsed.dir}</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -116,6 +123,7 @@
                 <version>2.6</version>
                 <executions>
                     <execution>
+                        <id>validate</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>copy</goal>
@@ -133,7 +141,44 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <!-- Javascript test test runner -->
+                    <execution>
+                        <id>unpack-js-unittest-runner</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeTypes>tar.gz</includeTypes>
+                            <excludeTransitive>true</excludeTransitive>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <useSubDirectoryPerArtifact>false</useSubDirectoryPerArtifact>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>Javascript unit tests</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>${project.build.directory}/maven-javascript-unit-test-runner/bin/test-runner.sh</executable>
+                    <environmentVariables>
+                        <MODULE_PATHS>
+                            classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/
+                        </MODULE_PATHS>
+                    </environmentVariables>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
