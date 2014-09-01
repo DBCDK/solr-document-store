@@ -19,6 +19,8 @@
 
 package dk.dbc.cloud.indexer;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import dk.dbc.opensearch.commons.fcrepo.FCRepoRestClientProvider;
 import dk.dbc.opensearch.commons.fcrepo.RepositoryFactory;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
@@ -28,6 +30,7 @@ import dk.dbc.opensearch.commons.repository.RepositoryException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
@@ -47,8 +50,16 @@ public class SolrIndexer {
     @Resource
     TransactionSynchronizationRegistry transactionRegistry;
 
+    @EJB
+    MetricsRegistry registry;
+
+    Counter documentsUpdated;
+    Counter documentsDeleted;
+
     @PostConstruct
     public void init() {
+        documentsUpdated = registry.getRegistry().counter(MetricRegistry.name(SolrIndexer.class, "documentsUpdated"));
+        documentsDeleted = registry.getRegistry().counter(MetricRegistry.name(SolrIndexer.class, "documentsDeleted"));
         FCRepoRestClientProvider fcRepoRestClientProvider = new FCRepoRestClientProvider() {
             @Override
             public FCRepoRestClient get() {
@@ -57,7 +68,7 @@ public class SolrIndexer {
                 return restClient;
             }
         };
-        RepositoryFactory.initializeFactory("CloudIndexer", fcRepoRestClientProvider);
+        RepositoryFactory.initializeFactory("CloudWorker", fcRepoRestClientProvider);
     }
 
     @PreDestroy
@@ -74,6 +85,8 @@ public class SolrIndexer {
                 String data = getObjectData(pid);
                 SolrUpdaterCallback callback = new SolrUpdaterCallback(pid, responseContext, responseContext.createQueue(targetQueue));
                 jsWrapper.createIndexData(pid, data, callback);
+                documentsDeleted.inc(callback.getDeletedDocumentsCount());
+                documentsUpdated.inc(callback.getUpdatedDocumentsCount());
             } else {
                 log.debug("object {} filtered", pid);
             }

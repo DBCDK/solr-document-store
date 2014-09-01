@@ -78,12 +78,15 @@ public class CloudIndexerIT {
         consumer.setMessageListener(documentWorker);
         HttpClient httpClient = HttpClientBuilder.create().build();
         documentWorker.restClient = new FCRepoRestClient(httpClient, "dummyurl", "", "");
+        documentWorker.registry = new MetricsRegistry();
+        documentWorker.init();
+
     }
 
     @After
     public void after() throws Exception{
         documentWorker.responseContext.close();
-        documentWorker.restClient.shutdown();
+        documentWorker.shutdown();
         broker.stop();
     }
 

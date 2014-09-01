@@ -19,6 +19,8 @@
 
 package dk.dbc.cloud.indexer;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClientException;
 import javax.annotation.PostConstruct;
@@ -54,6 +56,9 @@ public class CloudIndexer implements MessageListener {
     private static final Logger log = LoggerFactory.getLogger(CloudIndexer.class);
 
     @EJB
+    MetricsRegistry registry;
+
+    @EJB
     SolrIndexer docBuilder;
 
     @EJB
@@ -67,8 +72,12 @@ public class CloudIndexer implements MessageListener {
     final int redeliveryLimit = 5;
     final String deadQueueName = "deadPidQueue";
 
+    Timer onMessageTimer;
+
     @PostConstruct
     public void init() {
+        onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(CloudIndexer.class, "onMessage"));
+
         HttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
@@ -89,6 +98,7 @@ public class CloudIndexer implements MessageListener {
     @Override
     public void onMessage(Message message) {
         try {
+            Timer.Context time = onMessageTimer.time();
             MapMessage m = (MapMessage) message;
             String targetQueue = m.getString("documentQueueName");
             String fedoraUrl = m.getString("fedoraUrl");
@@ -116,6 +126,7 @@ public class CloudIndexer implements MessageListener {
                     throw ex;
                 }
             }
+            time.stop();
         } catch (JMSException ex) {
             log.error("unable to extract fields from message {}", message, ex);
             throw new EJBException(ex);
