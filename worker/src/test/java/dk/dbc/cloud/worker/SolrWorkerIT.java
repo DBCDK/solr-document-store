@@ -17,8 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dk.dbc.cloud.indexer;
+package dk.dbc.cloud.worker;
 
+import dk.dbc.cloud.worker.SolrWorker;
+import dk.dbc.cloud.worker.SolrUpdaterCallback;
+import dk.dbc.cloud.worker.MetricsRegistry;
+import dk.dbc.cloud.worker.SolrIndexerJS;
+import dk.dbc.cloud.worker.SolrIndexer;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,16 +58,16 @@ import org.junit.Test;
  *
  * @author kasper
  */
-public class CloudIndexerIT {
+public class SolrWorkerIT {
 
-    private CloudIndexer documentWorker;
+    private SolrWorker documentWorker;
     private final String pidQueueName = "pidQueue";
     private final String documentQueueName = "documentQueue";
     private final String deadPidQueueName = "deadPidQueue";
     private EmbeddedJMS broker;
     private ConnectionFactory connectionFactory;
 
-    public CloudIndexerIT() {
+    public SolrWorkerIT() {
     }
 
     @Before
@@ -71,7 +76,7 @@ public class CloudIndexerIT {
         startBroker();
 
         //Setup document worker
-        documentWorker = new CloudIndexer();
+        documentWorker = new SolrWorker();
         JMSContext context = connectionFactory.createContext();
         documentWorker.responseContext = context;
         JMSConsumer consumer = context.createConsumer(context.createQueue(pidQueueName));
@@ -103,7 +108,7 @@ public class CloudIndexerIT {
         mm.setString("documentQueueName", documentQueueName);
         context.createProducer().send(context.createQueue(pidQueueName), mm);
 
-        //Let CloudIndexer handle message
+        //Let SolrWorker handle message
         //Check that a "add-document-message" is on documentQueue
         //and that we can cast it to SolrInputDocument
         ObjectMessage message = (ObjectMessage) context.createConsumer(context.createQueue(documentQueueName)).receive();
@@ -123,7 +128,7 @@ public class CloudIndexerIT {
         mm.setString("documentQueueName", documentQueueName);
         context.createProducer().send(context.createQueue(pidQueueName), mm);
 
-        //Let CloudIndexer handle message
+        //Let SolrWorker handle message
         //Check that a "delete-document-message" is on documentQueue
         TextMessage deleteMessage = (TextMessage) context.createConsumer(context.createQueue(documentQueueName)).receive();
         assertEquals(deleteMessage.getText(), "deletepid");
@@ -142,7 +147,7 @@ public class CloudIndexerIT {
         mm.setString("pid", "somepid");
         context.createProducer().send(context.createQueue(pidQueueName), mm);
 
-        // Let CloudIndexer handle-and-fail message until retry-limit is reached, and
+        // Let SolrWorker handle-and-fail message until retry-limit is reached, and
         // check that the pid-message is put on dead message queue.
         // Should happen after retry-limit is reached
         MapMessage deadMessage = (MapMessage) context.createConsumer(context.createQueue(deadPidQueueName)).receive();

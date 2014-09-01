@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dk.dbc.cloud.indexer;
+package dk.dbc.cloud.worker;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -68,7 +68,7 @@ public class SolrIndexer {
                 return restClient;
             }
         };
-        RepositoryFactory.initializeFactory("CloudWorker", fcRepoRestClientProvider);
+        RepositoryFactory.initializeFactory("SolrWorker", fcRepoRestClientProvider);
     }
 
     @PreDestroy

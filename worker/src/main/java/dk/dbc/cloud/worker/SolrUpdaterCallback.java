@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with opensearch.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package dk.dbc.cloud.indexer;
+package dk.dbc.cloud.worker;
 
 import javax.jms.Destination;
 import javax.jms.JMSContext;

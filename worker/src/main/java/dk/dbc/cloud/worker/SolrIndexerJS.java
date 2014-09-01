@@ -21,7 +21,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dk.dbc.cloud.indexer;
+package dk.dbc.cloud.worker;
 
 import dk.dbc.commons.exception.ExceptionUtil;
 import dk.dbc.commons.javascript.JavaScriptWrapperSingleEnvironment;

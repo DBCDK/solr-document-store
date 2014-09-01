@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package dk.dbc.cloud.indexer;
+package dk.dbc.cloud.worker;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -51,9 +51,9 @@ import org.slf4j.LoggerFactory;
             @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue")
 //            @ActivationConfigProperty(propertyName = "connectionFactoryLookup", propertyValue = "jms/cloudConnectionFactory")
         })
-public class CloudIndexer implements MessageListener {
+public class SolrWorker implements MessageListener {
 
-    private static final Logger log = LoggerFactory.getLogger(CloudIndexer.class);
+    private static final Logger log = LoggerFactory.getLogger(SolrWorker.class);
 
     @EJB
     MetricsRegistry registry;
@@ -76,7 +76,7 @@ public class CloudIndexer implements MessageListener {
 
     @PostConstruct
     public void init() {
-        onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(CloudIndexer.class, "onMessage"));
+        onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
 
         HttpClient httpClient = HttpClientBuilder.create().build();
 
