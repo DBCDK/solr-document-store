@@ -19,6 +19,7 @@ along with opensearch.  If not, see <http://www.gnu.org/licenses/>.
 
 package dk.dbc.cloud.worker;
 
+import dk.dbc.commons.exception.ExceptionUtil;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import org.apache.solr.common.SolrInputDocument;
@@ -41,6 +42,10 @@ public class SolrUpdaterCallback
     private final Destination responseQueue;
 
     SolrUpdaterCallback(String identifier, JMSContext responseContext, Destination responseQueue) {
+        ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(identifier, "identifier", log);
+        ExceptionUtil.checkForNullAndLogAndThrow(responseContext, "responseContext", log);
+        ExceptionUtil.checkForNullAndLogAndThrow(responseQueue, "responseQueue", log);
+
         this.identifier = identifier;
         this.responseContext = responseContext;
         this.responseQueue = responseQueue;
@@ -48,6 +53,7 @@ public class SolrUpdaterCallback
 
 
     public void addDocument(Object index) {
+        ExceptionUtil.checkForNullAndLogAndThrow(index, "index", log);
         if (index instanceof NativeArray) {
             SolrInputDocument solrDocument = extractIndexDocumentFromNativeArray((NativeArray) index);
             if (log.isTraceEnabled()) {
@@ -59,16 +65,19 @@ public class SolrUpdaterCallback
             addToQueue(solrDocument);
         }
         else {
-            throw new IllegalStateException("Unknown document type added by javascript: " + index.getClass());
+            throw new IllegalArgumentException("Unknown document type added by javascript: " + index.getClass());
         }
     }
-    public void addToQueue(SolrInputDocument doc){
+
+    void addToQueue(SolrInputDocument doc){
         responseContext.createProducer().send(responseQueue, doc);
         updatedDocumentsCount++;
     }
 
     public void deleteDocument(String docId) {
         log.debug("Deleting document for {}", docId);
+        ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
+
         responseContext.createProducer().send(responseQueue, docId);
         deletedDocumentsCount++;
     }
@@ -81,17 +90,29 @@ public class SolrUpdaterCallback
         return deletedDocumentsCount;
     }
 
-    private static SolrInputDocument extractIndexDocumentFromNativeArray(NativeArray result) throws IllegalStateException {
-        long length = result.getLength();
-        log.debug("Result of running JS: {}, length {}", result, length);
+    private static SolrInputDocument extractIndexDocumentFromNativeArray(NativeArray index) throws IllegalStateException {
+        long length = index.getLength();
+        log.debug("Extracting index from data: {}, length {}", index, length);
         SolrInputDocument document = new SolrInputDocument();
-        for (Object obj : result) {
+        for (Object obj : index) {
             if (!(obj instanceof NativeObject)) {
-                throw new IllegalStateException("Unknown result element type returned by javascript: " + obj.getClass());
+                throw new IllegalArgumentException("Unknown result element type returned by javascript: " + obj.getClass());
             }
             NativeObject nat = (NativeObject) obj;
-            String name = (String) nat.get("name", null);
-            String value = (String) nat.get("value", null);
+            String name, value;
+            if (nat.has("name", null)) {
+                Object nameObject = nat.get("name", null);
+                name = (String) nameObject;
+            } else {
+                throw new IllegalArgumentException("'name' field missing from object "+obj);
+            }
+            if (nat.has("value", null)) {
+                Object valueObject = nat.get("value", null);
+                value = (String) valueObject;
+            } else {
+                throw new IllegalArgumentException("'name' field missing from object "+obj);
+            }
+
             log.debug("name: '{}', value '{}'", name, value);
             document.addField(name, value);
         }

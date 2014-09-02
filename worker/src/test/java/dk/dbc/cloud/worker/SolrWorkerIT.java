@@ -19,11 +19,6 @@
 
 package dk.dbc.cloud.worker;
 
-import dk.dbc.cloud.worker.SolrWorker;
-import dk.dbc.cloud.worker.SolrUpdaterCallback;
-import dk.dbc.cloud.worker.MetricsRegistry;
-import dk.dbc.cloud.worker.SolrIndexerJS;
-import dk.dbc.cloud.worker.SolrIndexer;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,9 +61,6 @@ public class SolrWorkerIT {
     private final String deadPidQueueName = "deadPidQueue";
     private EmbeddedJMS broker;
     private ConnectionFactory connectionFactory;
-
-    public SolrWorkerIT() {
-    }
 
     @Before
     public void before() throws Exception {
