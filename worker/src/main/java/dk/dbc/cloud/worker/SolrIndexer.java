@@ -37,6 +37,7 @@ import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.jms.JMSContext;
 import javax.transaction.TransactionSynchronizationRegistry;
+import static net.logstash.logback.marker.Markers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,11 +83,17 @@ public class SolrIndexer {
         transactionRegistry.putResource(REST_CLIENT_KEY, restClient);
         try {
             if (jsWrapper.isIndexableIdentifier(pid)) {
+                long starttime = System.nanoTime();
                 String data = getObjectData(pid);
                 SolrUpdaterCallback callback = new SolrUpdaterCallback(pid, responseContext, responseContext.createQueue(targetQueue));
                 jsWrapper.createIndexData(pid, data, callback);
                 documentsDeleted.inc(callback.getDeletedDocumentsCount());
                 documentsUpdated.inc(callback.getUpdatedDocumentsCount());
+                long endtime = System.nanoTime();
+                log.info(append("duration",((double)((endtime-starttime)/10000))/100).and(
+                            append("updates",callback.getUpdatedDocumentsCount())).and(
+                            append("deletes",callback.getDeletedDocumentsCount())),
+                            "Documents successfully build for pid: {}", pid );
             } else {
                 log.debug("object {} filtered", pid);
             }

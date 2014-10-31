@@ -108,7 +108,7 @@ public class SolrWorker implements MessageListener {
             String pid = m.getString("pid");
             int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
 
-            log.info("Processing message. pid: '{}'", pid);
+            log.info("Processing message with pid: '{}'", pid);
             log.debug("FCRepo: '{}', Document Queue: '{}', Message timestamp: {}, Delivery attempts: {}",
                     new Object[] { fedoraUrl, targetQueue, timeStamp, deliveryAttempts});
 
