@@ -30,6 +30,7 @@ import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
+import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.JMSRuntimeException;
@@ -48,8 +49,8 @@ import org.slf4j.LoggerFactory;
 @MessageDriven(
         activationConfig = {
             @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-            @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue")
-//            @ActivationConfigProperty(propertyName = "connectionFactoryLookup", propertyValue = "jms/cloudConnectionFactory")
+            @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue"),
+            @ActivationConfigProperty(propertyName = "connectionFactoryLookup", propertyValue = "jms/indexerConnectionFactory")
         })
 public class SolrWorker implements MessageListener {
 
@@ -65,6 +66,7 @@ public class SolrWorker implements MessageListener {
     SolrIndexerJS javascriptWrapper;
 
     @Inject
+    @JMSConnectionFactory("jms/indexerConnectionFactory")
     JMSContext responseContext;
 
     FCRepoRestClient restClient;
@@ -76,6 +78,7 @@ public class SolrWorker implements MessageListener {
 
     @PostConstruct
     public void init() {
+        log.info("Initializing SolrWorker");
         onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
 
         HttpClient httpClient = HttpClientBuilder.create().build();
@@ -107,6 +110,7 @@ public class SolrWorker implements MessageListener {
             long timeStamp = m.getJMSTimestamp();
             String pid = m.getString("pid");
             int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
+            
 
             log.info("Processing message with pid: '{}'", pid);
             log.debug("FCRepo: '{}', Document Queue: '{}', Message timestamp: {}, Delivery attempts: {}",

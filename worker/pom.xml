@@ -92,6 +92,11 @@
       <groupId>com.codahale.metrics</groupId>
       <artifactId>metrics-core</artifactId>
     </dependency>
+    <dependency>
+        <groupId>com.github.danielwegener</groupId>
+        <artifactId>logback-kafka-appender</artifactId>
+        <version>0.0.1</version>
+    </dependency>
 
   </dependencies>
 

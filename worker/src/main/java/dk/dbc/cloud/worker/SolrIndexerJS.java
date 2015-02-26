@@ -40,11 +40,11 @@ import org.slf4j.ext.XLoggerFactory;
 public class SolrIndexerJS {
     private final static XLogger log = XLoggerFactory.getXLogger(SolrIndexerJS.class);
 
-    @Resource(name="moduleSearchPath")
+    @Resource(lookup="moduleSearchPath")
     String moduleSearchPath;
-    @Resource(name="scriptFile")
+    @Resource(lookup="scriptFile")
     String scriptFile;
-    @Resource(name="scriptFunction")
+    @Resource(lookup="scriptFunction")
     String scriptFunction;
 
     JavaScriptWrapperSingleEnvironment wrapper;
