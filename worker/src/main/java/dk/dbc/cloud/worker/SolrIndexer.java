@@ -36,7 +36,6 @@ import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.jms.JMSContext;
-import javax.jms.Queue;
 import javax.transaction.TransactionSynchronizationRegistry;
 import static net.logstash.logback.marker.Markers.*;
 import org.slf4j.Logger;
@@ -52,6 +51,9 @@ public class SolrIndexer {
     @Resource
     TransactionSynchronizationRegistry transactionRegistry;
 
+    @EJB
+    LogbackHelper logHelp;
+    
     @EJB
     MetricsRegistry registry;
 
@@ -91,17 +93,20 @@ public class SolrIndexer {
                 documentsDeleted.inc(callback.getDeletedDocumentsCount());
                 documentsUpdated.inc(callback.getUpdatedDocumentsCount());
                 long endtime = System.nanoTime();
-                log.info(append("duration",((double)((endtime-starttime)/10000))/100).and(
+                
+                log.info(   logHelp.getMarker(pid).and(
+                            append("duration",((double)((endtime-starttime)/10000))/100)).and(
                             append("updates",callback.getUpdatedDocumentsCount())).and(
-                            append("deletes",callback.getDeletedDocumentsCount())),
-                            "Documents successfully build for pid: {}", pid );
+                            append("deletes",callback.getDeletedDocumentsCount())).and(
+                            append("targetQueue",targetQueue)),
+                            "Documents successfully build");
             } else {
                 log.debug("object {} filtered", pid);
             }
         }
         catch (Exception ex) {
             String error = String.format("Error calling indexing logic for '%s'", pid);
-            log.error(error);
+            log.error(logHelp.getMarker(pid),error);
             throw new EJBException(error, ex);
         }
         finally {
