@@ -27,6 +27,7 @@ import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
 import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
 import dk.dbc.opensearch.commons.repository.IRepositoryIdentifier;
 import dk.dbc.opensearch.commons.repository.RepositoryException;
+import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -50,9 +51,6 @@ public class SolrIndexer {
 
     @Resource
     TransactionSynchronizationRegistry transactionRegistry;
-
-    @EJB
-    LogbackHelper logHelp;
     
     @EJB
     MetricsRegistry registry;
@@ -94,7 +92,7 @@ public class SolrIndexer {
                 documentsUpdated.inc(callback.getUpdatedDocumentsCount());
                 long endtime = System.nanoTime();
                 
-                log.info(   logHelp.getMarker(pid).and(
+                log.info(   LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED).and(
                             append("duration",((double)((endtime-starttime)/10000))/100)).and(
                             append("updates",callback.getUpdatedDocumentsCount())).and(
                             append("deletes",callback.getDeletedDocumentsCount())).and(
@@ -106,7 +104,7 @@ public class SolrIndexer {
         }
         catch (Exception ex) {
             String error = String.format("Error calling indexing logic for '%s'", pid);
-            log.error(logHelp.getMarker(pid),error);
+            log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),error);
             throw new EJBException(error, ex);
         }
         finally {

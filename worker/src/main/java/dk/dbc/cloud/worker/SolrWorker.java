@@ -23,6 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
 import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClientException;
+import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -57,9 +58,6 @@ import org.slf4j.LoggerFactory;
 public class SolrWorker implements MessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(SolrWorker.class);
-    
-    @EJB
-    LogbackHelper logHelp;
 
     @EJB
     MetricsRegistry registry;
@@ -117,10 +115,10 @@ public class SolrWorker implements MessageListener {
             int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
             
 
-            log.info(logHelp.getMarker(pid).
-                    and(append("FCRepo", fedoraUrl)).
+            log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.STARTED).
+                    and(append("fedora", fedoraUrl)).
                     and(append("JmsTimestamp", timeStamp).
-                    and(append("DeliveryAttempts", deliveryAttempts))),
+                    and(append("deliveryAttempts", deliveryAttempts))),
                             "Started processing message");
 
             if(deliveryAttempts <= redeliveryLimit){
@@ -128,21 +126,21 @@ public class SolrWorker implements MessageListener {
                 docBuilder.buildDocuments(pid, javascriptWrapper, restClient, targetQueue, responseContext);
             }else{
                 //Put on dead message queue
-                log.error(logHelp.getMarker(pid),"Unable to proces message {} - redelivery limit reached", message);
+                log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
                 try{
                     responseContext.createProducer().send(responseContext.createQueue(deadQueueName), message);
-                    log.info(logHelp.getMarker(pid),"Message {} moved to dead message queue", message);
+                    log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED),"Message {} moved to dead message queue", message);
                 }catch(JMSRuntimeException ex){
-                    log.error(logHelp.getMarker(pid),"Message {} could not be moved to dead message queue", message, ex);
+                    log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Message {} could not be moved to dead message queue", message, ex);
                     throw ex;
                 }
             }
             time.stop();
         } catch (JMSException ex) {
-            log.error(logHelp.getMarker(),"unable to extract fields from message {}", message, ex);
+            log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"unable to extract fields from message {}", message, ex);
             throw new EJBException(ex);
         } catch (Exception ex) {
-            log.error(logHelp.getMarker(),"unable to process message {}", message, ex);
+            log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"unable to process message {}", message, ex);
             throw new EJBException(ex.getMessage());
         }
     }
