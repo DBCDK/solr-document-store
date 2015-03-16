@@ -20,6 +20,10 @@ along with opensearch.  If not, see <http://www.gnu.org/licenses/>.
 package dk.dbc.cloud.worker;
 
 import dk.dbc.commons.exception.ExceptionUtil;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import org.apache.solr.common.SolrInputDocument;
@@ -93,7 +97,7 @@ public class SolrUpdaterCallback
     private static SolrInputDocument extractIndexDocumentFromNativeArray(NativeArray index) throws IllegalStateException {
         long length = index.getLength();
         log.debug("Extracting index from data: {}, length {}", index, length);
-        SolrInputDocument document = new SolrInputDocument();
+        Map <String, Set<String>> docMap = new HashMap<>();
         for (Object obj : index) {
             if (!(obj instanceof NativeObject)) {
                 throw new IllegalArgumentException("Unknown result element type returned by javascript: " + obj.getClass());
@@ -112,9 +116,26 @@ public class SolrUpdaterCallback
             } else {
                 throw new IllegalArgumentException("'name' field missing from object "+obj);
             }
-
-            log.debug("name: '{}', value '{}'", name, value);
-            document.addField(name, value);
+            Set<String> values = docMap.get(name);
+            if (values == null) {
+                values = new HashSet<>();
+                docMap.put(name, values);
+            }
+            if (values.add(value)) {
+                log.debug("Adding name: '{}', value '{}'", name, value);
+            } else {
+                log.trace("Skipping duplicate name: '{}', value '{}'", name, value);
+            }
+        }
+        SolrInputDocument document = new SolrInputDocument();
+        for (Map.Entry<String, Set<String>> entrySet : docMap.entrySet()) {
+            String key = entrySet.getKey();
+            Set<String> value = entrySet.getValue();
+            if (value.size() == 1) {
+                document.addField(key, value.iterator().next());
+            } else {
+                document.addField(key, value);
+            }
         }
         return document;
     }
