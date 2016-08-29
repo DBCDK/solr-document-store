@@ -19,12 +19,16 @@
 
 package dk.dbc.cloud.worker;
 
+import dk.dbc.jslib.Environment;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
+import javax.jms.ObjectMessage;
+import jdk.nashorn.api.scripting.JSObject;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import static org.mockito.Matchers.refEq;
@@ -32,93 +36,89 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.ScriptableObject;
 
 public class SolrUpdaterCallbackTest {
 
     private final String pid = "obj:1";
+    private final String trackingId = "Tracking ID";
     private final JMSContext mockContext = mock(JMSContext.class);
     private final Destination mockQueue = mock(Destination.class);
+    private Environment environment;
+
+    @Before
+    public void before() throws Exception {
+        environment = new Environment();
+    }
 
     @Test
     public void testConstructor_OK() {
-        new SolrUpdaterCallback(pid, mockContext, mockQueue);
+        new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
     }
 
     @Test(expected = NullPointerException.class)
     public void testConstructor_throwsOnNullPid() {
-        new SolrUpdaterCallback(null, mockContext, mockQueue);
+        new SolrUpdaterCallback(null, environment, mockContext, mockQueue, trackingId);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor_throwsOnEmptyPid() {
-        new SolrUpdaterCallback("", mockContext, mockQueue);
+        new SolrUpdaterCallback("", environment, mockContext, mockQueue, trackingId);
     }
 
     @Test(expected = NullPointerException.class)
     public void testConstructor_throwsOnNullContext() {
-        new SolrUpdaterCallback(pid, null, mockQueue);
+        new SolrUpdaterCallback(pid, environment, null, mockQueue, trackingId);
     }
 
     @Test(expected = NullPointerException.class)
     public void testConstructor_throwsOnNullResponseQueue() {
-        new SolrUpdaterCallback(pid, mockContext, null);
+        new SolrUpdaterCallback(pid, environment, mockContext, null, trackingId);
     }
 
     @Test(expected = NullPointerException.class)
     public void testAddDocument_throwsOnNullDocument() {
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
         instance.addDocument(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddDocument_throwsOnIndexIsNotAnArray() {
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
-        instance.addDocument(new Object());
+    @Test(expected = ClassCastException.class)
+    public void testAddDocument_throwsOnIndexIsNotAnArray() throws Exception {
+        Object obj = environment.eval( "'foo'" );
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.addDocument(obj);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddDocument_throwsOnArrayContainingNonNativeObjectElement() {
-        NativeArray array = new NativeArray(new Object[] {new Object()});
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
-        instance.addDocument(array);
+    @Test(expected = IllegalStateException.class)
+    public void testAddDocument_throwsOnArrayContainingNonNativeObjectElement() throws Exception {
+        Object obj = environment.eval( "[ '' ];" );
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.addDocument(obj);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddDocument_throwsOnArrayContainingObjectWithoutNameField() {
-        NativeObject field = new NativeObject();
-        field.defineProperty( "value", "SomeValue", ScriptableObject.DONTENUM );
-        NativeArray array = new NativeArray(new Object[] {field});
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
-        instance.addDocument(array);
+    @Test(expected = NullPointerException.class)
+    public void testAddDocument_throwsOnArrayContainingObjectWithoutNameField() throws Exception {
+        Object obj = environment.eval( "[ { value: 'SomeValue' } ];" );
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.addDocument(obj);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddDocument_throwsOnArrayContainingObjectWithoutValueField() {
-        NativeObject field = new NativeObject();
-        field.defineProperty( "name", "SomeName", ScriptableObject.DONTENUM );
-        NativeArray array = new NativeArray(new Object[] {field});
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
-        instance.addDocument(array);
+    @Test(expected = NullPointerException.class)
+    public void testAddDocument_throwsOnArrayContainingObjectWithoutValueField() throws Exception {
+        Object obj = environment.eval( "[ { name: 'SomeName' } ];" );
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.addDocument(obj);
     }
 
     @Test
-    public void testAddDocument_acceptsIndex() {
-        NativeObject field = new NativeObject();
-        field.defineProperty( "name", "SomeName", ScriptableObject.DONTENUM );
-        field.defineProperty( "value", "SomeValue", ScriptableObject.DONTENUM );
-        NativeArray array = new NativeArray(new Object[] {field});
+    public void testAddDocument_acceptsIndex() throws Exception {
+        Object obj = environment.eval( "[ { name: 'SomeName', value: 'SomeValue' } ];" );
 
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
 
         JMSProducer mockProducer = mock(JMSProducer.class);
         when(mockContext.createProducer()).thenReturn(mockProducer);
 
-        instance.addDocument(array);
-
-        ArgumentMatcher<SolrInputDocument> documenMatcher = new ArgumentMatcher<SolrInputDocument>() {
+        ArgumentMatcher<SolrInputDocument> documentMatcher = new ArgumentMatcher<SolrInputDocument>() {
             public boolean matches(Object argument) {
                 if (! (argument instanceof SolrInputDocument)) {
                     return false;
@@ -131,7 +131,13 @@ public class SolrUpdaterCallbackTest {
                 return field.getValue().equals("SomeValue");
             }
         };
-        verify(mockProducer).send(refEq(mockQueue), argThat(documenMatcher));
+        
+        ObjectMessage mockMessage = mock(ObjectMessage.class);
+        when(mockContext.createObjectMessage(argThat( documentMatcher ))).thenReturn(mockMessage);
+
+        instance.addDocument(obj);
+
+        verify(mockProducer).send(refEq(mockQueue), refEq(mockMessage));
 
         assertEquals(1, instance.getUpdatedDocumentsCount());
         assertEquals(0, instance.getDeletedDocumentsCount());
@@ -139,24 +145,24 @@ public class SolrUpdaterCallbackTest {
 
     @Test(expected = NullPointerException.class)
     public void testDeleteDocument_throwsOnNullId() {
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
-        instance.deleteDocument(null);
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.deleteDocument(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testDeleteDocument_throwsOnEmptyId() {
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
-        instance.deleteDocument("");
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.deleteDocument("", null);
     }
 
     @Test
     public void testDeleteDocument_acceptsId() {
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, mockContext, mockQueue);
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
         JMSProducer mockProducer = mock(JMSProducer.class);
         when(mockContext.createProducer()).thenReturn(mockProducer);
         String documentId = "document id";
 
-        instance.deleteDocument(documentId);
+        instance.deleteDocument(documentId, "2001-01-02T12:34:56.789Z");
 
         verify(mockProducer).send(mockQueue, documentId);
 

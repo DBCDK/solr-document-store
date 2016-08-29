@@ -21,8 +21,6 @@ package dk.dbc.cloud.worker;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
-import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClientException;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -39,18 +37,17 @@ import javax.jms.JMSRuntimeException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.Queue;
 import static net.logstash.logback.marker.Markers.append;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author kasper
  */
 @MessageDriven(
         activationConfig = {
+            @ActivationConfigProperty(propertyName = "endpointExceptionRedeliveryAttempts", propertyValue = "5"),
             @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
             @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue"),
             @ActivationConfigProperty(propertyName = "connectionFactoryLookup", propertyValue = "jms/indexerConnectionFactory")
@@ -72,63 +69,46 @@ public class SolrWorker implements MessageListener {
     @JMSConnectionFactory("jms/indexerConnectionFactory")
     JMSContext responseContext;
 
-    FCRepoRestClient restClient;
+    @Resource(mappedName="jms/deadPidQueue")
+    private Queue deadPidQueue;
 
     final int redeliveryLimit = 5;
-    final String deadQueueName = "deadPidQueue";
 
     Timer onMessageTimer;
-
+    
     @PostConstruct
     public void init() {
         log.info("Initializing SolrWorker");
         onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
 
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
-        try {
-            restClient = new FCRepoRestClient(httpClient, "dummyurl", "", "");
-        }
-        catch (FCRepoRestClientException ex) {
-            log.error("Initializing FCRepoRestClient failed", ex);
-            throw new EJBException(ex);
-        }
     }
 
     @PreDestroy
     public void shutdown() {
-        restClient.shutdown();
+        log.info( "Shutting down SolrWorker");
     }
-
 
     @Override
     public void onMessage(Message message) {
         try {
             Timer.Context time = onMessageTimer.time();
             MapMessage m = (MapMessage) message;
-            String targetQueue = m.getString("documentQueueName");
-            String fedoraUrl = m.getString("fedoraUrl");
-            String user = m.getString("fedoraUsername");
-            String password = m.getString("fedoraPassword");
             long timeStamp = m.getJMSTimestamp();
             String pid = m.getString("pid");
             int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
-            
 
             log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.STARTED).
-                    and(append("fedora", fedoraUrl)).
                     and(append("JmsTimestamp", timeStamp).
                     and(append("deliveryAttempts", deliveryAttempts))),
                             "Started processing message");
 
             if(deliveryAttempts <= redeliveryLimit){
-                restClient.updateAddress(fedoraUrl, user, password);
-                docBuilder.buildDocuments(pid, javascriptWrapper, restClient, targetQueue, responseContext);
+                docBuilder.buildDocuments(pid, javascriptWrapper);
             }else{
                 //Put on dead message queue
                 log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
                 try{
-                    responseContext.createProducer().send(responseContext.createQueue(deadQueueName), message);
+                    responseContext.createProducer().send(deadPidQueue, message);
                     log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED),"Message {} moved to dead message queue", message);
                 }catch(JMSRuntimeException ex){
                     log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Message {} could not be moved to dead message queue", message, ex);

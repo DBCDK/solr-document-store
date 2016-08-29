@@ -17,17 +17,14 @@
  along with opensearch.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dk.dbc.cloud.worker;
 
-import dk.dbc.commons.exception.ExceptionUtil;
-import dk.dbc.commons.javascript.JavaScriptWrapperSingleEnvironment;
-import java.io.IOException;
+import dk.dbc.jslib.Environment;
+import dk.dbc.jslib.helper.JavaScriptWrapperSingleEnvironment;
+import dk.dbc.openagency.client.LibraryRuleHandler;
+import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
+import dk.dbc.opensearch.commons.repository.RepositoryInEnvironment;
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import org.slf4j.ext.XLogger;
@@ -40,38 +37,39 @@ import org.slf4j.ext.XLoggerFactory;
 public class SolrIndexerJS {
     private final static XLogger log = XLoggerFactory.getXLogger(SolrIndexerJS.class);
 
-    @Resource(lookup="moduleSearchPath")
-    String moduleSearchPath;
-    @Resource(lookup="scriptFile")
-    String scriptFile;
-    @Resource(lookup="scriptFunction")
-    String scriptFunction;
+    private final static String MODULE_SEARCH_PATH = "classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/";
+    private final static String JAVA_SCRIPT_FILE = "javascript/SolrIndex.js";
+    private final static String JAVA_SCRIPT_FUNCTION = "createIndexData";
 
     JavaScriptWrapperSingleEnvironment wrapper;
 
     @PostConstruct
     public void init() {
-        log.info("Create javascript wrapper with file: {}, function: {}, search path{}", new Object[] { scriptFile, scriptFunction, moduleSearchPath});
-        ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(scriptFunction, "scriptFunction", log);
+        log.info("Create javascript wrapper with file: {}, function: {}, search path{}", new Object[] { JAVA_SCRIPT_FILE, JAVA_SCRIPT_FUNCTION, MODULE_SEARCH_PATH});
         try {
-            wrapper = new JavaScriptWrapperSingleEnvironment(moduleSearchPath, scriptFile);
+            wrapper = new JavaScriptWrapperSingleEnvironment(MODULE_SEARCH_PATH, JAVA_SCRIPT_FILE);
         }
-        catch (IOException ex) {
-            log.error("Initialization failed", ex);
+        catch (Exception ex) {
+            log.error("Initializing {} failed", JAVA_SCRIPT_FILE );
             throw new EJBException(ex);
         }
     }
 
-    public boolean isIndexableIdentifier(String identifier) {
+    public boolean isIndexableIdentifier(String identifier) throws Exception {
         Boolean isIndexablePid = (Boolean) wrapper.callObjectFunction("isIndexablePid", identifier);
         return isIndexablePid;
     }
 
-    public void createIndexData(String identifier, String data, SolrUpdaterCallback solrCallback) {
-        wrapper.callObjectFunction(scriptFunction, identifier, data, solrCallback);
-
+    public void createIndexData(IRepositoryDAO repository, String identifier, String data, SolrUpdaterCallback solrCallback, LibraryRuleHandler libraryRuleHandler) throws Exception {
+        try ( RepositoryInEnvironment r = new RepositoryInEnvironment(getEnvironment(), repository) ) {
+            wrapper.callObjectFunction(JAVA_SCRIPT_FUNCTION, identifier, data, libraryRuleHandler, solrCallback);
+        }
         if (solrCallback.getDeletedDocumentsCount() == 0 && solrCallback.getUpdatedDocumentsCount() == 0) {
             log.info("Indexing of {} was skipped by javascript", identifier);
         }
     }
+    public Environment getEnvironment() {
+        return wrapper.getEnvironment();
+    }
+
 }

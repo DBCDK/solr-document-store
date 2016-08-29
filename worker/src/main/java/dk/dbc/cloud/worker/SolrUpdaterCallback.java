@@ -20,15 +20,16 @@ along with opensearch.  If not, see <http://www.gnu.org/licenses/>.
 package dk.dbc.cloud.worker;
 
 import dk.dbc.commons.exception.ExceptionUtil;
+import dk.dbc.jslib.Environment;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
+import javax.jms.ObjectMessage;
+import jdk.nashorn.api.scripting.JSObject;
 import org.apache.solr.common.SolrInputDocument;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 
@@ -38,47 +39,51 @@ import org.slf4j.ext.XLoggerFactory;
 public class SolrUpdaterCallback
 {
     private final static XLogger log = XLoggerFactory.getXLogger(SolrUpdaterCallback.class);
+    private static final String TRACKING_ID_FIELD = "rec.trackingId";
 
     private int updatedDocumentsCount;
     private int deletedDocumentsCount;
     private final String identifier;
+    private final Environment jsEnvironment;
     private final JMSContext responseContext;
     private final Destination responseQueue;
+    private final String trackingId;
 
-    SolrUpdaterCallback(String identifier, JMSContext responseContext, Destination responseQueue) {
+    SolrUpdaterCallback(String identifier, Environment jsEnvironment, JMSContext responseContext, Destination responseQueue, String trackingId) {
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(identifier, "identifier", log);
         ExceptionUtil.checkForNullAndLogAndThrow(responseContext, "responseContext", log);
         ExceptionUtil.checkForNullAndLogAndThrow(responseQueue, "responseQueue", log);
 
         this.identifier = identifier;
+        this.jsEnvironment = jsEnvironment;
         this.responseContext = responseContext;
         this.responseQueue = responseQueue;
+        this.trackingId = trackingId;
     }
 
 
     public void addDocument(Object index) {
         ExceptionUtil.checkForNullAndLogAndThrow(index, "index", log);
-        if (index instanceof NativeArray) {
-            SolrInputDocument solrDocument = extractIndexDocumentFromNativeArray((NativeArray) index);
-            if (log.isTraceEnabled()) {
-                log.trace("Sending {} document to solr: {}", identifier,  solrDocument);
-            }
-            else {
-                log.debug("Sending {} document to solr", identifier);
-            }
-            addToQueue(solrDocument);
+        SolrInputDocument solrDocument = extractIndexDocumentFromNativeArray((JSObject) index);
+        if (trackingId != null && !solrDocument.isEmpty()) {
+            solrDocument.addField(TRACKING_ID_FIELD, trackingId);
+        }
+        if (log.isTraceEnabled()) {
+            log.trace("Sending {} document to queue: {}", identifier,  solrDocument);
         }
         else {
-            throw new IllegalArgumentException("Unknown document type added by javascript: " + index.getClass());
+            log.info("Sending {} document to queue", identifier);
         }
+        addToQueue(solrDocument);
     }
 
     void addToQueue(SolrInputDocument doc){
-        responseContext.createProducer().send(responseQueue, doc);
+        ObjectMessage message = responseContext.createObjectMessage( doc );
+        responseContext.createProducer().send(responseQueue, message);
         updatedDocumentsCount++;
     }
 
-    public void deleteDocument(String docId) {
+    public void deleteDocument(String docId, String streamDate) {
         log.debug("Deleting document for {}", docId);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
 
@@ -94,28 +99,23 @@ public class SolrUpdaterCallback
         return deletedDocumentsCount;
     }
 
-    private static SolrInputDocument extractIndexDocumentFromNativeArray(NativeArray index) throws IllegalStateException {
-        long length = index.getLength();
-        log.debug("Extracting index from data: {}, length {}", index, length);
+    private SolrInputDocument extractIndexDocumentFromNativeArray(JSObject index) throws IllegalStateException {
+        Object[] resultArray = jsEnvironment.getJavascriptObjectAsArray( index );
+        long length = resultArray.length;
+        log.debug("Result of running JS: {}, length {}", index, length);
+
+        // Create a map of field names to values and eliminate any duplicate values in each field name
         Map <String, Set<String>> docMap = new HashMap<>();
-        for (Object obj : index) {
-            if (!(obj instanceof NativeObject)) {
-                throw new IllegalArgumentException("Unknown result element type returned by javascript: " + obj.getClass());
+
+        for (Object obj : resultArray) {
+            if (!(obj instanceof JSObject)) {
+                throw new IllegalStateException("Unknown result element type returned by javascript: " + obj.getClass());
             }
-            NativeObject nat = (NativeObject) obj;
-            String name, value;
-            if (nat.has("name", null)) {
-                Object nameObject = nat.get("name", null);
-                name = (String) nameObject;
-            } else {
-                throw new IllegalArgumentException("'name' field missing from object "+obj);
-            }
-            if (nat.has("value", null)) {
-                Object valueObject = nat.get("value", null);
-                value = (String) valueObject;
-            } else {
-                throw new IllegalArgumentException("'name' field missing from object "+obj);
-            }
+            String name = jsEnvironment.getJavascriptObjectFieldAsString( obj, "name" );
+            String value = jsEnvironment.getJavascriptObjectFieldAsString( obj, "value" );
+            ExceptionUtil.checkForNullOrEmptyAndLogAndThrow( name, "index field name", log );
+            ExceptionUtil.checkForNullOrEmptyAndLogAndThrow( value, "index field value", log );
+
             Set<String> values = docMap.get(name);
             if (values == null) {
                 values = new HashSet<>();

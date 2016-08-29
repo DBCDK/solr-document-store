@@ -16,18 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package dk.dbc.cloud.worker;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import dk.dbc.opensearch.commons.fcrepo.FCRepoRestClientProvider;
-import dk.dbc.opensearch.commons.fcrepo.RepositoryFactory;
-import dk.dbc.opensearch.commons.fcrepo.rest.FCRepoRestClient;
+import dk.dbc.corepo.access.ee.CORepoProviderEE;
+import dk.dbc.openagency.client.LibraryRuleHandler;
+import dk.dbc.openagency.client.OpenAgencyServiceFromURL;
 import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
 import dk.dbc.opensearch.commons.repository.IRepositoryIdentifier;
 import dk.dbc.opensearch.commons.repository.RepositoryException;
+import dk.dbc.opensearch.commons.repository.RepositoryProvider;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
+import java.sql.SQLException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -36,8 +37,11 @@ import javax.ejb.EJBException;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.inject.Inject;
+import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
-import javax.transaction.TransactionSynchronizationRegistry;
+import javax.jms.Queue;
+import javax.naming.NamingException;
 import static net.logstash.logback.marker.Markers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,77 +49,102 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class SolrIndexer {
 
-    private static final Logger log = LoggerFactory.getLogger(SolrIndexer.class);
+    private static final Logger log = LoggerFactory.getLogger( SolrIndexer.class );
 
-    private static final String REST_CLIENT_KEY = "restClient";
+    @Inject
+    @EEConfig.Name("resourceBase")
+    private String resourceBase;
 
-    @Resource
-    TransactionSynchronizationRegistry transactionRegistry;
-    
+    @Inject
+    @EEConfig.Name("jmxDomain")
+    private String jmxDomain;
+
+    @Inject
+    @JMSConnectionFactory("jms/indexerConnectionFactory")
+    JMSContext responseContext;
+
+    @Resource(mappedName="jms/solrDocuments")
+    private Queue targetQueue;
+
+    @Inject
+    @EEConfig.Name("openAgencyUrl")
+    private String openAgencyUrl;
+
+    private RepositoryProvider daoProvider;
+
     @EJB
     MetricsRegistry registry;
+
+    LibraryRuleHandler libraryRuleHandler;
 
     Counter documentsUpdated;
     Counter documentsDeleted;
 
     @PostConstruct
     public void init() {
-        documentsUpdated = registry.getRegistry().counter(MetricRegistry.name(SolrIndexer.class, "documentsUpdated"));
-        documentsDeleted = registry.getRegistry().counter(MetricRegistry.name(SolrIndexer.class, "documentsDeleted"));
-        FCRepoRestClientProvider fcRepoRestClientProvider = new FCRepoRestClientProvider() {
-            @Override
-            public FCRepoRestClient get() {
-                // Lookup the actual rest client to use in the transaction registry
-                FCRepoRestClient restClient = (FCRepoRestClient)transactionRegistry.getResource(REST_CLIENT_KEY);
-                return restClient;
+        documentsUpdated = registry.getRegistry().counter( MetricRegistry.name( SolrIndexer.class, "documentsUpdated" ) );
+        documentsDeleted = registry.getRegistry().counter( MetricRegistry.name( SolrIndexer.class, "documentsDeleted" ) );
+        libraryRuleHandler = OpenAgencyServiceFromURL.builder().connectTimeout( 30000 ).requestTimeout( 30000 )
+                .build( openAgencyUrl ).libraryRules();
+
+        if ( resourceBase != null ) {
+            try {
+                daoProvider = new CORepoProviderEE( jmxDomain, resourceBase );
             }
-        };
-        RepositoryFactory.initializeFactory("SolrWorker", fcRepoRestClientProvider);
+            catch ( NamingException | SQLException ex ) {
+                throw new EJBException( "Failed to initialize repository provider " + resourceBase, ex );
+            }
+        }
     }
 
     @PreDestroy
     public void shutdown() {
-        RepositoryFactory.getRepositoryDAO().shutdown();
+        log.info( "Shutting down SolrIndexer" );
+        if ( daoProvider != null ) {
+            daoProvider.shutdown();
+        }
     }
 
-    @Lock(LockType.READ)
-    public void buildDocuments(String pid, SolrIndexerJS jsWrapper, FCRepoRestClient restClient, String targetQueue, JMSContext responseContext) {
-        // Make sure rest client is put in registry, so repository callback can access it
-        transactionRegistry.putResource(REST_CLIENT_KEY, restClient);
-        try {
-            if (jsWrapper.isIndexableIdentifier(pid)) {
+    @Lock( LockType.READ )
+    public void buildDocuments( String pid, SolrIndexerJS jsWrapper ) throws Exception {
+        try ( IRepositoryDAO dao = daoProvider.getRepository() ) {
+            if ( jsWrapper.isIndexableIdentifier( pid ) ) {
                 long starttime = System.nanoTime();
-                String data = getObjectData(pid);
-                SolrUpdaterCallback callback = new SolrUpdaterCallback(pid, responseContext, responseContext.createQueue(targetQueue));
-                jsWrapper.createIndexData(pid, data, callback);
-                documentsDeleted.inc(callback.getDeletedDocumentsCount());
-                documentsUpdated.inc(callback.getUpdatedDocumentsCount());
+                String data = getObjectData( dao, pid );
+                String trackingId = getTrackingId( dao, pid );
+                SolrUpdaterCallback callback = new SolrUpdaterCallback( pid, jsWrapper.getEnvironment(), responseContext,
+                        targetQueue, trackingId );
+                jsWrapper.createIndexData( dao, pid, data, callback, libraryRuleHandler );
+                documentsDeleted.inc( callback.getDeletedDocumentsCount() );
+                documentsUpdated.inc( callback.getUpdatedDocumentsCount() );
                 long endtime = System.nanoTime();
-                
-                log.info(   LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED).and(
-                            append("duration",((double)((endtime-starttime)/10000))/100)).and(
-                            append("updates",callback.getUpdatedDocumentsCount())).and(
-                            append("deletes",callback.getDeletedDocumentsCount())).and(
-                            append("targetQueue",targetQueue)),
-                            "Documents successfully build");
-            } else {
-                log.debug("object {} filtered", pid);
+
+                log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ).and(
+                        append( "duration", ( ( double ) ( ( endtime - starttime ) / 10000 ) ) / 100 ) ).and(
+                        append( "updates", callback.getUpdatedDocumentsCount() ) ).and(
+                        append( "deletes", callback.getDeletedDocumentsCount() ) ),
+                        "Documents successfully build" );
+            }
+            else {
+                log.debug( "object {} filtered", pid );
             }
         }
-        catch (Exception ex) {
-            String error = String.format("Error calling indexing logic for '%s'", pid);
+        catch ( Exception ex ) {
+            String error = String.format( "Error calling indexing logic for '%s'", pid );
             log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),error);
-            throw new EJBException(error, ex);
-        }
-        finally {
-            transactionRegistry.putResource("restClient", null);
+            throw new EJBException( error, ex );
         }
     }
 
-    private String getObjectData(String pid) throws IllegalStateException, RepositoryException {
-        IRepositoryDAO repositoryDAO = RepositoryFactory.getRepositoryDAO();
-        IRepositoryIdentifier identifier = repositoryDAO.createIdentifier(pid);
-        String data = repositoryDAO.exportObject(identifier);
+    private String getObjectData( IRepositoryDAO repositoryDAO, String pid ) throws IllegalStateException, RepositoryException {
+        IRepositoryIdentifier identifier = repositoryDAO.createIdentifier( pid );
+        String data = repositoryDAO.exportObject( identifier );
+        return data;
+    }
+
+    private String getTrackingId( IRepositoryDAO repositoryDAO, String pid ) throws IllegalStateException, RepositoryException {
+        IRepositoryIdentifier identifier = repositoryDAO.createIdentifier( pid );
+        String data = repositoryDAO.exportObject( identifier );
         return data;
     }
 }
