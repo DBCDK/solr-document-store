@@ -22,9 +22,10 @@ package dk.dbc.cloud.worker;
 import dk.dbc.jslib.Environment;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.JMSProducer;
+import javax.jms.MapMessage;
 import javax.jms.ObjectMessage;
-import jdk.nashorn.api.scripting.JSObject;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import static org.junit.Assert.*;
@@ -144,31 +145,46 @@ public class SolrUpdaterCallbackTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testDeleteDocument_throwsOnNullId() {
+    public void testDeleteDocument_throwsOnNullId() throws JMSException {
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
         instance.deleteDocument(null, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testDeleteDocument_throwsOnEmptyId() {
+    @Test(expected = NullPointerException.class)
+    public void testDeleteDocument_throwsOnNullStreamDate() throws JMSException {
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
-        instance.deleteDocument("", null);
+        instance.deleteDocument("pid", null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDeleteDocument_throwsOnEmptyId() throws JMSException {
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.deleteDocument("", "2001");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDeleteDocument_throwsOnEmptyStreamDate() throws JMSException {
+        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
+        instance.deleteDocument("pid", "");
     }
 
     @Test
-    public void testDeleteDocument_acceptsId() {
-        SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
-        JMSProducer mockProducer = mock(JMSProducer.class);
-        when(mockContext.createProducer()).thenReturn(mockProducer);
+    public void testDeleteDocument_acceptsId() throws JMSException {
+        SolrUpdaterCallback instance = new SolrUpdaterCallback( pid, environment, mockContext, mockQueue, trackingId );
+        JMSProducer mockProducer = mock( JMSProducer.class );
+        MapMessage mockMessage = mock( MapMessage.class );
+        when( mockContext.createMapMessage() ).thenReturn( mockMessage );
+        when( mockContext.createProducer() ).thenReturn( mockProducer );
         String documentId = "document id";
+        String streamDate = "2001-01-02T12:34:56.789Z";
 
-        instance.deleteDocument(documentId, "2001-01-02T12:34:56.789Z");
+        instance.deleteDocument( documentId, streamDate );
 
-        verify(mockProducer).send(mockQueue, documentId);
+        verify( mockMessage ).setString( SolrUpdaterCallback.DOCUMENT_ID, documentId );
+        verify( mockMessage ).setString( SolrUpdaterCallback.STREAM_DATE, streamDate );
+        verify( mockProducer ).send( mockQueue, mockMessage );
 
-        assertEquals(0, instance.getUpdatedDocumentsCount());
-        assertEquals(1, instance.getDeletedDocumentsCount());
+        assertEquals( 0, instance.getUpdatedDocumentsCount() );
+        assertEquals( 1, instance.getDeletedDocumentsCount() );
     }
-
-
 }

@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
 import javax.jms.ObjectMessage;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.solr.common.SolrInputDocument;
@@ -40,6 +42,9 @@ public class SolrUpdaterCallback
 {
     private final static XLogger log = XLoggerFactory.getXLogger(SolrUpdaterCallback.class);
     private static final String TRACKING_ID_FIELD = "rec.trackingId";
+    static final String STREAM_DATE = "streamDate";
+    static final String DOCUMENT_ID = "documentId";
+
 
     private int updatedDocumentsCount;
     private int deletedDocumentsCount;
@@ -83,14 +88,17 @@ public class SolrUpdaterCallback
         updatedDocumentsCount++;
     }
 
-    public void deleteDocument(String docId, String streamDate) {
+    public void deleteDocument(String docId, String streamDate) throws JMSException  {
         log.debug("Deleting document for {}", docId);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
+        ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(streamDate, "streamDate", log);
+        MapMessage message = responseContext.createMapMessage();
+        message.setString(DOCUMENT_ID, docId);
+        message.setString(STREAM_DATE, streamDate);
 
-        responseContext.createProducer().send(responseQueue, docId);
+        responseContext.createProducer().send(responseQueue, message);
         deletedDocumentsCount++;
     }
-
     public int getUpdatedDocumentsCount() {
         return updatedDocumentsCount;
     }

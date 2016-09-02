@@ -31,7 +31,6 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
@@ -127,8 +126,9 @@ public class SolrWorkerIT {
 
         //Let SolrWorker handle message
         //Check that a "delete-document-message" is on documentQueue
-        TextMessage deleteMessage = ( TextMessage ) documentConsumer.receive();
-        assertEquals( "Deleted expected document id", PID + "-870970-basis", deleteMessage.getText()  );
+        MapMessage deleteMessage = ( MapMessage ) documentConsumer.receive();
+        assertEquals( "Deleted expected document id", PID + "-870970-basis", deleteMessage.getString( SolrUpdaterCallback.DOCUMENT_ID ) );
+        assertEquals( "Deleted expected stream date", "2016-08-26T04:25:20.331Z", deleteMessage.getString( SolrUpdaterCallback.STREAM_DATE ) );
 
     }
 
