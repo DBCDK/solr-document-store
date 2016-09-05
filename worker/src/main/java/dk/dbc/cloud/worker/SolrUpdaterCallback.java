@@ -44,6 +44,7 @@ public class SolrUpdaterCallback
     private static final String TRACKING_ID_FIELD = "rec.trackingId";
     static final String STREAM_DATE = "streamDate";
     static final String DOCUMENT_ID = "documentId";
+    static final String TRACKING_ID = "trackingId";
 
 
     private int updatedDocumentsCount;
@@ -95,6 +96,7 @@ public class SolrUpdaterCallback
         MapMessage message = responseContext.createMapMessage();
         message.setString(DOCUMENT_ID, docId);
         message.setString(STREAM_DATE, streamDate);
+        message.setString(TRACKING_ID, trackingId);
 
         responseContext.createProducer().send(responseQueue, message);
         deletedDocumentsCount++;

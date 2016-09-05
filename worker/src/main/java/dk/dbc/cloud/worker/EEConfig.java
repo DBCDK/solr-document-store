@@ -56,16 +56,12 @@ public class EEConfig {
         String value = getValue(ip);
         Annotated annotated = ip.getAnnotated();
         Min min = annotated.getAnnotation(Min.class);
-        if (min != null) {
-            if (value.length() < min.value()) {
-                throw new EJBException("value length of " + value + " for: " + getName(ip) + " is out of range");
-            }
+        if (min != null && value.length() < min.value()) {
+            throw new EJBException("value length of " + value + " for: " + getName(ip) + " is out of range");
         }
         Max max = annotated.getAnnotation(Max.class);
-        if (max != null) {
-            if (value.length() > max.value()) {
-                throw new EJBException("value lenght of " + value + " for: " + getName(ip) + " is out of range");
-            }
+        if (max != null && value.length() > max.value()) {
+            throw new EJBException("value lenght of " + value + " for: " + getName(ip) + " is out of range");
         }
         Url url = ip.getAnnotated().getAnnotation(Url.class);
         if (url != null) {
@@ -106,16 +102,12 @@ public class EEConfig {
         long value = Long.parseLong(getValue(ip));
         Annotated annotated = ip.getAnnotated();
         Min min = annotated.getAnnotation(Min.class);
-        if (min != null) {
-            if (value < min.value()) {
-                throw new EJBException("value of " + value + " for: " + getName(ip) + " is out of range");
-            }
+        if (min != null && value < min.value()) {
+            throw new EJBException("value of " + value + " for: " + getName(ip) + " is out of range");
         }
         Max max = annotated.getAnnotation(Max.class);
-        if (max != null) {
-            if (value > max.value()) {
-                throw new EJBException("value of " + value + " for: " + getName(ip) + " is out of range");
-            }
+        if (max != null && value > max.value()) {
+            throw new EJBException("value of " + value + " for: " + getName(ip) + " is out of range");
         }
         return value;
     }

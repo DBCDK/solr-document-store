@@ -21,6 +21,7 @@ package dk.dbc.cloud.worker;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import dk.dbc.corepo.access.ee.CORepoProviderEE;
+import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.openagency.client.LibraryRuleHandler;
 import dk.dbc.openagency.client.OpenAgencyServiceFromURL;
 import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
@@ -110,8 +111,10 @@ public class SolrIndexer {
         try ( IRepositoryDAO dao = daoProvider.getRepository() ) {
             if ( jsWrapper.isIndexableIdentifier( pid ) ) {
                 long starttime = System.nanoTime();
-                String data = getObjectData( dao, pid );
                 String trackingId = getTrackingId( dao, pid );
+                DBCTrackedLogContext.setTrackingId( trackingId );
+
+                String data = getObjectData( dao, pid );
                 SolrUpdaterCallback callback = new SolrUpdaterCallback( pid, jsWrapper.getEnvironment(), responseContext,
                         targetQueue, trackingId );
                 jsWrapper.createIndexData( dao, pid, data, callback, libraryRuleHandler );
@@ -133,6 +136,8 @@ public class SolrIndexer {
             String error = String.format( "Error calling indexing logic for '%s'", pid );
             log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),error);
             throw new EJBException( error, ex );
+        } finally {
+            DBCTrackedLogContext.remove();
         }
     }
 
@@ -144,7 +149,7 @@ public class SolrIndexer {
 
     private String getTrackingId( IRepositoryDAO repositoryDAO, String pid ) throws IllegalStateException, RepositoryException {
         IRepositoryIdentifier identifier = repositoryDAO.createIdentifier( pid );
-        String data = repositoryDAO.exportObject( identifier );
-        return data;
+        String label = repositoryDAO.getObjectLabel( identifier );
+        return "SolrWorker:" + pid + "<" + label;
     }
 }

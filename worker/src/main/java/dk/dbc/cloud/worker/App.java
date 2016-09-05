@@ -6,8 +6,6 @@
 
 package dk.dbc.cloud.worker;
 
-import dk.dbc.solr.indexer.cloud.shared.LogAppender;
-
 /**
  *
  * @author kasper

@@ -21,6 +21,7 @@ package dk.dbc.cloud.worker;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -95,13 +96,13 @@ public class SolrWorker implements MessageListener {
             MapMessage m = (MapMessage) message;
             long timeStamp = m.getJMSTimestamp();
             String pid = m.getString("pid");
+            DBCTrackedLogContext.setTrackingId( "SolrWorker:" + pid );
             int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
 
             log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.STARTED).
                     and(append("JmsTimestamp", timeStamp).
                     and(append("deliveryAttempts", deliveryAttempts))),
                             "Started processing message");
-
             if(deliveryAttempts <= redeliveryLimit){
                 docBuilder.buildDocuments(pid, javascriptWrapper);
             }else{
@@ -122,6 +123,8 @@ public class SolrWorker implements MessageListener {
         } catch (Exception ex) {
             log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"unable to process message {}", message, ex);
             throw new EJBException(ex.getMessage());
+        } finally {
+            DBCTrackedLogContext.remove();
         }
     }
 
