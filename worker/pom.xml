@@ -65,6 +65,7 @@
       <artifactId>maven-javascript-unit-test-runner</artifactId>
       <version>0.1.0-SNAPSHOT</version>
       <type>tar.gz</type>
+      <classifier>bin</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -227,6 +228,7 @@
         </executions>
         <configuration>
           <executable>${project.build.directory}/maven-javascript-unit-test-runner/bin/test-runner.sh</executable>
+          <workingDirectory>${project.build.directory}/maven-javascript-unit-test-runner</workingDirectory>
           <environmentVariables>
             <MODULE_PATHS>
               classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/
