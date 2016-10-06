@@ -61,13 +61,6 @@ public class SolrIndexer {
     private String jmxDomain;
 
     @Inject
-    @JMSConnectionFactory("jms/indexerConnectionFactory")
-    JMSContext responseContext;
-
-    @Resource(mappedName="jms/solrDocuments")
-    private Queue targetQueue;
-
-    @Inject
     @EEConfig.Name("openAgencyUrl")
     private String openAgencyUrl;
 
@@ -107,7 +100,7 @@ public class SolrIndexer {
     }
 
     @Lock( LockType.READ )
-    public void buildDocuments( String pid, SolrIndexerJS jsWrapper ) throws Exception {
+    public void buildDocuments( String pid, SolrIndexerJS jsWrapper, JMSContext responseContext, Queue targetQueue ) throws Exception {
         try ( IRepositoryDAO dao = daoProvider.getRepository() ) {
             if ( jsWrapper.isIndexableIdentifier( pid ) ) {
                 long starttime = System.nanoTime();

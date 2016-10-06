@@ -72,6 +72,9 @@ public class SolrWorker implements MessageListener {
 
     @Resource(mappedName="jms/deadPidQueue")
     private Queue deadPidQueue;
+    
+    @Resource(mappedName="jms/solrDocuments")
+    private Queue targetQueue;
 
     final int redeliveryLimit = 5;
 
@@ -104,7 +107,7 @@ public class SolrWorker implements MessageListener {
                     and(append("deliveryAttempts", deliveryAttempts))),
                             "Started processing message");
             if(deliveryAttempts <= redeliveryLimit){
-                docBuilder.buildDocuments(pid, javascriptWrapper);
+                docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, targetQueue );
             }else{
                 //Put on dead message queue
                 log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
