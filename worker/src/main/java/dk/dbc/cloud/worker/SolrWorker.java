@@ -25,7 +25,6 @@ import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -38,14 +37,10 @@ import javax.jms.JMSRuntimeException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.Queue;
 import static net.logstash.logback.marker.Markers.append;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-/**
- *
- * @author kasper
- */
+
 @MessageDriven(
         activationConfig = {
             @ActivationConfigProperty(propertyName = "endpointExceptionRedeliveryAttempts", propertyValue = "5"),
@@ -69,12 +64,6 @@ public class SolrWorker implements MessageListener {
     @Inject
     @JMSConnectionFactory("jms/indexerConnectionFactory")
     JMSContext responseContext;
-
-    @Resource(mappedName="jms/deadPidQueue")
-    private Queue deadPidQueue;
-    
-    @Resource(mappedName="jms/solrDocuments")
-    private Queue targetQueue;
 
     final int redeliveryLimit = 5;
 
@@ -107,12 +96,13 @@ public class SolrWorker implements MessageListener {
                     and(append("deliveryAttempts", deliveryAttempts))),
                             "Started processing message");
             if(deliveryAttempts <= redeliveryLimit){
-                docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, targetQueue );
+                docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, responseContext.createQueue(App.JMS_DOCUMENT_QUEUE_NAME) );
             }else{
                 //Put on dead message queue
                 log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
                 try{
-                    responseContext.createProducer().send(deadPidQueue, message);
+                    
+                    responseContext.createProducer().send(responseContext.createQueue(App.JMS_DEADPID_QUEUE_NAME), message);
                     log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED),"Message {} moved to dead message queue", message);
                 }catch(JMSRuntimeException ex){
                     log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Message {} could not be moved to dead message queue", message, ex);
