@@ -28,7 +28,9 @@ import java.util.Set;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
 import javax.jms.MapMessage;
+import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.solr.common.SolrInputDocument;
@@ -85,7 +87,7 @@ public class SolrUpdaterCallback
 
     void addToQueue(SolrInputDocument doc){
         ObjectMessage message = responseContext.createObjectMessage( doc );
-        responseContext.createProducer().send(responseQueue, message);
+        sendRetryForever( message );
         updatedDocumentsCount++;
     }
 
@@ -98,8 +100,24 @@ public class SolrUpdaterCallback
         message.setString(STREAM_DATE, streamDate);
         message.setString(TRACKING_ID, trackingId);
 
-        responseContext.createProducer().send(responseQueue, message);
+        sendRetryForever( message );
         deletedDocumentsCount++;
+    }
+    
+    private void sendRetryForever( Message m ) {
+        while( true ) {
+            try {
+                responseContext.createProducer().send(responseQueue, m);
+                break;
+            } catch ( JMSRuntimeException e ) {
+                log.warn( "Push to queue failed, {}. Retry in 5s.", e.getMessage() );
+                try {
+                    Thread.sleep( 5000 );
+                } catch (InterruptedException ex) {
+                    log.warn( "Interrupted while sleeping for retry", ex );
+                }
+            }
+        }
     }
     public int getUpdatedDocumentsCount() {
         return updatedDocumentsCount;
