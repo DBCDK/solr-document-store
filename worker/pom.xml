@@ -230,6 +230,7 @@
           <executable>${project.build.directory}/maven-javascript-unit-test-runner/bin/test-runner.sh</executable>
           <workingDirectory>${project.build.directory}/maven-javascript-unit-test-runner</workingDirectory>
           <environmentVariables>
+            <USE_JAVA_XML_DOM>true</USE_JAVA_XML_DOM>
             <MODULE_PATHS>
               classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/
             </MODULE_PATHS>
