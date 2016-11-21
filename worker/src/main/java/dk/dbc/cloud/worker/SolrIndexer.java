@@ -32,14 +32,13 @@ import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import java.sql.SQLException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.Queue;
 import javax.naming.NamingException;
@@ -47,6 +46,7 @@ import static net.logstash.logback.marker.Markers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Startup
 @Singleton
 public class SolrIndexer {
 
