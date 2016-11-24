@@ -23,6 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
+import dk.dbc.solr.indexer.cloud.shared.SleepHandler;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.ActivationConfigProperty;
@@ -32,7 +33,6 @@ import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.JMSRuntimeException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -69,11 +69,15 @@ public class SolrWorker implements MessageListener {
 
     Timer onMessageTimer;
     
+    SleepHandler sleepHandler = new SleepHandler()
+                                .withLowerLimit( 5, 1000 )      //adjacent failures > 5 -> sleep 1s
+                                .withLowerLimit( 10, 10000 )    //adjacent failures > 10 -> sleep 10s
+                                .withLowerLimit( 100, 60000 );  //adjacent failures > 100 -> sleep 60s
+    
     @PostConstruct
     public void init() {
         log.info("Initializing SolrWorker");
         onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
-
     }
 
     @PreDestroy
@@ -97,11 +101,11 @@ public class SolrWorker implements MessageListener {
                             "Started processing message");
             if(deliveryAttempts <= redeliveryLimit){
                 docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, responseContext.createQueue(App.JMS_DOCUMENT_QUEUE_NAME) );
+                sleepHandler.reset();
             }else{
                 //Put on dead message queue
                 log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
-                try{
-                    
+                try{                    
                     responseContext.createProducer().send(responseContext.createQueue(App.JMS_DEADPID_QUEUE_NAME), message);
                     log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED),"Message {} moved to dead message queue", message);
                 }catch(JMSRuntimeException ex){
@@ -110,11 +114,9 @@ public class SolrWorker implements MessageListener {
                 }
             }
             time.stop();
-        } catch (JMSException ex) {
-            log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"unable to extract fields from message {}", message, ex);
-            throw new EJBException(ex);
         } catch (Exception ex) {
-            log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"unable to process message {}", message, ex);
+            log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"Unable to process message {}", message, ex);
+            sleepHandler.failure();
             throw new EJBException(ex.getMessage());
         } finally {
             DBCTrackedLogContext.remove();
