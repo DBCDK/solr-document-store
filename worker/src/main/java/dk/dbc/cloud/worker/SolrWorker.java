@@ -69,10 +69,8 @@ public class SolrWorker implements MessageListener {
 
     Timer onMessageTimer;
     
-    SleepHandler sleepHandler = new SleepHandler()
-                                .withLowerLimit( 5, 1000 )      //adjacent failures > 5 -> sleep 1s
-                                .withLowerLimit( 10, 10000 )    //adjacent failures > 10 -> sleep 10s
-                                .withLowerLimit( 100, 60000 );  //adjacent failures > 100 -> sleep 60s
+    @Inject
+    AdjacentFailureHandler failureHandler;
     
     @PostConstruct
     public void init() {
@@ -101,7 +99,7 @@ public class SolrWorker implements MessageListener {
                             "Started processing message");
             if(deliveryAttempts <= redeliveryLimit){
                 docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, responseContext.createQueue(App.JMS_DOCUMENT_QUEUE_NAME) );
-                sleepHandler.reset();
+                failureHandler.reset();
             }else{
                 //Put on dead message queue
                 log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
@@ -116,7 +114,7 @@ public class SolrWorker implements MessageListener {
             time.stop();
         } catch (Exception ex) {
             log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"Unable to process message {}", message, ex);
-            sleepHandler.failure();
+            failureHandler.failure();
             throw new EJBException(ex.getMessage());
         } finally {
             DBCTrackedLogContext.remove();
