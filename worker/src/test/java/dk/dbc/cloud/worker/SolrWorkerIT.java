@@ -127,7 +127,7 @@ public class SolrWorkerIT {
         //Let SolrWorker handle message
         //Check that a "delete-document-message" is on documentQueue
         MapMessage deleteMessage = ( MapMessage ) documentConsumer.receive();
-        assertEquals( "Deleted expected document id", PID + "-870970-basis", deleteMessage.getString( SolrUpdaterCallback.DOCUMENT_ID ) );
+        assertEquals( "Deleted expected document id", "23645564/32!" + PID + "-870970-basis", deleteMessage.getString( SolrUpdaterCallback.DOCUMENT_ID ) );
         assertEquals( "Deleted expected stream date", "2016-08-26T04:25:20.331Z", deleteMessage.getString( SolrUpdaterCallback.STREAM_DATE ) );
 
     }
