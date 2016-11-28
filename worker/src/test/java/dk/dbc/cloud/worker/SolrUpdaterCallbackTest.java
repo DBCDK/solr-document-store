@@ -112,7 +112,7 @@ public class SolrUpdaterCallbackTest {
 
     @Test
     public void testAddDocument_acceptsIndex() throws Exception {
-        Object obj = environment.eval( "[ { name: 'SomeName', value: 'SomeValue' } ];" );
+        Object obj = environment.eval( "[ { name: 'SomeName', value: 'SomeValue' }, { name: 'rec.bibliographicRecordId', value: 'someBibId' }, { name: 'id', value: 'someId' } ];" );
 
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
 
@@ -147,25 +147,25 @@ public class SolrUpdaterCallbackTest {
     @Test(expected = NullPointerException.class)
     public void testDeleteDocument_throwsOnNullId() throws JMSException {
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
-        instance.deleteDocument(null, null);
+        instance.deleteDocument(null, null, "bibrecid");
     }
 
     @Test(expected = NullPointerException.class)
     public void testDeleteDocument_throwsOnNullStreamDate() throws JMSException {
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
-        instance.deleteDocument("pid", null);
+        instance.deleteDocument("pid", null, "bibrecid");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testDeleteDocument_throwsOnEmptyId() throws JMSException {
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
-        instance.deleteDocument("", "2001");
+        instance.deleteDocument("", "2001", "bibrecid");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testDeleteDocument_throwsOnEmptyStreamDate() throws JMSException {
         SolrUpdaterCallback instance = new SolrUpdaterCallback(pid, environment, mockContext, mockQueue, trackingId);
-        instance.deleteDocument("pid", "");
+        instance.deleteDocument("pid", "", "bibrecid");
     }
 
     @Test
@@ -178,9 +178,9 @@ public class SolrUpdaterCallbackTest {
         String documentId = "document id";
         String streamDate = "2001-01-02T12:34:56.789Z";
 
-        instance.deleteDocument( documentId, streamDate );
+        instance.deleteDocument( documentId, streamDate, "bibrecid" );
 
-        verify( mockMessage ).setString( SolrUpdaterCallback.DOCUMENT_ID, documentId );
+        verify( mockMessage ).setString( SolrUpdaterCallback.DOCUMENT_ID, "bibrecid/32!document id" );
         verify( mockMessage ).setString( SolrUpdaterCallback.STREAM_DATE, streamDate );
         verify( mockProducer ).send( mockQueue, mockMessage );
 

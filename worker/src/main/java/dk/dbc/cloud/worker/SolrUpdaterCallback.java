@@ -68,6 +68,12 @@ public class SolrUpdaterCallback
         this.responseQueue = responseQueue;
         this.trackingId = trackingId;
     }
+    
+    private String getShardedSolrId( String bibliographicRecordId, String solrId ){
+        String shardKey = bibliographicRecordId.replaceAll("[^0-9a-zA-Z]", "");
+        String shardedId = shardKey + "/32!" + solrId;
+        return shardedId;
+    }
 
 
     public void addDocument(Object index) {
@@ -82,6 +88,12 @@ public class SolrUpdaterCallback
         else {
             log.info("Sending {} document to queue", identifier);
         }
+        
+        String bibliographicRecordId = solrDocument.getField( "rec.bibliographicRecordId" ).toString();
+        String solrId = solrDocument.getField( "id" ).toString();
+        String shardedId = getShardedSolrId( bibliographicRecordId, solrId );
+        solrDocument.setField( "id", shardedId );
+        
         addToQueue(solrDocument);
     }
 
@@ -91,12 +103,13 @@ public class SolrUpdaterCallback
         updatedDocumentsCount++;
     }
 
-    public void deleteDocument(String docId, String streamDate) throws JMSException  {
+    public void deleteDocument(String docId, String streamDate, String bibliographicRecordId) throws JMSException  {
         log.debug("Deleting document for {}", docId);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(streamDate, "streamDate", log);
         MapMessage message = responseContext.createMapMessage();
-        message.setString(DOCUMENT_ID, docId);
+        String shardedId = getShardedSolrId( bibliographicRecordId, docId );
+        message.setString(DOCUMENT_ID, shardedId);
         message.setString(STREAM_DATE, streamDate);
         message.setString(TRACKING_ID, trackingId);
 
