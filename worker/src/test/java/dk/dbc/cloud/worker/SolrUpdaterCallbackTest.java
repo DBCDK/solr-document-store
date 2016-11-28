@@ -187,4 +187,9 @@ public class SolrUpdaterCallbackTest {
         assertEquals( 0, instance.getUpdatedDocumentsCount() );
         assertEquals( 1, instance.getDeletedDocumentsCount() );
     }
+    
+    @Test
+    public void testGetShardedSolrId(){
+        assertEquals( "bibid/32!solr-doc-id", SolrUpdaterCallback.getShardedSolrId("bibid", "solr-doc-id") );
+    }
 }

@@ -69,7 +69,7 @@ public class SolrUpdaterCallback
         this.trackingId = trackingId;
     }
     
-    private String getShardedSolrId( String bibliographicRecordId, String solrId ){
+    static String getShardedSolrId( String bibliographicRecordId, String solrId ){
         String shardKey = bibliographicRecordId.replaceAll("[^0-9a-zA-Z]", "");
         String shardedId = shardKey + "/32!" + solrId;
         return shardedId;
@@ -89,8 +89,8 @@ public class SolrUpdaterCallback
             log.info("Sending {} document to queue", identifier);
         }
         
-        String bibliographicRecordId = solrDocument.getField( "rec.bibliographicRecordId" ).toString();
-        String solrId = solrDocument.getField( "id" ).toString();
+        String bibliographicRecordId = solrDocument.getField( "rec.bibliographicRecordId" ).getValue().toString();
+        String solrId = solrDocument.getField( "id" ).getValue().toString();
         String shardedId = getShardedSolrId( bibliographicRecordId, solrId );
         solrDocument.setField( "id", shardedId );
         
