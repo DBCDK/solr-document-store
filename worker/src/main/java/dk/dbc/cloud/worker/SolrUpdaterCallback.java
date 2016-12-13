@@ -155,7 +155,6 @@ public class SolrUpdaterCallback
             String name = jsEnvironment.getJavascriptObjectFieldAsString( obj, "name" );
             String value = jsEnvironment.getJavascriptObjectFieldAsString( obj, "value" );
             ExceptionUtil.checkForNullOrEmptyAndLogAndThrow( name, "index field name", log );
-            ExceptionUtil.checkForNullOrEmptyAndLogAndThrow( value, "index field value", log );
 
             Set<String> values = docMap.get(name);
             if (values == null) {
