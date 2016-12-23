@@ -150,7 +150,7 @@ public class SolrWorkerIT {
         MapMessage deadMessage = ( MapMessage ) deadPidConsumer.receive();
 
         assertEquals( PID, deadMessage.getString( "pid" ) );
-        assertEquals( 6, deadMessage.getIntProperty( "JMSXDeliveryCount" ) );
-
+        assertNotNull( deadMessage.getString( "exception" ) );
+        
     }
 }

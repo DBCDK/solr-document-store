@@ -47,6 +47,7 @@ public class SolrUpdaterCallback
     static final String STREAM_DATE = "streamDate";
     static final String DOCUMENT_ID = "documentId";
     static final String TRACKING_ID = "trackingId";
+    static final String PID = "pid";
 
 
     private int updatedDocumentsCount;
@@ -112,6 +113,7 @@ public class SolrUpdaterCallback
         message.setString(DOCUMENT_ID, shardedId);
         message.setString(STREAM_DATE, streamDate);
         message.setString(TRACKING_ID, trackingId);
+        message.setString(PID, identifier);
 
         sendRetryForever( message );
         deletedDocumentsCount++;

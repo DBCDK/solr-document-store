@@ -23,7 +23,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
-import dk.dbc.solr.indexer.cloud.shared.SleepHandler;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.ActivationConfigProperty;
@@ -33,7 +32,6 @@ import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
-import javax.jms.JMSRuntimeException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -43,10 +41,10 @@ import org.slf4j.LoggerFactory;
 
 @MessageDriven(
         activationConfig = {
-            @ActivationConfigProperty(propertyName = "endpointExceptionRedeliveryAttempts", propertyValue = "5"),
-            @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-            @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue"),
-            @ActivationConfigProperty(propertyName = "connectionFactoryLookup", propertyValue = "jms/indexerConnectionFactory")
+            @ActivationConfigProperty( propertyName = "endpointExceptionRedeliveryAttempts", propertyValue = "5" ),
+            @ActivationConfigProperty( propertyName = "destinationType", propertyValue = "javax.jms.Queue" ),
+            @ActivationConfigProperty( propertyName = "destinationLookup", propertyValue = "jms/pidQueue" ),
+            @ActivationConfigProperty( propertyName = "connectionFactoryLookup", propertyValue = "jms/indexerConnectionFactory" )
         })
 public class SolrWorker implements MessageListener {
 
@@ -62,7 +60,7 @@ public class SolrWorker implements MessageListener {
     SolrIndexerJS javascriptWrapper;
 
     @Inject
-    @JMSConnectionFactory("jms/indexerConnectionFactory")
+    @JMSConnectionFactory( "jms/indexerConnectionFactory" )
     JMSContext responseContext;
 
     final int redeliveryLimit = 5;
@@ -74,8 +72,8 @@ public class SolrWorker implements MessageListener {
     
     @PostConstruct
     public void init() {
-        log.info("Initializing SolrWorker");
-        onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
+        log.info( "Initializing SolrWorker" );
+        onMessageTimer = registry.getRegistry().timer( MetricRegistry.name( SolrWorker.class, "onMessage" ) );
     }
 
     @PreDestroy
@@ -84,41 +82,58 @@ public class SolrWorker implements MessageListener {
     }
 
     @Override
-    public void onMessage(Message message) {
+    public void onMessage( Message message ) {
         try {
             Timer.Context time = onMessageTimer.time();
             MapMessage m = (MapMessage) message;
             long timeStamp = m.getJMSTimestamp();
-            String pid = m.getString("pid");
+            String pid = m.getString( "pid" );
             DBCTrackedLogContext.setTrackingId( "SolrWorker:" + pid );
-            int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
+            int deliveryAttempts = message.getIntProperty( "JMSXDeliveryCount" );
 
-            log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.STARTED).
-                    and(append("JmsTimestamp", timeStamp).
-                    and(append("deliveryAttempts", deliveryAttempts))),
-                            "Started processing message");
-            if(deliveryAttempts <= redeliveryLimit){
-                docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, responseContext.createQueue(App.JMS_DOCUMENT_QUEUE_NAME) );
+            log.info(LogAppender.getMarker( App.APP_NAME, pid, LogAppender.STARTED ).
+                    and( append( "JmsTimestamp", timeStamp ).
+                    and( append( "deliveryAttempts", deliveryAttempts ) ) ),
+                            "Started processing message" );
+            
+            try {
+                docBuilder.buildDocuments( pid, javascriptWrapper, responseContext, responseContext.createQueue( App.JMS_DOCUMENT_QUEUE_NAME ) );
                 failureHandler.reset();
-            }else{
-                //Put on dead message queue
-                log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Unable to proces message {} - redelivery limit reached", message);
-                try{                    
-                    responseContext.createProducer().send(responseContext.createQueue(App.JMS_DEADPID_QUEUE_NAME), message);
-                    log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED),"Message {} moved to dead message queue", message);
-                }catch(JMSRuntimeException ex){
-                    log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED),"Message {} could not be moved to dead message queue", message, ex);
+            } catch( Exception ex ) {
+                if( deliveryAttempts >= redeliveryLimit ) {
+                    try{
+                        MapMessage failed = responseContext.createMapMessage();
+                        failed.setString( "pid", pid );
+                        failed.setString( "exception", getCauses( ex ) );
+                        responseContext.createProducer().send( responseContext.createQueue( App.JMS_DEADPID_QUEUE_NAME ), failed );
+                        log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ), "Message {} moved to dead message queue. Caused by: {}", message, ex.getMessage() );
+                    }catch( RuntimeException dmqException ){
+                        throw new RuntimeException( "Message {} could not be moved to dead message queue", dmqException );
+                    }
+                } else {
                     throw ex;
                 }
             }
             time.stop();
-        } catch (Exception ex) {
-            log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED),"Unable to process message {}", message, ex);
+        } catch ( Exception ex ) {
+            log.error( LogAppender.getMarker( App.APP_NAME, LogAppender.FAILED ), "Unable to process message {}", message, ex );
             failureHandler.failure();
-            throw new EJBException(ex.getMessage());
+            throw new EJBException( ex.getMessage() );
         } finally {
             DBCTrackedLogContext.remove();
         }
+    }
+    
+    String getCauses( Throwable e ) {
+        StringBuilder sb = new StringBuilder( e.getMessage() );
+        Throwable cause = null; 
+        Throwable result = e;
+
+        while( null != ( cause = result.getCause() )  && ( result != cause ) ) {
+            result = cause;
+            sb.append(", ").append( result.getMessage() );
+        }
+        return sb.toString();
     }
 
 }

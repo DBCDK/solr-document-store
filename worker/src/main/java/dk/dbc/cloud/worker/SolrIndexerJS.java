@@ -61,15 +61,18 @@ public class SolrIndexerJS {
     }
 
     public void createIndexData(IRepositoryDAO repository, String identifier, String data, SolrUpdaterCallback solrCallback, LibraryRuleHandler libraryRuleHandler) throws Exception {
-        try ( RepositoryInEnvironment r = new RepositoryInEnvironment(getEnvironment(), repository) ) {
-            wrapper.callObjectFunction(JAVA_SCRIPT_FUNCTION, identifier, data, libraryRuleHandler, solrCallback);
-        }
-        if (solrCallback.getDeletedDocumentsCount() == 0 && solrCallback.getUpdatedDocumentsCount() == 0) {
-            log.info("Indexing of {} was skipped by javascript", identifier);
+        try {
+            try ( RepositoryInEnvironment r = new RepositoryInEnvironment(getEnvironment(), repository) ) {
+                wrapper.callObjectFunction(JAVA_SCRIPT_FUNCTION, identifier, data, libraryRuleHandler, solrCallback);
+            }
+            if (solrCallback.getDeletedDocumentsCount() == 0 && solrCallback.getUpdatedDocumentsCount() == 0) {
+                log.info("Indexing of {} was skipped by javascript", identifier);
+            }
+        } catch( Exception e ) {
+            throw new Exception( e );
         }
     }
     public Environment getEnvironment() {
         return wrapper.getEnvironment();
     }
-
 }
