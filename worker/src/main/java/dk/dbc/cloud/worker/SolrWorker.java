@@ -104,11 +104,11 @@ public class SolrWorker implements MessageListener {
                     try{
                         MapMessage failed = responseContext.createMapMessage();
                         failed.setString( "pid", pid );
-                        failed.setString( "exception", getCauses( ex ) );
+                        failed.setString( "exception", LogAppender.getCauses( ex ) );
                         responseContext.createProducer().send( responseContext.createQueue( App.JMS_DEADPID_QUEUE_NAME ), failed );
                         log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ), "Message {} moved to dead message queue. Caused by: {}", message, ex.getMessage() );
                     }catch( RuntimeException dmqException ){
-                        throw new RuntimeException( "Message {} could not be moved to dead message queue", dmqException );
+                        throw new RuntimeException( pid + " could not be moved to dead message queue", dmqException );
                     }
                 } else {
                     throw ex;
@@ -122,18 +122,6 @@ public class SolrWorker implements MessageListener {
         } finally {
             DBCTrackedLogContext.remove();
         }
-    }
-    
-    String getCauses( Throwable e ) {
-        StringBuilder sb = new StringBuilder( e.getMessage() );
-        Throwable cause = null; 
-        Throwable result = e;
-
-        while( null != ( cause = result.getCause() )  && ( result != cause ) ) {
-            result = cause;
-            sb.append(", ").append( result.getMessage() );
-        }
-        return sb.toString();
     }
 
 }
