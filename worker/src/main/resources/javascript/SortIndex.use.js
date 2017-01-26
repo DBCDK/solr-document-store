@@ -952,14 +952,16 @@ var SortIndex = function() {
      * @method
      */
     that.createSortDateFirstEdition = function( index, commonDataXml ) {
+
         Log.trace( "Entering: SortIndex.createSortDateFirstEdition" );
+
         var firstEditionYear;
         var version = XPath.selectText( "/*/dkabm:record/dkdcplus:version", commonDataXml );
 
         if ( version.match( /1\. ((udgave)|(edition))/ ) ) {
             firstEditionYear = XPath.selectText( "/*/dkabm:record/dc:date", commonDataXml );
             firstEditionYear = SortIndex.__fourDigitDate( firstEditionYear );
-            if( firstEditionYear !== "0000" && ! firstEditionYear.match(/^2[1-9]/) ) {
+            if ( firstEditionYear !== "0000" && ! firstEditionYear.match( /^2[1-9]/ ) ) {
                 index.pushField( "sort.dateFirstEdition", firstEditionYear );
                 Log.trace( "Leaving: SortIndex.createSortDateFirstEdition" );
                 return index;
@@ -971,7 +973,7 @@ var SortIndex = function() {
                 var firstEditionMatch = text.match( /Originaludgave.*([1-2][0-9]{3})/ );
                 if ( firstEditionMatch ) {
                     firstEditionYear = firstEditionMatch[ 1 ];
-                    if( ! firstEditionYear.match(/^2[1-9]/) ) {
+                    if ( ! firstEditionYear.match( /^2[1-9]/ ) ) {
                         index.pushField( "sort.dateFirstEdition", firstEditionYear );
                         Log.trace( "Leaving: SortIndex.createSortDateFirstEdition" );
                         return index;
@@ -979,19 +981,19 @@ var SortIndex = function() {
                 }
                 firstEditionMatch = text.match( /1\. ((udgave)|(edition)).*([1-2][0-9]{3})/ );
                 if ( firstEditionMatch ) {
-                    var firstEditionYearCandidates = text.match(/([1-2][0-9]{3})/g);
+                    var firstEditionYearCandidates = text.match( /([1-2][0-9]{3})/g );
                     firstEditionYear = firstEditionYearCandidates[ firstEditionYearCandidates.length -1 ];
-                    if( ! firstEditionYear.match(/^2[1-9]/) ) {
+                    if ( ! firstEditionYear.match( /^2[1-9]/ ) ) {
                         index.pushField( "sort.dateFirstEdition", firstEditionYear );
                         Log.trace( "Leaving: SortIndex.createSortDateFirstEdition" );
                         return index;
                     }
                 }
-
-
             }
         }
+
         Log.trace( "Leaving: SortIndex.createSortDateFirstEdition" );
+
         return index;
     };
 

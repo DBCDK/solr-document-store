@@ -29,7 +29,7 @@ var TermIndex = function( ) {
      * @param {Object} index The index (object) to add the new index fields to
      * @param {Document} commonDataXml Xml object containing common data from object being indexed
      * @param {Document} dcDataXml Xml object containing dublin core data from object being indexed
-     * @param {Object} record an object with data from MARC
+     * @param {Record} record an object with data from MARC
      * @return {Object} The updated index object
      * @name TermIndex.createFields
      * @method
@@ -39,7 +39,7 @@ var TermIndex = function( ) {
         Log.trace( "Entering: TermIndex.createFields method" );
 
         // Concatenated types
-        var type = String(XPath.selectMultipleText("/*/dc:type", dcDataXml));
+        var type = String( XPath.selectMultipleText( "/*/dc:type", dcDataXml ) );
 
         TermIndex.createCreator( index, commonDataXml, record );
         TermIndex.createMainCreator( index, commonDataXml, record );
@@ -65,7 +65,7 @@ var TermIndex = function( ) {
         TermIndex.createMainTitle( index, commonDataXml, record);
         TermIndex.createSource( index, commonDataXml );
         TermIndex.createAcSource( index, commonDataXml );
-        TermIndex.createSubject( index, commonDataXml, record );
+        TermIndex.createSubject( index, commonDataXml );
         TermIndex.createDate( index, commonDataXml );
         //calling dummy method for logging
         TermIndex.createDateFirstEdition();
@@ -74,6 +74,7 @@ var TermIndex = function( ) {
         TermIndex.createIsbn( index, commonDataXml );
         TermIndex.createDescription( index, commonDataXml );
         TermIndex.createTrackTitle( index, commonDataXml, "term.trackTitle" );
+        TermIndex.createPartOf( index, commonDataXml ); //LSK: inserted missing call to this function 2017-01-24
         TermIndex.createOnlineAccess( index, commonDataXml, record );
 
         Log.trace( "Leaving: TermIndex.createFields method" );
@@ -215,9 +216,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createDefaultLocalData method" );
 
-        XPath.forEachNodeText("/*/marcx:record/marcx:datafield/marcx:subfield", localDataXml, function(text) {
+        XPath.forEachNodeText( "/*/marcx:record/marcx:datafield/marcx:subfield", localDataXml, function( text ) {
             index.pushField( "term.defaultLocalData", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createDefaultLocalData method" );
 
@@ -233,7 +234,7 @@ var TermIndex = function( ) {
      * @syntax TermIndex.createCreator( index, commonDataXml, record )
      * @param {Object} index The index (object) to add the new index fields to
      * @param {Document} commonDataXml Xml object containing common data
-     * @param {Object} record an object with data from MARC
+     * @param {Record} record an object with data from MARC
      * @return {Object} The updated index object
      * @name TermIndex.createCreator
      * @method
@@ -242,23 +243,23 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createCreator method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:creator", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:creator", commonDataXml, function( text ) {
             index.pushField( "term.creator", text );
-        });
+        } );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:contributor", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:contributor", commonDataXml, function( text ) {
             index.pushField( "term.creator", text );
-        });
-        if(record !== undefined){
-            record.eachField("245", function( field ) {
-                field.eachSubField("f", function (field, subField) {
+        } );
+
+        if ( undefined !== record ) {
+            record.eachField( "245", function( field ) {
+                field.eachSubField( "f", function ( field, subField ) {
                     var value = TermIndex.cleanDataForCreator( subField.value );
                     index.pushField( "term.creator", value );
-                });
+                } );
 
-            });
+            } );
            // dkcclterm.fo index values copied to term.creator in solr  (see solr-config/schema.xml)
-           // DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsFo, index, record, "term.creator");
         }
         Log.trace( "Leaving: TermIndex.createCreator method" );
 
@@ -283,12 +284,12 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createMainCreator method" );
 
-        if( record !== undefined ) {
+        if ( undefined !== record ) {
             DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsPo, index, record, "term.mainCreator" );
         } else  {
             XPath.forEachNodeText("/*/dkabm:record/dc:creator", commonDataXml, function(text) {
                 index.pushField( "term.mainCreator", text );
-            });
+            } );
         }
 
         Log.trace( "Leaving: TermIndex.createMainCreator method" );
@@ -352,11 +353,11 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: createCategory method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dcterms:audience", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dcterms:audience", commonDataXml, function( text ) {
             if ( text.match( /.*materialer/ ) ) {
                 index.pushField( "term.category", text );
             }
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createCategory method" );
 
@@ -381,7 +382,7 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createLanguage method" );
 
-        if ( record !== undefined ) {
+        if ( undefined !== record ) {
             var map = new MatchMap();
             map.put( "008", function( field ) {
                 field.eachSubField( "l", function( field, subField ) {
@@ -406,7 +407,6 @@ var TermIndex = function( ) {
             });
         }
 
-
         Log.trace( "Leaving: TermIndex.createLanguage method" );
 
         return index;
@@ -430,16 +430,15 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createPrimaryLanguage method" );
 
-        if ( record !== undefined ) {
-            var field008l = record.getFirstValue("008", "l");
-            if ( field008l !== undefined) {
+        if ( undefined !== record ) {
+            var field008l = record.getFirstValue( "008", "l" );
+            if ( undefined !== field008l ) {
                 index.pushField( "term.primaryLanguage", field008l );
             }
-        }
-        else {
+        } else {
             XPath.forEachNodeText("/*/dkabm:record/dc:language[ @xsi:type = 'dcterms:ISO639-2' ][ 1 ]", commonDataXml, function(text) {
                 index.pushField( "term.primaryLanguage", text );
-            });
+            } );
         }
 
         Log.trace( "Leaving: TermIndex.createPrimaryLanguage method" );
@@ -465,11 +464,14 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createLiteraryForm method" );
 
-        XPath.forEachNodeText("/*/adminData/genre", commonDataXml, function(genre) {
+        XPath.forEachNodeText("/*/adminData/genre", commonDataXml, function( genre ) {
+
             index.pushField( "term.literaryForm", genre );
-            if ( genre === 'fiktion' ) {
-                if ( record !== undefined ) {
-                    var map = new MatchMap();
+
+            if ( 'fiktion' === genre ) {
+
+                if ( undefined !== record ) {
+                    var map = new MatchMap( );
                     map.put( "008", function( field ) {
                         field.eachSubField( "j", function( field, subField ) {
                             switch ( subField.value ) {
@@ -496,7 +498,7 @@ var TermIndex = function( ) {
                             }
                         } );
                     } );
-                    record.eachFieldMap(map);
+                    record.eachFieldMap( map );
                 }
 
                 var dcType = XPath.selectText( "/*/dkabm:record/dc:type", commonDataXml );
@@ -507,7 +509,8 @@ var TermIndex = function( ) {
                     index.pushField( "term.literaryForm", "graphic novels" );
                 }
             }
-        });
+
+        } );
 
         Log.trace( "Leaving: TermIndex.createLiteraryForm method" );
 
@@ -532,38 +535,41 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createNationality method" );
 
-        var codes = [ ];
-
-        var nationality = "";
-
-        XPath.forEachNodeText("/*/dkabm:record/dc:subject[ @xsi:type = 'dkdcplus:DK5' ]", commonDataXml, function(text) {
-            if ( text === "77.7" || text === "88.652" || text === "82" || text === "82.6" || text === "85" || text === "88.4171"
-                    || text === "88.654" || text === "82.7" || text === "87" || text === "88.813" || text === "84" ) {
-                codes.push( text );
-            }
-        });
-
-        if ( codes.length === 0 ) {
+        function __logAndReturn( index ) {
             Log.trace( "Leaving: createNationality method" );
             return index;
         }
+
+        var relevantDk5Notations = [ "77.7", "82", "82.6", "82.7", "84", "85", "87", "88.4171", "88.652", "88.654", "88.813" ];
+        var codes = [ ];
+        var matchDk5Criteria = false;
+
+        XPath.forEachNodeText("/*/dkabm:record/dc:subject[ @xsi:type = 'dkdcplus:DK5' ]", commonDataXml, function(text) {
+            if ( -1 < relevantDk5Notations.indexOf( text ) ) {
+                codes.push( text );
+                matchDk5Criteria = true;
+            }
+        } );
+
+        if ( !matchDk5Criteria ) {
+            __logAndReturn( index );
+        }
+
         var foundNationality = false;
-        // If there is a DBC controlled subject for filmnationality - use that
+        // If there is a DBC controlled subject for film nationality - use that
         XPath.forEachNodeText( "/*/dkabm:record/dc:subject[ @xsi:type = 'dkdcplus:DBCO' ]", commonDataXml, function( text ) {
             //filtering values see Bug 20590
-            if( / film$/.test( text )) {
+            if ( / film$/.test( text ) ) {
                 index.pushField( "term.nationality", text );
                 foundNationality = true;
             }
-        });
+        } );
 
         if ( foundNationality ) {
-            Log.trace( "Leaving: createNationality method" );
-            return index;
+            __logAndReturn( index );
         }
-        if ( record !== undefined ) {
 
-            var language = record.getFirstValue( "008", "l" );
+        if ( undefined !== record ) {
 
             var description = "";
             //if description does not match tale we can stop here
@@ -577,25 +583,24 @@ var TermIndex = function( ) {
                 } );
             } );
 
-            //if description does not match tale getNationality will return undefined
-            if( description === "" ){
-                Log.trace( "Leaving: createNationality method" );
-                return index;
+            //if description does not match 'tale' getNationality will return undefined
+            if ( "" === description ) {
+                __logAndReturn( index );
             }
-
 
             // try to establish whether the film is made in USA so that american films don't end up as english films
             var usa = false;
-            record.eachField('512', function( field ) {
+            record.eachField( '512', function( field ) {
                 field.eachSubField( "a", function ( field, subfield ) {
                     var text = subfield.value;
                     if ( text.match( /USA/ ) ) {
                         usa = true;
                     }
-                });
-            });
+                } );
+            } );
 
-            nationality = TermIndex.getNationality( language, description, codes, usa );
+            var language = record.getFirstValue( "008", "l" );
+            var nationality = TermIndex.getNationality( language, description, codes, usa );
 
             if ( nationality ) {
                 index.pushField( "term.nationality", nationality );
@@ -611,7 +616,6 @@ var TermIndex = function( ) {
                 } );
             }
         }
-
 
         Log.trace( "Leaving: TermIndex.createNationality method" );
 
@@ -638,7 +642,6 @@ var TermIndex = function( ) {
         Log.trace( "Entering: TermIndex.getNationality method" );
 
         var nationality = undefined;
-        var code;
 
         switch ( language ) {
             case "ara":
@@ -648,10 +651,8 @@ var TermIndex = function( ) {
                 break;
             case "bos":
                 if ( description.match( /^bosnisk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "88.652" || codes[ code ] === "77.7" ) {
-                            nationality = "bosniske film";
-                        }
+                    if ( -1 < codes.indexOf( "88.652" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "bosniske film";
                     }
                 }
                 break;
@@ -662,19 +663,17 @@ var TermIndex = function( ) {
                 break;
             case "eng":
                 if ( description.match( /^engelsk (.* )?tale/i ) ) {
-                    if (usa === true){
+                    if ( true === usa ) {
                         nationality = "amerikanske film";
-                    } else{
+                    } else {
                         nationality = "engelske film";
                     }
                 }
                 break;
             case "fre":
                 if ( description.match( /^fransk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "82" || codes[ code ] === "77.7" ) {
-                            nationality = "franske film";
-                        }
+                    if ( -1 < codes.indexOf( "82" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "franske film";
                     }
                 }
                 break;
@@ -685,10 +684,8 @@ var TermIndex = function( ) {
                 break;
             case "ita":
                 if ( description.match( /^italiensk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "82.6" || codes[ code ] === "77.7" ) {
-                            nationality = "italienske film";
-                        }
+                    if ( -1 < codes.indexOf( "82.6" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "italienske film";
                     }
                 }
                 break;
@@ -709,19 +706,15 @@ var TermIndex = function( ) {
                 break;
             case "nor":
                 if ( description.match( /^norsk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "85" || codes[ code ] === "77.7" ) {
-                            nationality = "norske film";
-                        }
+                    if ( -1 < codes.indexOf( "85" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "norske film";
                     }
                 }
                 break;
             case "urd":
                 if ( description.match( /^urdu (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "88.4171" || codes[ code ] === "77.7" ) {
-                            nationality = "pakistanske film";
-                        }
+                    if ( -1 < codes.indexOf( "88.4171" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "pakistanske film";
                     }
                 }
                 break;
@@ -737,46 +730,36 @@ var TermIndex = function( ) {
                 break;
             case "scc":
                 if ( description.match( /^serbisk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "88.654" || codes[ code ] === "77.7" ) {
-                            nationality = "serbiske film";
-                        }
+                    if ( -1 < codes.indexOf( "88.654" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "serbiske film";
                     }
                 }
                 break;
             case "spa":
                 if ( description.match( /^spansk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "82.7" || codes[ code ] === "77.7" ) {
-                            nationality = "spanske film";
-                        }
+                    if ( -1 < codes.indexOf( "82.7" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "spanske film";
                     }
                 }
                 break;
             case "swe":
                 if ( description.match( /^svensk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "87" || codes[ code ] === "77.7" ) {
-                            nationality = "svenske film";
-                        }
+                    if ( -1 < codes.indexOf( "87" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "svenske film";
                     }
                 }
                 break;
             case "tur":
                 if ( description.match( /^tyrkisk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "88.813" || codes[ code ] === "77.7" ) {
-                            nationality = "tyrkiske film";
-                        }
+                    if ( -1 < codes.indexOf( "88.813" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "tyrkiske film";
                     }
                 }
                 break;
             case "ger":
                 if ( description.match( /^tysk (.* )?tale/i ) ) {
-                    for ( code in codes ) {
-                        if ( codes[ code ] === "84" || codes[ code ] === "77.7" ) {
-                            nationality = "tyske film";
-                        }
+                    if ( -1 < codes.indexOf( "84" ) || -1 < codes.indexOf( "77.7" ) ) {
+                        nationality = "tyske film";
                     }
                 }
                 break;
@@ -894,9 +877,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createSource method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:source", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:source", commonDataXml, function( text ) {
             index.pushField( "term.source", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createSource method" );
 
@@ -920,9 +903,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createAcSource method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/ac:source", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/ac:source", commonDataXml, function( text ) {
             index.pushField( "term.acSource", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createAcSource method" );
 
@@ -949,20 +932,18 @@ var TermIndex = function( ) {
 
         var submitter;
 
-        if ( record !== undefined ) {
-            submitter = record.getFirstValue("001", "b");
-            Log.debug("submitter: ", submitter);
+        if ( undefined !== record ) {
+            submitter = record.getFirstValue( "001", "b" );
+            Log.debug( "submitter: ", submitter );
         }
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:publisher", commonDataXml, function(text) {
-        	Log.debug("publisher: ", text);
+        XPath.forEachNodeText( "/*/dkabm:record/dc:publisher", commonDataXml, function( text ) {
             index.pushField( "term.publisher", text );
-
-            if (submitter === "874310" || text.match(/(Statens Bibliotek og Trykkeri for Blinde|Danmarks Blindebibliotek|^Nota$)/i)) {
-                Log.debug("DBBNOTA");
-                index.pushField("term.publisher", "DBBNOTA");
+            if ( "874310" === submitter || text.match( /(Statens Bibliotek og Trykkeri for Blinde|Danmarks Blindebibliotek|^Nota$)/i ) ) {
+                Log.debug( "DBBNOTA" );
+                index.pushField( "term.publisher", "DBBNOTA" );
             }
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createPublisher method" );
 
@@ -971,31 +952,27 @@ var TermIndex = function( ) {
     };
 
     /**
-     * Method that creates term.subject index fields from .
+     * Method that creates term.subject index fields from DKABM.
      *
      *
      * @type {method}
      * @syntax TermIndex.createSubject( index, commonDataXml )
      * @param {Object} index The index (object) to add the new index fields to
      * @param {Document} commonDataXml Xml object containing common data
-     * @param {Object} record an object with data from MARC
      * @return {Object} The updated index object
      * @name TermIndex.createSubject
      * @method
      */
 
-    that.createSubject = function( index, commonDataXml, record ) {
+    that.createSubject = function( index, commonDataXml ) {
 
         Log.trace( "Entering: TermIndex.createSubject method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:subject[ not( @xsi:type = 'dkdcplus:genre' ) ]", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:subject[ not( @xsi:type = 'dkdcplus:genre' ) ]", commonDataXml, function( text ) {
             index.pushField( "term.subject", text );
-        });
+        } );
 
         //index field values from dkcclterm.em are copied by solr (see schema.xml)
-        //if( record !== undefined){
-          //  DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsEm, index, record, "term.subject" );
-        //}
 
         Log.trace( "Leaving: TermIndex.createSubject method" );
 
@@ -1013,28 +990,26 @@ var TermIndex = function( ) {
      * @syntax TermIndex.createTitle( index, commonDataXml )
      * @param {Object} index The index (object) to add the new index fields to
      * @param {Document} commonDataXml Xml object containing common data
-     * @param {Object} record an object with data from MARC
      * @return {Object} The updated index object
      * @name TermIndex.createTitle
      * @method
      */
 
-    that.createTitle = function( index, commonDataXml, record ) {
+    that.createTitle = function( index, commonDataXml ) {
 
         Log.trace( "Entering: TermIndex.createTitle method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:title", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:title", commonDataXml, function( text ) {
             index.pushField( "term.title", text );
-        });
-        XPath.forEachNodeText("/*/dkabm:record/dcterms:alternative", commonDataXml, function(text) {
+        } );
+
+        XPath.forEachNodeText( "/*/dkabm:record/dcterms:alternative", commonDataXml, function( text ) {
             index.pushField( "term.title", text );
-        });
+        } );
+
          //term.trackTitle index values are copied to this index  (see solr-config/schema.xml)
-        //TermIndex.createTrackTitle( index, commonDataXml, "term.title" );
          //dkcclterm.ti index values are copied to this index (see solr-config/schema.xml)
-        //if( record !== undefined ){
-          //  DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsTi, index, record, "term.title");
-        //}
+
         Log.trace( "Leaving: TermIndex.createTitle method" );
 
         return index;
@@ -1058,9 +1033,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createMainTitle method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:title[ not( @xsi:type = 'dkdcplus:full' ) and not( @xsi:type = 'dkdcplus:series' ) ]", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:title[ not( @xsi:type = 'dkdcplus:full' ) and not( @xsi:type = 'dkdcplus:series' ) ]", commonDataXml, function(text) {
             index.pushField( "term.mainTitle", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createMainTitle method" );
 
@@ -1075,7 +1050,7 @@ var TermIndex = function( ) {
      *
      * @type {method}
      * @syntax TermIndex.createType( index, commonDataXml )
-     * @param {Object} index The index (object) to add the new index fields to
+     * @param {Object} index The index to add the new index fields to
      * @param {Document} commonDataXml Xml object containing common data
      * @return {Object} The updated index object
      * @name TermIndex.createType
@@ -1085,9 +1060,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createType method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:type[ @xsi:type = 'dkdcplus:BibDK-Type']", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:type[ @xsi:type = 'dkdcplus:BibDK-Type']", commonDataXml, function( text ) {
             index.pushField( "term.type", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createType method" );
 
@@ -1743,7 +1718,6 @@ var TermIndex = function( ) {
      * @name TermIndex.createPartOf
      * @method
      */
-
     that.createPartOf = function( index, commonDataXml ) {
 
         Log.trace( "Entering: TermIndex.createPartOf method" );
@@ -1775,10 +1749,8 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createOnlineAccess method" );
 
-        var child;
-
         var value = "";
-        if ( record !== undefined ) {
+        if ( undefined !== record ) {
             record.eachField( "008", function ( field ) {
                 Log.debug( "TermIndex.createOnlineAccess: field:", field );
                 field.eachSubField( "n", function ( field, subfield ) {
@@ -1794,20 +1766,21 @@ var TermIndex = function( ) {
                             value = "oi none";
                             break;
                     }
-                });
-            });
+                } );
+            } );
         }
+
         var elements = XPath.select( "/*/ln:links/ln:link[ln:relationType='dbcaddi:hasOnlineAccess']", commonDataXml );
-        for ( var i = 0 ; i < elements.length; i++){
-            child = elements[i];
-            var accType = XPath.selectText( "ln:access", child );
-            if ( accType === "free" ) {
+        for ( var i = 0 ; i < elements.length; i++ ) {
+            var child = elements[i];
+            var accessType = XPath.selectText( "ln:access", child );
+            if ( "free" === accessType ) {
                 value = "ou free";
             } else {
                 value = "od restricted";
             }
         }
-        if ( value !== "" ) {
+        if ( "" !== value ) {
             index.pushField( "term.onlineAccess", value );
         }
 
