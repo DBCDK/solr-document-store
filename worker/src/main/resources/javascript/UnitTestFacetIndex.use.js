@@ -1167,6 +1167,93 @@ UnitTest.addFixture( "FacetIndex.createLix", function() {
     Assert.equalValue( "Create facet.lix",
         FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
 
+    index = Index.newIndex();
+
+    xml = XmlUtil.fromString( '<ting:container ' +
+        'xmlns:ting="http://www.dbc.dk/ting" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:datafield ind1="0" ind2="0" tag="042">' +
+        '<marcx:subfield code="a">12-15</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>' );
+
+    indexOut = [ {
+        name: "facet.lix",
+        value: "12-15"
+    } ];
+
+    Assert.equalValue( "Create facet.lix range",
+        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+
+
+
+    index = Index.newIndex();
+    xml = XmlUtil.fromString( '<ting:container ' +
+        'xmlns:ting="http://www.dbc.dk/ting" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:datafield ind1="0" ind2="0" tag="042">' +
+        '<marcx:subfield code="a">05 Ml 5,4 + Lo 0,0</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>' );
+
+    indexOut = [ ];
+
+    Assert.equalValue( "Create facet.lix no lix-number (cataloging error)",
+        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+
+   index = Index.newIndex();
+
+    xml = XmlUtil.fromString( '<ting:container ' +
+        'xmlns:ting="http://www.dbc.dk/ting" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:datafield ind1="0" ind2="0" tag="042">' +
+        '<marcx:subfield code="a">Lix 26</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>' );
+
+    indexOut = [ {
+        name: "facet.lix",
+        value: "26"
+    }];
+
+    Assert.equalValue( "Create facet.lix remove Lix from number",
+        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+
+    index = Index.newIndex();
+
+    xml = XmlUtil.fromString( '<ting:container ' +
+        'xmlns:ting="http://www.dbc.dk/ting" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:datafield ind1="0" ind2="0" tag="042">' +
+        '<marcx:subfield code="a">6 lix</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>' );
+
+    indexOut = [ {
+        name: "facet.lix",
+        value: "6"
+    }];
+
+    Assert.equalValue( "Create facet.lix  remove lix from number",
+        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+
+
 } );
 
 UnitTest.addFixture( "FacetIndex.createPartOf", function() {

@@ -779,8 +779,13 @@ var FacetIndex = function() {
         if ( record !== undefined ) {
             record.eachField( '042', function( field ) {
                 field.eachSubField( 'a', function( field, subfield ) {
-                    index.pushField( "facet.lix", subfield.value );
-                } );
+                    var lixValue = subfield.value;
+                    lixValue = lixValue.replace( / ?lix ?/i,"");
+                    if( /^[0-9]+(-[0-9]+)?$/.test( lixValue )){
+                        index.pushField( "facet.lix", lixValue );
+
+                }
+                });
             } );
         }
 
