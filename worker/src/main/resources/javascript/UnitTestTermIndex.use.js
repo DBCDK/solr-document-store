@@ -1275,98 +1275,36 @@ UnitTest.addFixture( "TermIndex.createTypeCategory", function( ) {
     var index = Index.newIndex();
     var xml = XmlUtil.fromString(
         '<ting:container xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ' +
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
         '<ac:identifier>73128781|870971</ac:identifier>' +
-        '<ac:source>Avisartikler</ac:source>' +
-        '<dc:title>De kalder ham »Blodbaronen«</dc:title>' +
-        '<dc:title xsi:type="dkdcplus:full">De kalder ham Blodbaronen</dc:title>' +
-        '<dc:creator>Iben Thastum</dc:creator>' +
-        '<dc:creator xsi:type="oss:sort">Thastum, Iben</dc:creator>' +
-        '<dc:subject xsi:type="dkdcplus:DK5">99.4 Cronenberg, David</dc:subject>' +
-        '<dc:subject xsi:type="dkdcplus:DK5-Text">Biografier af enkelte personer</dc:subject>' +
-        '<dc:subject xsi:type="dkdcplus:DBCF">David Cronenberg</dc:subject>' +
-        '<dc:subject xsi:type="oss:sort">Cronenberg, David</dc:subject><dc:subject>biografier</dc:subject>' +
-        '<dc:subject xsi:type="dkdcplus:genre">nonfiktion</dc:subject>' +
-        '<dcterms:abstract>Canadisk filminstrukt\u00f8r. - I anledning af filmen Blodbr\u00f8dre</dcterms:abstract>' +
-        '<dcterms:audience>voksenmaterialer</dcterms:audience>' +
-        '<dc:date>1989</dc:date>' +
         '<dc:type xsi:type="dkdcplus:BibDK-Type">Avisartikel</dc:type>' +
-        '<dc:language xsi:type="dcterms:ISO639-2">dan</dc:language>' +
-        '<dc:language>Dansk</dc:language>' +
-        '<dcterms:isPartOf>Det fri aktuelt, 1989-04-28</dcterms:isPartOf>' +
-        '<dcterms:spatial>Canada film</dcterms:spatial>' +
         '</dkabm:record>' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:leader>000000000000000000000000</marcx:leader>' +
         '<marcx:datafield ind1="0" ind2="0" tag="001">' +
-        '<marcx:subfield code="a">73128781</marcx:subfield><marcx:subfield code="b">870971</marcx:subfield>' +
+        '<marcx:subfield code="a">73128781</marcx:subfield>' +
+        '<marcx:subfield code="b">870971</marcx:subfield>' +
         '<marcx:subfield code="c">19890511</marcx:subfield>' +
-        '<marcx:subfield code="d">19890511</marcx:subfield><marcx:subfield code="f">a</marcx:subfield>' +
+        '<marcx:subfield code="d">19890511</marcx:subfield>' +
+        '<marcx:subfield code="f">a</marcx:subfield>' +
         '<marcx:subfield code="o">c</marcx:subfield>' +
         '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="004">' +
-        '<marcx:subfield code="r">n</marcx:subfield><marcx:subfield code="a">i</marcx:subfield>' +
-        '</marcx:datafield>' +
         '<marcx:datafield ind1="0" ind2="0" tag="008">' +
-        '<marcx:subfield code="t">a</marcx:subfield><marcx:subfield code="u">f</marcx:subfield>' +
-        '<marcx:subfield code="a">1989</marcx:subfield><marcx:subfield code="b">dk</marcx:subfield>' +
-        '<marcx:subfield code="l">dan</marcx:subfield><marcx:subfield code="r">an</marcx:subfield>' +
+        '<marcx:subfield code="t">a</marcx:subfield>' +
+        '<marcx:subfield code="u">f</marcx:subfield>' +
+        '<marcx:subfield code="a">1989</marcx:subfield>' +
+        '<marcx:subfield code="b">dk</marcx:subfield>' +
+        '<marcx:subfield code="l">dan</marcx:subfield>' +
+        '<marcx:subfield code="r">an</marcx:subfield>' +
         '<marcx:subfield code="v">0</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="009">' +
-        '<marcx:subfield code="a">a</marcx:subfield><marcx:subfield code="g">xx</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="016">' +
-        '<marcx:subfield code="a">06666590</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="032">' +
-        '<marcx:subfield code="a">DAR198904</marcx:subfield><marcx:subfield code="a">ABU198919</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="086">' +
-        '<marcx:subfield code="a">Biografier af enkelte personer</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="245">' +
-        '<marcx:subfield code="a">De kalder ham »Blodbaronen«</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="504">' +
-        '<marcx:subfield code="a">Canadisk filminstrukt\u00f8r. - I anledning af filmen »Blodbr\u00f8dre«</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="557">' +
-        '<marcx:subfield code="a">Det ¤fri aktuelt</marcx:subfield><marcx:subfield code="j">1989</marcx:subfield>' +
-        '<marcx:subfield code="V">1989-04-28</marcx:subfield><marcx:subfield code="v">1989-04-28</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="600">' +
-        '<marcx:subfield code="a">Cronenberg</marcx:subfield><marcx:subfield code="h">David</marcx:subfield>' +
-        '<marcx:subfield code="2">ARTB</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="630">' +
-        '<marcx:subfield code="f">biografier</marcx:subfield><marcx:subfield code="2">ARTB</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="633">' +
-        '<marcx:subfield code="a">Canada</marcx:subfield><marcx:subfield code="u">film</marcx:subfield>' +
-        '<marcx:subfield code="2">ARTB</marcx:subfield></marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="652">' +
-        '<marcx:subfield code="m">99.4</marcx:subfield><marcx:subfield code="a">Cronenberg</marcx:subfield>' +
-        '<marcx:subfield code="h">David</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="700">' +
-        '<marcx:subfield code="a">Thastum</marcx:subfield><marcx:subfield code="h">Iben</marcx:subfield>' +
-        '</marcx:datafield>' +
-        '<marcx:datafield ind1="0" ind2="0" tag="996">' +
-        '<marcx:subfield code="a">IDX</marcx:subfield>' +
         '</marcx:datafield>' +
         '</marcx:record>' +
         '</marcx:collection>' +
-        '<adminData>' +
-        '<libraryType>none</libraryType><indexingAlias>danmarcxchange</indexingAlias>' +
-        '<accessType>physical</accessType>' +
-        '</adminData>' +
         '</ting:container>');
 
     var expected = [ {
@@ -1376,9 +1314,157 @@ UnitTest.addFixture( "TermIndex.createTypeCategory", function( ) {
 
     var actual = TermIndex.createTypeCategory( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
 
-    Assert.equalValue( "Create term.typeCategory", actual, expected );
+    Assert.equalValue( "Create term.typeCategory ana", actual, expected );
+
+
+    index = Index.newIndex();
+    xml = XmlUtil.fromString(
+        '<ting:container xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
+        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
+        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
+        '<dkabm:record>' +
+        '<ac:identifier>23645564|870970</ac:identifier>' +
+        '<dc:type xsi:type="dkdcplus:BibDK-Type">Bog</dc:type>' +
+        '</dkabm:record>' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:leader>000000000000000000000000</marcx:leader>' +
+        '<marcx:datafield ind1="0" ind2="0" tag="008">' +
+            '<marcx:subfield code="t">m</marcx:subfield>' +
+            '<marcx:subfield code="u">r</marcx:subfield>' +
+            '<marcx:subfield code="a">2001</marcx:subfield>' +
+            '<marcx:subfield code="z">2003</marcx:subfield>' +
+            '<marcx:subfield code="b">dk</marcx:subfield>' +
+            '<marcx:subfield code="d">x</marcx:subfield>' +
+            '<marcx:subfield code="j">f</marcx:subfield>' +
+            '<marcx:subfield code="l">dan</marcx:subfield>' +
+            '<marcx:subfield code="v">0</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>');
+
+    expected = [ {
+        name: "term.typeCategory",
+        value: "mono"
+    } ];
+
+    actual = TermIndex.createTypeCategory( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create term.typeCategory mono (008t=m)", actual, expected );
+
+
+    index = Index.newIndex();
+    xml = XmlUtil.fromString(
+        '<ting:container xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
+        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
+        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
+        '<dkabm:record>' +
+        '<ac:identifier>29418489|870970</ac:identifier>' +
+        '<dc:type xsi:type="dkdcplus:BibDK-Type">Bog</dc:type>' +
+        '</dkabm:record>' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:leader>000000000000000000000000</marcx:leader>' +
+        '<marcx:datafield ind1="0" ind2="0" tag="008">' +
+        '<marcx:subfield code="t">s</marcx:subfield>' +
+        '<marcx:subfield code="u">f</marcx:subfield>' +
+        '<marcx:subfield code="a">2012</marcx:subfield>' +
+        '<marcx:subfield code="b">dk</marcx:subfield>' +
+        '<marcx:subfield code="d">x</marcx:subfield>' +
+        '<marcx:subfield code="j">j</marcx:subfield>' +
+        '<marcx:subfield code="l">dan</marcx:subfield>' +
+        '<marcx:subfield code="v">0</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>');
+
+    expected = [ {
+        name: "term.typeCategory",
+        value: "mono"
+    } ];
+
+    actual = TermIndex.createTypeCategory( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create term.typeCategory mono (008t=s)", actual, expected );
+
+
+    index = Index.newIndex();
+    xml = XmlUtil.fromString(
+        '<ting:container xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
+        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
+        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
+        '<dkabm:record>' +
+        '<ac:identifier>03940721|870970</ac:identifier>' +
+        '<dc:type xsi:type="dkdcplus:BibDK-Type">Lydbog (baand)</dc:type>' +
+        '</dkabm:record>' +
+        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:leader>000000000000000000000000</marcx:leader>' +
+        '<marcx:datafield ind1="0" ind2="0" tag="008">' +
+        '<marcx:subfield code="t">p</marcx:subfield>' +
+        '<marcx:subfield code="u">c</marcx:subfield>' +
+        '<marcx:subfield code="a">1984</marcx:subfield>' +
+        '<marcx:subfield code="b">dk</marcx:subfield>' +
+        '<marcx:subfield code="c">q</marcx:subfield>' +
+        '<marcx:subfield code="h">p</marcx:subfield>' +
+        '<marcx:subfield code="l">dan</marcx:subfield>' +
+        '<marcx:subfield code="v">0</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>');
+
+    expected = [ {
+        name: "term.typeCategory",
+        value: "peri"
+    } ];
+
+    actual = TermIndex.createTypeCategory( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create term.typeCategory peri (008t=p)", actual, expected );
 
 } );
+
+
+UnitTest.addFixture( "TermIndex.createTypeCategoryDkabm", function( ) {
+
+    var index = Index.newIndex();
+    var xml = XmlUtil.fromString(
+        '<ting:container xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
+        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
+        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
+        'xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        '<dkabm:record>' +
+        '<ac:identifier>305521|150012</ac:identifier>' +
+        '<ac:source>Store Danske</ac:source>' +
+        '<dc:type xsi:type="dkdcplus:BibDK-Type">Artikel</dc:type>' +
+        '</dkabm:record>' +
+        '</ting:container>');
+
+    var expected = [ {
+        name: "term.typeCategory",
+        value: "mono"
+    } ];
+
+    var actual = TermIndex.createTypeCategoryDkabm( index, xml );
+
+    Assert.equalValue( "Create term.typeCategory mono from DKABM", actual, expected );
+
+
+} );
+
 
 UnitTest.addFixture( "TermIndex.createAccessType", function( ) {
 

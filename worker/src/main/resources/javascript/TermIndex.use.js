@@ -211,7 +211,6 @@ var TermIndex = function( ) {
      * @name TermIndex.createDefaultLocalData
      * @method
      */
-
     that.createDefaultLocalData = function( index, localDataXml ) {
 
         Log.trace( "Entering: TermIndex.createDefaultLocalData method" );
@@ -1087,22 +1086,33 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createTypeCategory method" );
 
-        if ( record !== undefined ) {
-            record.eachField( "008", function( field ) {
-                field.eachSubField( "t", function ( field, subField ) {
-                    var value = subField.value;
-                    if ( value.match( /a/ ) ) {
-                        index.pushField( "term.typeCategory", "ana" );
-                    }
-                    if ( value.match( /m|s/ ) ) {
-                        index.pushField( "term.typeCategory", "mono" );
-                    }
-                    if ( value.match( /p/ ) ) {
-                        index.pushField( "term.typeCategory", "peri" );
-                    }
-                } );
-            } );
+        if ( undefined === record ) {
+            Log.trace( "Leaving: TermIndex.createTypeCategory method" );
+            return index;
         }
+
+        record.eachField( "008", function( field ) {
+            field.eachSubField( "t", function ( field, subField ) {
+                var value = subField.value;
+                switch ( value ) {
+                    case "a":
+                        index.pushField( "term.typeCategory", "ana" );
+                        break;
+                    case "m":
+                        index.pushField( "term.typeCategory", "mono" );
+                        break;
+                    case "s":
+                        index.pushField( "term.typeCategory", "mono" );
+                        break;
+                    case "p":
+                        index.pushField( "term.typeCategory", "peri" );
+                        break;
+                    default:
+                        break;
+                }
+
+            } );
+        } );
 
         Log.trace( "Leaving: TermIndex.createTypeCategory method" );
 
@@ -1126,7 +1136,12 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createTypeCategoryDkabm method" );
 
-        var type = XPath.selectText("/*/dkabm:record/dc:type[ 1 ]", commonDataXml).toLowerCase( );
+        //This function was made with Search US#933 (2013) - bibliotek.dk wanted to be able to
+        //hit records from "Store Danske" (150012-leksikon) by searching term.category=mono which
+        //is also used to hit records in danMARC2 format.
+        //TODO: The creation of value based on DKABM should be seen in a broader context than just the example from "Store Danske".
+
+        var type = XPath.selectText( "/*/dkabm:record/dc:type[ 1 ]", commonDataXml).toLowerCase( );
 
         var value = "";
 
@@ -1528,9 +1543,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createReviewedIdentifier method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:identifier", reviewedDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:identifier", reviewedDataXml, function( text ) {
             index.pushField( "term.reviewedIdentifier", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createReviewedIdentifier method" );
 
@@ -1580,7 +1595,7 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createReviewer method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:creator[ not( @xsi:type = 'oss:sort' ) ]", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:creator[ not( @xsi:type = 'oss:sort' ) ]", commonDataXml, function(text) {
             index.pushField( "term.reviewer", text );
         });
 
@@ -1606,7 +1621,7 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createReviewSubject method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:title[ not( @xsi:type = 'dkdcplus:full' ) and not( @xsi:type = 'dkdcplus:series' )]", reviewedDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:title[ not( @xsi:type = 'dkdcplus:full' ) and not( @xsi:type = 'dkdcplus:series' )]", reviewedDataXml, function( text ) {
             index.pushField( "term.subject", text );
         });
 
@@ -1656,12 +1671,12 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createDescription method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:description", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:description", commonDataXml, function( text ) {
             index.pushField( "term.description", text );
-        });
-        XPath.forEachNodeText("/*/dkabm:record/dcterms:abstract", commonDataXml, function(text) {
+        } );
+        XPath.forEachNodeText( "/*/dkabm:record/dcterms:abstract", commonDataXml, function( text ) {
             index.pushField( "term.description", text );
-        });
+        } );
         Log.trace( "Leaving: TermIndex.createDescription method" );
 
         return index;
@@ -1686,20 +1701,22 @@ var TermIndex = function( ) {
         Log.trace( "Entering: TermIndex.createTrackTitle method" );
 
         var elements = XPath.select( "/*/dkabm:record/dcterms:hasPart[ @xsi:type = 'dkdcplus:track' ]", commonDataXml );
-        for ( var n = 0 ; n < elements.length; n++ ){
-            var child = elements[n];
+
+        for ( var n = 0 ; n < elements.length; n++ ) {
+            var child = elements[ n ];
             var text = XmlUtil.getText( child );
-            if ( text.trim() !== "" ) {
+            if ( "" !== text.trim( ) ) {
                 index.pushField( indexName, text );
             }
             var children = XmlUtil.getChildElements( child );
             for ( var i = 0 ; i < children.length; i++ ) {
                 text = XmlUtil.getText( children[i] );
-                if ( text.trim() !== "" ) {
+                if ( "" !== text.trim( ) ) {
                     index.pushField( indexName, text );
                 }
             }
         }
+
         Log.trace( "Leaving: TermIndex.createTrackTitle method" );
 
         return index;
