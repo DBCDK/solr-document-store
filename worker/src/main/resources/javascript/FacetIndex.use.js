@@ -346,7 +346,7 @@ var FacetIndex = function() {
                 }
             } );
         }
-        if( !foundLanguage && hasMultipleLanguages ) {
+        if ( !foundLanguage && hasMultipleLanguages ) {
             index.pushField( "facet.language", "Blandede sprog" );
             Log.debug( "FacetIndex.createLanguage: Blandede sprog" );
         }
@@ -636,8 +636,6 @@ var FacetIndex = function() {
 
         Log.trace( "Entering: createLevel method" );
 
-
-
         function getLevelTexts(code){
             var levelTexts = [];
             switch (code) {
@@ -716,14 +714,13 @@ var FacetIndex = function() {
         } );
 
         //if there was a field in dkabm with a level we do not need to look at the marc record
-        if( undefined !== record && levelIndexCreatedFromDkabm === false ) {
+        if ( undefined !== record && levelIndexCreatedFromDkabm === false ) {
             record.eachField( '008', function( field ) {
                 field.eachSubField( 'x', function( field, subfield ) {
                     updateIndex( subfield.value );
                 } );
             } );
         }
-
 
         Log.trace( "Leaving: createLevel method" );
 
