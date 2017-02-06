@@ -328,7 +328,7 @@
             </goals>
             <configuration>
               <commands>
-                <command>create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.23/" solr-worker</command>
+                <command>create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.30/" solr-worker</command>
                 <command>create-jdbc-connection-pool --restype=javax.sql.DataSource --datasourceclassname=org.postgresql.ds.PGSimpleDataSource --property=driverClass=org.postgresql.Driver:url="jdbc:postgresql://localhost:${corepo.port}/corepo":User=${user.name}:Password="" jdbc/solr-worker/corepo/pool</command>
                 <command>create-jdbc-resource --connectionpoolid=jdbc/solr-worker/corepo/pool jdbc/solr-worker/corepo</command>
                 <command>jms-ping</command>
