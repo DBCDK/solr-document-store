@@ -428,7 +428,9 @@ var DkcclTermIndex = function() {
      * @method
      */
     that.createDkcclFieldsBr = function( index, map ) {
+
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsBr" );
+
         map.put( "021", function( field ) {
             field.eachSubField( 'b', function( field, subField ) {
                 var brugsRetMatch = subField.value.match( /brugsretskategori: ([A-E]\+?)/i );
@@ -437,6 +439,7 @@ var DkcclTermIndex = function() {
                 }
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsBr" );
     };
 
