@@ -100,11 +100,12 @@ var DkcclPhraseIndex = function( ) {
      *
      *
      * @type {method}
-     * @syntax DkcclPhraseIndex.callIndexMethod( func, index, record, fieldName )
+     * @syntax DkcclPhraseIndex.callIndexMethod( func, index, record, fieldName, restricted )
      * @param {Function} func the index method to call
      * @param {Object} index the index to add fields to
      * @param {Record} record The record from which to create the index fields
      * @param {String|undefined} fieldName Optional fieldname parameter to pass to index method that requires it
+     * @param {Object} restricted
      * @return {Object} Index with added fields
      * @name DkcclPhraseIndex.callIndexMethod
      * @method
