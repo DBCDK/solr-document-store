@@ -165,10 +165,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsAc( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsAc( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsAc
+     * @name DkcclTermIndex.createDkcclFieldsAc
      * @method
      */
     that.createDkcclFieldsAc = function( index, map ) {
@@ -190,10 +190,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsAg( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsAg( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsAg
+     * @name DkcclTermIndex.createDkcclFieldsAg
      * @method
      */
     that.createDkcclFieldsAg = function( index, map ) {
@@ -274,10 +274,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsAr( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsAr( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsAr
+     * @name DkcclTermIndex.createDkcclFieldsAr
      * @method
      */
     that.createDkcclFieldsAr = function( index, map ) {
@@ -299,10 +299,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsAu( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsAu( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsAu
+     * @name DkcclTermIndex.createDkcclFieldsAu
      * @method
      */
     that.createDkcclFieldsAu = function( index, map ) {
@@ -1363,10 +1363,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsFv( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsFv( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsFv
+     * @name DkcclTermIndex.createDkcclFieldsFv
      * @method
      */
     that.createDkcclFieldsFv = function( index, map ) {
@@ -1480,10 +1480,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIb( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIb( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIb
+     * @name DkcclTermIndex.createDkcclFieldsIb
      * @method
      */
     that.createDkcclFieldsIb = function( index, map ) {
@@ -1527,10 +1527,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIc( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIc( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIc
+     * @name DkcclTermIndex.createDkcclFieldsIc
      * @method
      */
     that.createDkcclFieldsIc = function( index, map ) {
@@ -1564,10 +1564,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsId( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsId( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsId
+     * @name DkcclTermIndex.createDkcclFieldsId
      * @method
      */
     that.createDkcclFieldsId = function( index, map ) {
@@ -1588,10 +1588,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIm( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIm( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIm
+     * @name DkcclTermIndex.createDkcclFieldsIm
      * @method
      */
     that.createDkcclFieldsIm = function( index, map ) {
@@ -1612,10 +1612,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIn( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIn( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIn
+     * @name DkcclTermIndex.createDkcclFieldsIn
      * @method
      */
     that.createDkcclFieldsIn = function( index, map ) {
@@ -1724,10 +1724,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIp( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIp( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIp
+     * @name DkcclTermIndex.createDkcclFieldsIp
      * @method
      */
     that.createDkcclFieldsIp = function( index, map ) {
@@ -1748,10 +1748,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIr( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIr( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIr
+     * @name DkcclTermIndex.createDkcclFieldsIr
      * @method
      */
     that.createDkcclFieldsIr = function( index, map ) {
@@ -1772,10 +1772,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIs( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIs( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIs
+     * @name DkcclTermIndex.createDkcclFieldsIs
      * @method
      */
     that.createDkcclFieldsIs = function( index, map ) {
@@ -1945,10 +1945,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermsFieldsIx( index, map )
+     * @syntax DkcclTermIndex.createDkcclFieldsIx( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclTermsFieldsIx
+     * @name DkcclTermIndex.createDkcclFieldsIx
      * @method
      */
     that.createDkcclFieldsIx = function( index, map ) {
@@ -4353,10 +4353,10 @@ var DkcclTermIndex = function() {
      *
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclFieldsWw(( index, map ))
+     * @syntax DkcclTermIndex.createDkcclFieldsWw( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
-     * @name DkcclTermIndex.createDkcclwFieldsWw
+     * @name DkcclTermIndex.createDkcclFieldsWw
      * @method
      */
     that.createDkcclFieldsWw = function( index, map ) {
