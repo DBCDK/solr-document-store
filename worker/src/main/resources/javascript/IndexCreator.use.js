@@ -55,8 +55,10 @@ var IndexCreator = function( ) {
         // because all other modules expect to be able to
         // use root based XPath expressions
         var commonDataNode = XPath.selectNode( "/*/foxml:datastream[ @ID = 'commonData' ]/foxml:datastreamVersion/foxml:xmlContent/ting:container[ 1 ]", foXml );
-        // if document had no commonData stream, leave commonData undefined
+        /
+        // / if document had no commonData stream, leave commonData undefined
         var commonDataXml = ( commonDataNode === undefined ) ? undefined : XmlUtil.createDocumentFromElement( commonDataNode );
+
         var systemRelationsXml = XmlUtil.createDocumentFromElement( XPath.selectNode( "/*/foxml:datastream[ @ID = 'RELS-SYS' ]/foxml:datastreamVersion/foxml:xmlContent/rdf:RDF[ 1 ]", foXml ) );
         var dcDataXml = XmlUtil.createDocumentFromElement( XPath.selectNode( "/*/foxml:datastream[ @ID = 'DC' ]/foxml:datastreamVersion/foxml:xmlContent/oai_dc:dc[ 1 ]", foXml ) );
 
@@ -80,6 +82,7 @@ var IndexCreator = function( ) {
         var hasLocalDataStream = false;
 
         var elements = XPath.select( "/*/foxml:datastream", foXml );
+
         for ( var i = 0 ; i < elements.length; i++ ) {
             var child = elements[ i ];
             var streamId = XmlUtil.getAttribute( child, "ID" );
@@ -98,19 +101,21 @@ var IndexCreator = function( ) {
                 var streamSubmitterUseLocaldataStream = IndexCreator.useLocaldataStream( libraryRuleHandler, streamSubmitter );
                 if ( streamSubmitterUseLocaldataStream ) {
                     var localData = XPath.selectNode( "foxml:datastreamVersion/foxml:xmlContent/ting:localData[ 1 ]", child );
-                    if (localData === undefined) {
-                        // localData node is not present for local datastreams that have been marked deleted
-                        // and updated with <empty> content
-                        indexingData = undefined; 
-                    } else  {
-                        indexingData = XmlUtil.createDocumentFromElement( localData );
-                    }
-                    solrId = IndexCreator.getSolrId( pid, streamId.replace(/localData./, "") );
+                    // localData node is not present for local datastreams that have been marked deleted
+                    // and updated with <empty> content
+                    indexingData = ( undefined === localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
+                    // if ( undefined === localData ) {
+                    //     // localData node is not present for local datastreams that have been marked deleted
+                    //     // and updated with <empty> content
+                    //     indexingData = undefined;
+                    // } else  {
+                    //     indexingData = XmlUtil.createDocumentFromElement( localData );
+                    // }
+                    solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
                     streamDate = XPath.selectAttribute( "foxml:datastreamVersion/@CREATED", child );
-                }
-                else {
+                } else {
                     indexingData = commonDataXml;
-                    solrId = IndexCreator.getSolrId( pid, streamId.replace(/localData./, "") );
+                    solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
                     streamDate = XPath.selectAttribute("/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml);
                 }
             } else {
@@ -120,12 +125,12 @@ var IndexCreator = function( ) {
 
             Log.debug( "Stream solrid ", solrId );
 
-            if ( solrId !== "" ) {
+            if ( "" !== solrId ) {
                 IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler );
             }
         }
 
-        if ( hasLocalDataStream === false ) {
+        if ( false === hasLocalDataStream ) {
             indexingData = commonDataXml;
             solrId = IndexCreator.getSolrId( pid, pid.replace( /(.*):.*/, "$1") );
             streamDate = XPath.selectAttribute( "/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml );
@@ -366,7 +371,7 @@ var IndexCreator = function( ) {
                 agencyId,
                 Packages.dk.dbc.openagency.client.LibraryRuleHandler.Rule.USE_LOCALDATA_STREAM );
 
-        Log.debug( "IndexCreator.useLocaldataStream for agency ", agencyId,  " is ", useLocaldataStream );
+        Log.info( "IndexCreator.useLocaldataStream for agency ", agencyId,  " is ", useLocaldataStream );
 
         Log.trace( "Leaving: IndexCreator.useLocaldataStream" );
 
