@@ -55,7 +55,7 @@ var IndexCreator = function( ) {
         // because all other modules expect to be able to
         // use root based XPath expressions
         var commonDataNode = XPath.selectNode( "/*/foxml:datastream[ @ID = 'commonData' ]/foxml:datastreamVersion/foxml:xmlContent/ting:container[ 1 ]", foXml );
-        /
+
         // / if document had no commonData stream, leave commonData undefined
         var commonDataXml = ( commonDataNode === undefined ) ? undefined : XmlUtil.createDocumentFromElement( commonDataNode );
 
