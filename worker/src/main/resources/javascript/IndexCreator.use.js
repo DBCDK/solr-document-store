@@ -76,8 +76,6 @@ var IndexCreator = function( ) {
 
         var state = XPath.selectAttribute( "/*/foxml:objectProperties/foxml:property[ @NAME = 'info:fedora/fedora-system:def/model#state' ][ 1 ]/@VALUE", foXml );
 
-        var indexingData;
-
         var solrId = "";
         var hasLocalDataStream = false;
 
@@ -99,24 +97,18 @@ var IndexCreator = function( ) {
                 var streamSubmitter = matches[ 1 ];
 
                 var streamSubmitterUseLocaldataStream = IndexCreator.useLocaldataStream( libraryRuleHandler, streamSubmitter );
+                var indexingData;
                 if ( streamSubmitterUseLocaldataStream ) {
                     var localData = XPath.selectNode( "foxml:datastreamVersion/foxml:xmlContent/ting:localData[ 1 ]", child );
                     // localData node is not present for local datastreams that have been marked deleted
-                    // and updated with <empty> content
+                    // and updated with <empty> content:
                     indexingData = ( undefined === localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
-                    // if ( undefined === localData ) {
-                    //     // localData node is not present for local datastreams that have been marked deleted
-                    //     // and updated with <empty> content
-                    //     indexingData = undefined;
-                    // } else  {
-                    //     indexingData = XmlUtil.createDocumentFromElement( localData );
-                    // }
                     solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
                     streamDate = XPath.selectAttribute( "foxml:datastreamVersion/@CREATED", child );
                 } else {
                     indexingData = commonDataXml;
                     solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
-                    streamDate = XPath.selectAttribute("/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml);
+                    streamDate = XPath.selectAttribute( "/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml );
                 }
             } else {
                 // Skip DC, commonData and relations streams
@@ -177,7 +169,7 @@ var IndexCreator = function( ) {
         var bibliographicRecordId = pid.replace( /^.*:/, "" ).replace( /__[0-9]+/, "" );
 
         try {
-            if ( localDataState !== "A" || state !== "Active" ) {
+            if ( "A" !== localDataState || "Active" !== state  ) {
                 Log.debug( "Skip indexing and delete ", solrId );
                 solrCallback.deleteDocument( solrId, streamDate, bibliographicRecordId );
             } else {
@@ -186,11 +178,13 @@ var IndexCreator = function( ) {
                 index.pushField( "rec.fedoraStreamDate", streamDate );
 
                 AdminIndex.createRecCollectionIdentifier( indexingData, index );
+
                 if ( solrId.match( /katalog$/ ) ) {
                     FacetIndex.createFieldsLocalData( index, indexingData );
                     TermIndex.createAcquisitionDate( index, indexingData );
                     SortIndex.createSortLocalAcquisitionDate( index, indexingData );
                 }
+
                 Log.debug( "Adding indexed solr document ", solrId );
                 solrCallback.addDocument( index );
             }
@@ -224,7 +218,7 @@ var IndexCreator = function( ) {
 
         if ( ! XPath.select( "boolean( /*/rdf:Description/fedora:isPrimaryBibObjectFor )", systemRelationsXml ) ) {
             var unit = XPath.selectText( "/*/rdf:Description/fedora:isMemberOfUnit", systemRelationsXml );
-            if ( unit === "" ) {
+            if ( "" === unit ) {
                 throw "Record '" + pid + "' is not member of a unit";
             }
             var systemRelations = String( Repository.getDatastreamContent( unit, "RELS-SYS" ) );
