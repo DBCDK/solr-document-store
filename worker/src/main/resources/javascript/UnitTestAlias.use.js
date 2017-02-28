@@ -21,7 +21,7 @@ UnitTest.addFixture( "Alias.getAlias", function( ) {
 
 UnitTest.addFixture( "Alias.getAlias", function( ) {
 
-    xml = XmlUtil.fromString(
+    var xml = XmlUtil.fromString(
         '<ting:container xmlns:ting="http://www.dbc.dk/ting">' +
             '<adminData>' +
                 '<libraryType>research</libraryType>' +
@@ -31,7 +31,9 @@ UnitTest.addFixture( "Alias.getAlias", function( ) {
         '</ting:container>'
     );
 
-    Assert.exception( "Get indexing alias (invalid)", 'Alias.getAlias( xml );' );
+    var error = "Alias: 'ubf' is not valid";
 
-    delete this.xml;
+    Assert.exception( "Get indexing alias (invalid)", function( ) {
+        Alias.getAlias( xml ) }, error );
+
 } );

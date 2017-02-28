@@ -16,8 +16,6 @@ EXPORTED_SYMBOLS = [ 'Alias' ];
 
 var Alias = function( ) {
 
-    var that = {};
-
     /**
      * Method that retrieves the indexing alias.
      * 
@@ -29,7 +27,7 @@ var Alias = function( ) {
      * @name Alias.getAlias
      * @method
      */
-    that.getAlias = function( commonDataXml ) {
+    function getAlias( commonDataXml ) {
 
         var indexingAlias = XPath.selectText( "/*/adminData/indexingAlias", commonDataXml );
 
@@ -46,9 +44,11 @@ var Alias = function( ) {
                 return "";
                 break;
         }
-    };
+    }
 
-    return that;
+    return {
+        getAlias: getAlias
+    };
 
 }( );
 
