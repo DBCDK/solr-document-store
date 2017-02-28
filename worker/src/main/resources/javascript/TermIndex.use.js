@@ -285,7 +285,7 @@ var TermIndex = function( ) {
 
         if ( undefined !== record ) {
             DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsPo, index, record, "term.mainCreator" );
-        } else  {
+        } else {
             XPath.forEachNodeText("/*/dkabm:record/dc:creator", commonDataXml, function(text) {
                 index.pushField( "term.mainCreator", text );
             } );
@@ -391,19 +391,18 @@ var TermIndex = function( ) {
                 } );
             } );
             map.put( "041", function( field ) {
-                field.eachSubField( /l|a|p/, function( field, subField ) {
+                field.eachSubField( /a|p/, function( field, subField ) {  //2017-02-28: LSK removed subfield 'l' as no such subfield exist in field 041
                     var language = subField.value;
                     index.pushField( "term.language", language );
                     index.pushField( "term.language", Tables.languages( language) );
                 } );
             } );
             record.eachFieldMap( map );
-        }
-        else {
-            XPath.forEachNodeText("/*/dkabm:record/dc:language[ @xsi:type = 'dcterms:ISO639-2' ]", commonDataXml, function(text) {
+        } else {
+            XPath.forEachNodeText( "/*/dkabm:record/dc:language[ @xsi:type = 'dcterms:ISO639-2' ]", commonDataXml, function( text ) {
                 index.pushField( "term.language", text );
                 index.pushField( "term.language", Tables.languages( text ) );
-            });
+            } );
         }
 
         Log.trace( "Leaving: TermIndex.createLanguage method" );
@@ -789,9 +788,9 @@ var TermIndex = function( ) {
 
         Log.trace( "Entering: TermIndex.createDate method" );
 
-        XPath.forEachNodeText("/*/dkabm:record/dc:date", commonDataXml, function(text) {
+        XPath.forEachNodeText( "/*/dkabm:record/dc:date", commonDataXml, function( text ) {
             index.pushField( "term.date", text );
-        });
+        } );
 
         Log.trace( "Leaving: TermIndex.createDate method" );
 
