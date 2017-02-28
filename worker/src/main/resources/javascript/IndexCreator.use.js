@@ -184,7 +184,7 @@ var IndexCreator = function( ) {
                     TermIndex.createAcquisitionDate( index, indexingData );
                     SortIndex.createSortLocalAcquisitionDate( index, indexingData );
                 }
-
+                
                 Log.debug( "Adding indexed solr document ", solrId );
                 solrCallback.addDocument( index );
             }

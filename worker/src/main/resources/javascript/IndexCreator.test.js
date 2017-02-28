@@ -1315,7 +1315,7 @@ xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-
     Assert.equalValue( "Delete empty datastream. 1 document must be deleted", deleteDoc.length, 1 );
     Assert.equalValue( "Delete empty datastream. Document for localData.710100-katalog in 870970-basis:41013176 must be deleted",
             deleteDoc[0], "870970-basis:41013176-710100-katalog" );
-
+    
 
 } );
 
