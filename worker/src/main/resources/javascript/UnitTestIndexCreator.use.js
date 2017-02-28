@@ -2,23 +2,23 @@ use( "IndexCreator" );
 use( "UnitTest" );
 
 // Mock Repository function required for AdminIndex.createWorkId
-Repository.hasObject = function (id) {
+Repository.hasObject = function ( id ) {
     return false;
 };
 
 UnitTest.addFixture( "IndexCreator.prepareData 1", function( ) {
 
-    documents = [ ];
-    deleteDoc = [ ];
+    var documents = [ ];
+    var deleteDoc = [ ];
 
-    callBack = {
+    var callBack = {
         addDocument: function (doc) { documents.push( doc ); },
         deleteDocument: function (doc) { deleteDoc.push( doc ); }
     };
     
-    libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
+    var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
 
-    foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:27681794" \
+    var foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:27681794" \
     xmlns:foxml="info:fedora/fedora-system:def/foxml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
     xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">\
 <foxml:objectProperties>\
@@ -312,34 +312,28 @@ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">\
 </foxml:datastream>\
 </foxml:digitalObject>';
 
-    pid = "870970-basis:27681794";
+    var pid = "870970-basis:27681794";
 
     IndexCreator.prepareData( pid, foXml, libraryRuleHandlerMock, callBack );
 
-    Assert.equal( "1 document added", 'documents.length', 1 );
+    Assert.equalValue( "1 document added", documents.length, 1 );
 
-    delete this.foXml;
-    delete this.pid;
-    delete this.documents;
-    delete this.deleteDoc;
-    delete this.callBack;
-    delete this.libraryRuleHandlerMock;
 
 } );
 
 UnitTest.addFixture( "IndexCreator.prepareData 2", function( ) {
 
-    documents = [ ];
-    deleteDoc = [ ];
+    var documents = [ ];
+    var deleteDoc = [ ];
 
-    callBack = {
+    var callBack = {
         addDocument: function ( doc ) { documents.push( doc ); },
         deleteDocument: function ( doc ) { deleteDoc.push( doc ); }
     };
     
-    libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
+    var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
 
-    foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:29189129" xmlns:foxml="info:fedora/fedora-system:def/foxml#" \
+    var foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:29189129" xmlns:foxml="info:fedora/fedora-system:def/foxml#" \
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">\
 <foxml:objectProperties>\
 <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>\
@@ -681,33 +675,26 @@ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">\
 </foxml:datastream>\
 </foxml:digitalObject>';
 
-    pid = "870970-basis:29189129";
+    var pid = "870970-basis:29189129";
 
     IndexCreator.prepareData( pid, foXml, libraryRuleHandlerMock, callBack );
 
-    Assert.equal( "1 document added", 'documents.length', 1 );
-
-    delete this.foXml;
-    delete this.pid;
-    delete this.documents;
-    delete this.deleteDoc;
-    delete this.callBack;
-    delete this.libraryRuleHandlerMock;
+    Assert.equalValue( "1 document added", documents.length, 1 );
 
 } );
 
 
 UnitTest.addFixture( "IndexCreator.prepareData 3", function( ) {
 
-    documents = [ ];
-    deleteDoc = [ ];
+    var documents = [ ];
+    var deleteDoc = [ ];
 
-    callBack = {
+    var callBack = {
         addDocument: function ( doc ) { documents.push( doc ); },
         deleteDocument: function ( doc ) { deleteDoc.push( doc ); }
     };
 
-    libraryRuleHandlerMock = { 
+    var libraryRuleHandlerMock = {
         isAllowed: function( agencyId, rule ) { 
             if( agencyId === "710100" ) {
                 return true;
@@ -717,7 +704,7 @@ UnitTest.addFixture( "IndexCreator.prepareData 3", function( ) {
         } 
     };
 
-    foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:41013176" xmlns:foxml="info:fedora/fedora-system:def/foxml#" \
+    var foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:41013176" xmlns:foxml="info:fedora/fedora-system:def/foxml#" \
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# \
     http://www.fedora.info/definitions/1/0/foxml1-1.xsd">\
 <foxml:objectProperties>\
@@ -910,35 +897,28 @@ xmlns:oss="http://oss.dbc.dk/ns/osstypes" xmlns:ting="http://www.dbc.dk/ting" xm
 </foxml:datastream>\
 </foxml:digitalObject>';
 
-    pid = "870970-basis:41013176";
+    var pid = "870970-basis:41013176";
 
     IndexCreator.prepareData( pid, foXml, libraryRuleHandlerMock, callBack );
 
-    Assert.equal( "2 documents added", 'documents.length', 2 );
-
-    delete this.foXml;
-    delete this.pid;
-    delete this.documents;
-    delete this.deleteDoc;
-    delete this.callBack;
-    delete this.libraryRuleHandlerMock;
+    Assert.equalValue( "2 documents added", documents.length, 2 );
 
 } );
 
 
 UnitTest.addFixture( "IndexCreator.prepareData 4", function( ) {
 
-    documents = [ ];
-    deleteDoc = [ ];
+    var documents = [ ];
+    var deleteDoc = [ ];
 
-    callBack = {
+    var callBack = {
         addDocument: function (doc) { documents.push( doc ); },
         deleteDocument: function (doc) { deleteDoc.push( doc ); }
     };
     
-    libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
+    var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
 
-    foXml = '<foxml:digitalObject VERSION="1.1" PID="872530-katalog:27681794" \
+    var foXml = '<foxml:digitalObject VERSION="1.1" PID="872530-katalog:27681794" \
     xmlns:foxml="info:fedora/fedora-system:def/foxml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
     xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">\
 <foxml:objectProperties>\
@@ -1189,34 +1169,27 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http:/
 </foxml:datastream>\
 </foxml:digitalObject>';
 
-    pid = "872530-katalog:27681794";
+    var pid = "872530-katalog:27681794";
 
     IndexCreator.prepareData( pid, foXml, libraryRuleHandlerMock, callBack );
 
-    Assert.equal( "Prepare Data 4: 1 document added although there is no localData stream", 'documents.length', 1 );
-
-    delete this.foXml;
-    delete this.pid;
-    delete this.documents;
-    delete this.deleteDoc;
-    delete this.callBack;
-    delete this.libraryRuleHandlerMock;
+    Assert.equalValue( "Prepare Data 4: 1 document added although there is no localData stream", documents.length, 1 );
 
 } );
 
 UnitTest.addFixture( "IndexCreator.prepareData delete from empty local datastream (bug 19735)", function( ) {
 
-    documents = [ ];
-    deleteDoc = [ ];
+    var documents = [ ];
+    var deleteDoc = [ ];
 
-    callBack = {
+    var callBack = {
         addDocument: function (doc) { documents.push( doc ); },
         deleteDocument: function (doc) { deleteDoc.push( doc ); }
     };
 
-    libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
+    var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return true; } };
 
-    foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:41013176" xmlns:foxml="info:fedora/fedora-system:def/foxml#" \
+    var foXml = '<foxml:digitalObject VERSION="1.1" PID="870970-basis:41013176" xmlns:foxml="info:fedora/fedora-system:def/foxml#" \
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">\
 <foxml:objectProperties>\
 <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>\
@@ -1335,7 +1308,7 @@ xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-
 </foxml:datastream>\
 </foxml:digitalObject>';
 
-    pid = "870970-basis:41013176";
+    var pid = "870970-basis:41013176";
 
     IndexCreator.prepareData( pid, foXml, libraryRuleHandlerMock, callBack );
 
@@ -1343,12 +1316,6 @@ xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-
     Assert.equalValue( "Delete empty datastream. Document for localData.710100-katalog in 870970-basis:41013176 must be deleted",
             deleteDoc[0], "870970-basis:41013176-710100-katalog" );
 
-    delete this.foXml;
-    delete this.pid;
-    delete this.documents;
-    delete this.deleteDoc;
-    delete this.callBack;
-    delete this.libraryRuleHandlerMock;
 
 } );
 
