@@ -244,7 +244,9 @@ UnitTest.addFixture( "AdminIndex.createRecId", function( ) {
         value: "775100-katalog:28737971"
     } ];
 
-    Assert.equalValue( "Create rec.id for basis record with local data from library", AdminIndex.createRecId( xml, pid, index, solrId, libraryRuleHandlerMock ), indexOut );
+    var actual = AdminIndex.createRecId( xml, pid, index, solrId, libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create rec.id for basis record with local data from library", actual, indexOut );
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '\
@@ -289,7 +291,9 @@ UnitTest.addFixture( "AdminIndex.createRecId", function( ) {
         value: "870970-basis:28737971-870970-basis"
     } ];
 
-    Assert.equalValue( "Create rec.id for basis record", AdminIndex.createRecId( xml, pid, index, solrId, libraryRuleHandlerMock ), indexOut );
+    actual = AdminIndex.createRecId( xml, pid, index, solrId, libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create rec.id for basis record", actual, indexOut );
 
 
     index = Index.newIndex();
@@ -324,8 +328,9 @@ UnitTest.addFixture( "AdminIndex.createRecId", function( ) {
         value: "150046-arkibas:630-01A2-150046-arkibas"
     } ];
 
-    Assert.equalValue( "Create rec.id for record with hyphen as part of record identifier",
-        AdminIndex.createRecId( xml, pid, index, solrId, libraryRuleHandlerMock ), indexOut );
+    actual = AdminIndex.createRecId( xml, pid, index, solrId, libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create rec.id for record with hyphen as part of record identifier", actual, indexOut );
 
 
 } );
@@ -713,8 +718,10 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 5", function( ) {
         name: "rec.childDocId",
         value: "870970-forsk"
     } ];
-    Assert.equalValue( "Create childDocId from research library",
-        AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock ), indexOut );
+
+    var actual = AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create childDocId from research library", actual, indexOut );
 
 } );
 
@@ -758,43 +765,53 @@ xmlns:ac="http://biblstandard.dk/ac/namespace/">\
         name: "rec.childDocId",
         value: "150021-fjern"
     } ];
-    Assert.equalValue( "Create childDocId from 002a", AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock ), indexOut );
+
+    var actual = AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create childDocId from 002a", actual, indexOut );
 
 } );
 
-UnitTest.addFixture( "AdminIndex.__makeDate", function(){
-    Log.debug("UnitTest makeDate");
+UnitTest.addFixture( "AdminIndex.__makeDate", function( ) {
+
+    var testName = "makeDate with only year given";
     var input = "2016";
-    var output = "2016-01-01T00:00:00Z";
+    var expected = "2016-01-01T00:00:00Z";
+    var actual = AdminIndex.__makeDate( input );
 
-    Assert.equalValue("makeDate with only year given", AdminIndex.__makeDate( input ), output );
+    Assert.equalValue( testName, actual, expected );
 
+
+    testName = "return empty string if no date given";
     input = "20";
-    output = "";
+    expected = "";
+    actual = AdminIndex.__makeDate( input );
 
-    Assert.equalValue("return empty string if no date given", AdminIndex.__makeDate( input ), output );
+    Assert.equalValue( testName, actual, expected );
 
 
+    testName = "makeDate with valid date";
     input = "20160131";
-    output = "2016-01-31T00:00:00Z";
+    expected = "2016-01-31T00:00:00Z";
+    actual = AdminIndex.__makeDate( input );
 
-    Assert.equalValue("makeDate with valid date", AdminIndex.__makeDate( input ), output );
+    Assert.equalValue( testName, actual, expected );
 
+
+    testName = "makeDate with invalid date";
     input = "20150229";
-    output = "2015-03-01T00:00:00Z";
+    expected = "2015-03-01T00:00:00Z";
+    actual = AdminIndex.__makeDate( input );
 
-    Assert.equalValue("makeDate with invalid date", AdminIndex.__makeDate( input ), output );
+    Assert.equalValue( testName, actual, expected );
 
+
+    testName = "makeDate with input date specified down to seconds";
     input = "20100611153141";
-    output = "2010-06-11T00:00:00Z";
-    Assert.equalValue("makeDate with input date specified down to seconds", AdminIndex.__makeDate( input ), output );
+    expected = "2010-06-11T00:00:00Z";
+    actual = AdminIndex.__makeDate( input );
 
+    Assert.equalValue( testName, actual, expected );
 
-
-
-
-
-
-
-});
+} );
 

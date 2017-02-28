@@ -19,8 +19,6 @@ EXPORTED_SYMBOLS = [ 'AdminIndex' ];
  */
 var AdminIndex = function( ) {
 
-    var that = {};
-
     /**
      * Method that creates administrative index fields.
      *
@@ -38,9 +36,9 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createAdminFields
      * @method
      */
-    that.createAdminFields = function( index, commonDataXml, systemRelationsXml, pid, libraryRuleHandler, solrId ) {
+    function createAdminFields( index, commonDataXml, systemRelationsXml, pid, libraryRuleHandler, solrId ) {
 
-        Log.trace( "Entering: createAdminFields method" );
+        Log.trace( "Entering: AdminIndex.createAdminFields method" );
 
         var submitter = pid.replace( /\-.*/, "" );
         var format = pid.replace( /.*\-(.*)\:.*/, "$1" );
@@ -59,11 +57,11 @@ var AdminIndex = function( ) {
         AdminIndex.createUnitIsPrimaryObject( systemRelationsXml, index );
         AdminIndex.createChildDocId( commonDataXml, index, libraryRuleHandler );
 
-        Log.trace( "Leaving: createAdminFields method" );
+        Log.trace( "Leaving: AdminIndex.createAdminFields method" );
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates rec.workId index fields from input data.
@@ -77,7 +75,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createWorkId
      * @method
      */
-    that.createWorkId = function( systemRelationsXml, index ) {
+    function createWorkId( systemRelationsXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createWorkId method" );
 
@@ -87,13 +85,13 @@ var AdminIndex = function( ) {
         unit = XPath.selectText("/*/rdf:Description/fedora:isMemberOfUnit", systemRelationsXml);
 
         // If systemRelationsXml is a unit objects stream, unit id is in "Description@about" attribute
-        if ( unit === "" ) {
-            var about = XPath.selectAttribute("/*/rdf:Description/@rdf:about", systemRelationsXml);
+        if ( "" === unit ) {
+            var about = XPath.selectAttribute( "/*/rdf:Description/@rdf:about", systemRelationsXml );
             unit = String( about ).replace( /info:fedora\//, "" );
         }
 
-        if (unit !== "") {
-            if ( Repository.hasObject(unit) ) {
+        if ( "" !== unit ) {
+            if ( Repository.hasObject( unit ) ) {
                 var workRelations = Repository.getSysRelationsOfType( unit, "info:fedora/isMemberOfWork" );
                 if ( workRelations.length > 0 ) {
                     var work = workRelations[0].object;
@@ -104,7 +102,7 @@ var AdminIndex = function( ) {
         Log.trace( "Leaving: AdminIndex.createWorkId method" );
 
         return index;
-    };
+    }
 
     /**
      * Method that creates rec.unitId index fields from input data.
@@ -120,7 +118,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createUnitId
      * @method
      */
-    that.createUnitId = function( systemRelationsXml, index ) {
+    function createUnitId( systemRelationsXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createUnitId method" );
 
@@ -141,7 +139,7 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates unit.primaryObject index fields from input data.
@@ -157,7 +155,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createUnitPrimaryObject
      * @method
      */
-    that.createUnitPrimaryObject = function( systemRelationsXml, index ) {
+    function createUnitPrimaryObject( systemRelationsXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createUnitPrimaryObject method" );
 
@@ -168,11 +166,12 @@ var AdminIndex = function( ) {
         } else {
             index.pushField( "unit.primaryObject", String( about ).replace( /info:fedora\//, "" ) );
         }
+
         Log.trace( "Leaving: AdminIndex.createUnitPrimaryObject method" );
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates unit.isPrimaryObject index fields from input data.
@@ -188,7 +187,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createUnitIsPrimaryObject
      * @method
      */
-    that.createUnitIsPrimaryObject = function( systemRelationsXml, index ) {
+    function createUnitIsPrimaryObject( systemRelationsXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createUnitIsPrimaryObject method" );
 
@@ -202,7 +201,7 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates rec.collectionIdentifier index fields from input data.
@@ -217,7 +216,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createRecCollectionIdentifier
      * @method
      */
-    that.createRecCollectionIdentifier = function( inputXml, index ) {
+    function createRecCollectionIdentifier( inputXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createRecCollectionIdentifier method" );
 
@@ -229,7 +228,7 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates rec.id index fields from input data.
@@ -247,7 +246,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createRecId
      * @method
      */
-    that.createRecId = function( inputXml, pid, index, solrId, libraryRuleHandler ) {
+    function createRecId( inputXml, pid, index, solrId, libraryRuleHandler ) {
 
         Log.trace( "Entering: AdminIndex.createRecId method" );
 
@@ -281,7 +280,7 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates rec.bibliographicRecordId index fields from input data.
@@ -296,7 +295,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createRecBibliographicRecordId
      * @method
      */
-    that.createRecBibliographicRecordId = function( pid, index ) {
+    function createRecBibliographicRecordId( pid, index ) {
 
         Log.trace( "Entering: AdminIndex.createRecBibliographicRecordId method" );
 
@@ -307,20 +306,23 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
 
 
     //internal function for creating dates from a string of numbers
-    that.__makeDate = function( number ) {
+    function __makeDate( number ) {
+
         Log.trace( "Entering AdminIndex.__makeDate" );
+
         date = number;
         if ( date.length > 8 ) {
             date = date.slice( 0, 8 );
         }
+
         var correctedDate = DateUtil.correctDate( date );
 
-        if ( correctedDate === "" ) {
-            if ( date.length === 4 && /\d{4}/.test( date ) ) {
+        if ( "" === correctedDate ) {
+            if ( 4 === date.length && /\d{4}/.test( date ) ) {
                 correctedDate = date + "0101";
             } else {
                 Log.warn( "Cannot create a date from input number: " + number );
@@ -329,9 +331,11 @@ var AdminIndex = function( ) {
             }
         }
         var date = String( correctedDate ).replace( /(\d{4})(\d{2})(\d{2}).*/, "$1-$2-$3" ) + "T00:00:00Z";
+
         Log.trace( "Leaving AdminIndex.__makeDate" );
+
         return date;
-    };
+    }
 
     /**
      * Method that creates rec.createdDate index fields from marc field 001*d.
@@ -345,15 +349,15 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createRecCreatedDate
      * @method
      */
-    that.createRecCreatedDate = function( inputXml, index ) {
+    function createRecCreatedDate( inputXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createRecCreatedDate method" );
 
         // Select first date field. Ignore others
         var text = XPath.selectText("/*/marcx:collection/marcx:record[@type='Bibliographic']/marcx:datafield[@tag='001']/marcx:subfield[@code='d'][1]", inputXml);
-        if (text !== "") {
+        if ( "" !== text ) {
             var date = AdminIndex.__makeDate(text);
-            if( date !== "" ) {
+            if ( "" !== date ) {
                 index.pushField( "rec.createdDate", date );
             } else {
                 Log.warn( "Cannot create index field rec.createdDate from "+ text );
@@ -364,7 +368,7 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
 
     /**
      * Method that creates rec.modifiedDate index fields from marc field 001*c or 001*d.
@@ -378,7 +382,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createRecModifiedDate
      * @method
      */
-    that.createRecModifiedDate = function( inputXml, index ) {
+    function createRecModifiedDate( inputXml, index ) {
 
         Log.trace( "Entering: AdminIndex.createRecModifiedDate method" );
 
@@ -412,7 +416,9 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
+
+
     /**
      * Method that creates childDocId
      *
@@ -426,7 +432,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createChildDocId
      * @method
      */
-    that.createChildDocId = function( inputXml, index, libraryRuleHandler ) {
+    function createChildDocId( inputXml, index, libraryRuleHandler ) {
 
         Log.trace( "Entering: AdminIndex.createChildDocId method" );
 
@@ -457,7 +463,7 @@ var AdminIndex = function( ) {
 
         return index;
 
-    };
+    }
     
     /**
      * Get use_holdings_item switch for agency in VIP
@@ -470,7 +476,7 @@ var AdminIndex = function( ) {
      * @return {boolean} true if use_holdings_item switch is set for agency
      * @name AdminIndex.useHoldingsItem
      */
-    that.useHoldingsItem = function( libraryRuleHandler, agencyId ) {
+    function useHoldingsItem( libraryRuleHandler, agencyId ) {
         var useHoldingsItem = libraryRuleHandler.isAllowed(
                 agencyId,
                 Packages.dk.dbc.openagency.client.LibraryRuleHandler.Rule.USE_HOLDINGS_ITEM );
@@ -478,8 +484,22 @@ var AdminIndex = function( ) {
         Log.debug( "AdminIndex.useHoldingsItem for agency ", agencyId,  " is ", useHoldingsItem );
 	
         return useHoldingsItem;
-    };
+    }
 
-    return that;
+    return {
+        createAdminFields: createAdminFields,
+        createWorkId: createWorkId,
+        createUnitId: createUnitId,
+        createUnitPrimaryObject: createUnitPrimaryObject,
+        createUnitIsPrimaryObject: createUnitIsPrimaryObject,
+        createRecCollectionIdentifier: createRecCollectionIdentifier,
+        createRecId: createRecId,
+        createRecBibliographicRecordId: createRecBibliographicRecordId,
+        __makeDate: __makeDate,
+        createRecCreatedDate: createRecCreatedDate,
+        createRecModifiedDate: createRecModifiedDate,
+        createChildDocId: createChildDocId,
+        useHoldingsItem: useHoldingsItem
+    };
 
 }( );
