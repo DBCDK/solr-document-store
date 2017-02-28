@@ -255,7 +255,7 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
+        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
         '<ac:identifier>29392358|870970</ac:identifier>' +
@@ -289,13 +289,16 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         '</marcx:record>' +
         '</marcx:collection>' +
         '</ting:container>' );
+
     var indexOut = [ {
         name: "facet.language",
         value: "Dansk"
     } ];
 
-    Assert.equalValue( "Create facet.language for marc record based on 008*l",
-        FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    var testName = "Create facet.language for marc record based on 008*l";
+
+    Assert.equalValue( testName, actual, indexOut );
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '<ting:container ' +
@@ -304,7 +307,6 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -371,10 +373,13 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         '</marcx:record>' +
         '</marcx:collection>' +
         '</ting:container>' );
+
     indexOut = [];
 
-    Assert.equalValue( "Do not create facet.language index if language code is undefined",
-        FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Do not create facet.language index if language code is undefined";
+
+    Assert.equalValue( testName, actual, indexOut );
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '<ting:container ' +
@@ -401,8 +406,11 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         value: "F\u00E6r\u00f8sk"
     }];
 
-    Assert.equalValue( "Create facet.language index marc record with multiple language in 41*p",
-        FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Create facet.language index marc record with multiple language in 41*p";
+
+    Assert.equalValue( testName, actual, indexOut );
+
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '<ting:container ' +
@@ -433,9 +441,10 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         value: "Engelsk"
     } ];
 
-    Assert.equalValue( "Create facet.language index marc record with multiple language in 41*a",
-        FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Create facet.language index marc record with multiple language in 41*a";
 
+    Assert.equalValue( testName, actual, indexOut );
 
 
     index = Index.newIndex();
@@ -451,14 +460,15 @@ UnitTest.addFixture( "FacetIndex.createLanguage", function() {
         '</marcx:collection>' +
         '</ting:container>' );
 
-    indexOut = [{
+    indexOut = [ {
         name: "facet.language",
         value: "Blandede sprog"
-    }];
+    } ];
 
-    Assert.equalValue( "Create facet.language index marc record with mul in 008l but no 041 a or p",
-        FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLanguage( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Create facet.language index marc record with mul in 008l but no 041 a or p";
 
+    Assert.equalValue( testName, actual, indexOut );
 
 } );
 
@@ -636,7 +646,6 @@ UnitTest.addFixture( "FacetIndex.createAcSource", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -677,7 +686,6 @@ UnitTest.addFixture( "FacetIndex.createSubject", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -725,6 +733,7 @@ UnitTest.addFixture( "FacetIndex.createSubject", function() {
         '</marcx:record>' +
         '</marcx:collection>' +
         '</ting:container>' );
+
     var indexOut = [ {
         name: "facet.subject",
         value: "Andersen H. N. f. 1852"
@@ -751,11 +760,9 @@ UnitTest.addFixture( "FacetIndex.createSubject", function() {
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook">' +
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
         '<ac:identifier>59633|150005</ac:identifier>' +
         '<ac:source>Litteratursiden</ac:source>' +
@@ -775,6 +782,7 @@ UnitTest.addFixture( "FacetIndex.createSubject", function() {
         '</dkabm:record>' +
         '</ting:container>'
     );
+
     indexOut = [ {
         name: "facet.subject",
         value: "Friedrich Christian Delius"
@@ -796,7 +804,6 @@ UnitTest.addFixture( "FacetIndex.createType", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -839,7 +846,6 @@ UnitTest.addFixture( "FacetIndex.createAudienceCategory", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -871,7 +877,6 @@ UnitTest.addFixture( "FacetIndex.createAudience", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -930,7 +935,6 @@ UnitTest.addFixture( "FacetIndex.createForm", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -979,16 +983,20 @@ UnitTest.addFixture( "FacetIndex.createLiteraryForm", function() {
         FacetIndex.createLiteraryForm( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
 
     index = Index.newIndex();
-    xml = XmlUtil.fromString( '<ting:container xmlns:ting="http://www.dbc.dk/ting">' +
+    xml = XmlUtil.fromString(
+        '<ting:container xmlns:ting="http://www.dbc.dk/ting">' +
         '<adminData><genre>nonfiktion</genre></adminData>' +
-        '</ting:container>' );
+        '</ting:container>'
+    );
+
     indexOut = [ {
         name: "facet.literaryForm",
         value: "faglitteratur"
     } ];
 
-    Assert.equalValue( "Create facet.literaryForm for faglitteratur",
-        FacetIndex.createLiteraryForm( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    var actual = FacetIndex.createLiteraryForm( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) );
+
+    Assert.equalValue( "Create facet.literaryForm for faglitteratur", actual, indexOut );
 
 } );
 
@@ -1011,8 +1019,9 @@ UnitTest.addFixture( "FacetIndex.createLevel", function( ) {
         value: "folkeskoleniveau"
     } ];
 
-    Assert.equalValue( "Create facet.level (danMARC2 code, one value)",
-        FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.level (danMARC2 code, one value)", actual, indexOut );
 
     index = Index.newIndex( );
     xml = XmlUtil.fromString( '<ting:container xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' + 
@@ -1033,8 +1042,9 @@ UnitTest.addFixture( "FacetIndex.createLevel", function( ) {
         value: "forskningsniveau"
     } ];
 
-    Assert.equalValue( "Create facet.level (marc21 codes, two values)",
-        FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.level (marc21 codes, two values)", actual, indexOut );
 
     index = Index.newIndex( );
     xml = XmlUtil.fromString( '<ting:container xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' + 
@@ -1049,8 +1059,9 @@ UnitTest.addFixture( "FacetIndex.createLevel", function( ) {
 
     indexOut = [ ];
 
-    Assert.equalValue( "Create facet.level (value from 008x not in list)",
-        FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.level (value from 008x not in list)", actual, indexOut );
 
     index = Index.newIndex( );
     xml = XmlUtil.fromString( '<ting:container xmlns:ting="http://www.dbc.dk/ting" ' +
@@ -1066,8 +1077,9 @@ UnitTest.addFixture( "FacetIndex.createLevel", function( ) {
         value: "gymnasieniveau"
     }];
 
-    Assert.equalValue( "Create facet.level gymnasieniveau from dkabm",
-        FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.level gymnasieniveau from dkabm", actual, indexOut );
 
 
     index = Index.newIndex( );
@@ -1083,8 +1095,9 @@ UnitTest.addFixture( "FacetIndex.createLevel", function( ) {
 
     indexOut = [];
 
-    Assert.equalValue( "Create facet.level from dkabm no correct values ",
-        FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    actual = FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.level from dkabm no correct values ", actual, indexOut );
 
 
     index = Index.newIndex( );
@@ -1108,15 +1121,17 @@ UnitTest.addFixture( "FacetIndex.createLevel", function( ) {
         value: "folkeskoleniveau"
     } ];
 
-    Assert.equalValue( "Create facet.level (danMARC2 code and dkabm for same value)",
-        FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createLevel( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.level (danMARC2 code and dkabm for same value)", actual, indexOut );
 
 } );
 
 UnitTest.addFixture( "FacetIndex.createLet", function() {
 
     var index = Index.newIndex();
-    var xml = XmlUtil.fromString( '<ting:container xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+    var xml = XmlUtil.fromString(
+       '<ting:container xmlns:ting="http://www.dbc.dk/ting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
        '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' + 
            '<marcx:record format="danMARC2" type="Bibliographic">' + 
                '<marcx:datafield ind1="0" ind2="0" tag="042">' +
@@ -1135,8 +1150,9 @@ UnitTest.addFixture( "FacetIndex.createLet", function() {
         value: "18"
     } ];
 
-    Assert.equalValue( "Create facet.let",
-        FacetIndex.createLet( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    var actual = FacetIndex.createLet( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.let", actual, indexOut );
 
 } );
 
@@ -1164,8 +1180,9 @@ UnitTest.addFixture( "FacetIndex.createLix", function() {
         value: "10"
     } ];
 
-    Assert.equalValue( "Create facet.lix",
-        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    var actual = FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) );
+
+    Assert.equalValue( "Create facet.lix", actual, indexOut );
 
     index = Index.newIndex();
 
@@ -1186,8 +1203,9 @@ UnitTest.addFixture( "FacetIndex.createLix", function() {
         value: "12-15"
     } ];
 
-    Assert.equalValue( "Create facet.lix range",
-        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    actual = FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) );
+
+    Assert.equalValue( "Create facet.lix range", actual, indexOut );
 
 
 
@@ -1206,10 +1224,12 @@ UnitTest.addFixture( "FacetIndex.createLix", function() {
 
     indexOut = [ ];
 
-    Assert.equalValue( "Create facet.lix no lix-number (cataloging error)",
-        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    actual = FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) );
 
-   index = Index.newIndex();
+    Assert.equalValue( "Create facet.lix no lix-number (cataloging error)", actual, indexOut );
+
+
+    index = Index.newIndex();
 
     xml = XmlUtil.fromString( '<ting:container ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
@@ -1228,8 +1248,9 @@ UnitTest.addFixture( "FacetIndex.createLix", function() {
         value: "26"
     }];
 
-    Assert.equalValue( "Create facet.lix remove Lix from number",
-        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    actual = FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) );
+
+    Assert.equalValue( "Create facet.lix remove Lix from number", actual, indexOut );
 
     index = Index.newIndex();
 
@@ -1250,8 +1271,9 @@ UnitTest.addFixture( "FacetIndex.createLix", function() {
         value: "6"
     }];
 
-    Assert.equalValue( "Create facet.lix  remove lix from number",
-        FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    actual = FacetIndex.createLix( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) );
+
+    Assert.equalValue( "Create facet.lix  remove lix from number", actual, indexOut );
 
 
 } );
@@ -1265,7 +1287,6 @@ UnitTest.addFixture( "FacetIndex.createPartOf", function() {
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
         'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
@@ -1280,8 +1301,9 @@ UnitTest.addFixture( "FacetIndex.createPartOf", function() {
         value: "Berlingske tidende"
     } ];
 
-    Assert.equalValue( "Create facet.partOf",
-        FacetIndex.createPartOf( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml )  ), indexOut );
+    var actual = FacetIndex.createPartOf( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.partOf", actual, indexOut );
 
 } );
 
@@ -1289,13 +1311,9 @@ UnitTest.addFixture( "FacetIndex.createPartOf", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
@@ -1318,8 +1336,9 @@ UnitTest.addFixture( "FacetIndex.createPartOf", function() {
         value: "Rapports et procès-verbaux des réunions. Conseil International pour l'Exploration de la Mer"
     } ];
 
-    Assert.equalValue( "Create facet.partOf with addition",
-        FacetIndex.createPartOf( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createPartOf( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.partOf with addition", actual, indexOut );
 
 } );
 
@@ -1327,13 +1346,9 @@ UnitTest.addFixture( "FacetIndex.createPartOf", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
         'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
@@ -1359,8 +1374,9 @@ UnitTest.addFixture( "FacetIndex.createPartOf", function() {
         value: "Arsskrift / Lokalhistorisk Forening, Norre-Alslev Kommune"
     } ];
 
-    Assert.equalValue( "Create facet.partOf special case (comma)",
-        FacetIndex.createPartOf( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createPartOf( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.partOf special case (comma)", actual, indexOut );
 
 } );
 
@@ -1368,13 +1384,9 @@ UnitTest.addFixture( "FacetIndex.createTitleSeries", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
         'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
-        'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
@@ -1398,13 +1410,9 @@ UnitTest.addFixture( "FacetIndex.createGamePlatform", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
         'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
-        'xmlns:dcterms="http://purl.org/dc/terms/" ' +
         'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
         'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
         'xmlns:ting="http://www.dbc.dk/ting" ' +
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
         '<dkabm:record>' +
@@ -1426,8 +1434,7 @@ UnitTest.addFixture( "FacetIndex.createDk5", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ting="http://www.dbc.dk/ting" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:datafield ind1="0" ind2="0" tag="652">' +
@@ -1445,8 +1452,9 @@ UnitTest.addFixture( "FacetIndex.createDk5", function() {
         value: "99.4 Umberto Eco"
     } ];
 
-    Assert.equalValue( "Create facet.dk5",
-        FacetIndex.createDk5( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createDk5( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.dk5", actual, indexOut );
 
 } );
 
@@ -1454,8 +1462,7 @@ UnitTest.addFixture( "FacetIndex.createAccess", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ting="http://www.dbc.dk/ting" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:datafield ind1="0" ind2="0" tag="008">' +
@@ -1523,7 +1530,6 @@ UnitTest.addFixture( "FacetIndex.createPeriod", function() {
     xmlns:dcterms="http://purl.org/dc/terms/" \
     xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" \
     xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" \
-    xmlns:docbook="http://docbook.org/ns/docbook" \
     xmlns:oss="http://oss.dbc.dk/ns/osstypes" \
     xmlns:ting="http://www.dbc.dk/ting" \
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\
@@ -1584,7 +1590,6 @@ UnitTest.addFixture( "FacetIndex.createGeographic", function() {
     xmlns:dcterms="http://purl.org/dc/terms/" \
     xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" \
     xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" \
-    xmlns:docbook="http://docbook.org/ns/docbook" \
     xmlns:oss="http://oss.dbc.dk/ns/osstypes" \
     xmlns:ting="http://www.dbc.dk/ting" \
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\
@@ -1699,7 +1704,6 @@ UnitTest.addFixture( "FacetIndex.createNonFictionSubject", function() {
     xmlns:dcterms="http://purl.org/dc/terms/" \
     xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" \
     xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" \
-    xmlns:docbook="http://docbook.org/ns/docbook" \
     xmlns:oss="http://oss.dbc.dk/ns/osstypes" \
     xmlns:ting="http://www.dbc.dk/ting" \
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\
@@ -1803,15 +1807,7 @@ UnitTest.addFixture( "FacetIndex.createSheetMusic (partitur)", function() {
 
     var index = Index.newIndex();
     var xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
-        'xmlns:dcterms="http://purl.org/dc/terms/" ' +
-        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
-        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
-        'xmlns:ting="http://www.dbc.dk/ting" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:leader>00000n    2200000   4500</marcx:leader>' +
@@ -1838,20 +1834,15 @@ UnitTest.addFixture( "FacetIndex.createSheetMusic (partitur)", function() {
         value: "stemmer"
     } ];
 
-    Assert.equalValue( "Create facet.sheetMusic (partitur)",
-        FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    var testName = "Create facet.sheetMusic (partitur)";
+
+    Assert.equalValue( testName, actual, indexOut );
+
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
-        'xmlns:dcterms="http://purl.org/dc/terms/" ' +
-        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
-        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
-        'xmlns:ting="http://www.dbc.dk/ting" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:leader>00000n    2200000   4500</marcx:leader>' +
@@ -1871,20 +1862,14 @@ UnitTest.addFixture( "FacetIndex.createSheetMusic (partitur)", function() {
         value: "e-noder"
     } ];
 
-    Assert.equalValue( "Create facet.sheetMusic (E-node)",
-        FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Create facet.sheetMusic (E-node)";
+
+    Assert.equalValue( testName, actual, indexOut );
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
-        'xmlns:dcterms="http://purl.org/dc/terms/" ' +
-        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
-        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
-        'xmlns:ting="http://www.dbc.dk/ting" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:leader>00000n    2200000   4500</marcx:leader>' +
@@ -1901,20 +1886,15 @@ UnitTest.addFixture( "FacetIndex.createSheetMusic (partitur)", function() {
 
     indexOut = [];
 
-    Assert.equal( "Create facet.sheetMusic (E-node), make sure multiple subfields do not incorrectly result in facet",
-        FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData(xml) ), indexOut );
+    actual = FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Create facet.sheetMusic (E-node), make sure multiple subfields do not incorrectly result in facet";
+
+    Assert.equal( testName, actual, indexOut );
+
 
     index = Index.newIndex();
     xml = XmlUtil.fromString( '<ting:container ' +
-        'xmlns:ac="http://biblstandard.dk/ac/namespace/" ' +
-        'xmlns:dc="http://purl.org/dc/elements/1.1/" ' +
-        'xmlns:dcterms="http://purl.org/dc/terms/" ' +
-        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
-        'xmlns:dkdcplus="http://biblstandard.dk/abm/namespace/dkdcplus/" ' +
-        'xmlns:docbook="http://docbook.org/ns/docbook" ' +
-        'xmlns:oss="http://oss.dbc.dk/ns/osstypes" ' +
-        'xmlns:ting="http://www.dbc.dk/ting" ' +
-        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
         '<marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">' +
         '<marcx:record format="danMARC2" type="Bibliographic">' +
         '<marcx:leader>00000n    2200000   4500</marcx:leader>' +
@@ -1930,8 +1910,10 @@ UnitTest.addFixture( "FacetIndex.createSheetMusic (partitur)", function() {
         value: "music-minus-one"
     } ];
 
-    Assert.equalValue( "Create facet.sheetMusic (music-minus-one)",
-        FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    actual = FacetIndex.createSheetMusic( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+    testName = "Create facet.sheetMusic (music-minus-one)";
+
+    Assert.equal( testName, actual, indexOut );
 
 } );
 
@@ -1963,7 +1945,8 @@ UnitTest.addFixture( "FacetIndex.createExtraTitles", function() {
         value: "ekstra titler"
     } ];
 
-    Assert.equalValue( "Create facet.extraTitles",
-        FacetIndex.createExtraTitles( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) ), indexOut );
+    var actual = FacetIndex.createExtraTitles( index, xml, MarcUtility.createRecordObjectFromIndexingData( xml ) );
+
+    Assert.equalValue( "Create facet.extraTitles", actual, indexOut );
 
 } );
