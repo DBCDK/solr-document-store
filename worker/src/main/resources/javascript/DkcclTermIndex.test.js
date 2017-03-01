@@ -833,16 +833,10 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsMa", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "008", "00" );
-    var subfield = new Subfield( "t", "m" );
-    field.append( subfield );
-    record.append( field );
-    field = new Field( "009", "00" );
-    subfield = new Subfield( "a", "a" );
-    field.append( subfield );
-    subfield = new Subfield( "g", "xx" );
-    field.append( subfield );
-    record.append( field );
+    record.fromString(
+        '008 00 *tm\n' +
+        '009 00 *aa *gxx'
+    );
 
     var indexOut = [ {
         name: "dkcclterm.ma",
@@ -856,34 +850,37 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsMa", function() {
     }, {
         name: "dkcclterm.ma",
         value: "xx"
-    }
-    ];
+    } ];
 
-    Assert.equalValue( "Create dkcclterm fields (ma)",
-        DkcclTermIndex.createDkcclFieldsMa( index, record ), indexOut );
+    var actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
 
-    // actual record: 870970:50523861
+    Assert.equalValue( "Create dkcclterm fields (ma)", actual, indexOut );
+
+
     index = Index.newIndex();
     record = new Record();
-    field = new Field( "008", "00" );
-    subfield = new Subfield( "t", "m" );
-    field.append( subfield );
-    record.append( field );
-    field = new Field( "009", "00" );
-    subfield = new Subfield( "a", "a" );
-    field.append( subfield );
-    subfield = new Subfield( "b", "c" );
-    field.append( subfield );
-    subfield = new Subfield( "g", "xx" );
-    field.append( subfield );
-    subfield = new Subfield( "a", "s" );
-    field.append( subfield );
-    subfield = new Subfield( "g", "xc" );
-    field.append( subfield );
-    subfield = new Subfield( "a", "v" );
-    field.append( subfield );
+    record.fromString(
+        '008 00 *do\n'
+    );
 
-    record.append( field );
+    indexOut = [ {
+        name: "dkcclterm.ma",
+        value: "ta"
+    } ];
+
+    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
+
+    Assert.equalValue( "Create dkcclterm.ma field from 008*d", actual, indexOut );
+
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString(
+        '001 00 *a50523861 *b870970\n' +
+        '008 00 *tm\n' +
+        '009 00 *aa *bc *gxx *as *gxc *av'
+    );
+
     indexOut = [ {
         name: "dkcclterm.ma",
         value: "mo"
@@ -911,18 +908,19 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsMa", function() {
     }, {
         name: "dkcclterm.ma",
         value: "xc"
-    }
-    ];
+    } ];
+
+    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
 
     Assert.equalValue( "Create dkcclterm fields (ma) 1 book + 2 cd's with music ",
-        DkcclTermIndex.createDkcclFieldsMa( index, record ), indexOut );
+        actual, indexOut );
 
-    index = Index.newIndex();
-    var inputString = "008 *tm *dx *jf *nb *w1\n" +
-        "009 *aa *gxe\n";
-
-    record = new Record();
-    record.fromString( inputString );
+    index = Index.newIndex( );
+    record = new Record( );
+    record.fromString(
+        "008 00 *tm *dx *jf *nb *w1\n" +
+        "009 00 *aa *gxe\n"
+    );
     indexOut = [ {
         name: "dkcclterm.ma",
         value: "mo"
@@ -941,18 +939,21 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsMa", function() {
     }, {
         name: "dkcclterm.ma",
         value: "eb"
-    }
-    ];
+    } ];
 
-    Assert.equalValue( "Create dkcclterm field (ma) ebook", DkcclTermIndex.createDkcclFieldsMa( index, record ), indexOut );
+    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
+
+    Assert.equalValue( "Create dkcclterm field (ma) ebook", actual, indexOut );
+
 
     index = Index.newIndex();
     record = new Record();
-    inputString = "009 *aa *gxe\n" +
-        "032 *xBKM201224\n" +
-        "512 *aDownloades i EPUB-format\n";
+    record.fromString(
+        "009 00 *aa *gxe\n" +
+        "032 00 *xBKM201224\n" +
+        "512 00 *aDownloades i EPUB-format\n"
+    );
 
-    record.fromString( inputString );
     indexOut = [ {
         name: "dkcclterm.ma",
         value: "te"
@@ -963,7 +964,10 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsMa", function() {
         name: "dkcclterm.ma",
         value: "eb"
     } ];
-    Assert.equalValue( "Create dkcclterm field (ma) ebook without 008w1 marking", DkcclTermIndex.createDkcclFieldsMa( index, record ), indexOut );
+
+    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
+
+    Assert.equalValue( "Create dkcclterm field (ma) ebook without 008w1 marking", actual, indexOut );
 
 } );
 

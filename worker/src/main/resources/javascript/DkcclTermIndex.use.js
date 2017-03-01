@@ -2447,6 +2447,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsLn = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsLn" );
+
         map.put( "001", function( field ) {
             field.eachSubField( "b", function( field, subField ) {
                 index.pushField( "dkcclterm.ln", subField.value );
@@ -2462,6 +2463,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ln", subField.value );
             } );
         } );
+        
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsLn" );
     };
 
@@ -2482,445 +2484,218 @@ var DkcclTermIndex = function() {
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsMa" );
 
         var value;
+        var translation;
 
-        var map = new MatchMap();
+        var addToIndexIfValueExists = function( value ) {
+            if ( value ) {
+                index.pushField( "dkcclterm.ma", value );
+            }
+        };
+
+        var map = new MatchMap( );
+
         map.put( "005", function( field ) {
-            var subfieldMap = new MatchMap();
+            var subfieldMap = new MatchMap( );
             subfieldMap.put( "h", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "a":
-                        value = "lv";
-                        break;
-                    case "b":
-                        value = "lw";
-                        break;
-                    case "c":
-                        value = "lu";
-                        break;
-                    case "d":
-                        value = "lh";
-                        break;
-                    case "e":
-                        value = "ll";
-                        break;
-                    case "f":
-                        value = "lt";
-                        break;
-                    case "g":
-                        value = "lr";
-                        break;
-                    case "h":
-                        value = "ls";
-                        break;
-                    case "i":
-                        value = "l\u00f8";
-                        break;
-                    case "j":
-                        value = "la";
-                        break;
-                    case "k":
-                        value = "ld";
-                        break;
-                    case "l":
-                        value = "lj";
-                        break;
-                    case "m":
-                        value = "li";
-                        break;
-                    case "n":
-                        value = "lp";
-                        break;
-                    case "o":
-                        value = "lq";
-                        break;
-                    case "p":
-                        value = "l\u00E6";
-                        break;
-                    case "q":
-                        value = "l\u00E5";
-                        break;
-                    case "r":
-                        value = "le";
-                        break;
-                    case "s":
-                        value = "lg";
-                        break;
-                    case "t":
-                        value = "lf";
-                        break;
-                    case "u":
-                        value = "lz";
-                        break;
-                    case "v":
-                        value = "lx";
-                        break;
-                    case "w":
-                        value = "lc";
-                        break;
-                    case "x":
-                        value = "ln";
-                        break;
-                    case "y":
-                        value = "mm";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "a": "lv",
+                    "b": "lw",
+                    "c": "lu",
+                    "d": "lh",
+                    "e": "ll",
+                    "f": "lt",
+                    "g": "lr",
+                    "h": "ls",
+                    "i": "l\u00f8",
+                    "j": "la",
+                    "k": "ld",
+                    "l": "lj",
+                    "m": "li",
+                    "n": "lp",
+                    "o": "lq",
+                    "p": "l\u00E6",
+                    "q": "l\u00E5",
+                    "r": "le",
+                    "s": "lg",
+                    "t": "lf",
+                    "u": "lz",
+                    "v": "lx",
+                    "w": "lc",
+                    "x": "ln",
+                    "y": "mm"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "i", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "a":
-                        value = "pa";
-                        break;
-                    case "b":
-                        value = "ps";
-                        break;
-                    case "c":
-                        value = "pl";
-                        break;
-                    case "d":
-                        value = "pk";
-                        break;
-                    case "e":
-                        value = "pp";
-                        break;
-                    case "g":
-                        value = "px";
-                        break;
-                    case "h":
-                        value = "ph";
-                        break;
-                    case "i":
-                        value = "pd";
-                        break;
-                    case "j":
-                        value = "pc";
-                        break;
-                    case "k":
-                        value = "pr";
-                        break;
-                    case "l":
-                        value = "pu";
-                        break;
-                    case "o":
-                        value = "po";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "a": "pa",
+                    "b": "ps",
+                    "c": "pl",
+                    "d": "pk",
+                    "e": "pp",
+                    "g": "px",
+                    "h": "ph",
+                    "i": "pd",
+                    "j": "pc",
+                    "k": "pr",
+                    "l": "pu",
+                    "o": "po"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "j", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "a":
-                        value = "st";
-                        break;
-                    case "b":
-                        value = "sv";
-                        break;
-                    case "c":
-                        value = "so";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "a": "st",
+                    "b": "sv",
+                    "c": "so"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "k", function( field, subField ) {
-                if ( String( subField.value ).match( /e/ ) ) {
+                if ( "e" === String( subField.value ) ) {
                     index.pushField( "dkcclterm.ma", "tl" );
                 }
             } );
             subfieldMap.put( "z", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "p":
-                        value = "lb";
-                        break;
-                    case "q":
-                        value = "lk";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "p": "lb",
+                    "q": "lk"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             field.eachSubFieldMap( subfieldMap );
         } );
+
         map.put( "008", function( field ) {
             var subfieldMap = new MatchMap();
             subfieldMap.put( "d", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "a":
-                        value = "bl";
-                        break;
-                    case "b":
-                        value = "ka";
-                        break;
-                    case "c":
-                        value = "rg";
-                        break;
-                    case "d":
-                        value = "rf";
-                        break;
-                    case "e":
-                        value = "ob";
-                        break;
-                    case "f":
-                        value = "ec";
-                        break;
-                    case "g":
-                        value = "vv";
-                        break;
-                    case "h":
-                        value = "bj";
-                        break;
-                    case "i":
-                        value = "sa";
-                        break;
-                    case "j":
-                        value = "pg";
-                        break;
-                    case "k":
-                        value = "pt";
-                        break;
-                    case "l":
-                        value = "sd";
-                        break;
-                    case "m":
-                        value = "dp";
-                        break;
-                    case "n":
-                        value = "lo";
-                        break;
-                    case "o":
-                        value = "ta";
-                        break;
-                    case "p":
-                        value = "tr";
-                        break;
-                    case "q":
-                        value = "ex";
-                        break;
-                    case "r":
-                        value = "tt";
-                        break;
-                    case "s":
-                        value = "am";
-                        break;
-                    case "t":
-                        value = "tn";
-                        break;
-                    case "u":
-                        value = "ug";
-                        break;
-                    case "w":
-                        value = "rw";
-                        break;
-                    case "z":
-                        value = "bv";
-                        break;
-                    case "\u00E5":
-                        value = "s\u00E5";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "a": "bl",
+                    "b": "ka",
+                    "c": "rg",
+                    "d": "rf",
+                    "e": "ob",
+                    "f": "ec",
+                    "g": "vv",
+                    "h": "bj",
+                    "i": "sa",
+                    "j": "pg",
+                    "k": "pt",
+                    "l": "sd",
+                    "m": "dp",
+                    "n": "lo",
+                    "o": "ta",
+                    "p": "tr",
+                    "q": "ex",
+                    "r": "tt",
+                    "s": "am",
+                    "t": "tn",
+                    "u": "ug",
+                    "w": "rw",
+                    "z": "bv",
+                    "\u00E5": "s\u00E5"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "f", function( field, subField ) {
-                if ( String( subField.value ).match( /1/ ) ) {
+                if ( "1" === String( subField.value ) ) {
                     index.pushField( "dkcclterm.ma", "kf" );
                 }
             } );
             subfieldMap.put( "g", function( field, subField ) {
-                if ( String( subField.value ).match( /1/ ) ) {
+                if ( "1" === String( subField.value ) ) {
                     index.pushField( "dkcclterm.ma", "fe" );
                 }
             } );
             subfieldMap.put( "h", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "d":
-                        value = "pb";
-                        break;
-                    case "m":
-                        value = "ms";
-                        break;
-                    case "n":
-                        value = "av";
-                        break;
-                    case "p":
-                        value = "ts";
-                        break;
-                    case "z":
-                        value = "\u00E5p";
-                        break;
-                    case "?":
-                        value = "up";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "d": "pb",
+                    "m": "ms",
+                    "n": "av",
+                    "p": "ts",
+                    "z": "\u00E5p",
+                    "?": "up"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "j", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "d":
-                        value = "dr";
-                        break;
-                    case "e":
-                        value = "ea";
-                        break;
-                    case "f":
-                        value = "ro";
-                        break;
-                    case "i":
-                        value = "bx";
-                        break;
-                    case "j":
-                        value = "no";
-                        break;
-                    case "m":
-                        value = "ig";
-                        break;
-                    case "p":
-                        value = "di";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "d": "dr",
+                    "e": "ea",
+                    "f": "ro",
+                    "i": "bx",
+                    "j": "no",
+                    "m": "ig",
+                    "p": "di"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "m", function( field, subField ) {
-                if ( String( subField.value ).match( /1/ ) ) {
+                if ( "1" === String( subField.value ) ) {
                     index.pushField( "dkcclterm.ma", "ss" );
                 }
             } );
             subfieldMap.put( "n", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "a":
-                        value = "ou";
-                        break;
-                    case "b":
-                        value = "od";
-                        break;
-                    case "c":
-                        value = "oi";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "a": "ou",
+                    "b": "od",
+                    "c": "oi"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "o", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "b":
-                        value = "b\u00f8";
-                        break;
-                    case "s":
-                        value = "bs";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "b": "b\u00f8",
+                    "s": "bs"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "q", function( field, subField ) {
                 index.pushField( "dkcclterm.ma", subField.value );
             } );
             subfieldMap.put( "r", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "an":
-                        value = "ai";
-                        break;
-                    case "ap":
-                        value = "ap";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "an": "ai",
+                    "ap": "ap"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
             } );
             subfieldMap.put( "t", function( field, subField ) {
-                value = "";
-                switch ( subField.value ) {
-                    case "a":
-                        value = "an";
-                        break;
-                    case "m":
-                        value = "mo";
-                        break;
-                    case "p":
-                        value = "pe";
-                        break;
-                    case "s":
-                        value = "s\u00E6";
-                        break;
-                    default:
-                        break;
-                }
-                if ( value !== "" ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
+                translation = {
+                    "a": "an",
+                    "m": "mo",
+                    "p": "pe",
+                    "s": "s\u00E6"
+                };
+                addToIndexIfValueExists( translation[ subField.value ] );
+
                 if ( String( subField.value ).match( /[ms]/ ) && record.getValue( /009/, /[ab]/ ).match( /a/ ) && record.getValue( "009", "g" ).match( /xx/ ) ) {
                     index.pushField( "dkcclterm.ma", "b\u00E5" );
                 }
-                if ( String( subField.value ).match( /p/ ) && field.getValue( "u" ).match( /c/ ) ) {
+                if ( "p" === String( subField.value ) && field.getValue( "u" ).match( /c/ ) ) {
                     index.pushField( "dkcclterm.ma", "p\u00f8" );
                 }
-                if ( String( subField.value ).match( /p/ ) && record.getValue( "004", "a" ).match( /e/ ) ) {
+                if ( "p" === String( subField.value ) && record.getValue( "004", "a" ).match( /e/ ) ) {
                     index.pushField( "dkcclterm.ma", "pf" );
                 }
             } );
             field.eachSubFieldMap( subfieldMap );
         } );
+
         map.put( "009", function( field ) {
             field.eachSubField( /[ab]/, function( field, subField ) {
                 value = DkcclTermIndex.translateGMBCode( subField.value );
+                addToIndexIfValueExists( value );
 
-                if ( value !== undefined ) {
-                    index.pushField( "dkcclterm.ma", value );
-                }
                 if ( String( subField.value ).match( /s/ ) && record.getValue( "009", "g" ).match( /xc/ ) ) {
                     index.pushField( "dkcclterm.ma", "sc" );
                 }
                 if ( String( subField.value ).match( /s/ ) ) {
                     record.eachField( "009", function( field ) {
                         field.eachSubField( "g", function( field, subField ) {
-                            if ( String( subField.value ) === "xh" ) {
+                            if ( "xh" === String( subField.value ) ) {
                                 index.pushField( "dkcclterm.ma", "sb" );
-                            }
-                            if ( String( subField.value ) === "xk" ) {
+                            } else if ( "xk" === String( subField.value ) ) {
                                 index.pushField( "dkcclterm.ma", "sg" );
                             }
                         } );
@@ -2939,16 +2714,19 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ma", subField.value );
             } );
         } );
+
         map.put( "014", function( field ) {
             field.eachSubField( "x", function( field, subField ) {
                 index.pushField( "dkcclterm.ma", subField.value );
             } );
         } );
+
         record.eachFieldMap( map );
 
-        if( DkcclTermIndex.isEbook( record )){
+        if ( DkcclTermIndex.isEbook( record ) ) {
             index.pushField( "dkcclterm.ma","eb" );
         }
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsMa" );
         return index;
     };
@@ -4531,18 +4309,21 @@ var DkcclTermIndex = function() {
      *
      *  @type method
      *  @syntax DkcclTermIndex.isEbook( record )
-     *  @param {MarcRecord} record input record
+     *  @param {Record} record input record
      *  @return {Boolean} true if record is an eBook
      *  @name DkcclTermIndex.isEbook
      *  @method
      */
     that.isEbook = function( record ) {
+
         Log.trace( "Entering: DkcclTermIndex.isEbook" );
+
         var valueOf008w = record.getValue( "008", "w" );
-        if ( valueOf008w === '1' ) {
+        if ( "1" === valueOf008w ) {
             Log.trace( "Leaving: DkcclTermIndex.isEbook" );
             return true;
         }
+
         var f009 = record.field( "009" );
         var f856 = record.field( "856" );
         if ( f009.getValue( "a" ) === "a" && f009.getValue( "g" ) === "xe" && /BKM|NET/.test( record.getValue( "032", "x" )) ) {
@@ -4563,7 +4344,7 @@ var DkcclTermIndex = function() {
             return true;
         }
         var valueOf008t = record.getValue( "008", "t" );
-        if ( valueOf008t === "m" ) {
+        if ( "m" === valueOf008t ) {
             var valueOf856u = record.getValue( "856", "u" );
             if ( /ebrary\.com/.test( valueOf856u ) ||
                 /oxfordscholarship\.com/.test( f856 ) ||
