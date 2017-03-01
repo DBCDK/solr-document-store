@@ -1,3 +1,4 @@
+use( "DkcclTermMa" );
 use( "Log" );
 use( "Marc" );
 
@@ -23,7 +24,7 @@ var DkcclTermIndex = function() {
      * Method that creates dkcclterm index fields.
      *
      * @type {method}
-     * @syntax DkcclTermIndex.createDkcclTermFields( index, recordl )
+     * @syntax DkcclTermIndex.createDkcclTermFields( index, record )
      * @param {Object} index the index to add fields to
      * @param {Record} record The record from which to create the index fields
      * @return {Object} Index with added fields
@@ -129,7 +130,7 @@ var DkcclTermIndex = function() {
         record.eachFieldMap( map );
 
         // Can not be optimized like other methods because it needs direct access to record
-        DkcclTermIndex.createDkcclFieldsMa( index, record );
+        DkcclTermMa.createDkcclFieldsMa( index, record );
 
         Log.trace( "Leaving: DkcclTermIndex.createDkcclTermFields method" );
         return index;
@@ -199,6 +200,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsAg = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsAg" );
+
         map.put( "600", function( field ) {
             if ( field.getValue( "2" ) === "NAL" ) {
                 field.eachSubField( /./, function( field, subField ) {
@@ -240,6 +242,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ag", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsAg" );
     };
 
@@ -308,6 +311,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsAu = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsAu" );
+
         map.put( "652", function( field ) {
             field.eachSubField( /a|b|c|e|f|h|k|t/, function( field, subField ) {
                 index.pushField( "dkcclterm.au", subField.value );
@@ -328,6 +332,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.au", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsAu" );
     };
 
@@ -344,6 +349,8 @@ var DkcclTermIndex = function() {
      * @method
      */
     that.createDkcclFieldsAar = function( index, map ) {
+
+        Log.trace( "Entering DkcclTermIndex.createDkcclFieldsAar" );
 
         var __pushYears = function( fieldValue ){
             if (/^\d{4}(-\d{4})?$/.test( fieldValue )){
@@ -362,7 +369,7 @@ var DkcclTermIndex = function() {
             }
 
         };
-        Log.trace( "Entering DkcclTermIndex.createDkcclFieldsAar" );
+
         map.put( "008", function( field ) {
             field.eachSubField( /a|z/, function( field, subField ) {
                 __pushYears( subField.value )
@@ -388,6 +395,7 @@ var DkcclTermIndex = function() {
                 __pushYears( subField.value )
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsAar" );
     };
 
@@ -481,6 +489,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsCl = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsCl" );
+
         map.put( "050", function( field ) {
             field.eachSubField( "a", function( field, subField ) {
                 index.pushField( "dkcclterm.cl", subField.value );
@@ -526,6 +535,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.cl", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsCl" );
     };
 
@@ -641,6 +651,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsDk = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsDk" );
+
         map.put( "652", function( field ) {
             field.eachSubField( /i|m|n|o|p|q|r/, function( field, subField ) {
                 index.pushField( "dkcclterm.dk", subField.value );
@@ -651,6 +662,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.dk", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsDk" );
     };
 
@@ -669,6 +681,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsDs = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsDs" );
+
         map.put( "666", function( field ) {
             field.eachSubField( /s|r|q/, function( field, subField ) {
                 index.pushField( "dkcclterm.ds", subField.value );
@@ -679,7 +692,6 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ds", subField.value );
             } );
         } );
-
 
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsDs" );
     };
@@ -722,6 +734,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsEf = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsEf" );
+
         map.put( "630", function( field ) {
             field.eachSubField( /f|g/, function( field, subField ) {
                 index.pushField( "dkcclterm.ef", subField.value );
@@ -737,6 +750,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ef", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsEf" );
     };
 
@@ -780,6 +794,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsEk = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsEk" );
+
         map.put( "610", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 if ( !subField.name.match( /0|1|2|b|\u00e5/ ) ) {
@@ -796,6 +811,7 @@ var DkcclTermIndex = function() {
                 } );
             }
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsEk" );
     };
 
@@ -814,7 +830,8 @@ var DkcclTermIndex = function() {
      */
     that.createDkcclFieldsEm = function( index, map, indexName ) {
 
-        Log.trace( "Entering DkcclTermIndex.createDkcclEmFields" );
+        Log.trace( "Entering DkcclTermIndex.createDkcclFieldsEm" );
+
         map.put( "600", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 if ( !subField.name.match( /0|1|2|b|\u00e5/ ) ) {
@@ -985,6 +1002,7 @@ var DkcclTermIndex = function() {
                 index.pushField( indexName, subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsEm" );
     };
 
@@ -1002,6 +1020,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsEn = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsEn" );
+
         map.put( "520", function( field ) {
             field.eachSubField( "n", function( field, subField ) {
                 index.pushField( "dkcclterm.en", subField.value );
@@ -1017,6 +1036,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.en", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsEn" );
     };
 
@@ -1035,6 +1055,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsEp = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsEp" );
+
         map.put( "600", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 if ( !subField.name.match( /0|1|2|b|\u00e5/ ) ) {
@@ -1051,6 +1072,7 @@ var DkcclTermIndex = function() {
                 } );
             }
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsEp" );
     };
 
@@ -1068,6 +1090,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsEs = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsEs" );
+
         map.put( "630", function( field ) {
             field.eachSubField( /s|t/, function( field, subField ) {
                 index.pushField( "dkcclterm.es", subField.value );
@@ -1083,6 +1106,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.es", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsEs" );
     };
 
@@ -1100,6 +1124,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsFb = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsFb" );
+
         map.put( "242", function( field ) {
             field.eachSubField( "e", function( field, subField ) {
                 index.pushField( "dkcclterm.fb", subField.value );
@@ -1194,6 +1219,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.fb", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsFb" );
     };
 
@@ -1236,6 +1262,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsFl = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsFl" );
+
         map.put( "247", function( field ) {
             field.eachSubField( "i", function( field, subField ) {
                 index.pushField( "dkcclterm.fl", subField.value );
@@ -1251,6 +1278,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.fl", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsFl" );
     };
 
@@ -1293,6 +1321,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsFo = function( index, map, indexName ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsFo" );
+
         map.put( "100", function( field ) {
             if ( field.exists( /a|h|k|e|f|c|b|1|4|5|6/ ) ) {
                 index.pushField( indexName, field.getValue( /a|h|k|e|f|c|b|1|4|5|6/, " " ) );
@@ -1354,6 +1383,7 @@ var DkcclTermIndex = function() {
                 }
             }
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsFo" );
     };
 
@@ -1451,6 +1481,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsHt = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsHt" );
+
         map.put( "239", function( field ) {
             field.eachSubField( /t|u|v/, function( field, subField ) {
                 index.pushField( "dkcclterm.ht", subField.value );
@@ -1471,6 +1502,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ht", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsHt" );
     };
 
@@ -1489,6 +1521,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsIb = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsIb" );
+
         map.put( "021", function( field ) {
             field.eachSubField( /a|e|w|x/, function( field, subField ) {
                 index.pushField( "dkcclterm.ib", subField.value );
@@ -1519,6 +1552,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ib", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsIb" );
     };
 
@@ -1536,6 +1570,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsIc = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsIc" );
+
         map.put( "024", function( field ) {
             field.eachSubField( /a|x/, function( field, subField ) {
                 index.pushField( "dkcclterm.ic", subField.value );
@@ -1621,6 +1656,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsIn = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsIn" );
+
         map.put( "022", function( field ) {
             field.eachSubField( /a|l|x|z/, function( field, subField ) {
                 index.pushField( "dkcclterm.in", subField.value );
@@ -2003,6 +2039,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsKe = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsKe" );
+
         map.put( "600", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 if ( !subField.name.match( /0|1|2|b|\u00e5/ ) ) {
@@ -2178,6 +2215,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsKk = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsKk" );
+
         map.put( "032", function( field ) {
             field.eachSubField( /a|x/, function( field, subField ) {
                 index.pushField( "dkcclterm.kk", subField.value );
@@ -2189,6 +2227,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.kk", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsKk" );
     };
 
@@ -2207,6 +2246,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsKm = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsKm" );
+
         map.put( "034", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 index.pushField( "dkcclterm.km", subField.value );
@@ -2270,6 +2310,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsKo = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsKo" );
+
         map.put( "710", function( field ) {
             field.eachSubField( /a|c|e|i|j|k|s|4/, function( field, subField ) {
                 index.pushField( "dkcclterm.ko", subField.value );
@@ -2467,269 +2508,6 @@ var DkcclTermIndex = function() {
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsLn" );
     };
 
-    /**
-     * Method that creates ccl term index fields (ma).
-     *
-     *
-     * @type {method}
-     * @syntax DkcclTermIndex.createDkcclFieldsMa( index, record )
-     * @param {Object} index the index to add fields to
-     * @param {Record} record The record from which to create the index fields
-     * @return {Object} Index with added fields
-     * @name DkcclTermIndex.createDkcclFieldsMa
-     * @method
-     */
-    that.createDkcclFieldsMa = function( index, record ) {
-
-        Log.trace( "Entering DkcclTermIndex.createDkcclFieldsMa" );
-
-        var value;
-        var translation;
-
-        var addToIndexIfValueExists = function( value ) {
-            if ( value ) {
-                index.pushField( "dkcclterm.ma", value );
-            }
-        };
-
-        var map = new MatchMap( );
-
-        map.put( "005", function( field ) {
-            var subfieldMap = new MatchMap( );
-            subfieldMap.put( "h", function( field, subField ) {
-                translation = {
-                    "a": "lv",
-                    "b": "lw",
-                    "c": "lu",
-                    "d": "lh",
-                    "e": "ll",
-                    "f": "lt",
-                    "g": "lr",
-                    "h": "ls",
-                    "i": "l\u00f8",
-                    "j": "la",
-                    "k": "ld",
-                    "l": "lj",
-                    "m": "li",
-                    "n": "lp",
-                    "o": "lq",
-                    "p": "l\u00E6",
-                    "q": "l\u00E5",
-                    "r": "le",
-                    "s": "lg",
-                    "t": "lf",
-                    "u": "lz",
-                    "v": "lx",
-                    "w": "lc",
-                    "x": "ln",
-                    "y": "mm"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "i", function( field, subField ) {
-                translation = {
-                    "a": "pa",
-                    "b": "ps",
-                    "c": "pl",
-                    "d": "pk",
-                    "e": "pp",
-                    "g": "px",
-                    "h": "ph",
-                    "i": "pd",
-                    "j": "pc",
-                    "k": "pr",
-                    "l": "pu",
-                    "o": "po"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "j", function( field, subField ) {
-                translation = {
-                    "a": "st",
-                    "b": "sv",
-                    "c": "so"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "k", function( field, subField ) {
-                if ( "e" === String( subField.value ) ) {
-                    index.pushField( "dkcclterm.ma", "tl" );
-                }
-            } );
-            subfieldMap.put( "z", function( field, subField ) {
-                translation = {
-                    "p": "lb",
-                    "q": "lk"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            field.eachSubFieldMap( subfieldMap );
-        } );
-
-        map.put( "008", function( field ) {
-            var subfieldMap = new MatchMap();
-            subfieldMap.put( "d", function( field, subField ) {
-                translation = {
-                    "a": "bl",
-                    "b": "ka",
-                    "c": "rg",
-                    "d": "rf",
-                    "e": "ob",
-                    "f": "ec",
-                    "g": "vv",
-                    "h": "bj",
-                    "i": "sa",
-                    "j": "pg",
-                    "k": "pt",
-                    "l": "sd",
-                    "m": "dp",
-                    "n": "lo",
-                    "o": "ta",
-                    "p": "tr",
-                    "q": "ex",
-                    "r": "tt",
-                    "s": "am",
-                    "t": "tn",
-                    "u": "ug",
-                    "w": "rw",
-                    "z": "bv",
-                    "\u00E5": "s\u00E5"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "f", function( field, subField ) {
-                if ( "1" === String( subField.value ) ) {
-                    index.pushField( "dkcclterm.ma", "kf" );
-                }
-            } );
-            subfieldMap.put( "g", function( field, subField ) {
-                if ( "1" === String( subField.value ) ) {
-                    index.pushField( "dkcclterm.ma", "fe" );
-                }
-            } );
-            subfieldMap.put( "h", function( field, subField ) {
-                translation = {
-                    "d": "pb",
-                    "m": "ms",
-                    "n": "av",
-                    "p": "ts",
-                    "z": "\u00E5p",
-                    "?": "up"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "j", function( field, subField ) {
-                translation = {
-                    "d": "dr",
-                    "e": "ea",
-                    "f": "ro",
-                    "i": "bx",
-                    "j": "no",
-                    "m": "ig",
-                    "p": "di"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "m", function( field, subField ) {
-                if ( "1" === String( subField.value ) ) {
-                    index.pushField( "dkcclterm.ma", "ss" );
-                }
-            } );
-            subfieldMap.put( "n", function( field, subField ) {
-                translation = {
-                    "a": "ou",
-                    "b": "od",
-                    "c": "oi"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "o", function( field, subField ) {
-                translation = {
-                    "b": "b\u00f8",
-                    "s": "bs"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "q", function( field, subField ) {
-                index.pushField( "dkcclterm.ma", subField.value );
-            } );
-            subfieldMap.put( "r", function( field, subField ) {
-                translation = {
-                    "an": "ai",
-                    "ap": "ap"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-            } );
-            subfieldMap.put( "t", function( field, subField ) {
-                translation = {
-                    "a": "an",
-                    "m": "mo",
-                    "p": "pe",
-                    "s": "s\u00E6"
-                };
-                addToIndexIfValueExists( translation[ subField.value ] );
-
-                if ( String( subField.value ).match( /[ms]/ ) && record.getValue( /009/, /[ab]/ ).match( /a/ ) && record.getValue( "009", "g" ).match( /xx/ ) ) {
-                    index.pushField( "dkcclterm.ma", "b\u00E5" );
-                }
-                if ( "p" === String( subField.value ) && field.getValue( "u" ).match( /c/ ) ) {
-                    index.pushField( "dkcclterm.ma", "p\u00f8" );
-                }
-                if ( "p" === String( subField.value ) && record.getValue( "004", "a" ).match( /e/ ) ) {
-                    index.pushField( "dkcclterm.ma", "pf" );
-                }
-            } );
-            field.eachSubFieldMap( subfieldMap );
-        } );
-
-        map.put( "009", function( field ) {
-            field.eachSubField( /[ab]/, function( field, subField ) {
-                value = DkcclTermIndex.translateGMBCode( subField.value );
-                addToIndexIfValueExists( value );
-
-                if ( String( subField.value ).match( /s/ ) && record.getValue( "009", "g" ).match( /xc/ ) ) {
-                    index.pushField( "dkcclterm.ma", "sc" );
-                }
-                if ( String( subField.value ).match( /s/ ) ) {
-                    record.eachField( "009", function( field ) {
-                        field.eachSubField( "g", function( field, subField ) {
-                            if ( "xh" === String( subField.value ) ) {
-                                index.pushField( "dkcclterm.ma", "sb" );
-                            } else if ( "xk" === String( subField.value ) ) {
-                                index.pushField( "dkcclterm.ma", "sg" );
-                            }
-                        } );
-                    } );
-                }
-            } );
-            field.eachSubField( "g", function( field, subField ) {
-                if ( String( subField.value ) !== "xf" ) {
-                    index.pushField( "dkcclterm.ma", subField.value );
-                } else if ( String( subField.value ) === "xf" ) {
-                    index.pushField( "dkcclterm.ma", "tk" );
-                }
-
-            } );
-            field.eachSubField( "h", function( field, subField ) {
-                index.pushField( "dkcclterm.ma", subField.value );
-            } );
-        } );
-
-        map.put( "014", function( field ) {
-            field.eachSubField( "x", function( field, subField ) {
-                index.pushField( "dkcclterm.ma", subField.value );
-            } );
-        } );
-
-        record.eachFieldMap( map );
-
-        if ( DkcclTermIndex.isEbook( record ) ) {
-            index.pushField( "dkcclterm.ma","eb" );
-        }
-
-        Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsMa" );
-        return index;
-    };
 
     /**
      * Method that creates ccl term index fields (me).
@@ -2745,8 +2523,6 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsMe = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsMe" );
-
-        var value;
 
         map.put( "666", function( field ) {
             field.eachSubField( /m|n|p|l/, function( field, subField ) {
@@ -2773,8 +2549,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsMo" );
 
-        var value;
-
         map.put( "039", function( field ) {
             field.eachSubField( /a|b/, function( field, subField ) {
                 index.pushField( "dkcclterm.mo", subField.value );
@@ -2799,7 +2573,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsMs" );
 
-        var value;
         map.put( "660", function( field ) {
             field.eachSubField( /a|x|y|z/, function( field, subField ) {
                 index.pushField( "dkcclterm.ms", subField.value );
@@ -2859,8 +2632,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNb" );
 
-        var value;
-
         map.put( "666", function( field ) {
             field.eachSubField( "u", function( field, subField ) {
                 index.pushField( "dkcclterm.nb", subField.value );
@@ -2885,8 +2656,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNl" );
 
-        var value;
-
         map.put( "036", function( field ) {
             field.eachSubField( /a|b|z/, function( field, subField ) {
                 index.pushField( "dkcclterm.nl", subField.value );
@@ -2910,6 +2679,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsNo = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNo" );
+
         map.put( "247", function( field ) {
             field.eachSubField( "l", function( field, subField ) {
                 index.pushField( "dkcclterm.no", subField.value );
@@ -3015,7 +2785,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNr" );
 
-        var value;
         map.put( "001", function( field ) {
             field.eachSubField( "a", function( field, subField ) {
                 index.pushField( "dkcclterm.nr", subField.value );
@@ -3244,7 +3013,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNs" );
 
-        var value;
         map.put( "990", function( field ) {
             field.eachSubField( "m", function( field, subField ) {
                 index.pushField( "dkcclterm.ns", subField.value );
@@ -3274,7 +3042,6 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNt" );
 
-        var value;
         map.put( "210", function( field ) {
             field.eachSubField( /a|b|c/, function( field, subField ) {
                 index.pushField( "dkcclterm.nt", subField.value );
@@ -3303,8 +3070,6 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsNv = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsNv" );
-
-        var value;
 
         map.put( "008", function( field ) {
             field.eachSubField( "x", function( field, subField ) {
@@ -3426,6 +3191,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsPa = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsPa" );
+
         map.put( "245", function( field ) {
             field.eachSubField( /p|q|r|s/, function( field, subField ) {
                 index.pushField( "dkcclterm.pa", subField.value );
@@ -3436,6 +3202,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.pa", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsPa" );
     };
 
@@ -3453,6 +3220,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsPe = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsPe" );
+
         map.put( "100", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 if ( !subField.name.match( /0/ ) ) {
@@ -3506,6 +3274,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsPo = function( index, map, indexName ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsPo" );
+
         map.put( "100", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
                 if ( !subField.name.match( /0/ ) ) {
@@ -3525,6 +3294,7 @@ var DkcclTermIndex = function() {
                 index.pushField( indexName, subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsPo" );
     };
 
@@ -3542,6 +3312,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsPu = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsPu" );
+
         map.put( "247", function( field ) {
             field.eachSubField( "h", function( field, subField ) {
                 index.pushField( "dkcclterm.pu", subField.value );
@@ -3552,6 +3323,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.pu", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsPu" );
     };
 
@@ -3569,6 +3341,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsRt = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsRt" );
+
         map.put( "860", function( field ) {
             field.eachSubField( /c|t/, function( field, subField ) {
                 index.pushField( "dkcclterm.rt", subField.value );
@@ -3629,6 +3402,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.rt", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsRt" );
     };
 
@@ -3646,6 +3420,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsSe = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsSe" );
+
         map.put( "247", function( field ) {
             field.eachSubField( /n|o|s|v|S/, function( field, subField ) {
                 index.pushField( "dkcclterm.se", subField.value );
@@ -3666,6 +3441,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.se", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsSe" );
     };
 
@@ -3707,6 +3483,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsSo = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsSo" );
+
         map.put( "247", function( field ) {
             field.eachSubField( /n|o|s|S/, function( field, subField ) {
                 index.pushField( "dkcclterm.so", subField.value );
@@ -3727,6 +3504,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.so", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsSo" );
     };
 
@@ -3744,6 +3522,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsSp = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsSp" );
+
         map.put( "008", function( field ) {
             field.eachSubField( "l", function( field, subField ) {
                 index.pushField( "dkcclterm.sp", subField.value );
@@ -3843,7 +3622,9 @@ var DkcclTermIndex = function() {
      * @method
      */
     that.createDkcclFieldsTi = function( index, map, indexName ) {
+
         Log.trace( "Entering DkcclTermIndex.createDkcclTermsFieldsTi" );
+
         map.put( "210", "222", function( field ) {
             index.pushField( indexName, field.getValue( /./, " " ) );
         } );
@@ -3934,6 +3715,7 @@ var DkcclTermIndex = function() {
                 }
             }
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsTi" );
     };
 
@@ -4047,6 +3829,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsUt = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsUt" );
+
         map.put( "239", function( field ) {
             field.eachSubField( /t|u|v|b/, function( field, subField ) {
                 index.pushField( "dkcclterm.ut", subField.value );
@@ -4072,6 +3855,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ut", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsUt" );
     };
 
@@ -4113,6 +3897,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsVp = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsVp" );
+
         map.put( "557", function( field ) {
             field.eachSubField( /a|b|v|\u00e6|\u00f8|A/, function( field, subField ) {
                 index.pushField( "dkcclterm.vp", subField.value );
@@ -4123,6 +3908,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.vp", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsVp" );
     };
 
@@ -4140,6 +3926,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsWw = function( index, map ) {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsWw" );
+
         map.put( "247", function( field ) {
             field.eachSubField( "u", function( field, subField ) {
                 index.pushField( "dkcclterm.ww", subField.value );
@@ -4265,6 +4052,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.ww", subField.value );
             } );
         } );
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsWw" );
     };
 
@@ -4281,6 +4069,9 @@ var DkcclTermIndex = function() {
      *@method
      */
     that.translateGMBCode = function( inputCode ) {
+
+        Log.trace( "Entering DkcclTermIndex.translateGMBCode" );
+
         var codeMap = {
             'a': 'te',
             'b': 'h\u00E5',
@@ -4299,71 +4090,11 @@ var DkcclTermIndex = function() {
             'v': 'sm'
         };
         var outputCode = codeMap[ inputCode ];
+
+        Log.trace( "Leaving DkcclTermIndex.translateGMBCode" );
+
         return outputCode;
     };
-
-
-    /**
-     *  Helper method that finds out if a record is an ebook (used to create dkcclterm.ma)
-     *  see http://wiki.dbc.dk/bin/view/Data/FormatImp008w for guidelines
-     *
-     *  @type method
-     *  @syntax DkcclTermIndex.isEbook( record )
-     *  @param {Record} record input record
-     *  @return {Boolean} true if record is an eBook
-     *  @name DkcclTermIndex.isEbook
-     *  @method
-     */
-    that.isEbook = function( record ) {
-
-        Log.trace( "Entering: DkcclTermIndex.isEbook" );
-
-        var valueOf008w = record.getValue( "008", "w" );
-        if ( "1" === valueOf008w ) {
-            Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-            return true;
-        }
-
-        var f009 = record.field( "009" );
-        var f856 = record.field( "856" );
-        if ( f009.getValue( "a" ) === "a" && f009.getValue( "g" ) === "xe" && /BKM|NET/.test( record.getValue( "032", "x" )) ) {
-            var valuesOf512 = record.getValue( "512" );
-            var valueOf856y = record.getValue( "856", "y" );
-            var eBookMatch = /(EPUB|PDF|Flash)-format/;
-            if ( eBookMatch.test( valuesOf512 ) || eBookMatch.test( valueOf856y ) ) {
-                Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-                return true;
-            }
-            if ( /download/i.test( valuesOf512 ) && !/downloades i HTML-format/.test( valuesOf512 )) {
-                Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-                return true;
-            }
-        }
-        if ( /Early English books online/i.test( record.getValue( "440", "a" ) ) ) {
-            Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-            return true;
-        }
-        var valueOf008t = record.getValue( "008", "t" );
-        if ( "m" === valueOf008t ) {
-            var valueOf856u = record.getValue( "856", "u" );
-            if ( /ebrary\.com/.test( valueOf856u ) ||
-                /oxfordscholarship\.com/.test( f856 ) ||
-                /sciencedirect\.com/.test( valueOf856u ) ) {
-                Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-                return true;
-            }
-        }
-        if ( /bog/i.test( record.getValue( "091", "a" ) ) && /125010|810010/.test( record.getValue( "001", "b" ) ) ) {
-            Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-            return true;
-        }
-        Log.trace( "Leaving: DkcclTermIndex.isEbook" );
-
-        return false;
-
-
-    };
-
 
     return that;
 

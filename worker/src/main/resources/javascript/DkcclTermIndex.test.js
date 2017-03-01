@@ -3,21 +3,61 @@ use( "UnitTest" );
 use( "Index" );
 use( "Marc" );
 
+UnitTest.addFixture( "Test DkcclTermIndex.createDkcclTermFields", function() {
+
+    var index = Index.newIndex();
+    var record = new Record();
+    record.fromString(
+        '001 00 *a12345678 *b870970\n' +
+        '009 00 *aa *gxx'
+    );
+
+    var actual = DkcclTermIndex.createDkcclTermFields( index, record );
+
+    var expected = [{
+        name:"dkcclterm.id",
+        value:"12345678"
+    }, {
+        name:"dkcclterm.ln",
+        value:"870970"
+    }, {
+        name:"dkcclterm.nr",
+        value:"12345678"
+    }, {
+        name:"dkcclterm.hm",
+        value:"xx"
+    }, {
+        name:"dkcclterm.hm",
+        value:"te"
+    }, {
+        name:"dkcclterm.ma",
+        value:"te"
+    }, {
+        name:"dkcclterm.ma",
+        value:"xx"
+    } ];
+
+    Assert.equalValue( "simple test of createDkcclTermFields", actual, expected );
+
+} );
+
+
 UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsAj", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "001", "00" );
-    field.append( "c", "20110502180936" );
-    record.append( field );
+    record.fromString(
+        '001 00 *c20110502180936\n'
+    );
 
     var indexOut = [ {
         name: "dkcclterm.aj",
         value: "20110502180936"
     } ];
 
-    Assert.equalValue( "Create dkcclterm fields (aj)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsAj, index, record ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsAj, index, record );
+
+    Assert.equalValue( "Create dkcclterm fields (aj)", actual, indexOut );
 
 } );
 
@@ -829,147 +869,6 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsLn", function() {
 
 } );
 
-UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsMa", function() {
-
-    var index = Index.newIndex();
-    var record = new Record();
-    record.fromString(
-        '008 00 *tm\n' +
-        '009 00 *aa *gxx'
-    );
-
-    var indexOut = [ {
-        name: "dkcclterm.ma",
-        value: "mo"
-    }, {
-        name: "dkcclterm.ma",
-        value: "b\xe5"
-    }, {
-        name: "dkcclterm.ma",
-        value: "te"
-    }, {
-        name: "dkcclterm.ma",
-        value: "xx"
-    } ];
-
-    var actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
-
-    Assert.equalValue( "Create dkcclterm fields (ma)", actual, indexOut );
-
-
-    index = Index.newIndex();
-    record = new Record();
-    record.fromString(
-        '008 00 *do\n'
-    );
-
-    indexOut = [ {
-        name: "dkcclterm.ma",
-        value: "ta"
-    } ];
-
-    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
-
-    Assert.equalValue( "Create dkcclterm.ma field from 008*d", actual, indexOut );
-
-
-    index = Index.newIndex();
-    record = new Record();
-    record.fromString(
-        '001 00 *a50523861 *b870970\n' +
-        '008 00 *tm\n' +
-        '009 00 *aa *bc *gxx *as *gxc *av'
-    );
-
-    indexOut = [ {
-        name: "dkcclterm.ma",
-        value: "mo"
-    }, {
-        name: "dkcclterm.ma",
-        value: "b\xe5"
-    }, {
-        name: "dkcclterm.ma",
-        value: "te"
-    }, {
-        name: "dkcclterm.ma",
-        value: "mu"
-    }, {
-        name: "dkcclterm.ma",
-        value: "lm"
-    }, {
-        name: "dkcclterm.ma",
-        value: "sc"
-    }, {
-        name: "dkcclterm.ma",
-        value: "sm"
-    }, {
-        name: "dkcclterm.ma",
-        value: "xx"
-    }, {
-        name: "dkcclterm.ma",
-        value: "xc"
-    } ];
-
-    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
-
-    Assert.equalValue( "Create dkcclterm fields (ma) 1 book + 2 cd's with music ",
-        actual, indexOut );
-
-    index = Index.newIndex( );
-    record = new Record( );
-    record.fromString(
-        "008 00 *tm *dx *jf *nb *w1\n" +
-        "009 00 *aa *gxe\n"
-    );
-    indexOut = [ {
-        name: "dkcclterm.ma",
-        value: "mo"
-    }, {
-        name: "dkcclterm.ma",
-        value: "ro"
-    }, {
-        name: "dkcclterm.ma",
-        value: "od"
-    }, {
-        name: "dkcclterm.ma",
-        value: "te"
-    }, {
-        name: "dkcclterm.ma",
-        value: "xe"
-    }, {
-        name: "dkcclterm.ma",
-        value: "eb"
-    } ];
-
-    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
-
-    Assert.equalValue( "Create dkcclterm field (ma) ebook", actual, indexOut );
-
-
-    index = Index.newIndex();
-    record = new Record();
-    record.fromString(
-        "009 00 *aa *gxe\n" +
-        "032 00 *xBKM201224\n" +
-        "512 00 *aDownloades i EPUB-format\n"
-    );
-
-    indexOut = [ {
-        name: "dkcclterm.ma",
-        value: "te"
-    }, {
-        name: "dkcclterm.ma",
-        value: "xe"
-    }, {
-        name: "dkcclterm.ma",
-        value: "eb"
-    } ];
-
-    actual = DkcclTermIndex.createDkcclFieldsMa( index, record );
-
-    Assert.equalValue( "Create dkcclterm field (ma) ebook without 008w1 marking", actual, indexOut );
-
-} );
 
 UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsNo", function() {
 
@@ -1603,56 +1502,5 @@ UnitTest.addFixture( "DkcclTermIndex.translateGMBCode", function() {
     outputCode = undefined;
 
     Assert.equalValue( "Return undefined for unknown gmb code", DkcclTermIndex.translateGMBCode( inputCode ), outputCode );
-
-
-} );
-
-UnitTest.addFixture( "DkcclTermIndex.isEbook", function() {
-    var record = new Record();
-    var inputString = "008 *w1\n";
-    record.fromString( inputString );
-    Assert.that( " Return true if 008 w 1", DkcclTermIndex.isEbook( record ) );
-
-    record = new Record();
-    inputString = "009 *aa *gxe\n" +
-        "032 *xBKM201224\n" +
-        "512 *aDownloades i EPUB-format\n";
-
-    record.fromString( inputString );
-    Assert.that( "record is ebook in epub-format", DkcclTermIndex.isEbook( record ) );
-
-    record = new Record();
-    inputString = "008 *tm\n" +
-        "009 *aa *gxe\n" +
-        "856 *uhttp://molly.ruc.dk/login?url=http://site.ebrary.com/lib/rubruc/Doc?id=10539287\n";
-    record.fromString( inputString );
-    Assert.that( "record is ebook from ebrary", DkcclTermIndex.isEbook( record ) );
-
-    record = new Record();
-    inputString = "009 *aa *gxe\n" +
-        "512 *aKan downloades i PDF-format\n";
-
-    record.fromString( inputString );
-    Assert.not( "record is not ebook as there is no bkm/net", DkcclTermIndex.isEbook( record ) );
-
-    record = new Record();
-    inputString = "009 *aa *gxe\n" +
-        "512 *aKan downloades i HTML-format\n";
-
-    record.fromString( inputString );
-    Assert.not( "record is not ebook as it is in HTML", DkcclTermIndex.isEbook( record ) );
-
-
-    record = new Record();
-    inputString = "009 *aa *gxe\n" +
-        "440 *aEarly English books online\n";
-    record.fromString( inputString );
-    Assert.that( "record is ebook from early english books", DkcclTermIndex.isEbook( record ) );
-
-    record = new Record();
-    inputString = "001 *b810010\n" +
-        "091 *aBog\n";
-    record.fromString( inputString );
-    Assert.that( "record is ebook from det kongelige bibliothek", DkcclTermIndex.isEbook( record ) );
 
 } );
