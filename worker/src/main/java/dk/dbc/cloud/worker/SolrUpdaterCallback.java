@@ -88,7 +88,7 @@ public class SolrUpdaterCallback
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(streamDate, "streamDate", log);
         String shardedId = getShardedSolrId( bibliographicRecordId, docId );
-        deletedDocuments.add(new DeleteMessage(shardedId, identifier, streamDate, trackingId));
+        deletedDocuments.add(new DeleteMessage(shardedId, streamDate));
     }
     
     public ArrayList<SolrInputDocument> getUpdatedDocuments() {

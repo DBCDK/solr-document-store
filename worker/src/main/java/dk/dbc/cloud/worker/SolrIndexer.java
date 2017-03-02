@@ -28,6 +28,7 @@ import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
 import dk.dbc.opensearch.commons.repository.IRepositoryIdentifier;
 import dk.dbc.opensearch.commons.repository.RepositoryException;
 import dk.dbc.opensearch.commons.repository.RepositoryProvider;
+import dk.dbc.solr.indexer.cloud.shared.IndexerMessage;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import java.sql.SQLException;
 import javax.annotation.PostConstruct;
@@ -116,17 +117,14 @@ public class SolrIndexer {
                 documentsDeleted.inc( callback.getDeletedDocumentsCount() );
                 documentsUpdated.inc( callback.getUpdatedDocumentsCount() );
 
-                if (callback.getDeletedDocumentsCount() > 0) {
-                    ObjectMessage message = responseContext.createObjectMessage( callback.getDeletedDocuments() );
+                if (callback.getDeletedDocumentsCount() > 0 || callback.getUpdatedDocumentsCount() > 0) {
+                    IndexerMessage indexerMessage = new IndexerMessage(pid, trackingId, callback.getUpdatedDocuments(), callback.getDeletedDocuments());
+                    ObjectMessage message = responseContext.createObjectMessage( indexerMessage );
                     sendRetryForever( responseContext, targetQueue, message );
+                } else {
+                    log.info("Indexing {} skipped by javascript", pid);
                 }
-                if (callback.getUpdatedDocumentsCount() > 0) {
-                    ObjectMessage message = responseContext.createObjectMessage( callback.getUpdatedDocuments() );
-                    sendRetryForever( responseContext, targetQueue, message );
-                }
-
                 long endtime = System.nanoTime();
-
                 log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ).and(
                         append( "duration", ( ( double ) ( ( endtime - starttime ) / 10000 ) ) / 100 ) ).and(
                         append( "updates", callback.getUpdatedDocumentsCount() ) ).and(

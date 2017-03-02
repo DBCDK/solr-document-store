@@ -138,7 +138,7 @@ public class SolrUpdaterCallbackTest {
         instance.deleteDocument(documentId, streamDate, bibrecid);
 
         ArrayList<DeleteMessage> list = new ArrayList<>();
-        list.add(new DeleteMessage( SolrUpdaterCallback.getShardedSolrId(bibrecid, documentId), pid, streamDate, trackingId));
+        list.add(new DeleteMessage( SolrUpdaterCallback.getShardedSolrId(bibrecid, documentId), streamDate));
 
         assertEquals( 0, instance.getUpdatedDocumentsCount() );
         assertEquals( 1, instance.getDeletedDocumentsCount() );
