@@ -21,17 +21,12 @@ package dk.dbc.cloud.worker;
 
 import dk.dbc.commons.exception.ExceptionUtil;
 import dk.dbc.jslib.Environment;
+import dk.dbc.solr.indexer.cloud.shared.DeleteMessage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.jms.Destination;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
 import jdk.nashorn.api.scripting.JSObject;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.ext.XLogger;
@@ -44,29 +39,19 @@ public class SolrUpdaterCallback
 {
     private final static XLogger log = XLoggerFactory.getXLogger(SolrUpdaterCallback.class);
     private static final String TRACKING_ID_FIELD = "rec.trackingId";
-    static final String STREAM_DATE = "streamDate";
-    static final String DOCUMENT_ID = "documentId";
-    static final String TRACKING_ID = "trackingId";
-    static final String PID = "pid";
 
-
-    private int updatedDocumentsCount;
-    private int deletedDocumentsCount;
     private final String identifier;
     private final Environment jsEnvironment;
-    private final JMSContext responseContext;
-    private final Destination responseQueue;
     private final String trackingId;
 
-    SolrUpdaterCallback(String identifier, Environment jsEnvironment, JMSContext responseContext, Destination responseQueue, String trackingId) {
+    private final ArrayList<SolrInputDocument> updatedDocuments = new ArrayList<>();
+    private final ArrayList<DeleteMessage> deletedDocuments = new ArrayList<>();
+
+    SolrUpdaterCallback(String identifier, Environment jsEnvironment, String trackingId) {
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(identifier, "identifier", log);
-        ExceptionUtil.checkForNullAndLogAndThrow(responseContext, "responseContext", log);
-        ExceptionUtil.checkForNullAndLogAndThrow(responseQueue, "responseQueue", log);
 
         this.identifier = identifier;
         this.jsEnvironment = jsEnvironment;
-        this.responseContext = responseContext;
-        this.responseQueue = responseQueue;
         this.trackingId = trackingId;
     }
     
@@ -95,51 +80,31 @@ public class SolrUpdaterCallback
         String shardedId = getShardedSolrId( bibliographicRecordId, solrId );
         solrDocument.setField( "id", shardedId );
         
-        addToQueue(solrDocument);
+        updatedDocuments.add( solrDocument );
     }
 
-    void addToQueue(SolrInputDocument doc){
-        ObjectMessage message = responseContext.createObjectMessage( doc );
-        sendRetryForever( message );
-        updatedDocumentsCount++;
-    }
-
-    public void deleteDocument(String docId, String streamDate, String bibliographicRecordId) throws JMSException  {
+    public void deleteDocument(String docId, String streamDate, String bibliographicRecordId) {
         log.debug("Deleting document for {}", docId);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(streamDate, "streamDate", log);
-        MapMessage message = responseContext.createMapMessage();
         String shardedId = getShardedSolrId( bibliographicRecordId, docId );
-        message.setString(DOCUMENT_ID, shardedId);
-        message.setString(STREAM_DATE, streamDate);
-        message.setString(TRACKING_ID, trackingId);
-        message.setString(PID, identifier);
-
-        sendRetryForever( message );
-        deletedDocumentsCount++;
+        deletedDocuments.add(new DeleteMessage(shardedId, identifier, streamDate, trackingId));
     }
     
-    private void sendRetryForever( Message m ) {
-        while( true ) {
-            try {
-                responseContext.createProducer().send(responseQueue, m);
-                break;
-            } catch ( JMSRuntimeException e ) {
-                log.warn( "Push to queue failed, {}. Retry in 5s.", e.getMessage() );
-                try {
-                    Thread.sleep( 5000 );
-                } catch (InterruptedException ex) {
-                    log.warn( "Interrupted while sleeping for retry", ex );
-                }
-            }
-        }
+    public ArrayList<SolrInputDocument> getUpdatedDocuments() {
+        return updatedDocuments;
     }
+
     public int getUpdatedDocumentsCount() {
-        return updatedDocumentsCount;
+        return updatedDocuments.size();
     }
 
     public int getDeletedDocumentsCount() {
-        return deletedDocumentsCount;
+        return deletedDocuments.size();
+    }
+
+    public ArrayList<DeleteMessage> getDeletedDocuments() {
+        return deletedDocuments;
     }
 
     private SolrInputDocument extractIndexDocumentFromNativeArray(JSObject index) throws IllegalStateException {

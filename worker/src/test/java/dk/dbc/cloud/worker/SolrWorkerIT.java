@@ -21,7 +21,9 @@ package dk.dbc.cloud.worker;
 import com.sun.messaging.ConnectionConfiguration;
 import dk.dbc.corepo.access.CORepoProvider;
 import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
+import dk.dbc.solr.indexer.cloud.shared.DeleteMessage;
 import java.io.File;
+import java.util.List;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -111,7 +113,8 @@ public class SolrWorkerIT {
         //Check that a "add-document-message" is on documentQueue
         //and that we can cast it to SolrInputDocument
         ObjectMessage message = ( ObjectMessage ) documentConsumer.receive();
-        SolrInputDocument doc = ( SolrInputDocument ) message.getObject();
+        List list = (List) message.getObject();
+        SolrInputDocument doc = ( SolrInputDocument ) list.get(0);
     }
 
     @Test
@@ -126,9 +129,13 @@ public class SolrWorkerIT {
 
         //Let SolrWorker handle message
         //Check that a "delete-document-message" is on documentQueue
-        MapMessage deleteMessage = ( MapMessage ) documentConsumer.receive();
-        assertEquals( "Deleted expected document id", "23645564/32!" + PID + "-870970-basis", deleteMessage.getString( SolrUpdaterCallback.DOCUMENT_ID ) );
-        assertEquals( "Deleted expected stream date", "2016-08-26T04:25:20.331Z", deleteMessage.getString( SolrUpdaterCallback.STREAM_DATE ) );
+        ObjectMessage message = ( ObjectMessage ) documentConsumer.receive();
+        List list = (List) message.getObject();
+        DeleteMessage deleteMessage = (DeleteMessage) list.get(0);
+
+
+        assertEquals( "Deleted expected document id", "23645564/32!" + PID + "-870970-basis", deleteMessage.getDocumentId() );
+        assertEquals( "Deleted expected stream date", "2016-08-26T04:25:20.331Z", deleteMessage.getStreamDate() );
 
     }
 

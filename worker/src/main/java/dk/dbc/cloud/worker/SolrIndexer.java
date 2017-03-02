@@ -40,6 +40,9 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.jms.JMSContext;
+import javax.jms.JMSRuntimeException;
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.naming.NamingException;
 import static net.logstash.logback.marker.Markers.*;
@@ -108,11 +111,20 @@ public class SolrIndexer {
                 DBCTrackedLogContext.setTrackingId( trackingId );
 
                 String data = getObjectData( dao, pid );
-                SolrUpdaterCallback callback = new SolrUpdaterCallback( pid, jsWrapper.getEnvironment(), responseContext,
-                        targetQueue, trackingId );
+                SolrUpdaterCallback callback = new SolrUpdaterCallback( pid, jsWrapper.getEnvironment(), trackingId );
                 jsWrapper.createIndexData( dao, pid, data, callback, libraryRuleHandler );
                 documentsDeleted.inc( callback.getDeletedDocumentsCount() );
                 documentsUpdated.inc( callback.getUpdatedDocumentsCount() );
+
+                if (callback.getDeletedDocumentsCount() > 0) {
+                    ObjectMessage message = responseContext.createObjectMessage( callback.getDeletedDocuments() );
+                    sendRetryForever( responseContext, targetQueue, message );
+                }
+                if (callback.getUpdatedDocumentsCount() > 0) {
+                    ObjectMessage message = responseContext.createObjectMessage( callback.getUpdatedDocuments() );
+                    sendRetryForever( responseContext, targetQueue, message );
+                }
+
                 long endtime = System.nanoTime();
 
                 log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ).and(
@@ -145,4 +157,20 @@ public class SolrIndexer {
         String label = repositoryDAO.getObjectLabel( identifier );
         return "SolrWorker:" + pid + "<" + label;
     }
+    private static void sendRetryForever( JMSContext responseContext, Queue targetQueue, Message m ) {
+        while( true ) {
+            try {
+                responseContext.createProducer().send(targetQueue, m);
+                break;
+            } catch ( JMSRuntimeException e ) {
+                log.warn( "Push to queue failed, {}. Retry in 5s.", e.getMessage() );
+                try {
+                    Thread.sleep( 5000 );
+                } catch (InterruptedException ex) {
+                    log.warn( "Interrupted while sleeping for retry", ex );
+                }
+            }
+        }
+    }
+
 }
