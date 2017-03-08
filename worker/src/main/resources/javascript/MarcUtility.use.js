@@ -12,6 +12,7 @@ EXPORTED_SYMBOLS = [ 'MarcUtility' ];
  * @name MarcUtility
  */
 var MarcUtility = function( ) {
+
     var that = {};
     
     /**
@@ -19,20 +20,20 @@ var MarcUtility = function( ) {
      *
      *
      * @type {method}
-     * @syntax MarcUtility.createRecordObject( commonDataXml )
+     * @syntax MarcUtility.createRecordObject( xmlFragment )
      * @param {Xml} xmlFragment Xml object containing marcx:record
-     * @return {Object} The new record object
+     * @return {Record} The new record object
      * @name MarcUtility.createRecordObject
      * @method
      */
     that.createRecordObject = function( xmlFragment ){
 
         Log.trace( "Entering: MarcUtility.createRecordObject method" );
-        Log.debug("CMData: ", XmlUtil.logXmlString( xmlFragment ) );
+        Log.debug( "CMData: ", XmlUtil.logXmlString( xmlFragment ) );
 
         //var recordObj = MarcXchange.marcXchangeToMarcRecord(xmlFragment);
         var recordObj = new Record ( );
-        var children = XmlUtil.getChildElements(xmlFragment, "datafield", XmlNamespaces.marcx);
+        var children = XmlUtil.getChildElements( xmlFragment, "datafield", XmlNamespaces.marcx );
         for ( var i = 0 ; i < children.length ; i++ ) {
             var child = children[i];
             var tag = XmlUtil.getAttribute( child, "tag" );
@@ -54,7 +55,9 @@ var MarcUtility = function( ) {
         return recordObj;
     };
 
-    that.createRecordObjectFromIndexingData = function( indexingData ){
+
+    that.createRecordObjectFromIndexingData = function( indexingData ) {
+
         var master = new Record();
         // Get data from all records in collection
         var elements = XPath.select( "/*/marcx:collection/marcx:record", indexingData );
