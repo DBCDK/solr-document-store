@@ -3,7 +3,7 @@ use( "UnitTest" );
 
 UnitTest.addFixture( "IndexNormalizer.normalizeValues", function( ) {
 
-    index = [ {
+    var index = [ {
             name: "dkcclterm.aj",
             value: "20111212180236"
         }, {
@@ -263,7 +263,8 @@ UnitTest.addFixture( "IndexNormalizer.normalizeValues", function( ) {
             value: "\\tenor saxofon\\"
         }
     ];
-    indexOut = [ {
+
+    var indexOut = [ {
             name: "dkcclterm.aj",
             value: "20111212180236"
         }, {
@@ -488,9 +489,6 @@ UnitTest.addFixture( "IndexNormalizer.normalizeValues", function( ) {
         }
     ];
 
-    Assert.equal( "Normalize index", 'IndexNormalizer.normalizeValues( index );', indexOut );
-
-    delete this.index;
-    delete this.indexOut;
+    Assert.equalValue( "Normalize index", IndexNormalizer.normalizeValues( index ), indexOut );
 
 } );
