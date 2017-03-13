@@ -390,24 +390,24 @@ var AdminIndex = function( ) {
         var date;
 
         var text = XPath.selectText( "/*/marcx:collection/marcx:record[@type='Bibliographic']/marcx:datafield[@tag='001']/marcx:subfield[@code='c'][ 1 ]", inputXml );
-        if ( text !== "" ) {
+        if ( "" !== text ) {
             field100c = true;
             date = AdminIndex.__makeDate( text );
-            if ( date !== "" ) {
+            if ( "" !== date ) {
                 index.pushField( "rec.modifiedDate", date );
             } else {
-                Log.warn( "Cannot create index field rec.modifiedDate from "+ text );
+                Log.warn( "Cannot create index field rec.modifiedDate from " + text );
             }
         }
 
-        if ( field100c === false ) {
+        if ( false === field100c ) {
             text = XPath.selectText( "/*/marcx:collection/marcx:record[@type='Bibliographic']/marcx:datafield[@tag='001']/marcx:subfield[@code='d'][ 1 ]", inputXml );
-            if ( text !== "" ) {
+            if ( "" !== text ) {
                 date = AdminIndex.__makeDate( text );
-                if ( date !== "" ) {
+                if ( "" !== date ) {
                     index.pushField( "rec.modifiedDate", date );
                 } else {
-                    Log.warn( "Cannot create index field rec.modifiedDate from "+ text );
+                    Log.warn( "Cannot create index field rec.modifiedDate from " + text );
 
                 }
             }
@@ -424,7 +424,7 @@ var AdminIndex = function( ) {
      *
      *
      * @type {method}
-     * @syntax AdminIndex.createChildDocId( index, indexingData)
+     * @syntax AdminIndex.createChildDocId( index, indexingData, libraryRuleHandler)
      * @param {Document} inputXml Xml object containing input data
      * @param {Object} index The index (object) to add the new index fields to
      * @param {Object} libraryRuleHandler Javaobject. Instance of dk.dbc.openagency.client.LibraryRuleHandler to access OpenAgency
@@ -442,15 +442,15 @@ var AdminIndex = function( ) {
         var idFrom002a = XPath.selectText( "/*/marcx:collection/marcx:record[@type='Bibliographic']/marcx:datafield[@tag='002']/marcx:subfield[@code='a']", inputXml );
         Log.debug( "idFrom002a : ", idFrom002a );
 
-        if ( AdminIndex.useHoldingsItem( libraryRuleHandler, agencyId ) === true ) {
+        if ( true === AdminIndex.useHoldingsItem( libraryRuleHandler, agencyId ) ) {
             XPath.forEachNodeText( "/*/adminData/collectionIdentifier", inputXml, function( collectionId ) {
                 index.pushField( "rec.childDocId", collectionId + ":" + id );
             } );
         } else {
             XPath.forEachNodeText( "/*/adminData/collectionIdentifier", inputXml, function( collectionId ) {
-                if ( collectionId === "870970-basis" ) {
+                if ( "870970-basis" === collectionId ) {
                     index.pushField( "rec.childDocId", collectionId + ":" + id );
-                    if ( idFrom002a !== "" ) {
+                    if ( "" !== idFrom002a ) {
                         index.pushField( "rec.childDocId", collectionId + ":" + idFrom002a );
                     }
                 } else {

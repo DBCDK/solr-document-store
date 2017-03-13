@@ -368,8 +368,6 @@ UnitTest.addFixture( "AdminIndex.createRecBibliographicRecordId", function( ) {
 
 UnitTest.addFixture( "AdminIndex.createRecCreatedDate", function( ) {
 
-    var index = Index.newIndex();
-
     var xml = XmlUtil.fromString('\
 <ting:container xmlns:ting="http://www.dbc.dk/ting">\
   <marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">\\n\
@@ -382,15 +380,15 @@ UnitTest.addFixture( "AdminIndex.createRecCreatedDate", function( ) {
 </ting:container>\
 ');
 
-    var indexOut = [ {
+    var expected = [ {
         name: "rec.createdDate",
         value: "2014-08-12T00:00:00Z"
     } ];
 
-    Assert.equalValue( "Create rec.createdDate", AdminIndex.createRecCreatedDate( xml, index ), indexOut );
+    var actual = AdminIndex.createRecCreatedDate( xml, Index.newIndex() );
 
+    Assert.equalValue( "Create rec.createdDate", actual, expected );
 
-    index = Index.newIndex();
 
     xml = XmlUtil.fromString('\
 <ting:container xmlns:ting="http://www.dbc.dk/ting">\
@@ -404,15 +402,14 @@ UnitTest.addFixture( "AdminIndex.createRecCreatedDate", function( ) {
 </ting:container>\
 ');
 
-    indexOut = [ ];
+    expected = [ ];
+    actual = AdminIndex.createRecCreatedDate( xml, Index.newIndex() );
 
-    Assert.equalValue( "Create no rec.createdDate", AdminIndex.createRecCreatedDate( xml, index ), indexOut );
+    Assert.equalValue( "Create no rec.createdDate", actual, expected );
 
 } );
 
 UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
-
-    var index = Index.newIndex();
 
     var xml = XmlUtil.fromString('\
 <ting:container xmlns:ting="http://www.dbc.dk/ting">\
@@ -428,14 +425,15 @@ UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
 </ting:container>\
 ');
 
-    var indexOut = [ {
+    var expected = [ {
         name: "rec.modifiedDate",
         value: "2010-06-11T00:00:00Z"
     } ];
 
-    Assert.equalValue( "Create rec.modifiedDate", AdminIndex.createRecModifiedDate( xml, index ), indexOut );
+    var actual = AdminIndex.createRecModifiedDate( xml, Index.newIndex( ) );
 
-    index = Index.newIndex();
+    Assert.equalValue( "Create rec.modifiedDate", actual, expected );
+
 
     xml = XmlUtil.fromString('\
 <ting:container xmlns:ting="http://www.dbc.dk/ting">\
@@ -451,15 +449,16 @@ UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
 </ting:container>\
 ');
 
-    indexOut = [ {
+    expected = [ {
         name: "rec.modifiedDate",
         value: "2010-01-01T00:00:00Z"
     } ];
 
-    Assert.equalValue( "Create rec.modifiedDate with corrected date", AdminIndex.createRecModifiedDate( xml, index ), indexOut );
+    actual = AdminIndex.createRecModifiedDate( xml, Index.newIndex( ) );
+
+    Assert.equalValue( "Create rec.modifiedDate with corrected date", actual, expected );
 
 
-    index = Index.newIndex();
     xml = XmlUtil.fromString('\
 <ting:container xmlns:ting="http://www.dbc.dk/ting">\
   <marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">\\n\
@@ -473,19 +472,13 @@ UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
 </ting:container>\
 ');
 
-    indexOut = [];
-    Assert.equalValue( "Create rec.modifiedDate with invalid date", AdminIndex.createRecModifiedDate( xml, index ), indexOut );
+    expected = [];
+    actual = AdminIndex.createRecModifiedDate( xml, Index.newIndex( ) );
+
+    Assert.equalValue( "Create rec.modifiedDate with invalid date", actual, expected );
 
 
-
-
-} );
-
-UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
-
-    var index = Index.newIndex( );
-
-    var xml = XmlUtil.fromString( '<ting:container xmlns:marcx="info:lc/xmlns/marcxchange-v1" \
+    xml = XmlUtil.fromString( '<ting:container xmlns:marcx="info:lc/xmlns/marcxchange-v1" \
     xmlns:ting="http://www.dbc.dk/ting">\
 <marcx:collection>\
     <marcx:record format="danMARC2" type="Bibliographic">\
@@ -530,20 +523,17 @@ UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
     <collectionIdentifier>870970-basis</collectionIdentifier>\
 </adminData></ting:container>' );
 
-    var indexOut = [ {
+    expected = [ {
         name: "rec.modifiedDate",
         value: "2005-08-22T00:00:00Z"
     } ];
 
-    Assert.equalValue( "Create rec.modifiedDate from multivolume record", AdminIndex.createRecModifiedDate( xml, index ), indexOut );
+    actual = AdminIndex.createRecModifiedDate( xml, Index.newIndex( ) );
 
-} );
+    Assert.equalValue( "Create rec.modifiedDate from multivolume record", actual, expected );
 
-UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
 
-    var index = Index.newIndex( );
-
-    var xml = XmlUtil.fromString( '\
+    xml = XmlUtil.fromString( '\
     <ting:container xmlns:ting="http://www.dbc.dk/ting">\
       <marcx:collection xmlns:marcx="info:lc/xmlns/marcxchange-v1">\\n\
         <marcx:record type="Bibliographic">\
@@ -555,19 +545,21 @@ UnitTest.addFixture( "AdminIndex.createRecModifiedDate", function( ) {
     </ting:container>\
 ' );
 
-    var indexOut = [ {
+    expected = [ {
         name: "rec.modifiedDate",
         value: "2014-08-12T00:00:00Z"
     } ];
 
-    Assert.equalValue( "Create rec.modifiedDate no 001c", AdminIndex.createRecModifiedDate( xml, index ), indexOut );
+    actual = AdminIndex.createRecModifiedDate( xml, Index.newIndex( ) );
+
+    Assert.equalValue( "Create rec.modifiedDate no 001c", actual, expected );
 
 } );
 
 UnitTest.addFixture( "AdminIndex.createChildDocId 1", function( ) {
 
     var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return false; } };
-    var index = Index.newIndex( );
+
     var xml = XmlUtil.fromString( '\
     <ting:container xmlns:ting="http://www.dbc.dk/ting" \
     xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" \
@@ -583,7 +575,7 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 1", function( ) {
     </ting:container>\
 ' );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "rec.childDocId",
         value: "870970-basis:50776360"
     }, {
@@ -594,15 +586,15 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 1", function( ) {
         value: "150021-fjern"
     } ];
 
-    Assert.equalValue( "Create childDocId from BASIS (870970) record",
-        AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock ), indexOut );
+    var actual = AdminIndex.createChildDocId( xml, Index.newIndex( ), libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create childDocId from BASIS (870970) record", actual, expected );
 
 } );
 
 UnitTest.addFixture( "AdminIndex.createChildDocId 2", function( ) {
 
     var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return false; } };
-    var index = Index.newIndex( );
 
     var xml = XmlUtil.fromString( '\
     <ting:container xmlns:ting="http://www.dbc.dk/ting">\
@@ -620,8 +612,10 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 2", function( ) {
         name: "rec.childDocId",
         value: "150014-album"
     } ];
-    Assert.equalValue( "Create childDocId from source that is not a library",
-        AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock ), indexOut );
+
+    var actual = AdminIndex.createChildDocId( xml, Index.newIndex( ), libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create childDocId from source that is not a library", actual, indexOut );
 
 } );
 
@@ -634,7 +628,7 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 3", function( ) {
             }
         }
     };
-    var index = Index.newIndex( );
+
     var xml = XmlUtil.fromString( '\
     <ting:container xmlns:ting="http://www.dbc.dk/ting" \
     xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" \
@@ -652,8 +646,10 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 3", function( ) {
         name: "rec.childDocId",
         value: "723000-katalog:50776360"
     } ];
-    Assert.equalValue( "Create childDocId from public library",
-        AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock ), indexOut );
+
+    var actual = AdminIndex.createChildDocId( xml, Index.newIndex( ), libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create childDocId from public library", actual, indexOut );
 
 } );
 
@@ -661,12 +657,12 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 4", function( ) {
     
     var libraryRuleHandlerMock = {
         isAllowed: function( agencyId, rule ) { 
-            if( agencyId === "300580" ) {
+            if ( "300580" ===  agencyId ) {
                 return true;
             } 
         } 
     };
-    var index = Index.newIndex( );
+
     var xml = XmlUtil.fromString( '\
     <ting:container \
     xmlns:ting="http://www.dbc.dk/ting" \
@@ -689,15 +685,17 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 4", function( ) {
         name: "rec.childDocId",
         value: "870970-skole:50776360"
     } ];
-    Assert.equalValue( "Create childDocId from school library",
-        AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock ), indexOut );
+
+    var actual = AdminIndex.createChildDocId( xml, Index.newIndex( ), libraryRuleHandlerMock );
+
+    Assert.equalValue( "Create childDocId from school library", actual, indexOut );
 
 } );
 
 UnitTest.addFixture( "AdminIndex.createChildDocId 5", function( ) {
 
     var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return false; } };
-    var index = Index.newIndex( );
+
     var xml = XmlUtil.fromString( '\
     <ting:container xmlns:ting="http://www.dbc.dk/ting" \
     xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" \
@@ -711,6 +709,7 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 5", function( ) {
         </adminData>\
     </ting:container>\
 ' );
+
     var indexOut = [ {
         name: "rec.childDocId",
         value: "860980-katalog"
@@ -719,7 +718,7 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 5", function( ) {
         value: "870970-forsk"
     } ];
 
-    var actual = AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock );
+    var actual = AdminIndex.createChildDocId( xml, Index.newIndex( ), libraryRuleHandlerMock );
 
     Assert.equalValue( "Create childDocId from research library", actual, indexOut );
 
@@ -728,7 +727,7 @@ UnitTest.addFixture( "AdminIndex.createChildDocId 5", function( ) {
 UnitTest.addFixture( "AdminIndex.createChildDocId 6", function() {
 
     var libraryRuleHandlerMock = { isAllowed: function( agencyId, rule ){ return false; } };
-    var index = Index.newIndex( );
+
     var xml = XmlUtil.fromString( '\
 <ting:container xmlns:marcx="info:lc/xmlns/marcxchange-v1" \
 xmlns:ting="http://www.dbc.dk/ting" \
@@ -766,7 +765,7 @@ xmlns:ac="http://biblstandard.dk/ac/namespace/">\
         value: "150021-fjern"
     } ];
 
-    var actual = AdminIndex.createChildDocId( xml, index, libraryRuleHandlerMock );
+    var actual = AdminIndex.createChildDocId( xml, Index.newIndex( ), libraryRuleHandlerMock );
 
     Assert.equalValue( "Create childDocId from 002a", actual, indexOut );
 
