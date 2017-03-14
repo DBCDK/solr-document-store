@@ -31,13 +31,11 @@ EXPORTED_SYMBOLS = [ 'IndexCreator' ];
  */
 var IndexCreator = function( ) {
 
-    var that = {};
-
     /**
      * Method that prepares data for indexing.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax IndexCreator.prepareData( index, foxmlStr, libraryRuleHandler, solrCallback )
      * @param {String} pid The pid of the object being indexed
      * @param {String} foxmlStr The entire data representing the object being indexed
@@ -45,9 +43,9 @@ var IndexCreator = function( ) {
      * @param {Object} solrCallback Call back object with methods addDocument("array of fields" and deleteDocument(String solrId)
      * @return {Object} The new index object
      * @name IndexCreator.prepareData
-     * @method
+     * @function
      */
-    that.prepareData = function( pid, foxmlStr, libraryRuleHandler, solrCallback ) {
+    function prepareData( pid, foxmlStr, libraryRuleHandler, solrCallback ) {
 
         var foXml = XmlUtil.fromString( foxmlStr );
 
@@ -128,25 +126,40 @@ var IndexCreator = function( ) {
             streamDate = XPath.selectAttribute( "/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml );
             IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler );		
         }
-    };
-    
-    that.getSolrId = function( pid, streamId ) {
+    }
+
+
+    /**
+     * Create solr id from pid and streamId.
+     *
+     * @function
+     * @type {function}
+     * @syntax IndexCreator.getSolrId( pid, streamId )
+     * @param {String} pid
+     * @param {String} streamId
+     * @return {String}
+     * @name IndexCreator.getSolrId
+     */
+    function getSolrId( pid, streamId ) {
+
+        Log.trace( "Entering IndexCreator.getSolrId" );
 
         // var bibliographicRecordId = pid.replace( /^.*:/, "" ).replace( /__[0-9]+/, "" );
         //var shardKey = bibliographicRecordId.replace( /[^0-9a-zA-Z]/g, "" );
         //var solrId = shardKey + "/32!" + pid + "-" + streamId;
         var solrId = pid + "-" + streamId;
 
-        Log.debug( "Created solr-id: ", solrId );
+        Log.debug( "IndexCreator.getSolrId created solr-id: ", solrId );
+        Log.trace( "Leaving IndexCreator.getSolrId" );
 
         return solrId;
-    };
+    }
 
     /**
      * Method that creates SOLR index documents.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler )
      * @param {String} pid the Fedora identifier of the object being indexed
      * @param {Document} indexingData the specific XML to be indexed (commonData or localData)
@@ -160,9 +173,9 @@ var IndexCreator = function( ) {
      * @param {Object} libraryRuleHandler Javaobject. Instance of dk.dbc.openagency.client.LibraryRuleHandler to access OpenAgency
      * @return the updated array of SOLR index documents
      * @name IndexCreator.createIndexDocuments
-     * @method
+     * @function
      */
-    that.createIndexDocuments = function( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler ) {
+    function createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler ) {
 
         Log.trace( "Entering IndexCreator.createIndexDocuments ", solrId );
 
@@ -192,13 +205,13 @@ var IndexCreator = function( ) {
         finally {
             Log.trace( "Leaving IndexCreator.createIndexDocuments ", solrId );
         }
-    };
+    }
 
     /**
      * Method that populates index with the appropriate index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax IndexCreator.createIndexData( pid, indexingData, systemRelationsXml, dcDataXml, libraryRuleHandler, solrId )
      * @param {String} pid The pid of the object being indexed
      * @param {Document} indexingData the specific XML to be indexed (commonData or localData)
@@ -208,9 +221,11 @@ var IndexCreator = function( ) {
      * @param {String} solrId the identifier of the solr document
      * @return {Object} The updated index object
      * @name IndexCreator.createIndexData
-     * @method
+     * @function
      */
-    that.createIndexData = function( pid, indexingData, systemRelationsXml, dcDataXml, libraryRuleHandler, solrId ) {
+    function createIndexData( pid, indexingData, systemRelationsXml, dcDataXml, libraryRuleHandler, solrId ) {
+
+        Log.trace( "Entering IndexCreator.createIndexData" );
 
         var alias = Alias.getAlias( indexingData );
 
@@ -286,21 +301,23 @@ var IndexCreator = function( ) {
 
         index = IndexNormalizer.normalizeValues( index );
 
+        Log.trace( "Leaving IndexCreator.createIndexData" );
+
         return index;
 
-    };
+    }
 
     /**
      * Method that created an object of MarcRecords to use for indexing.
      *
-     * @method
-     * @type {method}
+     * @function
+     * @type {function}
      * @syntax IndexCreator.createMarcObjects( indexingData )
      * @param {Document} indexingData
      * @return {Object}
      * @name IndexCreator.createMarcObjects
      */
-    that.createMarcObjects = function( indexingData ) {
+    function createMarcObjects( indexingData ) {
 
         Log.trace( "Entering: IndexCreator.createMarcObjects" );
 
@@ -344,20 +361,20 @@ var IndexCreator = function( ) {
 
         return marcObjects;
 
-    };
+    }
 
     /**
      * Get use_localdata_stream switch for agency in VIP
      *
-     * @method
-     * @type {method}
+     * @function
+     * @type {function}
      * @syntax IndexCreator.useLocaldataStream( libraryRuleHandler, agencyId )
      * @param {Object} libraryRuleHandler Javaobject. Instance of dk.dbc.openagency.client.LibraryRuleHandler to access OpenAgency
      * @param {String} agencyId Agency to look up
      * @return {boolean} true if use_localdata_stream switch is set for agency
      * @name IndexCreator.useLocaldataStream
      */
-    that.useLocaldataStream = function( libraryRuleHandler, agencyId ) {
+    function useLocaldataStream( libraryRuleHandler, agencyId ) {
 
         Log.trace( "Entering: IndexCreator.useLocaldataStream" );
 
@@ -370,9 +387,16 @@ var IndexCreator = function( ) {
         Log.trace( "Leaving: IndexCreator.useLocaldataStream" );
 
         return useLocaldataStream;
-    };
+    }
 
-    return that;
+    return {
+        prepareData: prepareData,
+        getSolrId: getSolrId,
+        createIndexDocuments: createIndexDocuments,
+        createIndexData: createIndexData,
+        createMarcObjects: createMarcObjects,
+        useLocaldataStream: useLocaldataStream
+    };
 
 }( );
 
