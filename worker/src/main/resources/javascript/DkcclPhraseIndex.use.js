@@ -1,5 +1,6 @@
 use( "Log" );
 use( "Marc" );
+use( "Tables" );
 
 EXPORTED_SYMBOLS = [ 'DkcclPhraseIndex' ];
 
@@ -64,6 +65,7 @@ var DkcclPhraseIndex = function( ) {
         DkcclPhraseIndex.createDkcclLknFields( index, map );
         DkcclPhraseIndex.createDkcclLkoFields( index, map );
         DkcclPhraseIndex.createDkcclLmeFields( index, map );
+        DkcclPhraseIndex.createDkcclLmoFields( index, map );
         DkcclPhraseIndex.createDkcclLmsFields( index, map );
         DkcclPhraseIndex.createDkcclLnbFields( index, map );
         DkcclPhraseIndex.createDkcclLntFields( index, map );
@@ -1479,6 +1481,32 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLmeFields" );
+    };
+
+
+    /**
+     * Method that creates cll lmo index fields
+     *
+     * @type {method}
+     * @syntax Dkcclphrase.createDkcclLmoFields( index, map )
+     * @param {Object} index the index to add fields to
+     * @param {MatchMap} map The map to register hanlder methods in
+     * @name DkcclPhraseIndex.createDkcclLmoFields
+     */
+    that.createDkcclLmoFields = function( index, map ) {
+        Log.trace( 'Entering DkcclPhraseIndex.createDkcclLmoFields' );
+
+        map.put( "039", function( field ) {
+            field.eachSubField( "a", function( field, subfield ) {
+                var musicCode = subfield.value;
+                var musicText = Tables.musicGenre( musicCode );
+                if ( undefined !== musicText ) {
+                    index.pushField( "dkcclphrase.lmo", musicText );
+                }
+            } );
+        } );
+
+        Log.trace( 'Leaving DkcclPhraseIndex.createDkcclLmoFields' );
     };
 
     /**

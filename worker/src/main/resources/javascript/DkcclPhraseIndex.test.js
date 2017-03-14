@@ -1710,6 +1710,38 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclUdkFields", function() {
 
 } );
 
+
+UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLmoFields", function() {
+    var index = Index.newIndex();
+    var record = new Record();
+    record.fromString( "039 00 *abef\n" );
+
+    var expectedIndex = [ {
+        'name': "dkcclphrase.lmo",
+        'value': "Rock"
+    } ];
+
+    Assert.equalValue( "Create dkccl lmo fields for rockmusik",
+        DkcclPhraseIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLmoFields, index, record ), expectedIndex );
+
+    index = Index.newIndex();
+    record = new Record();
+    expectedIndex = [];
+    Assert.equalValue( "Create no dkccl lmo fields for empty record",
+        DkcclPhraseIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLmoFields, index, record ), expectedIndex );
+
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "039 00 *anovalidcode\n" );
+    expectedIndex = [];
+    Assert.equalValue( "Create no dkccl lmo fields for unknown code",
+        DkcclPhraseIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLmoFields, index, record ), expectedIndex );
+
+
+} );
+
+
 UnitTest.addFixture( "DkcclPhraseIndex.pushExtraIndexFields", function() {
 
     var indexOut = [ {
@@ -1796,4 +1828,6 @@ UnitTest.addFixture( "DkcclPhraseIndex.pushCreatorIndexFields", function(){
         DkcclPhraseIndex.pushCreatorIndexFields( Index.newIndex( ), undefined, "540" ), [ ] );
 
 } );
+
+
 
