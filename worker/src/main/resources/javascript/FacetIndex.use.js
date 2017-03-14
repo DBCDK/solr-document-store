@@ -773,16 +773,16 @@ var FacetIndex = function() {
 
         Log.trace( "Entering: createLix method" );
 
-        if ( record !== undefined ) {
+        if ( undefined !== record ) {
             record.eachField( '042', function( field ) {
                 field.eachSubField( 'a', function( field, subfield ) {
                     var lixValue = subfield.value;
-                    lixValue = lixValue.replace( / ?lix ?/i,"");
-                    if( /^[0-9]+(-[0-9]+)?$/.test( lixValue )){
+                    lixValue = lixValue.replace( / ?lix ?/i, "" );
+                    if ( /^[0-9]+(-[0-9]+)?$/.test( lixValue ) ) {
                         index.pushField( "facet.lix", lixValue );
 
-                }
-                });
+                    }
+                } );
             } );
         }
 
