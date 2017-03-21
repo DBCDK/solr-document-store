@@ -448,6 +448,23 @@ var DkcclTermIndex = function() {
             } );
         } );
 
+        var fieldCodeToMnemoCodeTable =  {
+            "a": "ou",
+            "b": "od",
+            "c": "oi"
+        };
+        map.put( "008", function( field ){
+            if( field.exists( "n" )) {
+                var field008nCode = field.subfield( "n" ).value;
+                    var m07 = fieldCodeToMnemoCodeTable[ field008nCode ];
+                    if ( m07 ) {
+                        index.pushField( "dkcclterm.br", m07 );
+
+                }
+            }
+
+        });
+
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsBr" );
     };
 

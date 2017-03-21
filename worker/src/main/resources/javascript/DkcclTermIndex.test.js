@@ -1488,6 +1488,62 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsBr", function() {
     Assert.equalValue( "Create dkcclterm fields (br) with values d and b",
         DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBr, index, record ), indexOut );
 
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "008 00 *na\n" );
+
+
+    indexOut = [{
+        name: "dkcclterm.br",
+        value: "ou"
+    }];
+
+    Assert.equalValue( "Create dkcclterm fields (br) from 008 n is a(mnemo-code:ou from m07)",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBr, index, record ), indexOut );
+
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "008 00 *nb\n" );
+
+
+    indexOut = [{
+        name: "dkcclterm.br",
+        value: "od"
+    }];
+
+    Assert.equalValue( "Create dkcclterm fields (br) from 008 n is b(mnemo-code:od from m07)",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBr, index, record ), indexOut );
+
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "008 00 *nc\n" );
+
+
+    indexOut = [{
+        name: "dkcclterm.br",
+        value: "oi"
+    }];
+
+    Assert.equalValue( "Create dkcclterm fields (br) from 008 n is c(mnemo-code:oi from m07)",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBr, index, record ), indexOut );
+
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "008 00 *e1\n" );
+
+
+    indexOut = [];
+
+    Assert.equalValue( "Create dkcclterm fields (br) no field 008 n",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBr, index, record ), indexOut );
+
+
+
+
+
 
 } );
 
