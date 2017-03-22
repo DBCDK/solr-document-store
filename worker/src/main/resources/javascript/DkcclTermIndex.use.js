@@ -2266,18 +2266,7 @@ var DkcclTermIndex = function() {
     that.createDkcclFieldsKl = function( index, map ){
         Log.trace( 'Entering DkcclTermIndex.createDkcclFieldsKl' );
 
-        map.put( "087", function( field ){
-            field.eachSubField( /[a-z]/, function( field, subField ){
-                index.pushField( "dkcclterm.kl", subField.value );
-            })
-        });
-
-        map.put( "088", function( field ){
-            field.eachSubField( /[a-z]/, function( field, subField ){
-                index.pushField( "dkcclterm.kl", subField.value );
-            })
-        });
-        map.put( "089", function( field ){
+        map.put( "087", "088", "089", function( field ){
             field.eachSubField( /[a-z]/, function( field, subField ){
                 index.pushField( "dkcclterm.kl", subField.value );
             })
