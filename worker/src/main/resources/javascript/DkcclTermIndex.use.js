@@ -526,6 +526,7 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.cl", subField.value );
             } );
         } );
+
         map.put( "080", function( field ) {
             field.eachSubField( /a|x/, function( field, subField ) {
                 index.pushField( "dkcclterm.cl", subField.value );
@@ -536,6 +537,10 @@ var DkcclTermIndex = function() {
                 index.pushField( "dkcclterm.cl", subField.value );
             } );
         } );
+        /**
+         * values from dkcclterm.kl er copied over in solr-indexer-config/config/schema.xml
+         * i.e. fields 087 a-z, 088 a-z and 089 a-z
+         */
         map.put( "652", function( field ) {
             field.eachSubField( /i|m|n|o|p|q|r/, function( field, subField ) {
                 index.pushField( "dkcclterm.cl", subField.value );
@@ -2245,6 +2250,41 @@ var DkcclTermIndex = function() {
         } );
 
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsKk" );
+    };
+
+
+    /**
+     * Method that creates cll term index fields (kl).
+     *
+     * @type {method}
+     * @syntax DkcclTermIndex.createDkcclFieldsKl( index, map )
+     * @param {Object} index the index to add fields to
+     * @param {MatchMap} map The map to register handler methods in
+     * @name DkcclTermIndex.createDkcclFieldsKl
+     * @method
+     */
+    that.createDkcclFieldsKl = function( index, map ){
+        Log.trace( 'Entering DkcclTermIndex.createDkcclFieldsKl' );
+
+        map.put( "087", function( field ){
+            field.eachSubField( /[a-z]/, function( field, subField ){
+                index.pushField( "dkcclterm.kl", subField.value );
+            })
+        });
+
+        map.put( "088", function( field ){
+            field.eachSubField( /[a-z]/, function( field, subField ){
+                index.pushField( "dkcclterm.kl", subField.value );
+            })
+        });
+        map.put( "089", function( field ){
+            field.eachSubField( /[a-z]/, function( field, subField ){
+                index.pushField( "dkcclterm.kl", subField.value );
+            })
+        });
+
+        Log.trace( 'Leaving DkcclTermIndex.createDkcclFieldsKl' );
+
     };
 
 

@@ -850,6 +850,85 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsKk", function() {
 
 } );
 
+UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsKl", function(){
+
+    var index = Index.newIndex();
+    var record = new Record();
+    record.fromString( "088 00 *a82/89(520) *bSkønlitteratur, Japan\n" );
+
+    var indexOut = [{
+        name: "dkcclterm.kl",
+        value: "82/89(520)"
+    },{
+        name: "dkcclterm.kl",
+        value: "Skønlitteratur, Japan"
+    }];
+
+    Assert.equalValue( "Create dkcclterm fields (kl) for field 088",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsKl, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "088 00 *aXmbea *dnoder musikoptagelser violinkoncerter\n" +
+        "088 00 *aX *b/-qa *dnoder musikoptagelser amerikanske musikværker\n" );
+
+    indexOut = [ {
+       name: "dkcclterm.kl",
+        value: "Xmbea"
+    },{
+        name: "dkcclterm.kl",
+        value: "noder musikoptagelser violinkoncerter"
+    }, {
+        name: "dkcclterm.kl",
+        value: "X"
+    }, {
+        name: "dkcclterm.kl",
+        value: "/-qa"
+    }, {
+        name: "dkcclterm.kl",
+        value: "noder musikoptagelser amerikanske musikværker"
+    }
+    ];
+
+
+    Assert.equalValue( "Create dkcclterm fields (kl) for several fields 088",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsKl, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "089 00 *a338.45\n");
+
+    indexOut = [ {
+        name: "dkcclterm.kl",
+        value: "338.45"
+    }
+    ];
+
+
+    Assert.equalValue( "Create dkcclterm fields (kl) for 089",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsKl, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "087 00 *a338.45\n");
+
+    indexOut = [ {
+        name: "dkcclterm.kl",
+        value: "338.45"
+    }
+    ];
+
+
+    Assert.equalValue( "Create dkcclterm fields (kl) for 087",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsKl, index, record ), indexOut );
+
+
+
+
+
+
+});
+
 UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsLn", function() {
 
     var index = Index.newIndex();
