@@ -393,6 +393,10 @@ var DkcclPhraseIndex = function( ) {
                 index.pushField( "dkcclphrase.lcl", subField.value );
             } );
         } );
+        /**
+         * values from dkcclterm.kl er copied over in solr-indexer-config/config/schema.xml
+         * i.e. fields 087 a 088 a and 089 a
+         */
         map.put( "652", "654", function( field ) {
             index.pushField( "dkcclphrase.lcl", field.getValue( /i|v/, " " ) );
             index.pushField( "dkcclphrase.lcl", field.getValue( /m|v/, " " ) );
@@ -1382,6 +1386,29 @@ var DkcclPhraseIndex = function( ) {
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLkeFields" );
     };
 
+    /**
+     * Method that creates ccl lkl index fields.
+     *
+     *
+     * @type {method}
+     * @syntax DkcclPhraseIndex.createDkcclLklFields( index, map )
+     * @param {Object} index the index to add fields to
+     * @param {MatchMap} map The map to register handler methods in
+     * @name DkcclPhraseIndex.createDkcclLklFields
+     * @method
+     */
+    that.createDkcclLklFields = function( index, map ){
+        Log.trace( "Entering DkcclPhraseIndex.createDkcclLklFields" );
+
+        map.put( "087", "088", "089", function( field ){
+            field.eachSubField( "a", function( field, subField ){
+                index.pushField( "dkcclterm.lkl", subField.value );
+            })
+        });
+
+        Log.trace( "Leaving DkcclPhraseIndex.createDkcclLklFields" );
+
+    };
     /**
      * Method that creates ccl lkn index fields.
      *

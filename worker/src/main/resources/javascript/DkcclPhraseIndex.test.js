@@ -906,6 +906,68 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLkeFields", function() {
 
 } );
 
+
+UnitTest.addFixture( "DkcclTermIndex.createDkcclLklFields", function() {
+
+    var index = Index.newIndex();
+    var record = new Record();
+    record.fromString( "088 00 *a82/89(520) *bSkønlitteratur, Japan\n" );
+
+    var indexOut = [ {
+        name: "dkcclterm.lkl",
+        value: "82/89(520)"
+    } ];
+
+    Assert.equalValue( "Create dkcclterm fields (lkl) for field 088",
+        DkcclTermIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLklFields, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "088 00 *aXmbea *dnoder musikoptagelser violinkoncerter\n" +
+        "088 00 *aX *b/-qa *dnoder musikoptagelser amerikanske musikværker\n" );
+
+    indexOut = [ {
+        name: "dkcclterm.lkl",
+        value: "Xmbea"
+    }, {
+        name: "dkcclterm.lkl",
+        value: "X"
+    }
+    ];
+
+
+    Assert.equalValue( "Create dkcclterm fields (lkl) for several fields 088",
+        DkcclTermIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLklFields, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "089 00 *a338.45\n" );
+
+    indexOut = [ {
+        name: "dkcclterm.lkl",
+        value: "338.45"
+    }
+    ];
+
+
+    Assert.equalValue( "Create dkcclterm fields (lkl) for 089",
+        DkcclTermIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLklFields, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "087 00 *a338.45\n" );
+
+    indexOut = [ {
+        name: "dkcclterm.lkl",
+        value: "338.45"
+    }
+    ];
+
+
+    Assert.equalValue( "Create dkcclterm fields (lkl) for 087",
+        DkcclTermIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLklFields, index, record ), indexOut );
+});
+
 UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLknFields", function() {
 
     var index = Index.newIndex();
