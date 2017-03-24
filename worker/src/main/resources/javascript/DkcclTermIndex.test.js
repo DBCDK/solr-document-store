@@ -210,25 +210,12 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsAg", function() {
 
 UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsBc", function() {
 
+
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "023", "00" );
-    field.append( "b", "5051159324214" );
-    record.append( field );
-
-    var indexOut = [ {
-        name: "dkcclterm.bc",
-        value: "5051159324214"
-    } ];
-
-    Assert.equalValue( "Create dkcclterm fields (bc)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBc, index, record ), indexOut );
-
-    index = Index.newIndex();
-    record = new Record();
     record.fromString( "023 00 *a5051159324214 *x505115932421-----4\n" );
 
-    indexOut = [ {
+    var indexOut = [ {
         name: "dkcclterm.bc",
         value: "5051159324214"
     }, {
