@@ -1402,7 +1402,7 @@ var DkcclPhraseIndex = function( ) {
 
         map.put( "087", "088", "089", function( field ){
             field.eachSubField( "a", function( field, subField ){
-                index.pushField( "dkcclterm.lkl", subField.value );
+                index.pushField( "dkcclphrase.lkl", subField.value );
             })
         });
 
