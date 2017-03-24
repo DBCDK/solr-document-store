@@ -416,7 +416,7 @@ var DkcclTermIndex = function() {
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsBc" );
 
         map.put( "023", function( field ) {
-            field.eachSubField( /a|b/, function( field, subField ) {
+            field.eachSubField( /a|b|x/, function( field, subField ) {
                 index.pushField( "dkcclterm.bc", subField.value );
             } );
         } );

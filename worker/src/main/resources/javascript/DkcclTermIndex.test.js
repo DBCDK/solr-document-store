@@ -223,6 +223,23 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsBc", function() {
 
     Assert.equalValue( "Create dkcclterm fields (bc)",
         DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBc, index, record ), indexOut );
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( "023 00 *a5051159324214 *x505115932421-----4\n" );
+
+    indexOut = [ {
+        name: "dkcclterm.bc",
+        value: "5051159324214"
+    }, {
+        name: "dkcclterm.bc",
+        value: "505115932421-----4"
+    }
+    ];
+
+    Assert.equalValue( "Create dkcclterm fields (bc) for b and x",
+        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsBc, index, record ), indexOut );
+
 } );
 
 UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsBs", function() {
