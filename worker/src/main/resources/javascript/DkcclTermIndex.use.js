@@ -3318,16 +3318,9 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsPo" );
 
-        map.put( "100", function( field ) {
+        map.put( "100", "110", function( field ) {
             field.eachSubField( /./, function( field, subField ) {
-                if ( !subField.name.match( /0/ ) ) {
-                    index.pushField( indexName, subField.value );
-                }
-            } );
-        } );
-        map.put( "110", function( field ) {
-            field.eachSubField( /./, function( field, subField ) {
-                if ( !subField.name.match( /0/ ) ) {
+                if ( "0" !== subField.name ) {
                     index.pushField( indexName, subField.value );
                 }
             } );
@@ -3385,62 +3378,8 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering DkcclTermIndex.createDkcclFieldsRt" );
 
-        map.put( "860", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "861", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "863", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "865", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "866", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "867", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "868", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "870", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "871", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "873", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "874", function( field ) {
-            field.eachSubField( /c|t/, function( field, subField ) {
-                index.pushField( "dkcclterm.rt", subField.value );
-            } );
-        } );
-        map.put( "879", function( field ) {
+        map.put( "860", "861", "863", "865", "866", "867", "868", "870", "871", "873", "874", "879",
+            function( field ) {
             field.eachSubField( /c|t/, function( field, subField ) {
                 index.pushField( "dkcclterm.rt", subField.value );
             } );

@@ -1153,15 +1153,28 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsRt", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "009", "00" );
-    var subfield = new Subfield( "g", "xx" );
-    field.append( subfield );
-    record.append( field );
+    record.fromString( '861 00 *iFortsaettelse som *tRIBA Journal *g2003-' );
 
-    var indexOut = [];
+    var expected = [ {
+        name: "dkcclterm.rt",
+        value: "RIBA Journal"
+    } ];
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsRt, index, record );
 
-    Assert.equalValue( "Create dkcclterm fields (rt)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsRt, index, record ), indexOut );
+    Assert.equalValue( "Create dkcclterm.rt from 861", actual, expected );
+
+
+    index = Index.newIndex();
+    record = new Record();
+    record.fromString( '861 00 *iAlso available online: *tArchaeological journal' );
+
+    expected = [ {
+        name: "dkcclterm.rt",
+        value: "Archaeological journal"
+    } ];
+    actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsRt, index, record );
+
+    Assert.equalValue( "Create dkcclterm.rt from 865", actual, expected );
 
 } );
 
@@ -1169,18 +1182,11 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsSf", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "990", "00" );
-    var subfield = new Subfield( "o", "201150" );
-    field.append( subfield );
-    subfield = new Subfield( "b", "l" );
-    field.append( subfield );
-    subfield = new Subfield( "b", "v" );
-    field.append( subfield );
-    subfield = new Subfield( "u", "nt" );
-    field.append( subfield );
-    record.append( field );
+    record.fromString(
+        "990 00 *o201150 *bl *bv *unt"
+    );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "dkcclterm.sf",
         value: "201150"
     }, {
@@ -1189,11 +1195,11 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsSf", function() {
     }, {
         name: "dkcclterm.sf",
         value: "v"
-    }
-    ];
+    } ];
 
-    Assert.equalValue( "Create dkcclterm fields (sf)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsSf, index, record ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsSf, index, record );
+
+    Assert.equalValue( "Create dkcclterm fields (sf)", actual, expected );
 
 } );
 
@@ -1201,18 +1207,16 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsSp", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "008", "00" );
-    var subfield = new Subfield( "l", "dan" );
-    field.append( subfield );
-    record.append( field );
+    record.fromString( "008 00 *ldan" );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "dkcclterm.sp",
         value: "dan"
     } ];
 
-    Assert.equalValue( "Create dkcclterm fields (sp)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsSp, index, record ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsSp, index, record );
+
+    Assert.equalValue( "Create dkcclterm fields (sp)", actual, expected );
 
 } );
 
@@ -1220,26 +1224,24 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsTi", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "210", "00" );
-    field.append( "a", "Good Omens" );
-    field.append( "c", "The Nice and Accurate Prophecies of Agnes Nutter, Witch" );
-    record.append( field );
-    field = new Field( "245", "00" );
-    field.append( "a", "Glas kaster skygge" );
-    field.append( "c", "om litteraer oversaettelse" );
-    record.append( field );
+    record.fromString(
+        "210 00 *aGood Omens *cThe Nice and Accurate Prophecies of Agnes Nutter, Witch\n" +
+        "245 00 *aGlas kaster skygge *com litteraer oversaettelse"
+    );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "dkcclterm.ti",
         value: "Good Omens The Nice and Accurate Prophecies of Agnes Nutter, Witch"
     }, {
         name: "dkcclterm.ti",
         value: "Glas kaster skygge om litteraer oversaettelse"
-    }
-    ];
+    } ];
 
-    Assert.equalValue( "Create dkcclterm fields (ti)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsTi, index, record, "dkcclterm.ti" ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod(
+        DkcclTermIndex.createDkcclFieldsTi, index, record, "dkcclterm.ti"
+    );
+
+    Assert.equalValue( "Create dkcclterm fields (ti)", actual, expected );
 
 } );
 
@@ -1247,18 +1249,13 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsTi", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "241", "00" );
-    field.append( "a", "In the wake of Selandia - danish liner shipping 1912-2012" );
-    record.append( field );
-    field = new Field( "245", "00" );
-    field.append( "a", "Dansk linjefart - fra Selandia til Emma Maersk" );
-    record.append( field );
-    field = new Field( "945", "00" );
-    field.append( "a", "1001 nat" );
-    field.append( "z", "740" );
-    record.append( field );
+    record.fromString(
+        "241 00 *aIn the wake of Selandia - danish liner shipping 1912-2012\n" +
+        "245 00 *aDansk linjefart - fra Selandia til Emma Maersk\n" +
+        "945 00 *a1001 nat *z740"
+    );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "dkcclterm.ti",
         value: "In the wake of Selandia - danish liner shipping 1912-2012"
     }, {
@@ -1267,11 +1264,13 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsTi", function() {
     }, {
         name: "dkcclterm.ti",
         value: "1001 nat"
-    }
-    ];
+    } ];
 
-    Assert.equalValue( "Create dkcclterm fields (ti from 945)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsTi, index, record, "dkcclterm.ti" ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod(
+        DkcclTermIndex.createDkcclFieldsTi, index, record, "dkcclterm.ti"
+    );
+
+    Assert.equalValue( "Create dkcclterm fields (ti from 945)", actual, expected );
 
 } );
 
@@ -1279,18 +1278,16 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsUl", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "008", "00" );
-    var subfield = new Subfield( "b", "dk" );
-    field.append( subfield );
-    record.append( field );
+    record.fromString( "008 00 *bdk" );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "dkcclterm.ul",
         value: "dk"
     } ];
 
-    Assert.equalValue( "Create dkcclterm fields (ul)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsUl, index, record ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsUl, index, record );
+
+    Assert.equalValue( "Create dkcclterm fields (ul)", actual, expected );
 
 } );
 
@@ -1298,24 +1295,16 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsUu", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "990", "00" );
-    var subfield = new Subfield( "o", "201150" );
-    field.append( subfield );
-    subfield = new Subfield( "b", "l" );
-    field.append( subfield );
-    subfield = new Subfield( "b", "v" );
-    field.append( subfield );
-    subfield = new Subfield( "u", "nt" );
-    field.append( subfield );
-    record.append( field );
+    record.fromString( "990 00 *o201150 *bl *bv *unt");
 
     var indexOut = [ {
         name: "dkcclterm.uu",
         value: "nt"
     } ];
 
-    Assert.equalValue( "Create dkcclterm fields (uu)",
-        DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsUu, index, record ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsUu, index, record );
+
+    Assert.equalValue( "Create dkcclterm fields (uu)", actual, indexOut );
 
 } );
 
@@ -1323,20 +1312,13 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsVp", function() {
 
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "008", "00" );
-    field.append( "b", "dan" );
-    record.append( field );
-    field = new Field( "557", "00" );
-    field.append( "a", "Vand & miljoe" );
-    field.append( "v", "1. aargang, nr. 3 (oktober 1984)" );
-    field.append( "j", "1984" );
-    record.append( field );
-    field = new Field( "558", "00" );
-    field.append( "a", "Moderne fransk dramatik" );
-    field.append( "h", "Fredensborg" );
-    record.append( field );
+    record.fromString(
+        "008 00 *bdan\n" +
+        "557 00 *aVand & miljoe *v1. aargang, nr. 3 (oktober 1984) *j1984\n" +
+        "558 00 *aModerne fransk dramatik *hFredensborg"
+    );
 
-    var indexOut = [ {
+    var expected = [ {
         name: "dkcclterm.vp",
         value: "Vand & miljoe"
     }, {
@@ -1345,10 +1327,11 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsVp", function() {
     }, {
         name: "dkcclterm.vp",
         value: "Moderne fransk dramatik"
-    }
-    ];
+    } ];
 
-    Assert.equalValue( "Create dkcclterm fields (vp)", DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsVp, index, record ), indexOut );
+    var actual = DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsVp, index, record );
+
+    Assert.equalValue( "Create dkcclterm fields (vp)", actual, expected );
 
 } );
 
@@ -1376,42 +1359,32 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsEm", function() {
     var index = Index.newIndex();
     var record = new Record();
     var field = new Field( "001", "00" );
-    var subfield = new Subfield( "a", "29036640" );
-    field.append( subfield );
+    field.append( "a", "29036640" );
     record.append( field );
     field = new Field( "032", "00" );
-    subfield = new Subfield( "a", "DBF201150" );
-    field.append( subfield );
-    subfield = new Subfield( "x", "BKM201150" );
-    field.append( subfield );
+    field.append( "a", "DBF201150" );
+    field.append( "x", "BKM201150" );
     record.append( field );
     field = new Field( "652", "00" );
-    subfield = new Subfield( "m", "65.908" );
-    field.append( subfield );
+    field.append( "m", "65.908" );
     record.append( field );
     field = new Field( "652", "00" );
-    subfield = new Subfield( "p", "62.8" );
-    field.append( subfield );
+    field.append( "p", "62.8" );
     record.append( field );
     field = new Field( "666", "00" );
-    subfield = new Subfield( "s", "magisk realisme" );
-    field.append( subfield );
+    field.append( "s", "magisk realisme" );
     record.append( field );
     field = new Field( "666", "00" );
-    subfield = new Subfield( "s", "kaerlighed" );
-    field.append( subfield );
+    field.append( "s", "kaerlighed" );
     record.append( field );
     field = new Field( "666", "00" );
-    subfield = new Subfield( "s", "faellesskab" );
-    field.append( subfield );
+    field.append( "s", "faellesskab" );
     record.append( field );
     field = new Field( "666", "00" );
-    subfield = new Subfield( "s", "Tokyo" );
-    field.append( subfield );
+    field.append(  "s", "Tokyo" );
     record.append( field );
     field = new Field( "666", "00" );
-    subfield = new Subfield( "s", "Japan" );
-    field.append( subfield );
+    field.append( "s", "Japan" );
     record.append( field );
 
     var indexOut = [ {
@@ -1429,8 +1402,7 @@ UnitTest.addFixture( "DkcclTermIndex.createDkcclFieldsEm", function() {
     }, {
         name: "dkcclterm.em",
         value: "Japan"
-    }
-    ];
+    } ];
 
     Assert.equalValue( "Create dkcclterm.em (1)",
         DkcclTermIndex.callIndexMethod( DkcclTermIndex.createDkcclFieldsEm, index, record, "dkcclterm.em" ), indexOut );
