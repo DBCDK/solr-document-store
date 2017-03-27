@@ -1753,7 +1753,7 @@ var TermIndex = function( ) {
      *
      *
      * @type {method}
-     * @syntax TermIndex.createOnlineAccess( index, commonDataXml )
+     * @syntax TermIndex.createOnlineAccess( index, commonDataXml, record )
      * @param {Object} index The index (object) to add the new index fields to
      * @param {Document} commonDataXml Xml object containing common data
      * @param {Object} record an object with data from MARC
@@ -1785,6 +1785,12 @@ var TermIndex = function( ) {
                 } );
             } );
         }
+
+
+        //TODO: This function could do with some review of what is wanted and needed - currently we
+        // overwrite the value taken from marc data in the next bit of code.
+        // Also, we have the index dkcclterm.br that contains the 'ou', 'od' and 'oi' values based on field 008n,
+        // - do we need them both? Or could we at least make sure that there is some consistency between the two indexes?
 
         var elements = XPath.select( "/*/ln:links/ln:link[ln:relationType='dbcaddi:hasOnlineAccess']", commonDataXml );
         for ( var i = 0 ; i < elements.length; i++ ) {

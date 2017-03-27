@@ -458,10 +458,7 @@ var DkcclTermIndex = function() {
             var m07 = fieldCodeToMnemoCodeTable[ field008nCode ];
             if ( m07 ) {
                 index.pushField( "dkcclterm.br", m07 );
-
             }
-
-
         } );
 
         Log.trace( "Leaving DkcclTermIndex.createDkcclFieldsBr" );
