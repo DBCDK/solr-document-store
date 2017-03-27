@@ -916,9 +916,6 @@ UnitTest.addFixture( "FacetIndex.createAudience", function() {
         value: "Fra 16 /u00e5r"
     }, {
         name: "facet.audience",
-        value: "PEGI-m\xe6rkning: 18"
-    }, {
-        name: "facet.audience",
         value: "Tilladt for brn over 15 r"
     } ];
 

@@ -523,7 +523,7 @@ var FacetIndex = function() {
 
         Log.trace( "Entering: createAudience method" );
 
-        XPath.forEachNodeText( "/*/dkabm:record/dcterms:audience[ @xsi:type = 'dkdcplus:age' or @xsi:type = 'dkdcplus:pegi' ]", commonDataXml, function( text ) {
+        XPath.forEachNodeText( "/*/dkabm:record/dcterms:audience[ @xsi:type = 'dkdcplus:age' ]", commonDataXml, function( text ) {
             index.pushField( "facet.audience", text );
         } );
         XPath.forEachNodeText( "/*/dkabm:record/dcterms:audience[ @xsi:type = 'dkdcplus:medieraad' ]", commonDataXml, function( text ) {
