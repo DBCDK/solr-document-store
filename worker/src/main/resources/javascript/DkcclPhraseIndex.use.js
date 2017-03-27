@@ -62,6 +62,7 @@ var DkcclPhraseIndex = function( ) {
         DkcclPhraseIndex.createDkcclLgdFields( index, map );
         DkcclPhraseIndex.createDkcclLhtFields( index, map );
         DkcclPhraseIndex.createDkcclLkeFields( index, map );
+        DkcclPhraseIndex.createDkcclLklFields( index, map );
         DkcclPhraseIndex.createDkcclLknFields( index, map );
         DkcclPhraseIndex.createDkcclLkoFields( index, map );
         DkcclPhraseIndex.createDkcclLmeFields( index, map );

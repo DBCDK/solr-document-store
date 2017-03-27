@@ -83,6 +83,7 @@ var DkcclTermIndex = function() {
         DkcclTermIndex.createDkcclFieldsKe( index, map );
         DkcclTermIndex.createDkcclFieldsKg( index, map );
         DkcclTermIndex.createDkcclFieldsKk( index, map );
+        DkcclTermIndex.createDkcclFieldsKl( index, map );
         DkcclTermIndex.createDkcclFieldsKm( index, map );
         DkcclTermIndex.createDkcclFieldsKn( index, map );
         DkcclTermIndex.createDkcclFieldsKo( index, map );
