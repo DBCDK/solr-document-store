@@ -2252,7 +2252,7 @@ var DkcclTermIndex = function() {
 
 
     /**
-     * Method that creates cll term index fields (kl).
+     * Method that creates ccl term index fields (kl).
      *
      * @type {method}
      * @syntax DkcclTermIndex.createDkcclFieldsKl( index, map )
