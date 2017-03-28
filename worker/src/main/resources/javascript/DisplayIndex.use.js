@@ -426,7 +426,6 @@ var DisplayIndex = function( ) {
 
         Log.trace( "Entering: DisplayIndex.createCreator method" );
 
-        var child;
         var field100Array = [ ];
         var field700Array = [ ];
         var length100 = 0;
@@ -659,7 +658,6 @@ var DisplayIndex = function( ) {
 
         Log.trace( "Entering: DisplayIndex.createType method" );
 
-        var child;
         var volumeObject = {
             mainData: "",
             volumeData: "",
@@ -816,7 +814,6 @@ var DisplayIndex = function( ) {
 
         Log.trace( "Entering: DisplayIndex.createWorkType method" );
 
-        var child;
         XPath.forEachNodeText( "/*/dkabm:record/dc:type[ @xsi:type='dkdcplus:BibDK-Type' ]", commonDataXml, function(text)  {
             if ( text !== "undefined" ) {
                 var workType = DisplayIndex.getWorkType( text );
@@ -867,6 +864,7 @@ var DisplayIndex = function( ) {
             "Netdokument": "book",
             "Punktskrift": "book",
             "Tegneserie": "book",
+            "Tegneserie (net)": "book",
             "Graphic novel": "book",
             "Lydbog (b\u00e5nd)": "audiobook",
             "Lydbog (cd)": "audiobook",
@@ -931,7 +929,6 @@ var DisplayIndex = function( ) {
 
         Log.trace( "Entering: DisplayIndex.createAccessType method" );
 
-        var child;
         XPath.forEachNodeText("/*/adminData/accessType", commonDataXml, function(text) {
             index.pushField( "display.accessType", String( text ) );
         });
