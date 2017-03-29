@@ -361,7 +361,7 @@ var DkcclTermIndex = function() {
                 var yearMatch = fieldValue.match(/(^| |c)\d{4}([^\d]|$)/g);
                 if( yearMatch ) {
                     for ( var i = 0; i < yearMatch.length; i++ ) {
-                        var year = yearMatch[ i ].replace(/[A-Za-z\(\)]/g,"");
+                        var year = yearMatch[ i ].replace(/[^\d]/g,"");
                         year = year.trim();
                         index.pushField( "dkcclterm.\u00e5r", year);
                     }
