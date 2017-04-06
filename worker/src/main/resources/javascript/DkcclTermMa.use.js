@@ -442,7 +442,6 @@ var DkcclTermMa = function( ) {
      *  @syntax DkcclTermMa.__addToMaIndexIfValueExists( index, value )
      *  @param {Object} index the index to add value to if value is not empty string, undefined or null
      *  @param {String|undefined|null} value the value to possibly add to index
-     *  @return {Boolean} true if record is an eBook
      *  @name DkcclTermMa.__addToMaIndexIfValueExists
      *  @function
      */
