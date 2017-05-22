@@ -68,15 +68,15 @@ public class SolrUpdaterCallback
         if (trackingId != null && !solrDocument.isEmpty()) {
             solrDocument.addField(TRACKING_ID_FIELD, trackingId);
         }
+        String solrId = solrDocument.getField( "id" ).getValue().toString();
         if (log.isTraceEnabled()) {
-            log.trace("Sending {} document to queue: {}", identifier,  solrDocument);
+            log.trace("Sending {} document to queue: {}", solrId,  solrDocument);
         }
         else {
-            log.info("Sending {} document to queue", identifier);
+            log.debug("Sending {} document to queue", solrId);
         }
         
         String bibliographicRecordId = solrDocument.getField( "rec.bibliographicRecordId" ).getValue().toString();
-        String solrId = solrDocument.getField( "id" ).getValue().toString();
         String shardedId = getShardedSolrId( bibliographicRecordId, solrId );
         solrDocument.setField( "id", shardedId );
         

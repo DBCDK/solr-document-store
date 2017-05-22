@@ -382,7 +382,7 @@ var IndexCreator = function( ) {
                 agencyId,
                 Packages.dk.dbc.openagency.client.LibraryRuleHandler.Rule.USE_LOCALDATA_STREAM );
 
-        Log.info( "IndexCreator.useLocaldataStream for agency ", agencyId,  " is ", useLocaldataStream );
+        Log.debug( "IndexCreator.useLocaldataStream for agency ", agencyId,  " is ", useLocaldataStream );
 
         Log.trace( "Leaving: IndexCreator.useLocaldataStream" );
 
