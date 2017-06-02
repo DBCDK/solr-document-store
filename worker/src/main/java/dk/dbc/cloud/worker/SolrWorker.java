@@ -23,6 +23,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
+import java.io.IOException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.ActivationConfigProperty;
@@ -32,10 +33,12 @@ import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import static net.logstash.logback.marker.Markers.append;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +66,7 @@ public class SolrWorker implements MessageListener {
     @JMSConnectionFactory( "jms/indexerConnectionFactory" )
     JMSContext responseContext;
 
-    final int redeliveryLimit = 5;
+    final static int REDELIVERY_LIMIT = 5;
 
     Timer onMessageTimer;
     
@@ -81,10 +84,17 @@ public class SolrWorker implements MessageListener {
         log.info( "Shutting down SolrWorker");
     }
 
+    /**
+     * Creates CORepo Solr documents and pushes to JMS document queue.
+     * Only IOExceptions should cause a message retry and a sleep penalty.
+     *
+     * @param message
+     */
     @Override
     public void onMessage( Message message ) {
+        Timer.Context time = onMessageTimer.time();
         try {
-            Timer.Context time = onMessageTimer.time();
+            
             MapMessage m = (MapMessage) message;
             long timeStamp = m.getJMSTimestamp();
             String pid = m.getString( "pid" );
@@ -99,28 +109,41 @@ public class SolrWorker implements MessageListener {
             try {
                 docBuilder.buildDocuments( pid, javascriptWrapper, responseContext, responseContext.createQueue( App.JMS_DOCUMENT_QUEUE_NAME ) );
                 failureHandler.reset();
-            } catch( Exception ex ) {
-                if( deliveryAttempts >= redeliveryLimit ) {
-                    try{
-                        MapMessage failed = responseContext.createMapMessage();
-                        failed.setString( "pid", pid );
-                        failed.setString( "exception", LogAppender.getCauses( ex ) );
-                        responseContext.createProducer().send( responseContext.createQueue( App.JMS_DEADPID_QUEUE_NAME ), failed );
-                        log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ), "Message {} moved to dead message queue. Caused by: {}", message, ex.getMessage() );
-                    }catch( RuntimeException dmqException ){
-                        throw new RuntimeException( pid + " could not be moved to dead message queue", dmqException );
+            } catch (Exception ex) {
+                
+                // Looking for IOException in exception chain.
+                // Have to do this since some exception wrapping is going on,
+                // otherwise refactoring is needed for a cleaner solution.
+                if(ExceptionUtils.indexOfType(ex, IOException.class) != -1) {
+                    if (deliveryAttempts < REDELIVERY_LIMIT) {
+                        throw ex;
                     }
+                    sendToDeadPidQueue(pid, "Redelivery limit reached, " + LogAppender.getCauses(ex));
                 } else {
-                    throw ex;
+                    sendToDeadPidQueue(pid, LogAppender.getCauses(ex));
                 }
             }
-            time.stop();
-        } catch ( Exception ex ) {
+            
+        } catch (Exception ex) {
             log.error( LogAppender.getMarker( App.APP_NAME, LogAppender.FAILED ), "Unable to process message {}", message, ex );
             failureHandler.failure();
             throw new EJBException( ex.getMessage() );
         } finally {
             DBCTrackedLogContext.remove();
+            time.stop();
+        }
+    }
+    
+     void sendToDeadPidQueue(String pid, String message) throws JMSException {
+        try {
+            MapMessage failed = responseContext.createMapMessage();
+            failed.setString("pid", pid);
+            failed.setString("exception", message);
+            responseContext.createProducer().send(responseContext.createQueue( App.JMS_DEADPID_QUEUE_NAME ), failed);
+            log.info( LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED ), "Pid {} moved to dead pid queue. Caused by: {}", pid, message);
+        } catch( JMSException ex ){
+            log.error("Could not move pid {} to dead pid queue. Reason: {}", pid, ex.getMessage());
+            throw ex;
         }
     }
 
