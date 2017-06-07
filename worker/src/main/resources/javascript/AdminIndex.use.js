@@ -24,9 +24,9 @@ var AdminIndex = function( ) {
      *
      *
      * @type {method}
-     * @syntax AdminIndex.createAdminFields( index, commonDataXml, systemRelationsXml, pid )
+     * @syntax AdminIndex.createAdminFields( index, indexingData, systemRelationsXml, pid, libraryRuleHandler, solrId )
      * @param {Object} index the index to add admin index fields to
-     * @param {Document} commonDataXml The XML from which to create the index fields
+     * @param {Document} indexingData The XML from which to create the index fields
      * @param {Document} systemRelationsXml The systems relations from which to retrieve unit information.
      * Relations stream for bibliographical object if it is primary for its unit. Else Relations stream from the unit 
      * @param {String} pid the pid of the object being indexed
@@ -36,7 +36,7 @@ var AdminIndex = function( ) {
      * @name AdminIndex.createAdminFields
      * @method
      */
-    function createAdminFields( index, commonDataXml, systemRelationsXml, pid, libraryRuleHandler, solrId ) {
+    function createAdminFields( index, indexingData, systemRelationsXml, pid, libraryRuleHandler, solrId ) {
 
         Log.trace( "Entering: AdminIndex.createAdminFields method" );
 
@@ -47,15 +47,16 @@ var AdminIndex = function( ) {
         index.pushField( "original_format", String( format ) );
         index.pushField( "rec.repositoryId", String( pid ) );
 
-        AdminIndex.createRecId( commonDataXml, pid, index, solrId, libraryRuleHandler );
+        AdminIndex.createRecId( indexingData, pid, index, solrId, libraryRuleHandler );
         AdminIndex.createRecBibliographicRecordId( pid, index );
-        AdminIndex.createRecCreatedDate( commonDataXml, index );
-        AdminIndex.createRecModifiedDate( commonDataXml, index );
+        AdminIndex.createRecCreatedDate( indexingData, index );
+        AdminIndex.createRecModifiedDate( indexingData, index );
         AdminIndex.createWorkId( systemRelationsXml, index );
         AdminIndex.createUnitId( systemRelationsXml, index );
         AdminIndex.createUnitPrimaryObject( systemRelationsXml, index );
         AdminIndex.createUnitIsPrimaryObject( systemRelationsXml, index );
-        AdminIndex.createChildDocId( commonDataXml, index, libraryRuleHandler );
+        AdminIndex.createChildDocId( indexingData, index, libraryRuleHandler );
+        AdminIndex.createRecExcludeFrom( indexingData, index );
 
         Log.trace( "Leaving: AdminIndex.createAdminFields method" );
 
@@ -464,7 +465,45 @@ var AdminIndex = function( ) {
         return index;
 
     }
-    
+
+
+    /**
+     * Method that creates rec.excludeFromUnionCatalogue index fields based on marc field 004*n.
+     *
+     *
+     * @type {method}
+     * @syntax AdminIndex.createRecExcludeFromUnionCatalogue( inputXml, index )
+     * @param {Document} inputXml Xml object containing input data
+     * @param {Object} index The index (object) to add the new index fields to
+     * @return {Object} The updated index object
+     * @name AdminIndex.createRecExcludeFromUnionCatalogue
+     * @method
+     */
+    function createRecExcludeFrom( inputXml, index ) {
+
+        Log.trace( "Entering: AdminIndex.createRecExcludeFrom method" );
+
+        var valueOf004n = XPath.selectText( "/*/marcx:collection/marcx:record[@type='Bibliographic']/marcx:datafield[@tag='004']/marcx:subfield[@code='n'][1]", inputXml);
+
+        if ( "f" === valueOf004n ) {
+            // according to kat-format the code f means that w is also set: http://www.kat-format.dk/danMARC2/Danmarc2.7.htm#pgfId=1355931
+            index.pushField( "rec.excludeFromUnionCatalogue", "true" );
+            index.pushField( "rec.excludeFromWorldCat", "true" );
+        } else if ( "w" === valueOf004n ) {
+            index.pushField( "rec.excludeFromUnionCatalogue", "false" );
+            index.pushField( "rec.excludeFromWorldCat", "true" );
+        } else {
+            index.pushField( "rec.excludeFromUnionCatalogue", "false" );
+            index.pushField( "rec.excludeFromWorldCat", "false" );
+        }
+
+        Log.trace( "Leaving: AdminIndex.createRecExcludeFrom method" );
+
+        return index;
+
+    }
+
+
     /**
      * Get use_holdings_item switch for agency in VIP
      *
@@ -499,6 +538,7 @@ var AdminIndex = function( ) {
         createRecCreatedDate: createRecCreatedDate,
         createRecModifiedDate: createRecModifiedDate,
         createChildDocId: createChildDocId,
+        createRecExcludeFrom: createRecExcludeFrom,
         useHoldingsItem: useHoldingsItem
     };
 

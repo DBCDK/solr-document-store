@@ -771,6 +771,109 @@ xmlns:ac="http://biblstandard.dk/ac/namespace/">\
 
 } );
 
+UnitTest.addFixture( "Test createRecExcludeFrom function", function( ) {
+
+    var xml = XmlUtil.fromString(
+        '<ting:localData xmlns:marcx="info:lc/xmlns/marcxchange-v1" ' +
+        'xmlns:ting="http://www.dbc.dk/ting" ' +
+        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
+        'xmlns:ac="http://biblstandard.dk/ac/namespace/">' +
+            '<dkabm:record>' +
+                '<ac:identifier>111932085|830380</ac:identifier>' +
+            '</dkabm:record>' +
+            '<marcx:collection>' +
+                '<marcx:record format="danMARC2" type="Bibliographic">' +
+                    '<marcx:datafield ind1="0" ind2="0" tag="004">' +
+                        '<marcx:subfield code="r">n</marcx:subfield>' +
+                        '<marcx:subfield code="a">e</marcx:subfield>' +
+                        '<marcx:subfield code="n">f</marcx:subfield>' +
+                    '</marcx:datafield>' +
+                '</marcx:record>' +
+            '</marcx:collection>' +
+        '</ting:localData>'
+    );
+
+    var expected = [ {
+            name: "rec.excludeFromUnionCatalogue",
+            value: "true"
+        }, {
+            name: "rec.excludeFromWorldCat",
+            value: "true"
+    } ];
+
+    var actual = AdminIndex.createRecExcludeFrom( xml, Index.newIndex( ) );
+
+    var testName = "Create rec.excludeFromUnionCatalogue and rec.excludeFromWorldCat indexes both with value = true";
+
+    Assert.equalValue( testName, actual, expected );
+
+
+    xml = XmlUtil.fromString(
+        '<ting:localData xmlns:marcx="info:lc/xmlns/marcxchange-v1" ' +
+        'xmlns:ting="http://www.dbc.dk/ting" ' +
+        'xmlns:dkabm="http://biblstandard.dk/abm/namespace/dkabm/" ' +
+        'xmlns:ac="http://biblstandard.dk/ac/namespace/">' +
+            '<dkabm:record>' +
+                '<ac:identifier>111990549|830380</ac:identifier>' +
+            '</dkabm:record>' +
+            '<marcx:collection>' +
+                '<marcx:record format="danMARC2" type="Bibliographic">' +
+                    '<marcx:datafield ind1="0" ind2="0" tag="004">' +
+                        '<marcx:subfield code="r">n</marcx:subfield>' +
+                        '<marcx:subfield code="a">e</marcx:subfield>' +
+                    '</marcx:datafield>' +
+                '</marcx:record>' +
+            '</marcx:collection>' +
+        '</ting:localData>'
+    );
+
+    expected = [ {
+        name: "rec.excludeFromUnionCatalogue",
+        value: "false"
+    }, {
+        name: "rec.excludeFromWorldCat",
+        value: "false"
+    } ];
+
+    actual = AdminIndex.createRecExcludeFrom( xml, Index.newIndex( ) );
+
+    testName = "Create rec.excludeFromUnionCatalogue and rec.excludeFromWorldCat indexes both with value = false";
+
+    Assert.equalValue( testName, actual, expected );
+
+
+    xml = XmlUtil.fromString(
+        '<ting:container xmlns:marcx="info:lc/xmlns/marcxchange-v1" ' +
+        'xmlns:ting="http://www.dbc.dk/ting">' +
+        '<marcx:collection>' +
+        '<marcx:record format="danMARC2" type="Bibliographic">' +
+        '<marcx:datafield ind1="0" ind2="0" tag="004">' +
+        '<marcx:subfield code="r">n</marcx:subfield>' +
+        '<marcx:subfield code="a">e</marcx:subfield>' +
+        '<marcx:subfield code="n">w</marcx:subfield>' +
+        '</marcx:datafield>' +
+        '</marcx:record>' +
+        '</marcx:collection>' +
+        '</ting:container>'
+    );
+
+    expected = [ {
+        name: "rec.excludeFromUnionCatalogue",
+        value: "false"
+    }, {
+        name: "rec.excludeFromWorldCat",
+        value: "true"
+    } ];
+
+    actual = AdminIndex.createRecExcludeFrom( xml, Index.newIndex( ) );
+
+    testName = "Create rec.excludeFromUnionCatalogue (false) and rec.excludeFromWorldCat (true)";
+
+    Assert.equalValue( testName, actual, expected );
+
+} );
+
+
 UnitTest.addFixture( "AdminIndex.__makeDate", function( ) {
 
     var testName = "makeDate with only year given";
