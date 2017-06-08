@@ -69,10 +69,21 @@ public class SolrWorker implements MessageListener {
     final static int REDELIVERY_LIMIT = 5;
 
     Timer onMessageTimer;
-    
+
     @Inject
     AdjacentFailureHandler failureHandler;
-    
+
+
+    @Inject
+    @EEConfig.Name("documentQueue")
+    @EEConfig.Default(App.JMS_DOCUMENT_QUEUE_NAME)
+    String documentQueue;
+
+    @Inject
+    @EEConfig.Name("deadPidQueue")
+    @EEConfig.Default(App.JMS_DEADPID_QUEUE_NAME)
+    String deadPidQueue;
+
     @PostConstruct
     public void init() {
         log.info( "Initializing SolrWorker" );
@@ -94,7 +105,7 @@ public class SolrWorker implements MessageListener {
     public void onMessage( Message message ) {
         Timer.Context time = onMessageTimer.time();
         try {
-            
+
             MapMessage m = (MapMessage) message;
             long timeStamp = m.getJMSTimestamp();
             String pid = m.getString( "pid" );
@@ -105,12 +116,12 @@ public class SolrWorker implements MessageListener {
                     and( append( "JmsTimestamp", timeStamp ).
                     and( append( "deliveryAttempts", deliveryAttempts ) ) ),
                             "Started processing message" );
-            
+
             try {
-                docBuilder.buildDocuments( pid, javascriptWrapper, responseContext, responseContext.createQueue( App.JMS_DOCUMENT_QUEUE_NAME ) );
+                docBuilder.buildDocuments(pid, javascriptWrapper, responseContext, responseContext.createQueue(documentQueue ) );
                 failureHandler.reset();
             } catch (Exception ex) {
-                
+
                 // Looking for IOException in exception chain.
                 // Have to do this since some exception wrapping is going on,
                 // otherwise refactoring is needed for a cleaner solution.
@@ -123,7 +134,7 @@ public class SolrWorker implements MessageListener {
                     sendToDeadPidQueue(pid, LogAppender.getCauses(ex));
                 }
             }
-            
+
         } catch (Exception ex) {
             log.error( LogAppender.getMarker( App.APP_NAME, LogAppender.FAILED ), "Unable to process message {}", message, ex );
             failureHandler.failure();
@@ -133,13 +144,13 @@ public class SolrWorker implements MessageListener {
             time.stop();
         }
     }
-    
+
      void sendToDeadPidQueue(String pid, String message) throws JMSException {
         try {
             MapMessage failed = responseContext.createMapMessage();
             failed.setString("pid", pid);
             failed.setString("exception", message);
-            responseContext.createProducer().send(responseContext.createQueue( App.JMS_DEADPID_QUEUE_NAME ), failed);
+            responseContext.createProducer().send(responseContext.createQueue( deadPidQueue ), failed);
             log.info( LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED ), "Pid {} moved to dead pid queue. Caused by: {}", pid, message);
         } catch( JMSException ex ){
             log.error("Could not move pid {} to dead pid queue. Reason: {}", pid, ex.getMessage());
