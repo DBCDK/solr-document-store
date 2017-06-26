@@ -102,6 +102,16 @@ var IndexCreator = function( ) {
                     // and updated with <empty> content:
                     indexingData = ( undefined === localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
                     solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
+
+                    // If library rules say to use local data stream, but stream only has partial data,
+                    // then use common datastream for indexing ( US2055 )
+                    if ( undefined !== indexingData && false === Alias.hasAlias( indexingData ) ) {
+                        Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream does not contain indexing alias:",
+                                XmlUtil.logXmlString( indexingData ) );
+                        // Use common data
+                        indexingData = commonDataXml;
+                    }
+
                     streamDate = XPath.selectAttribute( "foxml:datastreamVersion/@CREATED", child );
                 } else {
                     indexingData = commonDataXml;
