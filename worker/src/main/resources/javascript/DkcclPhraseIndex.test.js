@@ -1293,58 +1293,34 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLstFields", function() {
 
 UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLtiFields", function() {
 
-
     var index = Index.newIndex();
     var record = new Record();
-    var field = new Field( "241", "00" );
-    var subField = new Subfield( "a", "De \u00a4ensamma" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "245", "00" );
-    subField = new Subfield( "a", "De \u00a4ensomme" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "440", "00" );
-    subField = new Subfield( "a", "[Barbarotti-serien]" );
-    field.append( subField );
-    subField = new Subfield( "v", "[4. bind]" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "945", "00" );
-    subField = new Subfield( "a", "Barbarottiserien" );
-    field.append( subField );
-    subField = new Subfield( "x", "se" );
-    field.append( subField );
-    subField = new Subfield( "w", "[Barbarotti-serien]" );
-    field.append( subField );
-    subField = new Subfield( "z", "440(a)" );
-    field.append( subField );
-    record.append( field );
+    record.fromString(
+        "241 00 *a De ¤ensamma\n" +
+        "245 00 *a De ¤ensomme\n" +
+        "440 00 *a [Barbarotti-serien] *v [4. bind]\n" +
+        "945 00 *a Barbarottiserien *x se *w [Barbarotti-serien] *z 440(a)"
+    );
 
-    var indexOut = [
-        {
+    var indexOut = [ {
             name: "dkcclphrase.lti",
             value: "De ensamma"
-        },
-        {
+        }, {
             name: "dkcclphrase.lti",
             value: "ensamma"
-        },
-        {
+        }, {
             name: "dkcclphrase.mti",
             value: "De ensamma #241"
         }, {
             name: "dkcclphrase.mti",
             value: "ensamma #241"
-        },
-        {
+        }, {
             name: "dkcclphrase.lti",
             value: "De ensomme"
         }, {
             name: "dkcclphrase.lti",
             value: "ensomme"
-        },
-        {
+        }, {
             name: "dkcclphrase.mti",
             value: "De ensomme #245"
         }, {
@@ -1353,12 +1329,10 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLtiFields", function() {
         }, {
             name: "dkcclphrase.lti",
             value: "Barbarotti-serien"
-        },
-        {
+        }, {
             name: "dkcclphrase.mti",
             value: "Barbarotti-serien #440"
-        },
-        {
+        }, {
             name: "dkcclphrase.lti",
             value: "Barbarottiserien"
         }, {
@@ -1366,45 +1340,22 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLtiFields", function() {
             value: "Barbarottiserien #945"
         } ];
 
-    Assert.equalValue( "Create dkccl lti fields", IndexNormalizer.normalizeValues( DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ) ), indexOut );
+    var actual = IndexNormalizer.normalizeValues( DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, index, record ) );
+
+    var testName = "Create dkccl lti fields";
+    Assert.equalValue( testName, actual, indexOut );
+
 
     index = Index.newIndex();
     record = new Record();
-    field = new Field( "795", "00" );
-    subField = new Subfield( "a", "The best of Beethoven" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "795", "00" );
-    subField = new Subfield( "a", "Moderen" );
-    field.append( subField );
-    subField = new Subfield( "7", "(" );
-    field.append( subField );
-    subField = new Subfield( "v", "Taagen letter" );
-    field.append( subField );
-    subField = new Subfield( "7", ")" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "795", "00" );
-    subField = new Subfield( "a", "Offerte, H 514" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "795", "00" );
-    subField = new Subfield( "a", "Pour un reposoir H 523" );
-    field.append( subField );
-    subField = new Subfield( "u", "Ouverture des que la procession parait" );
-    field.append( subField );
-    record.append( field );
-    field = new Field( "795", "00" );
-    subField = new Subfield( "A", "Delfelt A" );
-    field.append( subField );
-    subField = new Subfield( "a", "delfelt a" );
-    field.append( subField );
-    subField = new Subfield( "c", "delfelt c" );
-    field.append( subField );
-    subField = new Subfield( "a", "delfelt a" );
-    field.append( subField );
-    record.append( field );
+    record.fromString(
+        "795 00 *a The best of Beethoven\n" +
+        "795 00 *a Moderen *7 ( *v Taagen letter *7 )\n" +
+        "795 00 *a Offerte, H 514\n" +
+        "795 00 *a Pour un reposoir H 523 *u Ouverture des que la procession parait\n" +
+        "795 00 *A Delfelt A *a delfelt a *c delfelt c *a delfelt a"
+    );
 
     indexOut = [ {
         name: "dkcclphrase.lti",
@@ -1412,186 +1363,175 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLtiFields", function() {
     }, {
         name: "dkcclphrase.lti", // comes from extra (removing prefix)
         value: "best of Beethoven"
-    },
-        {
-            name: "dkcclphrase.mti",
-            value: "The best of Beethoven #795"
-        }, {
-            name: "dkcclphrase.mti", // comes from extra (removing prefix)
-            value: "best of Beethoven #795"
-        },
-        {
-            name: "dkcclphrase.lti",
-            value: "Moderen Taagen letter"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "Moderen Taagen letter #795"
-        },
-        {
-            name: "dkcclphrase.lti",  // comes from second round uv
-            value: "Taagen letter"
-        },
-        {
-            name: "dkcclphrase.mti",  // comes from second round uv
-            value: "Taagen letter #795"
-        },
-        {
-            name: "dkcclphrase.lti",
-            value: "Offerte, H 514"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "Offerte, H 514 #795"
-        }, {
-            name: "dkcclphrase.lti",
-            value: "Pour un reposoir H 523 Ouverture des que la procession parait"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "Pour un reposoir H 523 Ouverture des que la procession parait #795"
-        },
-        {
-            name: "dkcclphrase.lti",  // comes from second rount uv
-            value: "Ouverture des que la procession parait"
-        },
+    }, {
+        name: "dkcclphrase.mti",
+        value: "The best of Beethoven #795"
+    }, {
+        name: "dkcclphrase.mti", // comes from extra (removing prefix)
+        value: "best of Beethoven #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "Moderen Taagen letter"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "Moderen Taagen letter #795"
+    }, {
+        name: "dkcclphrase.lti",  // comes from second round uv
+        value: "Taagen letter"
+    }, {
+        name: "dkcclphrase.mti",  // comes from second round uv
+        value: "Taagen letter #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "Offerte, H 514"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "Offerte, H 514 #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "Pour un reposoir H 523 Ouverture des que la procession parait"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "Pour un reposoir H 523 Ouverture des que la procession parait #795"
+    }, {
+        name: "dkcclphrase.lti",  // comes from second rount uv
+        value: "Ouverture des que la procession parait"
+    }, {
+        name: "dkcclphrase.mti",  // comes from second rount uv
+        value: "Ouverture des que la procession parait #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "delfelt a delfelt c"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "delfelt a delfelt c #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "Delfelt A delfelt c"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "Delfelt A delfelt c #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "delfelt a"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "delfelt a #795"
+    } ];
 
-        {
-            name: "dkcclphrase.mti",  // comes from second rount uv
-            value: "Ouverture des que la procession parait #795"
-        },
-        {
-            name: "dkcclphrase.lti",
-            value: "delfelt a delfelt c"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "delfelt a delfelt c #795"
-        },
-        {
-            name: "dkcclphrase.lti",
-            value: "Delfelt A delfelt c"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "Delfelt A delfelt c #795"
-        },
-        {
-            name: "dkcclphrase.lti",
-            value: "delfelt a"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "delfelt a #795"
-        } ];
+    actual = DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, index, record );
+
+    testName = "Create dkccl lti fields from 795 field";
+    Assert.equalValue( testName, actual, indexOut );
 
 
-    Assert.equalValue( "Create dkccl lti fields from 795 field", DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ), indexOut );
-
-    index = Index.newIndex();
     record = new Record();
-    field = new Field( "795", "00" );
-    field.append( "\u00e5", "16" );
-    field.append( "A", "March Nr 6 Kong Christian" );
-    field.append( "a", "March Nr VI Kong Christian" );
-    record.append( field );
+    record.fromString(
+        "795 00 *å 16 *A March Nr 6 Kong Christian *a March Nr VI Kong Christian"
+    );
 
     indexOut = [ {
         name: "dkcclphrase.lti",
         value: "March Nr VI Kong Christian"
-    },
-        {
-            name: "dkcclphrase.mti",
-            value: "March Nr VI Kong Christian #795"
-        }, {
-            name: "dkcclphrase.lti",
-            value: "March Nr 6 Kong Christian"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "March Nr 6 Kong Christian #795"
-        } ];
+    }, {
+        name: "dkcclphrase.mti",
+        value: "March Nr VI Kong Christian #795"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "March Nr 6 Kong Christian"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "March Nr 6 Kong Christian #795"
+    } ];
 
-    Assert.equalValue( "Create dkccl lti and mti fields from 795 field only subfield A and a", DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ), indexOut );
+    actual = DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, Index.newIndex(), record );
 
-    index = Index.newIndex();
+    testName = "Create dkccl lti and mti fields from 795 field only subfield A and a";
+    Assert.equalValue( testName, actual, indexOut );
+
+
     record = new Record();
-    var inputString = "239 *aSonatine for fløjte og klaver, opus 5\n";
-    record.fromString( inputString );
+    record.fromString( "239 *aSonatine for fløjte og klaver, opus 5\n" );
     indexOut = [];
-    Assert.equalValue("Do not create dkccl lti and mti fields if no matching subfields in record", DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ), indexOut );
+
+    actual = DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, Index.newIndex(), record );
+
+    testName = "Do not create dkccl lti and mti fields if no matching subfields in record";
+    Assert.equalValue( testName, actual, indexOut );
 
 
-    index = Index.newIndex();
     record = new Record();
-    inputString = "241 *aDet\n";
-    record.fromString( inputString );
+    record.fromString( "241 *aDet\n" );
     indexOut = [{
         name: "dkcclphrase.lti",
         value: "Det"
-    },
-        {
-            name: "dkcclphrase.mti",
-            value: "Det #241"
-        }
-    ];
+    }, {
+        name: "dkcclphrase.mti",
+        value: "Det #241"
+    } ];
 
-    Assert.equalValue(" Create dkccl lti and mti fields for 241 with replacement resulting in empty string", DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ), indexOut );
+    actual = DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, Index.newIndex(), record );
 
-    index = Index.newIndex();
+    testName = "Create dkccl lti and mti fields for 241 with replacement resulting in empty string";
+    Assert.equalValue( testName, actual, indexOut );
+
+
     record = new Record();
-    inputString = "245 *aUdkast til haandbog for haerens motorfoerere\n" +
-        "440 *aLA\n";
-    record.fromString( inputString );
+    record.fromString(
+        "245 *aUdkast til haandbog for haerens motorfoerere\n" +
+        "440 *aLA\n"
+    );
 
-    indexOut = [{
+    indexOut = [ {
         name: "dkcclphrase.lti",
         value: "Udkast til haandbog for haerens motorfoerere"
-    },
-        {
-            name: "dkcclphrase.mti",
-            value: "Udkast til haandbog for haerens motorfoerere #245"
-        },{
-            name: "dkcclphrase.lti",
-            value: "LA"
-        },
-        {
-            name: "dkcclphrase.mti",
-            value: "LA #440"
-        }
-    ];
+    }, {
+        name: "dkcclphrase.mti",
+        value: "Udkast til haandbog for haerens motorfoerere #245"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "LA"
+    }, {
+        name: "dkcclphrase.mti",
+        value: "LA #440"
+    } ];
 
-    Assert.equalValue(" Create dkccl lti and mti fields for 440 with replacement resulting in empty string", DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ), indexOut );
+    actual = DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, Index.newIndex(), record );
 
-    index = Index.newIndex();
+    testName = "Create dkccl lti and mti fields for 440 with replacement resulting in empty string";
+    Assert.equalValue( testName, actual, indexOut );
+
+
     record = new Record();
-    inputString = "245 *aNoir Tango\n"+
-            "440 *a[\n";
+    record.fromString(
+        "245 *aNoir Tango\n"+
+        "440 *a[\n" );
 
-    record.fromString( inputString );
-    indexOut =  [
-        {
-            name: "dkcclphrase.lti",
-            value: "Noir Tango"
-        },{
-            name:"dkcclphrase.mti",
-            value: "Noir Tango #245"
-        }, {
-            name: "dkcclphrase.lti",
-            value: "["
-        },{
-            name:"dkcclphrase.mti",
-            value: "[ #440"
-        }
-    ];
+    indexOut =  [ {
+        name: "dkcclphrase.lti",
+        value: "Noir Tango"
+    },{
+        name:"dkcclphrase.mti",
+        value: "Noir Tango #245"
+    }, {
+        name: "dkcclphrase.lti",
+        value: "["
+    },{
+        name:"dkcclphrase.mti",
+        value: "[ #440"
+    } ];
     //[ is filtered by solr
-    Assert.equalValue(" Create dkccl lti and mti fields for 245 and 440", DkcclPhraseIndex.callIndexMethod(
-        DkcclPhraseIndex.createDkcclLtiFields, index, record ), indexOut );
+
+    actual = DkcclPhraseIndex.callIndexMethod(
+        DkcclPhraseIndex.createDkcclLtiFields, Index.newIndex(), record );
+
+    testName = "Create dkccl lti and mti fields for 245 and 440";
+    Assert.equalValue( testName, actual, indexOut );
 } );
 
 UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLtsFields", function() {
