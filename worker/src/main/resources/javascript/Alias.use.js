@@ -29,9 +29,9 @@ var Alias = function( ) {
      */
     function hasAlias( datastreamXml ) {
 
-        Log.trace("Entering Alias.hasAlias:", XmlUtil.logXmlString( datastreamXml ))
+        Log.trace( "Entering Alias.hasAlias:", XmlUtil.logXmlString( datastreamXml ) );
 
-        var hasIndexingAlias = XPath.select( "boolean(/*/adminData/indexingAlias)", datastreamXml );
+        var hasIndexingAlias = XPath.select( "boolean( /*/adminData/indexingAlias )", datastreamXml );
 
         Log.debug( "Has indexing alias :", hasIndexingAlias );
         

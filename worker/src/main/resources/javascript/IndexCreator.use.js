@@ -196,6 +196,11 @@ var IndexCreator = function( ) {
                 Log.debug( "Skip indexing and delete ", solrId );
                 solrCallback.deleteDocument( solrId, streamDate, bibliographicRecordId );
             } else {
+                if ( !indexingData ) {
+                    //bug#21186: datastreams without content caused indexing to fail and debugging was difficult
+                    // so now we throw an error
+                    throw Error( "Missing indexing data for solr id: " + solrId );
+                }
                 var index = IndexCreator.createIndexData( pid, indexingData, systemRelationsXml, dcDataXml, libraryRuleHandler, solrId );
                 index.pushField( "id", String( solrId ) );
                 index.pushField( "rec.fedoraStreamDate", streamDate );
