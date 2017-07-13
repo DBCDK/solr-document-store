@@ -1740,7 +1740,6 @@ UnitTest.addFixture( "DkcclPhraseIndex.createDkcclLmoFields", function() {
     Assert.equalValue( "Create no dkccl lmo fields for unknown code",
         DkcclPhraseIndex.callIndexMethod( DkcclPhraseIndex.createDkcclLmoFields, index, record ), expectedIndex );
 
-
 } );
 
 
@@ -1777,7 +1776,6 @@ UnitTest.addFixture( "DkcclPhraseIndex.pushExtraIndexFields", function() {
         DkcclPhraseIndex.pushExtraIndexFields( Index.newIndex(), "dkcclphrase.mti", "Broederna Lejonhjaerta", "241" ), indexOut );
 
 
-
     Assert.equalValue( "Create no extra index for mti missing original field name",
         DkcclPhraseIndex.pushExtraIndexFields( Index.newIndex(), "dkcclphrase.mti", "Broederna Lejonhjaerta" ), [ ] );
 } );
@@ -1806,6 +1804,7 @@ UnitTest.addFixture( "DkcclPhraseIndex.pushTitleIndexFields", function() {
 
     Assert.equalValue( "Create no title indices if given value is empty",
         DkcclPhraseIndex.pushTitleIndexFields( Index.newIndex(), " " ), [ ] );
+
 } );
 
 
@@ -1821,7 +1820,6 @@ UnitTest.addFixture( "DkcclPhraseIndex.pushCreatorIndexFields", function(){
 
     Assert.equalValue( "Add creator index fields from field 100",
         DkcclPhraseIndex.pushCreatorIndexFields( Index.newIndex(), "Karen Blixen", "100" ), indexOut );
-
 
     Assert.equalValue( "Add no creator index from field 239 for empty value",
         DkcclPhraseIndex.pushCreatorIndexFields( Index.newIndex(), " ", "100" ), [ ] );

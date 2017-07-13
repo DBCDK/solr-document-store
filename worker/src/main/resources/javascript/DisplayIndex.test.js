@@ -3782,7 +3782,7 @@ UnitTest.addFixture( "DisplayIndex.getWorkType", function( ) {
     Assert.equalValue( "Create one work type",
         DisplayIndex.getWorkType( "Bog" ), "book" );
 
-    Assert.equalValue( "Create one work type (periodica)",
+    Assert.equalValue( "Create one work type (periodica)", 
         DisplayIndex.getWorkType( "Periodikum" ), "periodica" );
 
     Assert.equalValue( "Create work type for 'Tegneserie (net)",

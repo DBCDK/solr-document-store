@@ -1914,8 +1914,8 @@ var DkcclPhraseIndex = function( ) {
      * @method
      */
     that.createDkcclLtiFields = function( index, map ) {
-        Log.trace( "Entering DkcclPhraseIndex.createDkcclLtiFields" );
 
+        Log.trace( "Entering DkcclPhraseIndex.createDkcclLtiFields" );
 
         var titleValue;
 
@@ -2047,9 +2047,7 @@ var DkcclPhraseIndex = function( ) {
                 DkcclPhraseIndex.pushTitleIndexFields( index, titleValue, field.name );
             } );
         } );
-
         map.put( "795", function( field ) {
-
             DkcclPhraseIndex.collectBySequence( index, field, /[Aabc\u00E6\u00f8uv]/, /[aA]/ );
             field.eachSubField( /u|v/, function( field, subField ) {
 
@@ -2333,15 +2331,15 @@ var DkcclPhraseIndex = function( ) {
             }
         };
 
-       if( value === undefined ){
+       if ( value === undefined ) {
            Log.error( "Undefined value found in field: ", fieldName );
            return index;
        }
         __pushExtraIndex( value );
        if ( value.match( /\u00a4/ ) ) {
             __pushExtraIndex( value.replace( /.* ?\u00a4 ?/, "" ));
-        } else if ( value.match( /^de |^den |^det |^en |^et |^the |^a |^an |^le |^la |^les |^las |^l' |^der |^die |^das /i ) ) {
-            __pushExtraIndex( value.replace( /^den |^det |^de |^en |^et |^the |^a |^an |^le |^la |^les |^las |^l' |^der |^die |^das /i, "" ));
+        } else if ( value.match( /^de |^den |^det |^en |^et |^the |^a |^an |^le |^la |^les |^las |^l'|^der |^die |^das /i ) ) {
+            __pushExtraIndex( value.replace( /^den |^det |^de |^en |^et |^the |^a |^an |^le |^la |^les |^las |^l'|^der |^die |^das /i, "" ));
         }
 
         Log.trace( "Leaving DkcclPhraseIndex.pushExtraIndexFields" );
@@ -2364,12 +2362,14 @@ var DkcclPhraseIndex = function( ) {
     that.pushTitleIndexFields = function( index, value, origin ) {
 
         Log.trace( "Entering DkcclPhraseIndex.pushTitleIndexFields" );
+
         if ( undefined === value ) {
             Log.error( "Field value given to DkcclPhraseIndex.pushCreatorIndexFields was undefined. Could not create lti/mti index fields" );
             return index;
         }
-        Log.debug("value.pushTitleIndexFields", value + " ");
-        if( "" !== value.trim()) {
+        Log.debug( "value.pushTitleIndexFields", value + " " );
+
+        if ( "" !== value.trim( ) ) {
             DkcclPhraseIndex.pushExtraIndexFields( index, "dkcclphrase.lti", value );
             DkcclPhraseIndex.pushExtraIndexFields( index, "dkcclphrase.mti", value, origin );
         }
@@ -2417,14 +2417,13 @@ var DkcclPhraseIndex = function( ) {
     };
 
     /**
-    * DkcclPhraseIndex.inArr
-    * Method that checks wheter an item is contained in an array.
+    * Method that checks if an item is contained in an array.
     *
     * @method
-    * @syntax DkcclPhraseIndex.inArr( Array, Array_item )
+    * @syntax DkcclPhraseIndex.inArr( arr, obj )
     * @param {Array} arr Array to check
     * @param {Object} obj Object to look for
-    * @return {Integer} returns -1 if none is found, or the index of item matching your criteria
+    * @return {Number} returns -1 if none is found, or the index of item matching your criteria
     * @example ( arr, obj )
     * @name DkcclPhraseIndex.inArr( [ 'a', 'A', 'c'], 'A' )
     */
@@ -2450,19 +2449,18 @@ var DkcclPhraseIndex = function( ) {
      * @method
      */
     that.collectBySequence = function ( index, field, regExSubFields, regExNewSequence ) {
+
         var collectedValue= "";
         var dataFromSubfieldLower = "";
         var dataFromSubfieldUpper = "";
         var regExLower = /[0-9&a-z\u00e6\u00f8\u00e5]/;
 
         var __emitToIndex = function () {
-
-            if (dataFromSubfieldLower !== "") {
-                    DkcclPhraseIndex.pushTitleIndexFields( index, dataFromSubfieldLower + collectedValue, field.name );
-
+            if ( "" !== dataFromSubfieldLower ) {
+                DkcclPhraseIndex.pushTitleIndexFields( index, dataFromSubfieldLower + collectedValue, field.name );
             }
-            if (dataFromSubfieldUpper !== "") {
-                    DkcclPhraseIndex.pushTitleIndexFields( index, dataFromSubfieldUpper + collectedValue, field.name );
+            if ( "" !== dataFromSubfieldUpper ) {
+                DkcclPhraseIndex.pushTitleIndexFields( index, dataFromSubfieldUpper + collectedValue, field.name );
             }
         };
 
@@ -2480,25 +2478,21 @@ var DkcclPhraseIndex = function( ) {
                 if ( subField.name.match( regExNewSequence ) ) {
                     if ( subField.name.match( regExLower ) ) {
                         dataFromSubfieldLower = subField.value;
-                    }
-                    else {
+                    } else {
                         dataFromSubfieldUpper = subField.value;
                     }
                 }
-            }
-            else {
+            } else {
                 // this will happen if the previous subfield was A
                 // and the first time
 
                 if ( subField.name.match( regExNewSequence ) ) {
                     if ( subField.name.match( regExLower ) ) {
                         dataFromSubfieldLower = subField.value;
-                    }
-                    else {
+                    } else {
                         dataFromSubfieldUpper = subField.value;
                     }
-                }
-                else {
+                } else {
                     // collect all other data from subfield, allways leading space because it is added to a-subfields data and A-subfields data
                     collectedValue += " " + subField.value;
                 }
