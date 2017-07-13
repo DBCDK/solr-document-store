@@ -37,7 +37,7 @@ import org.slf4j.ext.XLoggerFactory;
 public class SolrIndexerJS {
     private final static XLogger log = XLoggerFactory.getXLogger(SolrIndexerJS.class);
 
-    private final static String MODULE_SEARCH_PATH = "classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/ file://${basedir}/src/main/resources/javascript/standard-index-values/";
+    private final static String MODULE_SEARCH_PATH = "classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/";
     private final static String JAVA_SCRIPT_FILE = "javascript/SolrIndex.js";
     private final static String JAVA_SCRIPT_FUNCTION = "createIndexData";
 
