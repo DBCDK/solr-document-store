@@ -17,21 +17,19 @@ EXPORTED_SYMBOLS = [ 'DkcclPhraseIndex' ];
  */
 var DkcclPhraseIndex = function( ) {
 
-    var that = {};
-
     /**
      * Method that creates ccl phrase index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclPhraseFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {Record} record The record from which to create the index fields
      * @return {Object} Index with added fields
      * @name DkcclPhraseIndex.createDkcclPhraseFields
-     * @method
+     * @function
      */
-    that.createDkcclPhraseFields = function( index, record ) {
+    function createDkcclPhraseFields( index, record ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclPhraseFields" );
 
@@ -93,7 +91,7 @@ var DkcclPhraseIndex = function( ) {
         record.eachFieldMap(map);
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclPhraseFields" );
-    };
+    }
 
     /**
      * Create a MatchMap, add mapping functions from a specific index method and build the index from a record.
@@ -103,7 +101,7 @@ var DkcclPhraseIndex = function( ) {
      * This method bypasses the optimization above to provide only the fields handled by the specified method.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.callIndexMethod( func, index, record, fieldName, restricted )
      * @param {Function} func the index method to call
      * @param {Object} index the index to add fields to
@@ -112,28 +110,28 @@ var DkcclPhraseIndex = function( ) {
      * @param {Object} restricted
      * @return {Object} Index with added fields
      * @name DkcclPhraseIndex.callIndexMethod
-     * @method
+     * @function
      */
-    that.callIndexMethod = function(func, index, record, fieldName, restricted) {
+    function callIndexMethod(func, index, record, fieldName, restricted) {
         Log.debug("CALLINDEX ", restricted);
         var map = new MatchMap();
         func( index, map, fieldName, restricted );
         record.eachFieldMap( map );
         return index;
-    };
+    }
 
     /**
      * Method that creates ccl bcm index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclBcmFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclBcmFields
-     * @method
+     * @function
      */
-    that.createDkcclBcmFields = function( index, map ) {
+    function createDkcclBcmFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclBcmFields" );
 
@@ -142,20 +140,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclBcmFields" );
-    };
+    }
 
     /**
      * Method that creates ccl dbk index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclDbkFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclDbkFields
-     * @method
+     * @function
      */
-    that.createDkcclDbkFields = function( index, map ) {
+    function createDkcclDbkFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclDbkFields" );
 
@@ -164,20 +162,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclDbkFields" );
-    };
+    }
 
     /**
      * Method that creates ccl ddc index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclDdcFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclDdcFields
-     * @method
+     * @function
      */
-    that.createDkcclDdcFields = function( index, map ) {
+    function createDkcclDdcFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclDdcFields" );
 
@@ -186,20 +184,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclDdcFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lac index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLacFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLacFields
-     * @method
+     * @function
      */
-    that.createDkcclLacFields = function( index, map ) {
+    function createDkcclLacFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLacFields" );
 
@@ -210,20 +208,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLacFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lag index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLagFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLagFields
-     * @method
+     * @function
      */
-    that.createDkcclLagFields = function( index, map ) {
+    function createDkcclLagFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLagFields" );
         map.put( "600", function( field ) {
@@ -262,22 +260,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLagFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lau index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLauFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLauFields
-     * @method
+     * @function
      */
-    that.createDkcclLauFields = function( index, map ) {
+    function createDkcclLauFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLauFields" );
+
         map.put( "652", "654", "655", function( field ) {
             field.eachSubField( /A|a/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lau", subField.value + " " + field.getValue( /h|e|f|c|t/, " " ) );
@@ -302,20 +301,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLauFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lbr index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLbrFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLbrFields
-     * @method
+     * @function
      */
-    that.createDkcclLbrFields = function( index, map ) {
+    function createDkcclLbrFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLbrFields" );
 
@@ -326,20 +325,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLbrFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lcc index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLccFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLccFields
-     * @method
+     * @function
      */
-    that.createDkcclLccFields = function( index, map ) {
+    function createDkcclLccFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLccFields" );
 
@@ -350,22 +349,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLccFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lcl index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLclFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLclFields
-     * @method
+     * @function
      */
-    that.createDkcclLclFields = function( index, map ) {
+    function createDkcclLclFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLclFields" );
+
         map.put( "050", function( field ) {
             field.eachSubField( /a/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lcl", subField.value );
@@ -415,20 +415,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLclFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lcp index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLcpFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLcpFields
-     * @method
+     * @function
      */
-    that.createDkcclLcpFields = function( index, map ) {
+    function createDkcclLcpFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLcpFields" );
 
@@ -439,20 +439,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLcpFields" );
-    };
+    }
 
     /**
      * Method that creates ccl ldb index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLdbFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLdbFields
-     * @method
+     * @function
      */
-    that.createDkcclLdbFields = function( index, map ) {
+    function createDkcclLdbFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLdbFields" );
 
@@ -463,20 +463,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLdbFields" );
-    };
+    }
 
     /**
      * Method that creates ccl ldf index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLdfFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLdfFields
-     * @method
+     * @function
      */
-    that.createDkcclLdfFields = function( index, map ) {
+    function createDkcclLdfFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLdfFields" );
 
@@ -487,22 +487,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLdfFields" );
-    };
+    }
 
     /**
      * Method that creates ccl ldk index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLdkFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLdkFields
-     * @method
+     * @function
      */
-    that.createDkcclLdkFields = function( index, map ) {
+    function createDkcclLdkFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLdkFields" );
+
         map.put( "652", function( field ) {
             index.pushField( "dkcclphrase.ldk", field.getValue( /m|v/, " " ) );
             index.pushField( "dkcclphrase.ldk", field.getValue( /p|v/, " " ) );
@@ -521,23 +522,25 @@ var DkcclPhraseIndex = function( ) {
             index.pushField( "dkcclphrase.ldk", field.getValue( /p|v/, " " ) );
             index.pushField( "dkcclphrase.ldk", field.getValue( /i|v/, " " ) );
         } );
+
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLdkFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lds index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLdsFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLdsFields
-     * @method
+     * @function
      */
-    that.createDkcclLdsFields = function( index, map ) {
+    function createDkcclLdsFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLdsFields" );
+
         map.put( "666", function( field ) {
             field.eachSubField( /s|r|q/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lds", subField.value );
@@ -548,21 +551,22 @@ var DkcclPhraseIndex = function( ) {
                 index.pushField( "dkcclphrase.lds", subField.value + " " + field.getValue( /b|c/, " " ) );
             } );
         } );
+
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLdsFields" );
-    };
+    }
 
     /**
      * Method that creates ccl led index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLedFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLedFields
-     * @method
+     * @function
      */
-    that.createDkcclLedFields = function( index, map ) {
+    function createDkcclLedFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLedFields" );
 
@@ -573,22 +577,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLedFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lef index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLefFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLefFields
-     * @method
+     * @function
      */
-    that.createDkcclLefFields = function( index, map ) {
+    function createDkcclLefFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLefFields" );
+
         map.put( "630", function( field ) {
             field.eachSubField( /f|g/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lef", subField.value + " " + field.getValue( /u/, " " ) );
@@ -606,22 +611,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLefFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lek index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLekFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLekFields
-     * @method
+     * @function
      */
-    that.createDkcclLekFields = function( index, map ) {
+    function createDkcclLekFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLekFields" );
+
         map.put( "610", function( field ) {
             field.eachSubField( /a|s/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lek", subField.value + " " + field.getValue( /e|c|i|k|j/, " " ) );
@@ -639,24 +645,25 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLekFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lem index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLemFields( index, map, indexName, restricted )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @param {Object} indexName a string with the name of the index to add fields to
-     * @param {Object} restricted a boolean true or false (decides wether some somfields are skipped)
+     * @param {Object} restricted a boolean true or false (decides whether some fields are skipped)
      * @name DkcclPhraseIndex.createDkcclLemFields
-     * @method
+     * @function
      */
-    that.createDkcclLemFields = function( index, map, indexName, restricted ) {
+    function createDkcclLemFields( index, map, indexName, restricted ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLemFields" );
+
         Log.debug("RESTRICTED: ", restricted);
 
         map.put( "600", function( field ) {
@@ -760,7 +767,7 @@ var DkcclPhraseIndex = function( ) {
                 index.pushField( indexName, subField.value );
             } );
         } );
-        if(restricted === true){
+        if (restricted === true) {
             Log.debug("ISRESTRICTED");
             map.put( "666", "667", function( field ) {
                 field.eachSubField( /e|f|l|m|n|o|p|q|r|s|t/, function( field, subField ) {
@@ -844,22 +851,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLemFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lep index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLepFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLepFields
-     * @method
+     * @function
      */
-    that.createDkcclLepFields = function( index, map ) {
+    function createDkcclLepFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLepFields" );
+
         map.put( "600", function( field ) {
             index.pushField( "dkcclphrase.lep", field.getValue( /a|h|e|f|c/, " " ) );
         } );
@@ -870,22 +878,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLepFields" );
-    };
+    }
 
     /**
      * Method that creates ccl les index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLesFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLesFields
-     * @method
+     * @function
      */
-    that.createDkcclLesFields = function( index, map ) {
+    function createDkcclLesFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLesFields" );
+
         map.put( "630", function( field ) {
             field.eachSubField( /s|t/, function( field, subField ) {
                 index.pushField( "dkcclphrase.les", subField.value + " " + field.getValue( /u/, " " ) );
@@ -907,20 +916,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLesFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lff index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLffFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLffFields
-     * @method
+     * @function
      */
-    that.createDkcclLffFields = function( index, map ) {
+    function createDkcclLffFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLffFields" );
         map.put( "100", function( field ) {
@@ -1013,20 +1022,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLffFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lfm index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLfmFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLfmFields
-     * @method
+     * @function
      */
-    that.createDkcclLfmFields = function( index, map ) {
+    function createDkcclLfmFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLfmFields" );
 
@@ -1037,20 +1046,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLfmFields" );
-    };
+    }
 
     /**
      * Method that creates creator index fields: dkcclphrase.lfo and dkcclphrase.mfo
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLfoFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLfoFields
-     * @method
+     * @function
      */
-    that.createDkcclLfoFields = function( index, map ) {
+    function createDkcclLfoFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLfoFields" );
 
@@ -1162,20 +1171,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLfoFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lgd index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLgdFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLgdFields
-     * @method
+     * @function
      */
-    that.createDkcclLgdFields = function( index, map ) {
+    function createDkcclLgdFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLgdFields" );
 
@@ -1192,22 +1201,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLgdFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lht index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLhtFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLhtFields
-     * @method
+     * @function
      */
-    that.createDkcclLhtFields = function( index, map ) {
+    function createDkcclLhtFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLhtFields" );
+
         map.put( "239", function( field ) {
             index.pushField( "dkcclphrase.lht", field.getValue( /t|u|v/, " " ) );
         } );
@@ -1224,20 +1234,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLhtFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lke index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLkeFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLkeFields
-     * @method
+     * @function
      */
-    that.createDkcclLkeFields = function( index, map ) {
+    function createDkcclLkeFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLkeFields" );
 
@@ -1386,20 +1396,21 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLkeFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lkl index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLklFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLklFields
-     * @method
+     * @function
      */
-    that.createDkcclLklFields = function( index, map ){
+    function createDkcclLklFields( index, map ){
+
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLklFields" );
 
         map.put( "087", "088", "089", function( field ){
@@ -1410,19 +1421,20 @@ var DkcclPhraseIndex = function( ) {
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLklFields" );
 
-    };
+    }
+
     /**
      * Method that creates ccl lkn index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLknFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLknFields
-     * @method
+     * @function
      */
-    that.createDkcclLknFields = function( index, map ) {
+    function createDkcclLknFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLknFields" );
 
@@ -1431,20 +1443,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLknFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lko index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLkoFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLkoFields
-     * @method
+     * @function
      */
-    that.createDkcclLkoFields = function( index, map ) {
+    function createDkcclLkoFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLkoFields" );
         map.put( "110", function( field ) {
@@ -1486,20 +1498,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLkoFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lme index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLmeFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLmeFields
-     * @method
+     * @function
      */
-    that.createDkcclLmeFields = function( index, map ) {
+    function createDkcclLmeFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLmeFields" );
 
@@ -1510,19 +1522,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLmeFields" );
-    };
+    }
 
 
     /**
      * Method that creates cll lmo index fields
      *
-     * @type {method}
+     * @type {function}
      * @syntax Dkcclphrase.createDkcclLmoFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register hanlder methods in
      * @name DkcclPhraseIndex.createDkcclLmoFields
      */
-    that.createDkcclLmoFields = function( index, map ) {
+    function createDkcclLmoFields( index, map ) {
+
         Log.trace( 'Entering DkcclPhraseIndex.createDkcclLmoFields' );
 
         map.put( "039", function( field ) {
@@ -1536,20 +1549,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( 'Leaving DkcclPhraseIndex.createDkcclLmoFields' );
-    };
+    }
 
     /**
      * Method that creates ccl lms index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLmsFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLmsFields
-     * @method
+     * @function
      */
-    that.createDkcclLmsFields = function( index, map ) {
+    function createDkcclLmsFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLmsFields" );
         map.put( "600", function( field ) {
@@ -1588,20 +1601,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLmsFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lnb index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLnbFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLnbFields
-     * @method
+     * @function
      */
-    that.createDkcclLnbFields = function( index, map ) {
+    function createDkcclLnbFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLnbFields" );
 
@@ -1612,22 +1625,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLnbFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lnt index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLntFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLntFields
-     * @method
+     * @function
      */
-    that.createDkcclLntFields = function( index, map ) {
+    function createDkcclLntFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLntFields" );
+
         map.put( "210", function( field ) {
             index.pushField( "dkcclphrase.lnt", field.getValue( /a|b|c/, " " ) );
         } );
@@ -1636,20 +1650,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLntFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lok index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLokFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLokFields
-     * @method
+     * @function
      */
-    that.createDkcclLokFields = function( index, map ) {
+    function createDkcclLokFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLokFields" );
 
@@ -1660,50 +1674,52 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLokFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lpa index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLpaFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLpaFields
-     * @method
+     * @function
      */
-    that.createDkcclLpaFields = function( index, map ) {
+    function createDkcclLpaFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLpaFields" );
+
         map.put( "245", function( field ) {
-            field.eachSubField( /p/, function( field, subField ) {
+            field.eachSubField( "p", function( field, subField ) {
                 index.pushField( "dkcclphrase.lpa", subField.value + " " + field.getValue( /q|r|s/, " " ) );
             } );
         } );
         map.put( "247", function( field ) {
-            field.eachSubField( /p/, function( field, subField ) {
+            field.eachSubField( "p", function( field, subField ) {
                 index.pushField( "dkcclphrase.lpa", subField.value );
             } );
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLpaFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lpe index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLpeFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLpeFields
-     * @method
+     * @function
      */
-    that.createDkcclLpeFields = function( index, map ) {
+    function createDkcclLpeFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLpeFields" );
+
         map.put( "100", function( field ) {
             field.eachSubField( /A|a/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lpe", subField.value + " " + field.getValue( /h|e|f|c/, " " ) );
@@ -1737,22 +1753,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLpeFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lpo index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLpoFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLpoFields
-     * @method
+     * @function
      */
-    that.createDkcclLpoFields = function( index, map ) {
+    function createDkcclLpoFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLpoFields" );
+
         map.put( "100", function( field ) {
             index.pushField( "dkcclphrase.lpo", field.getValue( /a|h|e|f|c/, " " ) );
         } );
@@ -1766,20 +1783,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLpoFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lrt index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLrtFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLrtFields
-     * @method
+     * @function
      */
-    that.createDkcclLrtFields = function( index, map ) {
+    function createDkcclLrtFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLrtFields" );
 
@@ -1792,22 +1809,23 @@ var DkcclPhraseIndex = function( ) {
         }
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLrtFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lse index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLseFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLseFields
-     * @method
+     * @function
      */
-    that.createDkcclLseFields = function( index, map ) {
+    function createDkcclLseFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLseFields" );
+
         map.put( "247", function( field ) {
             field.eachSubField( /s/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lse", subField.value + " " + field.getValue( /v|o|n/, " " ) );
@@ -1840,22 +1858,24 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLseFields" );
-    };
+
+    }
 
     /**
      * Method that creates ccl lso index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLsoFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLsoFields
-     * @method
+     * @function
      */
-    that.createDkcclLsoFields = function( index, map ) {
+    function createDkcclLsoFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLsoFields" );
+
         map.put( "247", function( field ) {
             field.eachSubField( /s/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lso", subField.value + " " + field.getValue( /o|n/, " " ) );
@@ -1879,20 +1899,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLsoFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lst index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLstFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLstFields
-     * @method
+     * @function
      */
-    that.createDkcclLstFields = function( index, map ) {
+    function createDkcclLstFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLstFields" );
 
@@ -1901,20 +1921,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLstFields" );
-    };
+    }
 
     /**
      * Method that creates title index fields. (i.e. dkcclphrase.mti and dkcclphrase.lti)
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLtiFields( index, map )
      * @param {Index} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLtiFields
-     * @method
+     * @function
      */
-    that.createDkcclLtiFields = function( index, map ) {
+    function createDkcclLtiFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLtiFields" );
 
@@ -2072,20 +2092,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLtiFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lts index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLtsFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLtsFields
-     * @method
+     * @function
      */
-    that.createDkcclLtsFields = function( index, map ) {
+    function createDkcclLtsFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLtsFields" );
 
@@ -2096,20 +2116,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLtsFields" );
-    };
+    }
 
     /**
      * Method that creates ccl ltt index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLttFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLttFields
-     * @method
+     * @function
      */
-    that.createDkcclLttFields = function( index, map ) {
+    function createDkcclLttFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLttFields" );
 
@@ -2118,20 +2138,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLttFields" );
-    };
+    }
 
     /**
      * Method that creates ccl luk index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLukFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLukFields
-     * @method
+     * @function
      */
-    that.createDkcclLukFields = function( index, map ) {
+    function createDkcclLukFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLukFields" );
 
@@ -2142,22 +2162,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLukFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lut index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLutFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLutFields
-     * @method
+     * @function
      */
-    that.createDkcclLutFields = function( index, map ) {
+    function createDkcclLutFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLutFields" );
+
         map.put( "239", function( field ) {
             index.pushField( "dkcclphrase.lut", field.getValue( /t|u|v|b/, " " ) );
         } );
@@ -2175,22 +2196,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLutFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lvp index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLvpFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLvpFields
-     * @method
+     * @function
      */
-    that.createDkcclLvpFields = function( index, map ) {
+    function createDkcclLvpFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLvpFields" );
+
         map.put( "557", function( field ) {
             field.eachSubField( /a|b/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lvp", subField.value + " " + field.getValue( /v|\u00E6|\u00f8|j/, " " ) );
@@ -2203,22 +2225,23 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLvpFields" );
-    };
+    }
 
     /**
      * Method that creates ccl lvx index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclLvxFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclLvxFields
-     * @method
+     * @function
      */
-    that.createDkcclLvxFields = function( index, map ) {
+    function createDkcclLvxFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclLvxFields" );
+
         map.put( "557", function( field ) {
             field.eachSubField( /a|b/, function( field, subField ) {
                 index.pushField( "dkcclphrase.lvx", subField.value + " " + field.getValue( /\u00E6|\u00f8/, " " ) );
@@ -2231,20 +2254,20 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclLvxFields" );
-    };
+    }
 
     /**
      * Method that creates ccl nal index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclNalFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclNalFields
-     * @method
+     * @function
      */
-    that.createDkcclNalFields = function( index, map ) {
+    function createDkcclNalFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclNalFields" );
 
@@ -2253,42 +2276,42 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclNalFields" );
-    };
+    }
 
     /**
      * Method that creates ccl nlm index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclNlmFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclNlmFields
-     * @method
+     * @function
      */
-    that.createDkcclNlmFields = function( index, map ) {
+    function createDkcclNlmFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclNlmFields" );
 
         map.put( "060", function( field ) {
-            index.pushField( "dkcclphrase.nlm", field.getValue( /a/, " " ) );
+            index.pushField( "dkcclphrase.nlm", field.getValue( "a", " " ) );
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclNlmFields" );
-    };
+    }
 
     /**
      * Method that creates ccl udk index fields.
      *
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.createDkcclUdkFields( index, map )
      * @param {Object} index the index to add fields to
      * @param {MatchMap} map The map to register handler methods in
      * @name DkcclPhraseIndex.createDkcclUdkFields
-     * @method
+     * @function
      */
-    that.createDkcclUdkFields = function( index, map ) {
+    function createDkcclUdkFields( index, map ) {
 
         Log.trace( "Entering DkcclPhraseIndex.createDkcclUdkFields" );
 
@@ -2297,12 +2320,12 @@ var DkcclPhraseIndex = function( ) {
         } );
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclUdkFields" );
-    };
+    }
 
     /**
      * Method that creates new indexFields without stopwords.
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.pushExtraIndexFields( index, fieldName, value, [origin] )
      * @param {Object} index Array of index objects with a name and a value
      * @param {String} fieldName a string with the name of the index that is added
@@ -2310,9 +2333,9 @@ var DkcclPhraseIndex = function( ) {
      * @param {String} [origin] the field name (obligatory for creating field dkcclphrase.mti)
      * @return {Object} Modified index
      * @name DkcclPhraseIndex.pushExtraIndexFields
-     * @method
+     * @function
      */
-    that.pushExtraIndexFields = function( index, fieldName, value, origin ) {
+    function pushExtraIndexFields( index, fieldName, value, origin ) {
 
         Log.trace( "Entering DkcclPhraseIndex.pushExtraIndexFields" );
 
@@ -2345,21 +2368,21 @@ var DkcclPhraseIndex = function( ) {
         Log.trace( "Leaving DkcclPhraseIndex.pushExtraIndexFields" );
 
         return index;
-    };
+    }
 
     /**
      * Method that creates new indexFields dkcclphrase.lti and dkcclphrase.mti for title
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.pushTitleIndexFields( index, value, origin )
      * @param {Index} index Array of index objects with a name and a value
      * @param {String} value the field value
      * @param {String} [origin] the field name (obligatory for creating field dkcclphrase.mti)
      * @return {Index} Modified index
      * @name DkcclPhraseIndex.pushTitleIndexFields
-     * @method
+     * @function
      */
-    that.pushTitleIndexFields = function( index, value, origin ) {
+    function pushTitleIndexFields( index, value, origin ) {
 
         Log.trace( "Entering DkcclPhraseIndex.pushTitleIndexFields" );
 
@@ -2377,7 +2400,7 @@ var DkcclPhraseIndex = function( ) {
         Log.trace( "Leaving DkcclPhraseIndex.pushTitleIndexFields" );
 
         return index;
-    };
+    }
 
     /**
      * Method that adds index fields dkcclphrase.mfo and dkcclphrase.lfo with creators
@@ -2389,9 +2412,9 @@ var DkcclPhraseIndex = function( ) {
      * @param {String} marcFieldName
      * @return {Index} index object that is updated with the new fields
      * @name DkcclPhraseIndex.pushCreatorIndexFields
-     * @method
+     * @function
      */
-    that.pushCreatorIndexFields = function( index, value, marcFieldName ) {
+    function pushCreatorIndexFields( index, value, marcFieldName ) {
 
         Log.trace( "Entering DkcclPhraseIndex.pushCreatorIndexFields" );
 
@@ -2414,12 +2437,12 @@ var DkcclPhraseIndex = function( ) {
 
         return index;
 
-    };
+    }
 
     /**
     * Method that checks if an item is contained in an array.
     *
-    * @method
+    * @function
     * @syntax DkcclPhraseIndex.inArr( arr, obj )
     * @param {Array} arr Array to check
     * @param {Object} obj Object to look for
@@ -2428,16 +2451,16 @@ var DkcclPhraseIndex = function( ) {
     * @name DkcclPhraseIndex.inArr( [ 'a', 'A', 'c'], 'A' )
     */
 
-    that.inArr = function( arr, obj ) {
+    function inArr( arr, obj ) {
         return ( arr.indexOf( obj ) );
-    };
+    }
 
     /**
      * Method that collects a sequence of subfields starting a new sequence on specified subfields.
      * If the start subfield also can be an upper case letter then the sequence is output both with
      * the lower case subfield and the upper case subfield.
      *
-     * @type {method}
+     * @type {function}
      * @syntax DkcclPhraseIndex.collectBySequence( index, field, regExSubFields, newSequenceSubFields )
      * @param {Object[]} index Array of index objects with a name and a value
      * @param {Field} field of marc object type
@@ -2446,9 +2469,9 @@ var DkcclPhraseIndex = function( ) {
      * @return {Object[]} modified index
      * @name DkcclPhraseIndex.collectBySequence
      * @example DkcclPhraseIndex.collectBySequence( index, field, /[Aabcuv]/, /[aA]/ );
-     * @method
+     * @function
      */
-    that.collectBySequence = function ( index, field, regExSubFields, regExNewSequence ) {
+    function collectBySequence( index, field, regExSubFields, regExNewSequence ) {
 
         var collectedValue= "";
         var dataFromSubfieldLower = "";
@@ -2501,9 +2524,71 @@ var DkcclPhraseIndex = function( ) {
         // any pending data?
         __emitToIndex( );
         return index;
-    };
+    }
 
-    return that;
+    //return that;
+
+    return {
+        createDkcclPhraseFields: createDkcclPhraseFields,
+        callIndexMethod: callIndexMethod,
+        createDkcclBcmFields: createDkcclBcmFields,
+        createDkcclDbkFields: createDkcclDbkFields,
+        createDkcclDdcFields: createDkcclDdcFields,
+        createDkcclLacFields: createDkcclLacFields,
+        createDkcclLagFields: createDkcclLagFields,
+        createDkcclLauFields: createDkcclLauFields,
+        createDkcclLbrFields: createDkcclLbrFields,
+        createDkcclLccFields: createDkcclLccFields,
+        createDkcclLclFields: createDkcclLclFields,
+        createDkcclLcpFields: createDkcclLcpFields,
+        createDkcclLdbFields: createDkcclLdbFields,
+        createDkcclLdfFields: createDkcclLdfFields,
+        createDkcclLdkFields: createDkcclLdkFields,
+        createDkcclLdsFields: createDkcclLdsFields,
+        createDkcclLedFields: createDkcclLedFields,
+        createDkcclLefFields: createDkcclLefFields,
+        createDkcclLekFields: createDkcclLekFields,
+        createDkcclLemFields: createDkcclLemFields,
+        createDkcclLepFields: createDkcclLepFields,
+        createDkcclLesFields: createDkcclLesFields,
+        createDkcclLffFields: createDkcclLffFields,
+        createDkcclLfmFields: createDkcclLfmFields,
+        createDkcclLfoFields: createDkcclLfoFields,
+        createDkcclLgdFields: createDkcclLgdFields,
+        createDkcclLhtFields: createDkcclLhtFields,
+        createDkcclLkeFields: createDkcclLkeFields,
+        createDkcclLklFields: createDkcclLklFields,
+        createDkcclLknFields: createDkcclLknFields,
+        createDkcclLkoFields: createDkcclLkoFields,
+        createDkcclLmeFields: createDkcclLmeFields,
+        createDkcclLmoFields: createDkcclLmoFields,
+        createDkcclLmsFields: createDkcclLmsFields,
+        createDkcclLnbFields: createDkcclLnbFields,
+        createDkcclLntFields: createDkcclLntFields,
+        createDkcclLokFields: createDkcclLokFields,
+        createDkcclLpaFields: createDkcclLpaFields,
+        createDkcclLpeFields: createDkcclLpeFields,
+        createDkcclLpoFields: createDkcclLpoFields,
+        createDkcclLrtFields: createDkcclLrtFields,
+        createDkcclLseFields: createDkcclLseFields,
+        createDkcclLsoFields: createDkcclLsoFields,
+        createDkcclLstFields: createDkcclLstFields,
+        createDkcclLtiFields: createDkcclLtiFields,
+        createDkcclLtsFields: createDkcclLtsFields,
+        createDkcclLttFields: createDkcclLttFields,
+        createDkcclLukFields: createDkcclLukFields,
+        createDkcclLutFields: createDkcclLutFields,
+        createDkcclLvpFields: createDkcclLvpFields,
+        createDkcclLvxFields: createDkcclLvxFields,
+        createDkcclNalFields: createDkcclNalFields,
+        createDkcclNlmFields: createDkcclNlmFields,
+        createDkcclUdkFields: createDkcclUdkFields,
+        pushExtraIndexFields: pushExtraIndexFields,
+        pushTitleIndexFields: pushTitleIndexFields,
+        pushCreatorIndexFields: pushCreatorIndexFields,
+        inArr: inArr,
+        collectBySequence: collectBySequence
+    };
 
 }( );
 
