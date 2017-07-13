@@ -1,7 +1,7 @@
 use( "Log" );
 use( "Marc" );
 use( "Tables" );
-use( "PhraseValues" );
+//use( "PhraseValues" );
 
 EXPORTED_SYMBOLS = [ 'DkcclPhraseIndex' ];
 
