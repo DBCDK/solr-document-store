@@ -1,6 +1,7 @@
 use( "Log" );
 use( "Marc" );
 use( "Tables" );
+use( "PhraseValues" );
 
 EXPORTED_SYMBOLS = [ 'DkcclPhraseIndex' ];
 
@@ -2050,7 +2051,6 @@ var DkcclPhraseIndex = function( ) {
         map.put( "795", function( field ) {
             DkcclPhraseIndex.collectBySequence( index, field, /[Aabc\u00E6\u00f8uv]/, /[aA]/ );
             field.eachSubField( /u|v/, function( field, subField ) {
-
                 titleValue = subField.value;
                 DkcclPhraseIndex.pushTitleIndexFields( index, titleValue, field.name );
             } );
