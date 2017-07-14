@@ -240,7 +240,7 @@
           <environmentVariables>
             <USE_JAVA_XML_DOM>true</USE_JAVA_XML_DOM>
             <MODULE_PATHS>
-              classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/
+              classpath:javascript/ classpath:javascript/javacore/ classpath:javascript/jscommon/system/ classpath:javascript/jscommon/convert/ classpath:javascript/jscommon/devel/ classpath:javascript/jscommon/util/ classpath:javascript/jscommon/external/ classpath:javascript/jscommon/marc/ classpath:javascript/jscommon/io/ classpath:javascript/jscommon/xml/ file://${basedir}/src/main/resources/javascript/standard-index-values/
             </MODULE_PATHS>
           </environmentVariables>
         </configuration>
