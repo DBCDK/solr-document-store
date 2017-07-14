@@ -34,6 +34,7 @@ var DkcclPhraseIndex = function( ) {
         Log.trace( "Entering DkcclPhraseIndex.createDkcclPhraseFields" );
 
         var map = new MatchMap();
+
         DkcclPhraseIndex.createDkcclBcmFields( index, map );
         DkcclPhraseIndex.createDkcclDbkFields( index, map );
         DkcclPhraseIndex.createDkcclDdcFields( index, map );
@@ -78,7 +79,11 @@ var DkcclPhraseIndex = function( ) {
         DkcclPhraseIndex.createDkcclLsoFields( index, map );
         DkcclPhraseIndex.createDkcclLstFields( index, map );
         //creates both dkcclphrase.lti and dkcclphrase.mti indices
-        DkcclPhraseIndex.createDkcclLtiFields( index, map );
+        //DkcclPhraseIndex.createDkcclLtiFields( index, map );
+
+        var valueCollection = {};
+        PhraseValues.createLtiAndMtiValuesFromDm2( map, valueCollection, [ "lti", "mti" ] );
+
         DkcclPhraseIndex.createDkcclLtsFields( index, map );
         DkcclPhraseIndex.createDkcclLttFields( index, map );
         DkcclPhraseIndex.createDkcclLukFields( index, map );
@@ -88,7 +93,16 @@ var DkcclPhraseIndex = function( ) {
         DkcclPhraseIndex.createDkcclNalFields( index, map );
         DkcclPhraseIndex.createDkcclNlmFields( index, map );
         DkcclPhraseIndex.createDkcclUdkFields( index, map );
-        record.eachFieldMap(map);
+
+        record.eachFieldMap( map );
+
+        for ( var indexName in valueCollection ) {
+            var corepoIndexName = "dkcclphrase." + indexName;
+            for ( var i = 0; i < valueCollection[indexName].length; i++ ) {
+                index.pushField( corepoIndexName, valueCollection[indexName][i] );
+            }
+        }
+
 
         Log.trace( "Leaving DkcclPhraseIndex.createDkcclPhraseFields" );
     }
