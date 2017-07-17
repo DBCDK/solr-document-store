@@ -1,6 +1,7 @@
 use( "DkcclTermMa" );
 use( "Log" );
 use( "Marc" );
+use( "TermValues" );
 
 
 EXPORTED_SYMBOLS = [ 'DkcclTermIndex' ];
@@ -119,7 +120,10 @@ var DkcclTermIndex = function() {
         DkcclTermIndex.createDkcclFieldsSt( index, map );
         DkcclTermIndex.createDkcclFieldsTf( index, map );
         DkcclTermIndex.createDkcclFieldsTg( index, map );
-        DkcclTermIndex.createDkcclFieldsTi( index, map, "dkcclterm.ti" );
+        //DkcclTermIndex.createDkcclFieldsTi( index, map, "dkcclterm.ti" ); //commented out because of userstory Search #2120, doing this instead:
+        var valueCollection = {};
+        TermValues.createTiValuesFromDm2( map, valueCollection );
+
         DkcclTermIndex.createDkcclFieldsTs( index, map );
         DkcclTermIndex.createDkcclFieldsTt( index, map );
         DkcclTermIndex.createDkcclFieldsUl( index, map );
@@ -132,6 +136,14 @@ var DkcclTermIndex = function() {
 
         // Can not be optimized like other methods because it needs direct access to record
         DkcclTermMa.createDkcclFieldsMa( index, record );
+
+        //To handle new way of creating indexes, introduced with Search US#2120:
+        for ( var indexName in valueCollection ) {
+            var corepoIndexName = "dkcclterm." + indexName;
+            for ( var i = 0; i < valueCollection[indexName].length; i++ ) {
+                index.pushField( corepoIndexName, valueCollection[indexName][i] );
+            }
+        }
 
         Log.trace( "Leaving: DkcclTermIndex.createDkcclTermFields method" );
         return index;

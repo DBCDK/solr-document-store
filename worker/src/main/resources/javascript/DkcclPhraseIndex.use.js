@@ -79,8 +79,7 @@ var DkcclPhraseIndex = function( ) {
         DkcclPhraseIndex.createDkcclLsoFields( index, map );
         DkcclPhraseIndex.createDkcclLstFields( index, map );
         //creates both dkcclphrase.lti and dkcclphrase.mti indices
-        //DkcclPhraseIndex.createDkcclLtiFields( index, map );
-
+        //DkcclPhraseIndex.createDkcclLtiFields( index, map );  //commented out because of userstory Search #2120, doing this instead:
         var valueCollection = {};
         PhraseValues.createLtiAndMtiValuesFromDm2( map, valueCollection, [ "lti", "mti" ] );
 
@@ -96,6 +95,7 @@ var DkcclPhraseIndex = function( ) {
 
         record.eachFieldMap( map );
 
+        //To handle new way of creating indexes, introduced with Search US#2120:
         for ( var indexName in valueCollection ) {
             var corepoIndexName = "dkcclphrase." + indexName;
             for ( var i = 0; i < valueCollection[indexName].length; i++ ) {
