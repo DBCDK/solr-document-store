@@ -49,13 +49,12 @@ var IndexCreator = function( ) {
 
         var foXml = XmlUtil.fromString( foxmlStr );
 
-        // use of XmlUtil.createDocumentFromElement is required,
-        // because all other modules expect to be able to
+        // use of XmlUtil.createDocumentFromElement is required, because all other modules expect to be able to
         // use root based XPath expressions
         var commonDataNode = XPath.selectNode( "/*/foxml:datastream[ @ID = 'commonData' ]/foxml:datastreamVersion/foxml:xmlContent/ting:container[ 1 ]", foXml );
 
         // / if document had no commonData stream, leave commonData undefined
-        var commonDataXml = ( commonDataNode === undefined ) ? undefined : XmlUtil.createDocumentFromElement( commonDataNode );
+        var commonDataXml = ( undefined === commonDataNode ) ? undefined : XmlUtil.createDocumentFromElement( commonDataNode );
 
         var systemRelationsXml = XmlUtil.createDocumentFromElement( XPath.selectNode( "/*/foxml:datastream[ @ID = 'RELS-SYS' ]/foxml:datastreamVersion/foxml:xmlContent/rdf:RDF[ 1 ]", foXml ) );
         var dcDataXml = XmlUtil.createDocumentFromElement( XPath.selectNode( "/*/foxml:datastream[ @ID = 'DC' ]/foxml:datastreamVersion/foxml:xmlContent/oai_dc:dc[ 1 ]", foXml ) );
@@ -77,10 +76,11 @@ var IndexCreator = function( ) {
         var solrId = "";
         var hasLocalDataStream = false;
 
-        var elements = XPath.select( "/*/foxml:datastream", foXml );
+        var dataStreamElements = XPath.select( "/*/foxml:datastream", foXml );
 
-        for ( var i = 0 ; i < elements.length; i++ ) {
-            var child = elements[ i ];
+        for ( var i = 0 ; i < dataStreamElements.length; i++ ) {
+
+            var child = dataStreamElements[ i ];
             var streamId = XmlUtil.getAttribute( child, "ID" );
             var localDataState = XmlUtil.getAttribute( child, "STATE" );
             var streamDate;
@@ -100,18 +100,21 @@ var IndexCreator = function( ) {
                     var localData = XPath.selectNode( "foxml:datastreamVersion/foxml:xmlContent/ting:localData[ 1 ]", child );
                     // localData node is not present for local datastreams that have been marked deleted
                     // and updated with <empty> content:
-                    indexingData = ( undefined === localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
+                    indexingData = ( !localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
                     solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
 
                     // If library rules say to use local data stream, but stream only has partial data,
                     // then use common datastream for indexing ( US2055 )
-                    if ( undefined !== indexingData && false === Alias.hasAlias( indexingData ) ) {
+                    if ( undefined === indexingData ) {
+                        Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream is empty" );
+                        // Use common data
+                        indexingData = commonDataXml;
+                    } else if ( false === Alias.hasAlias( indexingData ) ) {
                         Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream does not contain indexing alias:",
-                                XmlUtil.logXmlString( indexingData ) );
+                            XmlUtil.logXmlString( indexingData ) );
                         // Use common data
                         indexingData = commonDataXml;
                     }
-
                     streamDate = XPath.selectAttribute( "foxml:datastreamVersion/@CREATED", child );
                 } else {
                     indexingData = commonDataXml;
