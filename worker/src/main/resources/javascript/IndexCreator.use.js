@@ -71,56 +71,37 @@ var IndexCreator = function( ) {
 //        var dcDataXml = XmlUtil.createDocument( );
 //        dcDataXml.appendChild( XPath.selectNode( "/*/foxml:datastream[ @ID = 'DC' ]/foxml:datastreamVersion/foxml:xmlContent/oai_dc:dc[ 1 ]", foXml ) );
 
-        var state = XPath.selectAttribute( "/*/foxml:objectProperties/foxml:property[ @NAME = 'info:fedora/fedora-system:def/model#state' ][ 1 ]/@VALUE", foXml );
+        var objectState = XPath.selectAttribute( "/*/foxml:objectProperties/foxml:property[ @NAME = 'info:fedora/fedora-system:def/model#state' ][ 1 ]/@VALUE", foXml );
 
         var solrId = "";
-        var hasLocalDataStream = false;
+        var objectHasLocalDataStream = false;
 
         var dataStreamElements = XPath.select( "/*/foxml:datastream", foXml );
 
         for ( var i = 0 ; i < dataStreamElements.length; i++ ) {
 
-            var child = dataStreamElements[ i ];
-            var streamId = XmlUtil.getAttribute( child, "ID" );
-            var localDataState = XmlUtil.getAttribute( child, "STATE" );
+            var datastreamElement = dataStreamElements[ i ];
+            var streamId = XmlUtil.getAttribute( datastreamElement, "ID" );
+            var localDataState = XmlUtil.getAttribute( datastreamElement, "STATE" );
             var streamDate;
             solrId = "";
 
             Log.debug( "streamName = ", streamId );
 
-            var matches = streamId.match( /localData\.([0-9]{6})-/ );
-            if ( matches ) {
-                hasLocalDataStream = true;
+            var localDataMatch = streamId.match( /localData\.([0-9]{6})-/ );
+            if ( localDataMatch ) {
+                objectHasLocalDataStream = true;
                 // Extract submitter from stream name (group 1)
-                var streamSubmitter = matches[ 1 ];
+                var streamSubmitter = localDataMatch[ 1 ];
 
-                var streamSubmitterUseLocaldataStream = IndexCreator.useLocaldataStream( libraryRuleHandler, streamSubmitter );
-                var indexingData;
-                if ( streamSubmitterUseLocaldataStream ) {
-                    var localData = XPath.selectNode( "foxml:datastreamVersion/foxml:xmlContent/ting:localData[ 1 ]", child );
-                    // localData node is not present for local datastreams that have been marked deleted
-                    // and updated with <empty> content:
-                    indexingData = ( !localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
-                    solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
+                var indexingParameters = IndexCreator.setParametersForIndexingBibliographicRecords(
+                    pid, datastreamElement, streamId, streamSubmitter, commonDataXml, foXml, libraryRuleHandler
+                );
 
-                    // If library rules say to use local data stream, but stream only has partial data,
-                    // then use common datastream for indexing ( US2055 )
-                    if ( undefined === indexingData ) {
-                        Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream is empty" );
-                        // Use common data
-                        indexingData = commonDataXml;
-                    } else if ( false === Alias.hasAlias( indexingData ) ) {
-                        Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream does not contain indexing alias:",
-                            XmlUtil.logXmlString( indexingData ) );
-                        // Use common data
-                        indexingData = commonDataXml;
-                    }
-                    streamDate = XPath.selectAttribute( "foxml:datastreamVersion/@CREATED", child );
-                } else {
-                    indexingData = commonDataXml;
-                    solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
-                    streamDate = XPath.selectAttribute( "/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml );
-                }
+                var indexingData = indexingParameters.indexingData;
+                solrId = indexingParameters.solrId;
+                streamDate = indexingParameters.streamDate;
+
             } else {
                 // Skip DC, commonData and relations streams
                 Log.trace( "Not indexing ", streamId );
@@ -129,17 +110,94 @@ var IndexCreator = function( ) {
             Log.debug( "Stream solrid ", solrId );
 
             if ( "" !== solrId ) {
-                IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler );
+                IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, objectState, localDataState, solrId, streamDate, libraryRuleHandler );
             }
         }
 
-        if ( false === hasLocalDataStream ) {
+        if ( false === objectHasLocalDataStream ) {
             indexingData = commonDataXml;
             solrId = IndexCreator.getSolrId( pid, pid.replace( /(.*):.*/, "$1") );
             streamDate = XPath.selectAttribute( "/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml );
-            IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, state, localDataState, solrId, streamDate, libraryRuleHandler );		
+            IndexCreator.createIndexDocuments( pid, indexingData, systemRelationsXml, dcDataXml, solrCallback, objectState, localDataState, solrId, streamDate, libraryRuleHandler );
         }
     }
+
+
+    /**
+     * Method that sets parameters to use when creating index documents for bibliographic records.
+     * Sets the parameters solrId, indexingData and streamDate based on such things as:
+     * - whether the submitter who 'owns' the datastream uses localdata or not
+     * - whether localdata is empty/contains incomplete data (in that case indexing data is the commondata)
+     *
+     *
+     * @type {function}
+     * @syntax IndexCreator.setParametersForIndexingBibliographicRecords( pid, localdatastream, streamId, streamSubmitter, commonDataXml, foXml, libraryRuleHandler )
+     * @param {String} pid The pid of the object being indexed
+     * @param {Document} localdatastream The currently handled localData of the object being indexed
+     * @param {String} streamId The name of the datastream currently handled
+     * @param {String} streamSubmitter The submitter who owns the (local) datastream
+     * @param {Document} commonDataXml The commondata of the object being indexed
+     * @param {Document} foXml The whole xml document of the object being indexed
+     * @param {Object} libraryRuleHandler Javaobject. Instance of dk.dbc.openagency.client.LibraryRuleHandler to access OpenAgency
+     * @return {Object} with tre parameters: solrId, indexingData and streamDate
+     * @name IndexCreator.setParametersForIndexingBibliographicRecords
+     * @function
+     */
+    function setParametersForIndexingBibliographicRecords( pid, localdatastream, streamId, streamSubmitter, commonDataXml, foXml, libraryRuleHandler ) {
+
+        Log.trace( "Entering setParametersForIndexingBibliographicRecords" );
+
+        var streamSubmitterUseLocaldataStream = IndexCreator.useLocaldataStream( libraryRuleHandler, streamSubmitter );
+
+        var solrId = "";
+        var indexingData;
+        var streamDate;
+
+        if ( !streamSubmitterUseLocaldataStream ) {
+
+            solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
+            indexingData = commonDataXml;
+            streamDate = XPath.selectAttribute( "/*/foxml:datastream[ @ID='commonData' ]/foxml:datastreamVersion/@CREATED", foXml );
+
+        } else {
+
+            solrId = IndexCreator.getSolrId( pid, streamId.replace( /localData./, "" ) );
+
+            // sometimes we have empty localdata streams, so we set indexingData to undefined if there is no localData,
+            // otherwise creating the indexingData from the localData:
+            var localData = XPath.selectNode( "foxml:datastreamVersion/foxml:xmlContent/ting:localData[ 1 ]", localdatastream );
+            indexingData = ( !localData ) ? undefined : XmlUtil.createDocumentFromElement( localData );
+
+            // If library rules say to use local data stream, but stream only has partial data,
+            // then use common datastream for indexing ( US2055 )
+            if ( undefined === indexingData ) {
+                Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream is empty" );
+                // Use common data
+                indexingData = commonDataXml;
+            } else if ( false === Alias.hasAlias( indexingData ) ) {
+                Log.warn( "Stream submitter ", streamSubmitter, " uses local data stream, but local stream does not contain indexing alias:",
+                    XmlUtil.logXmlString( indexingData ) );
+                // Use common data
+                indexingData = commonDataXml;
+            }
+
+            streamDate = XPath.selectAttribute( "foxml:datastreamVersion/@CREATED", localdatastream );
+
+        }
+
+        var parameters = {
+            "indexingData": indexingData,
+            "solrId": solrId,
+            "streamDate": streamDate
+        };
+
+
+        Log.trace( "Leaving setParametersForIndexingBibliographicRecords" );
+
+        return parameters;
+
+    }
+
 
 
     /**
@@ -409,6 +467,7 @@ var IndexCreator = function( ) {
 
     return {
         prepareData: prepareData,
+        setParametersForIndexingBibliographicRecords: setParametersForIndexingBibliographicRecords,
         getSolrId: getSolrId,
         createIndexDocuments: createIndexDocuments,
         createIndexData: createIndexData,
