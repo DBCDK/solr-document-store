@@ -9,7 +9,8 @@ UnitTest.addFixture( "Test DkcclTermIndex.createDkcclTermFields", function() {
     var record = new Record();
     record.fromString(
         '001 00 *a12345678 *b870970\n' +
-        '009 00 *aa *gxx'
+        '009 00 *aa *gxx\n' +
+        '100 00 *aJoseph*hJenny'
     );
 
     var actual = DkcclTermIndex.createDkcclTermFields( index, record );
@@ -30,11 +31,26 @@ UnitTest.addFixture( "Test DkcclTermIndex.createDkcclTermFields", function() {
         name:"dkcclterm.hm",
         value:"te"
     }, {
+        name:"dkcclterm.pe",
+        value:"Joseph"
+    }, {
+        name:"dkcclterm.pe",
+        value:"Jenny"
+    }, {
+        name:"dkcclterm.po",
+        value:"Joseph"
+    }, {
+        name:"dkcclterm.po",
+        value:"Jenny"
+    }, {
         name:"dkcclterm.ma",
         value:"te"
     }, {
         name:"dkcclterm.ma",
         value:"xx"
+    }, {
+        name:"dkcclterm.fo",
+        value:"Joseph Jenny"
     } ];
 
     Assert.equalValue( "simple test of createDkcclTermFields", actual, expected );

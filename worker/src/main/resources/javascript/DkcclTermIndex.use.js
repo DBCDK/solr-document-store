@@ -37,6 +37,7 @@ var DkcclTermIndex = function() {
 
         Log.trace( "Entering: DkcclTermIndex.createDkcclTermFields method" );
 
+        var valueCollection = {};
         var map = new MatchMap();
         DkcclTermIndex.createDkcclFieldsAc( index, map );
         DkcclTermIndex.createDkcclFieldsAg( index, map );
@@ -66,7 +67,9 @@ var DkcclTermIndex = function() {
         DkcclTermIndex.createDkcclFieldsFg( index, map );
         DkcclTermIndex.createDkcclFieldsFl( index, map );
         DkcclTermIndex.createDkcclFieldsFm( index, map );
-        DkcclTermIndex.createDkcclFieldsFo( index, map, "dkcclterm.fo" );
+        //DkcclTermIndex.createDkcclFieldsFo( index, map, "dkcclterm.fo" );   //commented out because the function moved to standard-index-values
+        TermValues.createFoValuesFromDm2( map, valueCollection );
+
         DkcclTermIndex.createDkcclFieldsFv( index, map );
         DkcclTermIndex.createDkcclFieldsGd( index, map );
         DkcclTermIndex.createDkcclFieldsHm( index, map );
@@ -121,7 +124,6 @@ var DkcclTermIndex = function() {
         DkcclTermIndex.createDkcclFieldsTf( index, map );
         DkcclTermIndex.createDkcclFieldsTg( index, map );
         //DkcclTermIndex.createDkcclFieldsTi( index, map, "dkcclterm.ti" ); //commented out because of userstory Search #2120, doing this instead:
-        var valueCollection = {};
         TermValues.createTiValuesFromDm2( map, valueCollection );
 
         DkcclTermIndex.createDkcclFieldsTs( index, map );
