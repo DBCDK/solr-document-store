@@ -31,6 +31,7 @@ import dk.dbc.opensearch.commons.repository.RepositoryProvider;
 import dk.dbc.solr.indexer.cloud.shared.IndexerMessage;
 import dk.dbc.solr.indexer.cloud.shared.LogAppender;
 import java.sql.SQLException;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
@@ -46,7 +47,9 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.naming.NamingException;
+
 import static net.logstash.logback.marker.Markers.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,12 +158,18 @@ public class SolrIndexer {
         String label = repositoryDAO.getObjectLabel( identifier );
         return "SolrWorker:" + pid + "<" + label;
     }
+
+    private static final Pattern FAIL_PATTERN = Pattern.compile("(message exceeds the single message size limit for the broker or destination)", Pattern.CASE_INSENSITIVE);
+
     private static void sendRetryForever( JMSContext responseContext, Queue targetQueue, Message m ) {
         while( true ) {
             try {
                 responseContext.createProducer().send(targetQueue, m);
                 break;
             } catch ( JMSRuntimeException e ) {
+                if( FAIL_PATTERN.matcher(e.getMessage()).find() ) {
+                    throw e;
+                }
                 log.warn( "Push to queue failed, {}. Retry in 5s.", e.getMessage() );
                 try {
                     Thread.sleep( 5000 );
