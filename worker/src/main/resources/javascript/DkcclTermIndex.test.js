@@ -55,6 +55,87 @@ UnitTest.addFixture( "Test DkcclTermIndex.createDkcclTermFields", function() {
 
     Assert.equalValue( "simple test of createDkcclTermFields", actual, expected );
 
+
+    index = Index.newIndex();
+    record = new Record();              //constructed test record
+    record.fromString(
+        '001 00*a5 333 180 7*b870970*fa\n' +
+        '004 00*rn*ae\n' +
+        '009 00*ar*gxe\n' +
+        '652 00*0*å1*m162.722*bOpel\n' +
+        '666 00*spiger\n' +
+        '666 00*ufor 9 aar\n' +
+        '952 00*aKadett*xse*wOpel*z652/1(b)\n' );
+
+    actual = DkcclTermIndex.createDkcclTermFields( index, record );
+
+    expected = [{
+        name:"dkcclterm.id",
+        value:"5 333 180 7"
+    }, {
+        name:"dkcclterm.ln",
+        value:"870970"
+    }, {
+        name:"dkcclterm.nr",
+        value:"5 333 180 7"
+    }, {
+        name:"dkcclterm.hm",
+        value:"xe"
+    }, {
+        name:"dkcclterm.hm",
+        value:"ly"
+    }, {
+        name:"dkcclterm.au",
+        value:"Opel"
+    }, {
+        name:"dkcclterm.cl",
+        value:"162.722"
+    }, {
+        name:"dkcclterm.dk",
+        value:"162.722"
+    }, {
+        name:"dkcclterm.ok",
+        value:"162.722"
+    }, {
+        name:"dkcclterm.db",
+        value:"piger"
+    }, {
+        name:"dkcclterm.ds",
+        value:"piger"
+    }, {
+        name:"dkcclterm.ke",
+        value:"piger"
+    }, {
+        name:"dkcclterm.db",
+        value:"for 9 aar"
+    }, {
+        name:"dkcclterm.nb",
+        value:"for 9 aar"
+    }, {
+        name:"dkcclterm.au",
+        value:"Kadett"
+    }, {
+        name:"dkcclterm.ma",
+        value:"ly"
+    }, {
+        name:"dkcclterm.ma",
+        value:"xe"
+    }, {
+        name:"dkcclterm.em",
+        value:"Opel"
+    }, {
+        name:"dkcclterm.em",
+        value:"piger"
+    }, {
+        name:"dkcclterm.em",
+        value:"for 9 aar"
+    }, {
+        name:"dkcclterm.em",
+        value:"Kadett"
+    } ];
+
+    Assert.equalValue( "second test of createDkcclTermFields with focus on subject fields", actual, expected );
+
 } );
 
 

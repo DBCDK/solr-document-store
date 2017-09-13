@@ -59,7 +59,9 @@ var DkcclTermIndex = function() {
         DkcclTermIndex.createDkcclFieldsEf( index, map );
         DkcclTermIndex.createDkcclFieldsEj( index, map );
         DkcclTermIndex.createDkcclFieldsEk( index, map );
-        DkcclTermIndex.createDkcclFieldsEm( index, map, "dkcclterm.em" );
+        //DkcclTermIndex.createDkcclFieldsEm( index, map, "dkcclterm.em" );  //commented out because the function moved to standard-index-values
+        TermValues.createEmValuesFromDm2( map, valueCollection );
+
         DkcclTermIndex.createDkcclFieldsEn( index, map );
         DkcclTermIndex.createDkcclFieldsEp( index, map );
         DkcclTermIndex.createDkcclFieldsEs( index, map );
