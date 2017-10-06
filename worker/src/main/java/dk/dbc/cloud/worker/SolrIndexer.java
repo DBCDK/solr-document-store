@@ -115,7 +115,7 @@ public class SolrIndexer {
                 DBCTrackedLogContext.setTrackingId( trackingId );
 
                 String data = getObjectData( dao, pid );
-                SolrUpdaterCallback callback = new SolrUpdaterCallback( pid, jsWrapper.getEnvironment(), trackingId );
+                SolrUpdaterCallback callback = new SolrUpdaterCallback( jsWrapper.getEnvironment(), trackingId );
                 jsWrapper.createIndexData( dao, pid, data, callback, libraryRuleHandler );
                 documentsDeleted.inc( callback.getDeletedDocumentsCount() );
                 documentsUpdated.inc( callback.getUpdatedDocumentsCount() );

@@ -15,8 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with opensearch.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ */
 package dk.dbc.cloud.worker;
 
 import dk.dbc.commons.exception.ExceptionUtil;
@@ -35,32 +34,27 @@ import org.slf4j.ext.XLoggerFactory;
 /**
  *
  */
-public class SolrUpdaterCallback
-{
+public class SolrUpdaterCallback {
+
     private final static XLogger log = XLoggerFactory.getXLogger(SolrUpdaterCallback.class);
     private static final String TRACKING_ID_FIELD = "rec.trackingId";
 
-    private final String identifier;
     private final Environment jsEnvironment;
     private final String trackingId;
 
     private final ArrayList<SolrInputDocument> updatedDocuments = new ArrayList<>();
     private final ArrayList<DeleteMessage> deletedDocuments = new ArrayList<>();
 
-    SolrUpdaterCallback(String identifier, Environment jsEnvironment, String trackingId) {
-        ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(identifier, "identifier", log);
-
-        this.identifier = identifier;
+    SolrUpdaterCallback(Environment jsEnvironment, String trackingId) {
         this.jsEnvironment = jsEnvironment;
         this.trackingId = trackingId;
     }
-    
-    static String getShardedSolrId( String bibliographicRecordId, String solrId ){
+
+    static String getShardedSolrId(String bibliographicRecordId, String solrId) {
         String shardKey = bibliographicRecordId.replaceAll("[^0-9a-zA-Z]", "");
         String shardedId = shardKey + "/32!" + solrId;
         return shardedId;
     }
-
 
     public void addDocument(Object index) {
         ExceptionUtil.checkForNullAndLogAndThrow(index, "index", log);
@@ -68,29 +62,28 @@ public class SolrUpdaterCallback
         if (trackingId != null && !solrDocument.isEmpty()) {
             solrDocument.addField(TRACKING_ID_FIELD, trackingId);
         }
-        String solrId = solrDocument.getField( "id" ).getValue().toString();
+        String solrId = solrDocument.getField("id").getValue().toString();
         if (log.isTraceEnabled()) {
-            log.trace("Sending {} document to queue: {}", solrId,  solrDocument);
-        }
-        else {
+            log.trace("Sending {} document to queue: {}", solrId, solrDocument);
+        } else {
             log.debug("Sending {} document to queue", solrId);
         }
-        
-        String bibliographicRecordId = solrDocument.getField( "rec.bibliographicRecordId" ).getValue().toString();
-        String shardedId = getShardedSolrId( bibliographicRecordId, solrId );
-        solrDocument.setField( "id", shardedId );
-        
-        updatedDocuments.add( solrDocument );
+
+        String bibliographicRecordId = solrDocument.getField("rec.bibliographicRecordId").getValue().toString();
+        String shardedId = getShardedSolrId(bibliographicRecordId, solrId);
+        solrDocument.setField("id", shardedId);
+
+        updatedDocuments.add(solrDocument);
     }
 
     public void deleteDocument(String docId, String streamDate, String bibliographicRecordId) {
         log.debug("Deleting document for {}", docId);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(docId, "docId", log);
         ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(streamDate, "streamDate", log);
-        String shardedId = getShardedSolrId( bibliographicRecordId, docId );
+        String shardedId = getShardedSolrId(bibliographicRecordId, docId);
         deletedDocuments.add(new DeleteMessage(shardedId, streamDate));
     }
-    
+
     public ArrayList<SolrInputDocument> getUpdatedDocuments() {
         return updatedDocuments;
     }
@@ -108,20 +101,20 @@ public class SolrUpdaterCallback
     }
 
     private SolrInputDocument extractIndexDocumentFromNativeArray(JSObject index) throws IllegalStateException {
-        Object[] resultArray = jsEnvironment.getJavascriptObjectAsArray( index );
+        Object[] resultArray = jsEnvironment.getJavascriptObjectAsArray(index);
         long length = resultArray.length;
         log.debug("Result of running JS: {}, length {}", index, length);
 
         // Create a map of field names to values and eliminate any duplicate values in each field name
-        Map <String, Set<String>> docMap = new HashMap<>();
+        Map<String, Set<String>> docMap = new HashMap<>();
 
         for (Object obj : resultArray) {
-            if (!(obj instanceof JSObject)) {
+            if (!( obj instanceof JSObject )) {
                 throw new IllegalStateException("Unknown result element type returned by javascript: " + obj.getClass());
             }
-            String name = jsEnvironment.getJavascriptObjectFieldAsString( obj, "name" );
-            String value = jsEnvironment.getJavascriptObjectFieldAsString( obj, "value" );
-            ExceptionUtil.checkForNullOrEmptyAndLogAndThrow( name, "index field name", log );
+            String name = jsEnvironment.getJavascriptObjectFieldAsString(obj, "name");
+            String value = jsEnvironment.getJavascriptObjectFieldAsString(obj, "value");
+            ExceptionUtil.checkForNullOrEmptyAndLogAndThrow(name, "index field name", log);
 
             Set<String> values = docMap.get(name);
             if (values == null) {

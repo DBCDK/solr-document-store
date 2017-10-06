@@ -43,27 +43,28 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class EEConfig {
-    private static final Logger log = LoggerFactory.getLogger( EEConfig.class );
+
+    private static final Logger log = LoggerFactory.getLogger(EEConfig.class);
 
     @Target(value = {ElementType.FIELD})
     @Retention(value = RetentionPolicy.RUNTIME)
-    public static @interface Name {
+    public @interface Name {
 
         String value();
     }
 
     @Target(value = {ElementType.FIELD})
     @Retention(value = RetentionPolicy.RUNTIME)
-    public static @interface Url {
+    public @interface Url {
 
-        public boolean authentication() default false;
+        boolean authentication() default false;
     }
 
     @Target(value = {ElementType.FIELD})
     @Retention(value = RetentionPolicy.RUNTIME)
-    public static @interface Default {
+    public @interface Default {
 
-        public String value();
+        String value();
     }
 
     @Resource(lookup = "solr-worker")
@@ -145,7 +146,7 @@ public class EEConfig {
         String value = props.getProperty(name);
         if (value == null) {
             Default def = ip.getAnnotated().getAnnotation(Default.class);
-            if(def != null) {
+            if (def != null) {
                 value = def.value();
             }
         }
@@ -153,7 +154,7 @@ public class EEConfig {
         if (notNull != null && value == null) {
             throw new EJBException("Cannot resolve value for: " + name + " null is not allowed");
         }
-        log.info( "Configuration value {}:{}", name, value);
+        log.info("Configuration value {}:{}", name, value);
         return value;
     }
 
