@@ -129,7 +129,7 @@ public class SolrIndexer {
                 }
                 long endtime = System.nanoTime();
                 log.info( LogAppender.getMarker( App.APP_NAME, pid, LogAppender.SUCCEDED ).and(
-                        append( "duration", ( ( double ) ( ( endtime - starttime ) / 10000 ) ) / 100 ) ).and(
+                        append( "duration", ( ( double ) ( long ) ( ( endtime - starttime ) / 10000L ) ) / 100.0 ) ).and(
                         append( "updates", callback.getUpdatedDocumentsCount() ) ).and(
                         append( "deletes", callback.getDeletedDocumentsCount() ) ),
                         "Documents successfully build" );

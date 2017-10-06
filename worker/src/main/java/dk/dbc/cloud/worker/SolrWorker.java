@@ -99,7 +99,7 @@ public class SolrWorker implements MessageListener {
      * Creates CORepo Solr documents and pushes to JMS document queue.
      * Only IOExceptions should cause a message retry and a sleep penalty.
      *
-     * @param message
+     * @param message Pid
      */
     @Override
     public void onMessage( Message message ) {
