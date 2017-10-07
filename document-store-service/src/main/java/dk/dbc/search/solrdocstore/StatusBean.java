@@ -19,10 +19,7 @@ public class StatusBean {
     @Path("status")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getStatus() {
-        log.info(" ja7 ja7 ja7 ");
-        log.info(" ja7 ja7 ja7 ");
-        log.info(" ja7 ja7 ja7 ");
-        log.info(" ja7 ja7 ja7 ");
+        log.info("getStatus called ");
         return Response.ok().entity("{ 'ok': True }").build();
     }
 
