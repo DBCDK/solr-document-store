@@ -1,4 +1,4 @@
-# solrdocstore
+# Solr Document Store
 
 Solr Document Store for Corepo &amp; HoldingsItems index Documents
   

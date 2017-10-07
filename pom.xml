@@ -16,6 +16,8 @@
     <relativePath/>
   </parent>
 
+  <modules><module>document-store-service</module></modules>
+
   <groupId>dk.dbc</groupId>
   <artifactId>solr-doc-store</artifactId>
   <version>1.0-SNAPSHOT</version>
