@@ -303,6 +303,8 @@ var IndexCreator = function( ) {
 
         Log.trace( "Entering IndexCreator.createIndexData" );
 
+        //NB: This function does not have any unit tests.
+
         var alias = Alias.getAlias( indexingData );
 
         var index = Index.newIndex( );
