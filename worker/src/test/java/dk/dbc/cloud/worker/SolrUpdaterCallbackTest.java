@@ -30,7 +30,6 @@ import org.junit.Test;
 
 public class SolrUpdaterCallbackTest {
 
-    private final String pid = "obj:1";
     private final String trackingId = "Tracking ID";
     private Environment environment;
 
@@ -41,16 +40,6 @@ public class SolrUpdaterCallbackTest {
 
     @Test
     public void testConstructor_OK() {
-        new SolrUpdaterCallback(environment, trackingId);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testConstructor_throwsOnNullPid() {
-        new SolrUpdaterCallback(environment, trackingId);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstructor_throwsOnEmptyPid() {
         new SolrUpdaterCallback(environment, trackingId);
     }
 
@@ -144,7 +133,7 @@ public class SolrUpdaterCallbackTest {
         assertEquals( 1, instance.getDeletedDocumentsCount() );
         assertEquals(list, instance.getDeletedDocuments());
     }
-    
+
     @Test
     public void testGetShardedSolrId(){
         assertEquals( "bibid/32!solr-doc-id", SolrUpdaterCallback.getShardedSolrId("bibid", "solr-doc-id") );
