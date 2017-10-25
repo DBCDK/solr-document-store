@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 
-public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTest {
+public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
 
     @Test
     public void StoreEntity() {

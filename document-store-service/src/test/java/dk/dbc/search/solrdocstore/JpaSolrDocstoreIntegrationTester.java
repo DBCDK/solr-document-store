@@ -8,7 +8,7 @@ import org.postgresql.ds.PGSimpleDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class JpaSolrDocstoreIntegrationTest extends JpaIntegrationTest {
+public class JpaSolrDocstoreIntegrationTester extends JpaIntegrationTest {
 
     @Override
     public JpaTestEnvironment setup() {
