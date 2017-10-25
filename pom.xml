@@ -16,11 +16,25 @@
     <relativePath/>
   </parent>
 
-  <modules><module>document-store-service</module></modules>
+    <properties>
+        <flyway.version>4.1.0</flyway.version>
+        <dbc-commons.version>1.3-SNAPSHOT</dbc-commons.version>
+    </properties>
+
+    <modules>
+        <module>document-store-service</module>
+    </modules>
 
   <groupId>dk.dbc</groupId>
   <artifactId>solr-doc-store</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-    
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
