@@ -17,8 +17,10 @@ pipeline {
         stage("build") {
             steps {
                 // Fail Early..
-                if( env.BRANCH_NAME ) {
-                    throw new hudson.AbortException('Job Started from non MultiBranch Build')
+                script {
+                    if (env.BRANCH_NAME) {
+                        throw new hudson.AbortException('Job Started from non MultiBranch Build')
+                    }
                 }
 
                 sh """
