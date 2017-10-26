@@ -20,7 +20,10 @@ pipeline {
                 script {
                     if (! env.BRANCH_NAME) {
                         throw new hudson.AbortException('Job Started from non MultiBranch Build')
+                    } else {
+                        println(" Building BRANCH_NAME == ${BRANCH_NAME}")
                     }
+
                 }
 
                 sh """
@@ -43,12 +46,14 @@ pipeline {
                         def projectName = f.path.substring(0, f.path.indexOf('/'))
 
                         dir(dirName) {
-                            def imageName = "solr-doc-store-${projectName}-${pom.version}".toLowerCase()
+                            def imageName = "solr-${projectName}-${pom.version}".toLowerCase()
                             def imageLabel = env.BUILD_NUMBER
-                            if ( !env.BRANCH_NAME ==~ /master|trunk/) {
+                            if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
                                 println("Using branch_name ${BRANCH_NAME}")
                                 imageLabel = BRANCH_NAME.split(/\//)[-1]
                                 imageLabel = imageLabel.toLowerCase()
+                            } else {
+                                println(" Using Master branch ${BRANCH_NAME}")
                             }
 
                             println("In ${dirName} build ${projectName} as ${imageName}:$imageLabel")
@@ -58,7 +63,7 @@ pipeline {
                             if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
                                 docker.withRegistry('https://docker-os.dbc.dk', 'docker') {
                                     app.push()
-                                    if (BRANCH_NAME ==~ /master|trunk/) {
+                                    if (env.BRANCH_NAME ==~ /master|trunk/) {
                                         app.push "latest"
                                     }
                                 }
