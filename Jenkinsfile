@@ -4,7 +4,7 @@ pipeline {
         maven "maven 3.5"
     }
     environment {
-        MAVEN_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+        MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
     }
     triggers {
         pollSCM("H/3 * * * *")
@@ -16,6 +16,11 @@ pipeline {
     stages {
         stage("build") {
             steps {
+                // Fail Early..
+                if( env.BRANCH_NAME ) {
+                    throw new hudson.AbortException('Job Started from non MultiBranch Build')
+                }
+
                 sh """
                     mvn -B clean
                     mvn -B verify pmd:pmd javadoc:aggregate                   
@@ -23,5 +28,45 @@ pipeline {
                 //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
             }
         }
+
+        stage('Docker') {
+            steps {
+                script {
+                    def allDockerFiles = findFiles glob: '**/Dockerfile'
+                    def dockerFiles = allDockerFiles.findAll { f -> !f.path.startsWith("docker") }
+                    pom = readMavenPom file: 'pom.xml'
+
+                    for (def f : dockerFiles) {
+                        def dirName = f.path.take(f.path.length() - 11)
+                        def projectName = f.path.substring(0, f.path.indexOf('/'))
+
+                        dir(dirName) {
+                            def imageName = "solr-doc-store-${projectName}-${pom.version}".toLowerCase()
+                            def imageLabel = env.BUILD_NUMBER
+                            if ( !env.BRANCH_NAME ==~ /master|trunk/) {
+                                println("Using branch_name ${BRANCH_NAME}")
+                                imageLabel = BRANCH_NAME.split(/\//)[-1]
+                                imageLabel = imageLabel.toLowerCase()
+                            }
+
+                            println("In ${dirName} build ${projectName} as ${imageName}:$imageLabel")
+                            sh 'rm -f *.war ; cp  ../../../target/*.war .'
+                            def app = docker.build("$imageName:${imageLabel}".toLowerCase(), '--pull --no-cache .')
+
+                            if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
+                                docker.withRegistry('https://docker-os.dbc.dk', 'docker') {
+                                    app.push()
+                                    if (BRANCH_NAME ==~ /master|trunk/) {
+                                        app.push "latest"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
+
 }
