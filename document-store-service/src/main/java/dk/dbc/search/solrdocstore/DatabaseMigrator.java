@@ -31,7 +31,8 @@ public class DatabaseMigrator {
    		flyway.migrate();
    	}
 
-
+	public DatabaseMigrator( ) {
+	}
 	/**
 	 * For Integration test only
 	 * @param dataSource .
