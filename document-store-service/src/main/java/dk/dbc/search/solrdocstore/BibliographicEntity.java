@@ -17,7 +17,7 @@ public class BibliographicEntity {
     public String work;
     public String unit;
     public String producerVersion;
-    public boolean deleted;
+    public Boolean deleted;
     @Convert(converter = pgMapOfStringsToJsonConverter.class)
     public Map<String, List<String> > indexKeys;
     public int commitWithin;
