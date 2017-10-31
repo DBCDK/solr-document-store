@@ -21,35 +21,52 @@
 
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.commons.jsonb.JSONBException;
 import org.postgresql.util.PGobject;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handles mapping from/to String to/from PostgreSQL JSON type
  */
 @Converter
-public class pgStringToJsonConverter implements AttributeConverter<String, PGobject> {
+public class pgMapOfStringsToJsonConverter implements AttributeConverter<Map<String, List<String>>, PGobject> {
+    private final JSONBContext context=new JSONBContext();
+    
     @Override
-    public PGobject convertToDatabaseColumn(String content) throws IllegalStateException {
+    public PGobject convertToDatabaseColumn(Map<String, List<String>> content) throws IllegalStateException {
         final PGobject pgObject = new PGobject();
         pgObject.setType("jsonb");
         try {
-            pgObject.setValue(content);
-        } catch (SQLException e) {
+
+            pgObject.setValue(context.marshall(content));
+        } catch (SQLException | JSONBException e) {
             throw new IllegalStateException(e);
         }
         return pgObject;
     }
 
+
+
     @Override
-    public String convertToEntityAttribute(PGobject pgObject) {
+    public Map<String, List<String>> convertToEntityAttribute(PGobject pgObject) {
         if (pgObject == null) {
             return null;
         }
-        return pgObject.getValue();
+        Map<String, List<String>> res=null;
+        try {
+            res = context.unmarshall(pgObject.getValue(), new HashMap().getClass());
+        } catch (JSONBException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 }
 

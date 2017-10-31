@@ -25,7 +25,7 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_1.xsd"
              version="2.1">
   <persistence-unit name="solrDocumentStore_PU" transaction-type="JTA">
-    <jta-data-source>jdbc/dataio/harvester/tasks</jta-data-source>
+    <jta-data-source>jdbc/solr-doc-store</jta-data-source>
     <properties>
       <property name="javax.persistence.schema-generation.database.action" value="none"/>
     </properties>

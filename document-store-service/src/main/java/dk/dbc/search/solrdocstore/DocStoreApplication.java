@@ -13,7 +13,7 @@ import javax.ws.rs.core.Application;
      * This class defines the other classes that make up this JAX-RS application
      * by having the getClasses method return a specific set of resources.
      */
-@ApplicationPath("/")
+@ApplicationPath("")
 public class DocStoreApplication extends Application {
         private static final Logger log = LoggerFactory.getLogger(DocStoreApplication.class);
 
@@ -21,6 +21,7 @@ public class DocStoreApplication extends Application {
         public Set<Class<?>> getClasses() {
             final Set<Class<?>> classes = new HashSet<>();
             classes.add(StatusBean.class);
+            classes.add(BibliographicBean.class);
             for (Class<?> clazz : classes) {
                 log.info("Registered {} resource", clazz.getName());
             }
