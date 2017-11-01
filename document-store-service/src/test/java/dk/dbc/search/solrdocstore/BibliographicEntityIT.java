@@ -20,7 +20,7 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
             be.unit = "unit:2";
             be.producerVersion = "1234";
             be.deleted = false;
-            be.indexKeys = "[ {\"key\": \"titel\", \"value\": \"unix bogen\"}, {\"key\": \"titel\", \"value\": \"unix bogen\"} ]";
+            be.indexKeys = "{\"titel\": [\"unix bogen\"], \"id\": [\"argle\"] }";
             be.commitWithin = 1000;
             be.trackingId = "";
             em.persist(be);
@@ -36,7 +36,7 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
     public void LoadEntity() throws Exception {
         executeScriptResource("/entityTestData.sql");
         EntityManager em=env().getEntityManager();
-        BibliographicEntity be=env().getPersistenceContext().run( () -> { return em.find(BibliographicEntity.class, "id:3"); });
+        BibliographicEntity be=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, "id:3"));
 
         assertThat( be.agencyId, is(300));
         assertThat( be.bibliographicRecordId, is("4321"));
@@ -49,7 +49,7 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
         assertThat(be.unit , is( "unit:3" ));
         assertThat(be.producerVersion , is( "5544" ));
         assertThat(be.deleted , is( true ));
-        assertThat(be.indexKeys , is( "[{\"key\": \"ti\", \"value\": \"isdnBogen\"}, {\"key\": \"001\", \"value\": \"argle\"}]" ));
+        assertThat(be.indexKeys , is( "{\"ti\": [\"isdnBogen\"], \"001\": [\"argle\"]}" ));
         assertThat(be.commitWithin , is( 7788 ));
         assertThat(be.trackingId , is( "track" ));
 
