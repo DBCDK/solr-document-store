@@ -26,7 +26,7 @@ CREATE TABLE bibliographicSolrKeys (
     work VARCHAR(50) NOT NULL,
     unit VARCHAR(50) NOT NULL,
     producerVersion VARCHAR(50),
-    deleted BOOLEAN,
+    deleted BOOLEAN NOT NULL,
     indexKeys JSONB,
     commitWithin NUMERIC(10),
     trackingId VARCHAR(256) NOT NULL DEFAULT ''
