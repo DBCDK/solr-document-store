@@ -32,3 +32,15 @@ CREATE TABLE bibliographicSolrKeys (
     trackingId VARCHAR(256) NOT NULL DEFAULT ''
 );
 
+
+CREATE TABLE holdingsItemsSolrKeys (
+    agencyId NUMERIC(6) NOT NULL,
+    bibliographicRecordId TEXT NOT NULL,
+    producerVersion VARCHAR(50),
+    indexKeys JSONB,
+    commitWithin NUMERIC(10),
+    trackingId VARCHAR(256) NOT NULL DEFAULT '',
+
+    PRIMARY KEY ( agencyId, bibliographicRecordId )
+);
+
