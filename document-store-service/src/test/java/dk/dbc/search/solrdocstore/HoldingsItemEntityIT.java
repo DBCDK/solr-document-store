@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,30 +49,34 @@ public class HoldingsItemEntityIT extends JpaSolrDocstoreIntegrationTester {
 
      @Test
      public void LoadEntity() throws Exception {
-        /*
+
          executeScriptResource("/entityTestData.sql");
          EntityManager em=env().getEntityManager();
-         BibliographicEntity be=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, "id:3"));
+
+         AgencyItemKey key=new AgencyItemKey().withAgencyId(300).withBibliographicRecordId("4321");
+         HoldingsItemEntity be=env().getPersistenceContext().run( () -> em.find(HoldingsItemEntity.class, key));
 
          assertThat( be.agencyId, is(300));
          assertThat( be.bibliographicRecordId, is("4321"));
 
+         assertThat(be.producerVersion , is( "revision" ));
+         ArrayList<Map<String,List<String>>> expected = new ArrayList<>();
 
-         assertThat(be.id , is( "id:3" ));
-         assertThat(be.agencyId , is( 300 ));
-         assertThat(be.bibliographicRecordId , is( "4321" ));
-         assertThat(be.work , is( "work:3" ));
-         assertThat(be.unit , is( "unit:3" ));
-         assertThat(be.producerVersion , is( "5544" ));
-         assertThat(be.deleted , is( true ));
-         Map<String,List<String>> expected= new HashMap<>();
-         expected.put("ti", Arrays.asList("isdnBogen", "title2"));
-         expected.put("001", Collections.singletonList("argle"));
+         Map<String, List<String>> doc1=new HashMap<>();
+         doc1.put("title", Collections.singletonList("unix bogen"));
+         doc1.put("id", Collections.singletonList("argle"));
+         expected.add( doc1 );
+
+         Map<String, List<String>> doc2=new HashMap<>();
+         doc2.put("title", Collections.singletonList("unix bogen"));
+         doc2.put("id", Collections.singletonList("argle"));
+         doc2.put("dyr", Collections.singletonList("hest"));
+         expected.add( doc2 );
+         
          assertThat(be.indexKeys, is( expected ));
 
-         assertThat(be.commitWithin , is( 7788 ));
+         assertThat(be.commitWithin , is( 4444 ));
          assertThat(be.trackingId , is( "track" ));
-          */
      }
 
 }

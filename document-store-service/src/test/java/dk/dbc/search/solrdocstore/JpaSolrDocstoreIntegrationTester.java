@@ -21,6 +21,7 @@ public class JpaSolrDocstoreIntegrationTester extends JpaIntegrationTest {
     public void ClearDatase() throws SQLException {
         try (Connection conn = env().getDatasource().getConnection() ) {
             conn.createStatement().executeUpdate("delete from bibliographicSolrKeys");
+            conn.createStatement().executeUpdate("delete from holdingsitemssolrkeys");
         }
 
     }
