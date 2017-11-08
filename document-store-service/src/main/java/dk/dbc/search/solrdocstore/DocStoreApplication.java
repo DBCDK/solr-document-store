@@ -22,6 +22,7 @@ public class DocStoreApplication extends Application {
             final Set<Class<?>> classes = new HashSet<>();
             classes.add(StatusBean.class);
             classes.add(BibliographicBean.class);
+            classes.add(HoldingsItemBean.class);
             for (Class<?> clazz : classes) {
                 log.info("Registered {} resource", clazz.getName());
             }

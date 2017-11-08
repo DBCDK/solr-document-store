@@ -32,7 +32,6 @@ CREATE TABLE bibliographicSolrKeys (
     trackingId VARCHAR(256) NOT NULL DEFAULT ''
 );
 
-
 CREATE TABLE holdingsItemsSolrKeys (
     agencyId NUMERIC(6) NOT NULL,
     bibliographicRecordId TEXT NOT NULL,
