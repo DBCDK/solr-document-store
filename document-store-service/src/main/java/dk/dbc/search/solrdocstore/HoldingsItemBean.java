@@ -30,10 +30,9 @@ public class HoldingsItemBean {
         @Path("holdings")
         @Consumes({ MediaType.APPLICATION_JSON })
         @Produces({MediaType.APPLICATION_JSON})
-        public Response addBibliographicKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
-            log.info("AddBibliographicKeys called ");
-
+        public Response addHoldingsKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
             HoldingsItemEntity hi=jsonbContext.unmarshall(KeyJsonContent, HoldingsItemEntity.class);
+            log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
 
             entityManager.merge( hi );
 
