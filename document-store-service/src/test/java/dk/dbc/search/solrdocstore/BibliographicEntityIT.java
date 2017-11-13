@@ -5,6 +5,11 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
 
@@ -20,7 +25,9 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
             be.unit = "unit:2";
             be.producerVersion = "1234";
             be.deleted = false;
-            be.indexKeys = "{\"titel\": [\"unix bogen\"], \"id\": [\"argle\"] }";
+            be.indexKeys = new HashMap<>();
+            be.indexKeys.put("titel", Collections.singletonList("unix bogen"));
+            be.indexKeys.put("id", Collections.singletonList("argle"));
             be.commitWithin = 1000;
             be.trackingId = "";
             em.persist(be);
@@ -49,7 +56,11 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
         assertThat(be.unit , is( "unit:3" ));
         assertThat(be.producerVersion , is( "5544" ));
         assertThat(be.deleted , is( true ));
-        assertThat(be.indexKeys , is( "{\"ti\": [\"isdnBogen\"], \"001\": [\"argle\"]}" ));
+        Map<String,List<String>> expected= new HashMap<>();
+        expected.put("ti", Arrays.asList("isdnBogen", "title2"));
+        expected.put("001", Collections.singletonList("argle"));
+        assertThat(be.indexKeys, is( expected ));
+
         assertThat(be.commitWithin , is( 7788 ));
         assertThat(be.trackingId , is( "track" ));
 
