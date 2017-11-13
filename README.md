@@ -17,6 +17,12 @@ levels of [FRBS](https://en.wikipedia.org/wiki/Functional_Requirements_for_Bibli
    Holds Holdings Documents fragments at the Item level.
            
            
+# JMeter 
+
+The JMeter projects uses the following plugins from https://jmeter-plugins.org/wiki/PluginsManager/
+   - Distribution/Percentile Graphs  https://jmeter-plugins.org/wiki/RespTimesDistribution/
+  
+           
 # Testing 
 
 Todo:
