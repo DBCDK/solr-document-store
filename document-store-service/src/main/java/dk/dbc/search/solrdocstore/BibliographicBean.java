@@ -32,13 +32,10 @@ public class BibliographicBean {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({MediaType.APPLICATION_JSON})
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
-        log.info("AddBibliographicKeys called ");
-        
         BibliographicEntity be=jsonbContext.unmarshall(KeyJsonContent, BibliographicEntity.class);
+        log.info("AddBibliographicKeys called {}:{}", be.agencyId,be.bibliographicRecordId);
 
         entityManager.merge( be );
-        
-        return Response.ok().entity("{ \"ok\": True }").build();
+        return Response.ok().entity("{ \"test\": True }").build();
     }
-    
 }

@@ -7,6 +7,9 @@ import javax.persistence.Table;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.persistence.annotations.Mutable;
+import org.eclipse.persistence.annotations.Mutable;
+
 @Entity
 @Table(name = "bibliographicSolrKeys")
 public class BibliographicEntity {
@@ -17,7 +20,9 @@ public class BibliographicEntity {
     public String work;
     public String unit;
     public String producerVersion;
-    public Boolean deleted;
+    public boolean deleted;
+    @SuppressWarnings("JpaAttributeTypeInspection")
+    @Mutable
     @Convert(converter = pgMapOfStringsToJsonConverter.class)
     public Map<String, List<String> > indexKeys;
     public int commitWithin;

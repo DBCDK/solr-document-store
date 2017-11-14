@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import org.eclipse.persistence.annotations.Mutable;
+
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,6 +20,7 @@ public class HoldingsItemEntity {
     public String bibliographicRecordId;
     public String producerVersion;
     @SuppressWarnings("JpaAttributeTypeInspection")
+    @Mutable
     @Convert(converter = pgHoldingsKeysToPgConverter.class)
     public List<Map<String, List<String>>> indexKeys;
     public int commitWithin;
