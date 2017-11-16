@@ -73,8 +73,7 @@ public class HoldingsItemEntityIT extends JpaSolrDocstoreIntegrationTester {
          expected.add( doc2 );
          
          assertThat(be.indexKeys, is( expected ));
-
-         assertThat(be.commitWithin , is( 4444 ));
+         
          assertThat(be.trackingId , is( "track" ));
      }
 

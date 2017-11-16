@@ -20,7 +20,6 @@
 ---
 
 CREATE TABLE bibliographicSolrKeys (
-    id varchar(100) NOT NULL PRIMARY KEY,
     agencyId NUMERIC(6) NOT NULL,
     bibliographicRecordId TEXT NOT NULL,
     work VARCHAR(50) NOT NULL,
@@ -28,8 +27,9 @@ CREATE TABLE bibliographicSolrKeys (
     producerVersion VARCHAR(50),
     deleted BOOLEAN NOT NULL,
     indexKeys JSONB,
-    commitWithin NUMERIC(10),
-    trackingId VARCHAR(256) NOT NULL DEFAULT ''
+    trackingId VARCHAR(256) NOT NULL DEFAULT '',
+    
+    PRIMARY KEY ( agencyId, bibliographicRecordId )
 );
 
 CREATE TABLE holdingsItemsSolrKeys (
@@ -37,7 +37,6 @@ CREATE TABLE holdingsItemsSolrKeys (
     bibliographicRecordId TEXT NOT NULL,
     producerVersion VARCHAR(50),
     indexKeys JSONB,
-    commitWithin NUMERIC(10),
     trackingId VARCHAR(256) NOT NULL DEFAULT '',
 
     PRIMARY KEY ( agencyId, bibliographicRecordId )
