@@ -1,5 +1,4 @@
-#FROM docker.dbc.dk/payara-micro:latest
-FROM micro
+FROM docker.dbc.dk/payara-micro:latest
 
 ADD config.d/* config.d
 ADD *.war wars/
