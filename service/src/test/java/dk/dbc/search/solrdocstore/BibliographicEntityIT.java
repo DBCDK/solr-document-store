@@ -18,7 +18,6 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
         EntityManager em=env().getEntityManager();
         env().getPersistenceContext().run( () -> {
             BibliographicEntity be=new BibliographicEntity();
-            be.id = "Id:1";
             be.agencyId = 200;
             be.bibliographicRecordId = "1234";
             be.work = "work:1";
@@ -33,7 +32,8 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
             em.persist(be);
         });
 
-        BibliographicEntity be2=em.find(BibliographicEntity.class, "Id:1");
+        AgencyItemKey key=new AgencyItemKey().withAgencyId(200).withBibliographicRecordId("1234");
+        BibliographicEntity be2=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, key) );
 
         assertThat( be2.agencyId, is(200));
         assertThat( be2.bibliographicRecordId, is("1234"));
@@ -43,13 +43,13 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
     public void LoadEntity() throws Exception {
         executeScriptResource("/entityTestData.sql");
         EntityManager em=env().getEntityManager();
-        BibliographicEntity be=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, "id:3"));
+
+        AgencyItemKey key=new AgencyItemKey().withAgencyId(300).withBibliographicRecordId("4321");
+        BibliographicEntity be=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, key));
 
         assertThat( be.agencyId, is(300));
         assertThat( be.bibliographicRecordId, is("4321"));
         
-
-        assertThat(be.id , is( "id:3" ));
         assertThat(be.agencyId , is( 300 ));
         assertThat(be.bibliographicRecordId , is( "4321" ));
         assertThat(be.work , is( "work:3" ));

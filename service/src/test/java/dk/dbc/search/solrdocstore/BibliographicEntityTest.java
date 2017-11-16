@@ -18,7 +18,6 @@ public class BibliographicEntityTest {
     @Test
     public void SimpleEncode() throws Exception {
         BibliographicEntity be=new BibliographicEntity();
-        be.id = "Id:1";
         be.agencyId = 200;
         be.bibliographicRecordId = "1234";
         be.work = "work:1";
@@ -33,15 +32,14 @@ public class BibliographicEntityTest {
         be.trackingId = "";
 
         String s=context.marshall( be);
-        assertThat(s, is("{\"id\":\"Id:1\",\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"commitWithin\":1000,\"trackingId\":\"\"}"));
+        assertThat(s, is("{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"trackingId\":\"\",\"commitWithin\":1000}"));
     }
 
     @Test
     public void SimpleDecode() throws Exception {
-        String jsonContent="{\"id\":\"Id:1\",\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"commitWithin\":1000,\"trackingId\":\"\"}";
+        String jsonContent="{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"commitWithin\":1000,\"trackingId\":\"\"}";
 
         BibliographicEntity be=context.unmarshall(jsonContent, BibliographicEntity.class);
-        assertThat(be.id, is("Id:1"));
         assertThat(be.agencyId ,is( 200));
         assertThat(be.bibliographicRecordId ,is( "1234"));
         assertThat(be.work ,is( "work:1"));
