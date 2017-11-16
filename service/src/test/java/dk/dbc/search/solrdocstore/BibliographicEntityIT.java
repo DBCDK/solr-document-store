@@ -60,8 +60,7 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
         expected.put("ti", Arrays.asList("isdnBogen", "title2"));
         expected.put("001", Collections.singletonList("argle"));
         assertThat(be.indexKeys, is( expected ));
-
-        assertThat(be.commitWithin , is( 7788 ));
+        
         assertThat(be.trackingId , is( "track" ));
 
     }
