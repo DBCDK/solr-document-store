@@ -36,6 +36,6 @@ public class BibliographicBean {
         log.info("AddBibliographicKeys called {}:{}", be.agencyId,be.bibliographicRecordId);
 
         entityManager.merge( be );
-        return Response.ok().entity("{ \"test\": True }").build();
+        return Response.ok().entity("{ \"ok\": True }").build();
     }
 }
