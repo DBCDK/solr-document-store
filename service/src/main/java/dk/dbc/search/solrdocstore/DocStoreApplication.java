@@ -15,7 +15,7 @@ import javax.ws.rs.core.Application;
      * This class defines the other classes that make up this JAX-RS application
      * by having the getClasses method return a specific set of resources.
      */
-@ApplicationPath("")
+@ApplicationPath("/api")
 public class DocStoreApplication extends Application {
         private static final Logger log = LoggerFactory.getLogger(DocStoreApplication.class);
 
