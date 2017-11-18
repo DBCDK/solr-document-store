@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 @Stateless
-@Path("")
+@Path(".")
 public class HoldingsItemBean {
         private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
 
