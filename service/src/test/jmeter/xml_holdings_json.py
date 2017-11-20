@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
 """
+  one off debug helper script: read a bibliographic solr document xml file and generate a json file for the /api/holdings entry point
+
   Scan a list of solr documents in xml and extract sample solr-doc-store holdings update .json documents.
   if bib and faust is not given.. it is taken from the .xml file
 """
+
 import xml.etree.ElementTree
 import argparse
 import json
