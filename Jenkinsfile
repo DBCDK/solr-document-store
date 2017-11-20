@@ -19,6 +19,7 @@ pipeline {
                 // Fail Early..
                 script {
                     if (! env.BRANCH_NAME) {
+                        currentBuild.rawBuild.result = Result.ABORTED
                         throw new hudson.AbortException('Job Started from non MultiBranch Build')
                     } else {
                         println(" Building BRANCH_NAME == ${BRANCH_NAME}")
@@ -39,14 +40,21 @@ pipeline {
                 script {
                     def allDockerFiles = findFiles glob: '**/Dockerfile'
                     def dockerFiles = allDockerFiles.findAll { f -> !f.path.startsWith("docker") }
-                    pom = readMavenPom file: 'pom.xml'
+                    def version = readMavenPom().version
+                    
 
                     for (def f : dockerFiles) {
                         def dirName = f.path.take(f.path.length() - 11)
-                        def projectName = f.path.substring(0, f.path.indexOf('/'))
+
 
                         dir(dirName) {
-                            def imageName = "solr-${projectName}-${pom.version}".toLowerCase()
+                            modulePom = readMavenPom file: '../../../pom.xml'
+                            def projectName = modulePom.getName()
+                            if( !projectName ) {
+                                throw new hudson.AbortException("Unable to find module Name in ${dirName}/../../../pom.xml remember to add a <name> element")
+                            }
+
+                            def imageName = "${projectName}-${version}".toLowerCase()
                             def imageLabel = env.BUILD_NUMBER
                             if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
                                 println("Using branch_name ${BRANCH_NAME}")

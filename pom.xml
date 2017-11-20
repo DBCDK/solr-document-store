@@ -22,7 +22,7 @@
     </properties>
 
     <modules>
-        <module>document-store-service</module>
+        <module>service</module>
     </modules>
 
   <groupId>dk.dbc</groupId>
