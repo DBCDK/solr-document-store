@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+"""one off debug helper script: read a bibliographic solr document xml file and generate a json file for the /api/bibliographic entry point"""
+
 import xml.etree.ElementTree
 import argparse
 import json
