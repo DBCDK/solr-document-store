@@ -9,6 +9,7 @@
 
     <artifactId>solr-doc-store-service</artifactId>
     <packaging>war</packaging>
+    <name>solr-doc-store-service</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
