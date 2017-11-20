@@ -7,8 +7,9 @@ import org.postgresql.ds.PGSimpleDataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-public class JpaSolrDocstoreIntegrationTester extends JpaIntegrationTest {
+public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
     @Override
     public JpaTestEnvironment setup() {
@@ -19,11 +20,11 @@ public class JpaSolrDocstoreIntegrationTester extends JpaIntegrationTest {
 
     @Before
     public void ClearDatase() throws SQLException {
-        try (Connection conn = env().getDatasource().getConnection() ) {
-            conn.createStatement().executeUpdate("delete from bibliographicSolrKeys");
-            conn.createStatement().executeUpdate("delete from holdingsitemssolrkeys");
+        try (Connection conn = env().getDatasource().getConnection();
+             Statement statement = conn.createStatement() )  {
+            statement.executeUpdate("delete from bibliographicSolrKeys");
+            statement.executeUpdate("delete from holdingsitemssolrkeys");
         }
-
     }
 
 

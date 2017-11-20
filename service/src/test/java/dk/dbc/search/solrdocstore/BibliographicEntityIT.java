@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
+public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void StoreEntity() {
@@ -33,19 +33,21 @@ public class BibliographicEntityIT extends JpaSolrDocstoreIntegrationTester {
         });
 
         AgencyItemKey key=new AgencyItemKey().withAgencyId(200).withBibliographicRecordId("1234");
-        BibliographicEntity be2=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, key) );
+        BibliographicEntity be2=env().getPersistenceContext()
+                .run( () -> em.find(BibliographicEntity.class, key) );
 
         assertThat( be2.agencyId, is(200));
         assertThat( be2.bibliographicRecordId, is("1234"));
     }
 
     @Test
-    public void LoadEntity() throws Exception {
+    public void LoadEntity() {
         executeScriptResource("/entityTestData.sql");
         EntityManager em=env().getEntityManager();
 
         AgencyItemKey key=new AgencyItemKey().withAgencyId(300).withBibliographicRecordId("4321");
-        BibliographicEntity be=env().getPersistenceContext().run( () -> em.find(BibliographicEntity.class, key));
+        BibliographicEntity be=env().getPersistenceContext()
+                .run( () -> em.find(BibliographicEntity.class, key));
 
         assertThat( be.agencyId, is(300));
         assertThat( be.bibliographicRecordId, is("4321"));

@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+"""
+  Scan a list of solr documents in xml and extract sample solr-doc-store holdings update .json documents.
+  if bib and faust is not given.. it is taken from the .xml file
+"""
 import xml.etree.ElementTree
 import argparse
 import json
@@ -60,6 +64,6 @@ output = {
 
 outputFilename = "%s-%s.json"%(global_agencyId, global_bibliographicRecordId)
 
-print( outfile)
+print(outputFilename)
 with open(outputFilename, "w") as outfile:
     json.dump(output, outfile, indent=4, sort_keys=True)

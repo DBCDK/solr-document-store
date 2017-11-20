@@ -46,7 +46,7 @@ pipeline {
                         def projectName = f.path.substring(0, f.path.indexOf('/'))
 
                         dir(dirName) {
-                            def imageName = "solr-doc${projectName}-${pom.version}".toLowerCase()
+                            def imageName = "${projectName}-${pom.version}".toLowerCase()
                             def imageLabel = env.BUILD_NUMBER
                             if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
                                 println("Using branch_name ${BRANCH_NAME}")
