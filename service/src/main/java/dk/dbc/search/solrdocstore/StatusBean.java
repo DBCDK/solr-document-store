@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 @Stateless
 @Path("")
 public class StatusBean {
+
     private static final Logger log = LoggerFactory.getLogger(StatusBean.class);
 
     @GET
