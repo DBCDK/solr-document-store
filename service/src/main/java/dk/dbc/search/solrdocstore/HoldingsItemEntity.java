@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import java.io.Serializable;
 import org.eclipse.persistence.annotations.Mutable;
 
 import javax.persistence.Convert;
@@ -14,17 +15,25 @@ import java.util.Map;
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
 @IdClass(AgencyItemKey.class)
-public class HoldingsItemEntity {
+public class HoldingsItemEntity implements Serializable {
+
+    private static final long serialVersionUID = 2469572172167117328L;
+
     @Id
     public int agencyId;
+
     @Id
     public String bibliographicRecordId;
+
     public String producerVersion;
+
     @SuppressWarnings("JpaAttributeTypeInspection")
     @Mutable
-    @Convert(converter = pgHoldingsKeysToPgConverter.class)
+    @Convert(converter = PgHoldingsKeysToPgConverter.class)
     public List<Map<String, List<String>>> indexKeys;
+
     public String trackingId;
+
     @Transient
     public int commitWithin;
 }
