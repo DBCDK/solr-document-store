@@ -19,9 +19,9 @@ import javax.ws.rs.core.UriInfo;
 @Stateless
 @Path("")
 public class BibliographicBean {
+
     private static final Logger log = LoggerFactory.getLogger(BibliographicBean.class);
 
-    
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
@@ -29,13 +29,15 @@ public class BibliographicBean {
 
     @POST
     @Path("bibliographic")
-    @Consumes({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
-        BibliographicEntity be=jsonbContext.unmarshall(KeyJsonContent, BibliographicEntity.class);
-        log.info("AddBibliographicKeys called {}:{}", be.agencyId,be.bibliographicRecordId);
 
-        entityManager.merge( be );
+        BibliographicEntity be = jsonbContext.unmarshall(KeyJsonContent, BibliographicEntity.class);
+        log.info("AddBibliographicKeys called {}:{}", be.agencyId, be.bibliographicRecordId);
+
+        entityManager.merge(be);
+
         return Response.ok().entity("{ \"ok\": True }").build();
     }
 }
