@@ -19,22 +19,25 @@ import javax.ws.rs.core.UriInfo;
 @Stateless
 @Path(".")
 public class HoldingsItemBean {
-        private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
 
-        private final JSONBContext jsonbContext = new JSONBContext();
+    private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
 
-        @PersistenceContext(unitName = "solrDocumentStore_PU")
-        EntityManager entityManager;
+    private final JSONBContext jsonbContext = new JSONBContext();
 
-        @POST
-        @Path("holdings")
-        @Consumes({ MediaType.APPLICATION_JSON })
-        @Produces({MediaType.APPLICATION_JSON})
-        public Response addHoldingsKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
-            HoldingsItemEntity hi=jsonbContext.unmarshall(KeyJsonContent, HoldingsItemEntity.class);
-            log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
+    @PersistenceContext(unitName = "solrDocumentStore_PU")
+    EntityManager entityManager;
 
-            entityManager.merge( hi );
+    @POST
+    @Path("holdings")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response addHoldingsKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
 
-            return Response.ok().entity("{ \"ok\": true }").build(); }
+        HoldingsItemEntity hi = jsonbContext.unmarshall(KeyJsonContent, HoldingsItemEntity.class);
+        log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
+
+        entityManager.merge(hi);
+
+        return Response.ok().entity("{ \"ok\": true }").build();
+    }
 }
