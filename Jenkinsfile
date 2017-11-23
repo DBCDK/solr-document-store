@@ -28,8 +28,8 @@ pipeline {
                 }
 
                 sh """
-                    mvn -B clean
-                    bash -c 'mvn -B -pl \$(mods=(); for mod in docker/*; do if [ -e "\$mod/pom.xml" ]; then mods+=( '!'"\$mod" ); fi; done; IFS=','; echo "\${mods[*]}") verify pmd:pmd javadoc:aggregate'
+                    mvn -Dmaven.repo.local=\$WORKSPACE/.repo -B clean
+                    bash -c 'mvn -Dmaven.repo.local=\$WORKSPACE/.repo -B -pl \$(mods=(); for mod in docker/*; do if [ -e "\$mod/pom.xml" ]; then mods+=( '!'"\$mod" ); fi; done; IFS=','; echo "\${mods[*]}") install pmd:pmd javadoc:aggregate'
                 """
                 //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
             }
@@ -38,7 +38,7 @@ pipeline {
         stage('Docker') {
             steps {
                 sh """
-                    bash -c 'mvn -B -pl \$(mods=(); for mod in docker/*; do if [ -e "\$mod/pom.xml" ]; then mods+=( "\$mod" ); fi; done; IFS=','; echo "\${mods[*]}") install'
+                    bash -c 'mvn -Dmaven.repo.local=\$WORKSPACE/.repo -B -pl \$(mods=(); for mod in docker/*; do if [ -e "\$mod/pom.xml" ]; then mods+=( "\$mod" ); fi; done; IFS=','; echo "\${mods[*]}") install'
                 """
                 script {
                     def allDockerFiles = findFiles glob: '**/Dockerfile'
