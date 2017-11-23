@@ -51,7 +51,7 @@ public class BibliographicBean {
             throw new IllegalStateException("Missing implementation");
         }
 
-        return Response.ok().entity("{ \"ok\": True }").build();
+        return Response.ok().entity("{ \"ok\": true }").build();
     }
 
     /*
