@@ -38,6 +38,6 @@ public class BibliographicBean {
 
         entityManager.merge(be);
 
-        return Response.ok().entity("{ \"ok\": True }").build();
+        return Response.ok().entity("{ \"ok\": true }").build();
     }
 }
