@@ -25,6 +25,10 @@ hs_err_pid*
 .idea/
 *.iml
 
+# netbeans
+nb-*.xml
+
 # targets
 /service/target/
 /corepo-worker/target/
+/docker/corepo-worker/target/
