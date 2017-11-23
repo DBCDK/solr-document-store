@@ -22,6 +22,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -54,6 +55,7 @@ import javax.jms.MessageListener;
 import static net.logstash.logback.marker.Markers.append;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
@@ -114,6 +116,11 @@ public class SolrWorker implements MessageListener {
     @EEConfig.Name("solrDocumentStoreUrl")
     private String solrDocumentStoreUrl;
 
+    @Inject
+    @EEConfig.Name("commitWithin")
+    @EEConfig.Default("-1")
+    private long commitWithin;
+
     private CloseableHttpClient client;
     private ObjectWriter printer;
 
@@ -121,7 +128,7 @@ public class SolrWorker implements MessageListener {
     public void init() {
         log.info("Initializing SolrWorker");
         onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
-        solrDocStoreTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
+        solrDocStoreTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "solrDocStore"));
         log.info("solrDocumentStoreUrl = {}", solrDocumentStoreUrl);
         this.client = HttpClientBuilder.create()
                 .build();
@@ -142,6 +149,7 @@ public class SolrWorker implements MessageListener {
      * @param updater Object containing all generated documents
      */
     public void deployRecords(String foXml, SolrUpdaterCallback updater) {
+        String trackingId = updater.getTrackingId();
         HashSet<String> marc002a = otherRecordIds.fromFoXML(foXml);
         try {
             String pid = updater.getPid();
@@ -151,8 +159,8 @@ public class SolrWorker implements MessageListener {
             for (Map<String, Set<String>> updatedDocument : updater.getUpdatedDocuments()) {
                 ObjectNode record = O.createObjectNode();
                 String id = updatedDocument.get("id").iterator().next();
-                makeMetadata(record, id, false, unit, work, marc002a);
-                ObjectNode document = record.putObject("content");
+                makeMetadata(record, id, false, unit, work, trackingId, marc002a);
+                ObjectNode document = record.putObject("indexKeys");
                 for (Map.Entry<String, Set<String>> entry : updatedDocument.entrySet()) {
                     ArrayNode documentKey = document.putArray(entry.getKey());
                     for (String value : entry.getValue()) {
@@ -165,7 +173,7 @@ public class SolrWorker implements MessageListener {
             for (DeleteMessage deletedDocument : updater.getDeletedDocuments()) {
                 ObjectNode record = O.createObjectNode();
                 String id = deletedDocument.getDocumentId();
-                makeMetadata(record, id, true, unit, work, marc002a);
+                makeMetadata(record, id, true, unit, work, trackingId, marc002a);
                 sendRecordToSolrDocStore(id, record);
             }
 
@@ -181,16 +189,16 @@ public class SolrWorker implements MessageListener {
     /**
      * Add metadata to structure
      *
-     * @param record    Json to add metadata to
-     * @param id        ID of record as procuced by the javascript
-     * @param deleted   deleted value
-     * @param unit      member of unit
-     * @param work      member of work
-     * @param superceds which other ids do this record cover (only
-     *                  bibliographicrecordid)
+     * @param record     Json to add metadata to
+     * @param id         ID of record as procuced by the javascript
+     * @param deleted    deleted value
+     * @param unit       member of unit
+     * @param work       member of work
+     * @param trackingId trackingId to include
+     * @param superceds  which other ids do this record cover (only
+     *                   bibliographicrecordid)
      */
-    private void makeMetadata(ObjectNode record, String id, boolean deleted, String unit, String work, HashSet<String> superceds) {
-        ObjectNode meta = record.putObject("metadata");
+    private void makeMetadata(ObjectNode record, String id, boolean deleted, String unit, String work, String trackingId, HashSet<String> superceds) {
         String idAfterColon = id.substring(id.indexOf(':') + 1);
         String[] idPart = idAfterColon.split("-");
         if (idPart.length != 3) {
@@ -198,13 +206,17 @@ public class SolrWorker implements MessageListener {
         }
         String bibliographicRecordId = idPart[0];
         String agencyId = idPart[1];
-        meta.put("bibliographicRecordId", bibliographicRecordId);
-        meta.put("agencyId", agencyId);
-        meta.put("deleted", deleted);
-        meta.put("unit", unit);
-        meta.put("work", work);
-        meta.put("version", javascriptWrapper.getVersion());
-        ArrayNode covers = meta.putArray("superceds");
+        record.put("bibliographicRecordId", bibliographicRecordId);
+        record.put("agencyId", agencyId);
+        record.put("deleted", deleted);
+        record.put("unit", unit);
+        record.put("work", work);
+        record.put("producerVersion", javascriptWrapper.getVersion());
+        record.put("trackingId", trackingId);
+        if (commitWithin > 0) {
+            record.put("commitWithin", commitWithin);
+        }
+        ArrayNode covers = record.putArray("superceds");
         for (String coverId : superceds) {
             covers.add(coverId);
         }
@@ -226,19 +238,45 @@ public class SolrWorker implements MessageListener {
                     printer.writeValueAsBytes(record),
                     ContentType.APPLICATION_JSON));
 
+            log.info("posting pid: " + pid + " to solrDocStore");
             try (CloseableHttpResponse resp = client.execute(post)) {
-                System.out.println("resp = " + resp);
-                String content = "";
-                try (InputStream is = resp.getEntity().getContent()) {
-                    content = readInputStream(is);
-                }
+                log.debug("resp = {}", resp);
                 int code = resp.getStatusLine().getStatusCode();
                 if (code != 200) {
-                    log.error("solrDocStore responded: " + resp.getStatusLine());
-                    log.error(": " + content);
+                    log.error("solrDocStore responded: {}", resp.getStatusLine());
+                    try (InputStream is = resp.getEntity().getContent()) {
+                        String content = readInputStream(is);
+                        log.error(content);
+                    }
                     throw new RuntimeException("Error communicating with solrDocStore, got status: " + code);
                 }
-                log.info("posted pid: " + pid + " to solrDocStore");
+                Header contentType = resp.getFirstHeader("content-type");
+                if (contentType == null) {
+                    throw new RuntimeException("Response from solrDocStore had no content-type set");
+                }
+                String contentTypeValue = contentType.getValue().split(";")[0];
+                if (contentTypeValue.equals("application/json")) {
+                    JsonNode content;
+                    try (InputStream is = resp.getEntity().getContent()) {
+                        content = O.readTree(is);
+                    }
+                    JsonNode ok = content.get("ok");
+                    if (ok == null) {
+                        log.debug(O.writeValueAsString(content));
+                        throw new RuntimeException("Response had no 'ok' field");
+                    }
+                    if (!ok.asBoolean(false)) {
+                        log.debug(O.writeValueAsString(content));
+                        throw new RuntimeException("Response had not ok response");
+                    }
+                } else {
+                    try (InputStream is = resp.getEntity().getContent()) {
+                        String content = readInputStream(is);
+                        log.debug("content type error:");
+                        log.debug(content);
+                    }
+                    throw new RuntimeException("Response from solrDocStore hadwrong content-type: " + contentTypeValue);
+                }
             }
         }
     }
