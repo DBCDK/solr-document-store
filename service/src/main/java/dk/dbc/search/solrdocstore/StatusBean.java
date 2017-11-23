@@ -11,13 +11,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Stateless
-@Path("")
+@Path("status")
 public class StatusBean {
 
     private static final Logger log = LoggerFactory.getLogger(StatusBean.class);
 
     @GET
-    @Path("status")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getStatus() {
         log.info("getStatus called ");
