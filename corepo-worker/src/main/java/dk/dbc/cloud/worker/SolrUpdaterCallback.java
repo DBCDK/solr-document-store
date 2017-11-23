@@ -88,6 +88,10 @@ public class SolrUpdaterCallback {
         return pid;
     }
 
+    public String getTrackingId() {
+        return trackingId;
+    }
+
     private Map<String, Set<String>> extractIndexFieldsFromNativeArray(JSObject index) throws IllegalStateException {
         Object[] resultArray = jsEnvironment.getJavascriptObjectAsArray(index);
         long length = resultArray.length;
