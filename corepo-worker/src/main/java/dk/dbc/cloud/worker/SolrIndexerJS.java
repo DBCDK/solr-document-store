@@ -61,9 +61,9 @@ public class SolrIndexerJS {
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream("/javascript/version.txt");
             if (is != null) {
-                byte[] bytes = new byte[256];
+                byte[] bytes = new byte[256]; // yes... version string is no longer than 256
                 int len = is.read(bytes);
-                version = new String(bytes, 0, len, StandardCharsets.UTF_8);
+                version = new String(bytes, 0, len, StandardCharsets.UTF_8).trim();
                 is.close();
             }
         } catch (IOException ex) {
