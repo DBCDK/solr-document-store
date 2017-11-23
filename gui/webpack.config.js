@@ -13,6 +13,23 @@ module.exports = {
         path: PATHS.build,
         filename: 'app-bundle.js'
     },
+    plugins: [
+        new webpack.optimize.UglifyJsPlugin({
+            beautify: false,
+            minimize: true,
+            mangle: {
+                screw_ie8: true,
+                keep_fnames: false
+            },
+            compress: {
+                screw_ie8: true,
+                //drop_console: true, // strips console statements
+                unused: true,
+                dead_code: true, // big one--strip code that will never execute
+            },
+            comments: false
+        }),
+    ],
     module: {
         rules: [
             {

@@ -26,6 +26,12 @@ public class FrontendAPIBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    /**
+     * Returns a json object with a result field, which is a list of json BibliographicEntity that matches
+     * bibliographicRecordId with the argument.
+     * @param bibliographicRecordId path parameter, expects URI encoding
+     * @return Response
+     */
     @GET
     @Path("getBibliographicRecord/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})

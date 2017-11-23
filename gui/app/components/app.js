@@ -16,13 +16,13 @@ class App extends React.PureComponent {
     }
 
     render(){
-        let load = (this.state.pendingSearch) ? <i className="fa fa-refresh fa-spin fa-fw" aria-hidden="true"/> : <div/>;
+        let load = (this.state.pendingSearch) ? <i className="fa fa-refresh fa-spin fa-fw" aria-hidden="true"/> : null;
         return (
             <div className="container">
                 <div className="py-4" style={{"text-align": "center"}}>
                     <h1 id="h1-div-headline">Søg FAUST nr:</h1>
                     <div className="input-group margin-bottom-sm">
-                        <span className="input-group-addon"><i className="fa fa-search fa-fw" aria-hidden="true"></i></span>
+                        <span className="input-group-addon"><i className="fa fa-search fa-fw" aria-hidden="true"/></span>
                         <input
                             className="form-control"
                             placeholder="Indtast faust nr"
@@ -30,7 +30,12 @@ class App extends React.PureComponent {
                             value={this.state.search}
                             onChange={this.handleSearchTyped}/>
                     </div>
-                    <button className="btn btn-primary btn-lg my-2" disabled={this.state.pendingSearch} onClick={this.searchSubmit}>{load}Søg</button>
+                    <button
+                        className="btn btn-primary btn-lg my-2"
+                        disabled={this.state.pendingSearch}
+                        onClick={this.searchSubmit}>
+                        {load}Søg
+                    </button>
                 </div>
                 <ListResults
                     results={this.state.searchResults}/>
@@ -44,7 +49,9 @@ class App extends React.PureComponent {
         this.setState({
             pendingSearch: true
         });
-        fetch('api/getBibliographicRecord/'+encodeURIComponent(this.state.search)).then((res)=>{
+        fetch(
+            'api/getBibliographicRecord/'+encodeURIComponent(this.state.search)
+        ).then((res)=>{
             if(res.status === 200)
                 return res.json();
             else
