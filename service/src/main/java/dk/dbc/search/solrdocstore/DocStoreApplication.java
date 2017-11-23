@@ -18,9 +18,11 @@ public class DocStoreApplication extends Application {
 
     private static final Logger log = LoggerFactory.getLogger(DocStoreApplication.class);
 
-    static final Set<Class<?>> classes = new HashSet<>();
+    private static final Set<Class<?>> CLASSES = makeClasses();
 
-    static {
+    private static Set<Class<?>> makeClasses() {
+        HashSet<Class<?>> classes = new HashSet<>();
+
         classes.add(StatusBean.class);
         classes.add(BibliographicBean.class);
         classes.add(HoldingsItemBean.class);
@@ -28,10 +30,11 @@ public class DocStoreApplication extends Application {
         for (Class<?> clazz : classes) {
             log.info("Registered {} resource", clazz.getName());
         }
+        return classes;
     }
 
     @Override
     public Set<Class<?>> getClasses() {
-        return classes;
+        return CLASSES;
     }
 }
