@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 @Stateless
-@Path("")
+@Path("bibliographic")
 public class BibliographicBean {
 
     private static final Logger log = LoggerFactory.getLogger(BibliographicBean.class);
@@ -28,12 +28,11 @@ public class BibliographicBean {
     EntityManager entityManager;
 
     @POST
-    @Path("bibliographic")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public Response addBibliographicKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
+    public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
-        BibliographicEntity be = jsonbContext.unmarshall(KeyJsonContent, BibliographicEntity.class);
+        BibliographicEntity be = jsonbContext.unmarshall(jsonContent, BibliographicEntity.class);
         log.info("AddBibliographicKeys called {}:{}", be.agencyId, be.bibliographicRecordId);
 
         entityManager.merge(be);
