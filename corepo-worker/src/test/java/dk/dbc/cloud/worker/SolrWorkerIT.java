@@ -18,14 +18,19 @@
  */
 package dk.dbc.cloud.worker;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.sun.messaging.ConnectionConfiguration;
 import dk.dbc.corepo.access.CORepoProvider;
+import dk.dbc.json.matcher.JsonMatcher;
 import dk.dbc.opensearch.commons.repository.IRepositoryDAO;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +56,6 @@ import org.junit.AfterClass;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -65,6 +69,9 @@ import org.slf4j.LoggerFactory;
 public class SolrWorkerIT {
 
     private static final Logger log = LoggerFactory.getLogger(SolrWorkerIT.class);
+
+    private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper YAML_OBJECT_MAPPER = new YAMLMapper();
 
     private final String pidQueueName = "jms_pidQueue";
     private final String deadPidQueueName = "jms_deadPidQueue";
@@ -109,10 +116,10 @@ public class SolrWorkerIT {
             }
 
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("text/plain; charset=utf-8");
+            response.setContentType("application/json; charset=utf-8");
             baseRequest.setHandled(true);
             PrintWriter writer = response.getWriter();
-            writer.println("OK");
+            writer.println("{ \"ok\": true }");
         }
     }
 
@@ -171,14 +178,17 @@ public class SolrWorkerIT {
         mm.setString("pid", PID);
         pidProducer.send(mm);
 
-        ArrayList<String> jsons = fetch();
-        System.out.println("jsons = " + jsons);
+        ArrayNode responses = fetch();
+        System.out.println("responses:" +
+                           JSON_OBJECT_MAPPER.writer(new DefaultPrettyPrinter()).writeValueAsString(responses));
 
+        contentTest(responses, "testAddDocument.yaml");
     }
 
     @Test
     //    @Ignore
     public void testDeleteDocument() throws Exception {
+        System.out.println("testDeleteDocument");
         repository.ingestObject(FileUtils.readFileToString(new File(UNIT_FILE)));
         repository.ingestObject(FileUtils.readFileToString(new File(DELETED_PID_FILE)));
         repository.commit();
@@ -188,16 +198,16 @@ public class SolrWorkerIT {
         mm.setString("pid", PID);
         pidProducer.send(mm);
 
-        ArrayList<String> jsons = fetch();
-        System.out.println("jsons = " + jsons);
-
+        ArrayNode responses = fetch();
+        contentTest(responses, "testDeleteDocument.yaml");
     }
 
     // This test does not verify the SolrWorker.redeliveryLimit
     // The glassfish message queue automatically moves the message to "mq.sys.dmq" after one redelivery attempt
     @Test
-//    @Ignore
+    //    @Ignore
     public void testMaxRetryAttemptsReached() throws JMSException, Exception {
+        System.out.println("testMaxRetryAttemptsReached");
         repository.ingestObject(FileUtils.readFileToString(new File(UNIT_FILE)));
         repository.ingestObject(FileUtils.readFileToString(new File(INVALID_PID_FILE)));
         repository.commit();
@@ -217,18 +227,33 @@ public class SolrWorkerIT {
 
     }
 
-    private ArrayList<String> fetch() throws InterruptedException {
+    private ArrayNode fetch() throws InterruptedException, IOException {
         long t = 150;
-        ArrayList<String> jsons = new ArrayList<>();
+        ArrayNode array = JSON_OBJECT_MAPPER.createArrayNode();
         for (;;) {
             String json = content.poll(t, TimeUnit.SECONDS);
             if (json == null) {
                 break;
             }
-            jsons.add(json);
+            array.add(JSON_OBJECT_MAPPER.readTree(json));
             t = 2;
         }
-        return jsons;
+        return array;
     }
 
+    private void contentTest(ArrayNode responses, String testAddDocumentyaml) throws IOException, IllegalStateException {
+        JsonNode tests = YAML_OBJECT_MAPPER.readTree(getClass().getClassLoader().getResource(testAddDocumentyaml));
+        if (!tests.isArray()) {
+            throw new IllegalStateException("Cannot parse " + testAddDocumentyaml + " into array");
+        }
+        for (JsonNode test : tests) {
+            String name = test.get("name").asText("UNKNOWN TEST");
+            boolean expected = test.get("expected").asBoolean(true);
+            JsonNode expression = test.get("expression");
+            System.out.println("test: " + name);
+            JsonMatcher matcher = new JsonMatcher(expression);
+            boolean actual = matcher.matches(responses);
+            assertEquals("test: " + name, expected, actual);
+        }
+    }
 }
