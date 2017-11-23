@@ -1,0 +1,24 @@
+-   name: "870970 record present"
+    expected: true
+    expression:
+        ?:
+            bibliographicRecordId: "23645564"
+            agencyId: "870970"
+            deleted: false
+            indexKeys:
+                   id: "870970-basis:23645564-870970-basis"
+                   
+-   name: "all records by id"
+    expected: true
+    expression:
+        -   indexKeys:
+                id: "870970-basis:23645564-870970-basis"
+        -   indexKeys:
+                id: "870970-basis:23645564-766500-katalog"
+        -   indexKeys:
+                id: "870970-basis:23645564-717300-katalog"
+        -   indexKeys:
+                id: "870970-basis:23645564-710100-katalog"
+        -   indexKeys:
+                id: "870970-basis:23645564-300101-katalog"
+                
