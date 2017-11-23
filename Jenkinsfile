@@ -29,7 +29,7 @@ pipeline {
 
                 sh """
                     mvn -B clean
-                    mvn -B verify pmd:pmd javadoc:aggregate                   
+                    mvn -B -pl "!docker" verify pmd:pmd javadoc:aggregate                   
                 """
                 //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
             }
@@ -37,6 +37,13 @@ pipeline {
 
         stage('Docker') {
             steps {
+                script {
+                    if (env.BRANCH_NAME == "master") {
+                        sh """
+                            mvn -B -pl "docker" install
+                        """
+                    }
+                }
                 script {
                     def allDockerFiles = findFiles glob: '**/Dockerfile'
                     def dockerFiles = allDockerFiles.findAll { f -> !f.path.startsWith("docker") }
