@@ -24,7 +24,7 @@ CREATE TABLE bibliographicSolrKeys (
     bibliographicRecordId TEXT NOT NULL,
     work VARCHAR(50) NOT NULL,
     unit VARCHAR(50) NOT NULL,
-    producerVersion VARCHAR(50),
+    producerVersion VARCHAR(100),
     deleted BOOLEAN NOT NULL,
     indexKeys JSONB,
     trackingId VARCHAR(256) NOT NULL DEFAULT '',
@@ -35,7 +35,7 @@ CREATE TABLE bibliographicSolrKeys (
 CREATE TABLE holdingsItemsSolrKeys (
     agencyId NUMERIC(6) NOT NULL,
     bibliographicRecordId TEXT NOT NULL,
-    producerVersion VARCHAR(50),
+    producerVersion VARCHAR(100),
     indexKeys JSONB,
     trackingId VARCHAR(256) NOT NULL DEFAULT '',
 
