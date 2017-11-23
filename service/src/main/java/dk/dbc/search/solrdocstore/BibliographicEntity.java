@@ -38,5 +38,8 @@ public class BibliographicEntity implements Serializable {
     public String trackingId;
 
     @Transient
+    public List<String> superceds;
+
+    @Transient
     public int commitWithin;
 }
