@@ -39,6 +39,13 @@
         </dependency>
         <dependency>
             <groupId>dk.dbc</groupId>
+            <artifactId>dbc-commons-testutil-json-matcher</artifactId>
+            <version>1.3-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dk.dbc</groupId>
             <artifactId>opensearch-commons-repository</artifactId>
             <version>1.11-SNAPSHOT</version>
             <type>jar</type>
@@ -77,6 +84,13 @@
             <artifactId>jetty-server</artifactId>
             <version>9.4.2.v20170220</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.8.9</version>
+            <scope>test</scope>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -314,7 +328,8 @@
                         </goals>
                         <configuration>
                             <commands>
-                                <command>create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.30/":solrDocumentStoreUrl="http://localhost:${docstore.port}/context-root/" solr-worker</command>
+                                <command>#create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.31/":solrDocumentStoreUrl="http://localhost:${docstore.port}/context-root/" solr-worker</command>
+                                <command>create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.31/":solrDocumentStoreUrl="http://localhost:1080/solr-doc-store/api/bibliographic":commitWithin=1000 solr-worker</command>
                                 <command>create-jdbc-connection-pool --restype=javax.sql.DataSource --datasourceclassname=org.postgresql.ds.PGSimpleDataSource --property=driverClass=org.postgresql.Driver:url="jdbc:postgresql://localhost:${corepo.port}/corepo":User=${user.name}:Password="" jdbc/solr-worker/corepo/pool</command>
                                 <command>create-jdbc-resource --connectionpoolid=jdbc/solr-worker/corepo/pool jdbc/solr-worker/corepo</command>
                                 <command>jms-ping</command>
@@ -350,7 +365,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
                     <systemPropertyVariables>
                         <glassfish.http.port>${glassfish.http.port}</glassfish.http.port>
                         <glassfish.jms.port>${glassfish.jms.port}</glassfish.jms.port>
