@@ -12,7 +12,8 @@ LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Require
       INPUT_QUEUE_NAME="Name of input queue (optional, default jms_pidQueue)" \
       ERROR_QUEUE_NAME="Name of error queue (optional, default is jms_deadPidQueue)" \
       SOLR_DOC_STORE_URL="http:// url of solr-doc-store endpoint (required)" \
-      JSON_PRETTY_PRINT="Should json to solr-doc-store be prettyprinted (optional, default is false)"
+      JSON_PRETTY_PRINT="Should json to solr-doc-store be prettyprinted (optional, default is false)" \
+      COMMIT_WITHIN="How fast should a message be committeted when loaded into solr (<=0 is disabled) (optional, default is -1)" 
 
 ADD corepo-ee-shard.sh /docker-entrypoint-confd.d/
 
