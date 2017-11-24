@@ -1,4 +1,23 @@
 import React from 'react';
+import ReactTable from 'react-table';
+
+const columns = [{
+    Header: 'agencyId',
+    accessor: 'agencyId'
+},{
+    Header: 'bibliographicRecordId',
+    accessor: 'bibliographicRecordId'
+},{
+    Header: 'Producer Version',
+    accessor: 'producerVersion'
+},{
+    Header: 'Deleted',
+    accessor: 'deleted',
+    Cell: (props)=>""+props.value
+},{
+    Header: 'Tracking ID',
+    accessor: 'trackingId'
+}];
 
 class ListResults extends React.PureComponent {
     constructor(props){
@@ -6,29 +25,15 @@ class ListResults extends React.PureComponent {
     }
 
     render(){
-        let results = this.props.results;
-        let body = (results.length > 0) ? results.map((result) =>
-            <tr>
-                <td>{result.agencyId}</td>
-                <td>{result.bibliographicRecordId}</td>
-                <td>{result.producerVersion}</td>
-                <td>{""+result.deleted}</td>
-                <td>{result.trackingId}</td>
-            </tr>
-        ) : <p>No results...</p>;
         return (
-            <table className="table">
-                <thead className="thead-dark">
-                    <th scope="col">agencyId</th>
-                    <th scope="col">bibliographicRecordId</th>
-                    <th scope="col">Producer Version</th>
-                    <th scope="col">deleted</th>
-                    <th scope="col">trackingId</th>
-                </thead>
-                <tbody>
-                    {body}
-                </tbody>
-            </table>
+            <ReactTable
+                loading={this.props.loading}
+                columns={columns}
+                data={this.props.results}
+                showPaginagion={true}
+                showPageSizeOptions={true}
+                pageSizeOptions={[20, 50, 100, 200]}
+                defaultPageSize={20}/>
         )
     }
 }
