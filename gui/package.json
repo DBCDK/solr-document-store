@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "dependencies": {
     "react": "^16.1.1",
-    "react-dom": "^16.1.1"
+    "react-dom": "^16.1.1",
+    "react-table": "^6.7.4"
   },
   "license": "GPL-3.0",
   "scripts": {

@@ -38,6 +38,7 @@ class App extends React.PureComponent {
                     </button>
                 </div>
                 <ListResults
+                    loading={this.state.pendingSearch}
                     results={this.state.searchResults}/>
                 <DisplayError
                     displayMessage={this.state.error}/>
