@@ -18,33 +18,33 @@
  * You should have received a copy of the GNU General Public License
  * along with DataIO.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package dk.dbc.search.solrdocstore;
-
-import org.postgresql.util.PGobject;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
+import org.postgresql.util.PGobject;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handles mapping from/to String to/from PostgreSQL JSON type
  */
 @Converter
-public class pgHoldingsKeysToPgConverter implements AttributeConverter<List<Map<String, List<String>>>, PGobject> {
+public class PgMapOfStringsToJsonConverter implements AttributeConverter<Map<String, List<String>>, PGobject> {
+
     private final JSONBContext context = new JSONBContext();
 
     @Override
-    public PGobject convertToDatabaseColumn(List<Map<String, List<String>>> content) throws IllegalStateException {
+    public PGobject convertToDatabaseColumn(Map<String, List<String>> content) throws IllegalStateException {
         final PGobject pgObject = new PGobject();
         pgObject.setType("jsonb");
         try {
+
             pgObject.setValue(context.marshall(content));
         } catch (SQLException | JSONBException e) {
             throw new IllegalStateException(e);
@@ -53,15 +53,16 @@ public class pgHoldingsKeysToPgConverter implements AttributeConverter<List<Map<
     }
 
     @Override
-    public List<Map<String, List<String>>> convertToEntityAttribute(PGobject pgObject) {
+    public Map<String, List<String>> convertToEntityAttribute(PGobject pgObject) {
         if (pgObject == null) {
             return null;
         }
+        Map<String, List<String>> res = null;
         try {
-           return context.unmarshall(pgObject.getValue(), new ArrayList<Map<String, List<String>>>().getClass());
+            res = context.unmarshall(pgObject.getValue(), HashMap.class);
         } catch (JSONBException e) {
             throw new IllegalStateException(e);
         }
+        return res;
     }
 }
-

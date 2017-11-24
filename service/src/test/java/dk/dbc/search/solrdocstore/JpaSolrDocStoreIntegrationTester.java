@@ -20,20 +20,19 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
     @Before
     public void ClearDatase() throws SQLException {
-        try (Connection conn = env().getDatasource().getConnection();
-             Statement statement = conn.createStatement() )  {
+        try (Connection conn = env().getDatasource().getConnection() ;
+             Statement statement = conn.createStatement()) {
             statement.executeUpdate("delete from bibliographicSolrKeys");
             statement.executeUpdate("delete from holdingsitemssolrkeys");
         }
     }
 
-
     private PGSimpleDataSource getDataSource() {
         final PGSimpleDataSource datasource = new PGSimpleDataSource();
 
         datasource.setServerName("localhost");
-        String postgresqlPort=System.getProperty("postgresql.port");
-        if( postgresqlPort != null && postgresqlPort.length() > 1 ) {
+        String postgresqlPort = System.getProperty("postgresql.port");
+        if (postgresqlPort != null && postgresqlPort.length() > 1) {
             datasource.setDatabaseName("docstore");
             datasource.setPortNumber(Integer.parseInt(System.getProperty("postgresql.port", "5432")));
         } else {
