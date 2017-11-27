@@ -7,7 +7,7 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "holdings2bibliographic")
+@Table(name = "holdingsToBibliographic")
 @IdClass(AgencyItemKey.class)
 public class HoldingsToBibliographicEntity {
     @Id
