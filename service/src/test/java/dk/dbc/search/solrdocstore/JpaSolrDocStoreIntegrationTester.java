@@ -23,6 +23,7 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         try (Connection conn = env().getDatasource().getConnection();
              Statement statement = conn.createStatement() )  {
             statement.executeUpdate("delete from holdings2bibliographic");
+            statement.executeUpdate("delete from bibliographictobibliographic");
             statement.executeUpdate("delete from bibliographicSolrKeys");
             statement.executeUpdate("delete from holdingsitemssolrkeys");
         }

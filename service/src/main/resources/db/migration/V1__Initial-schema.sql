@@ -49,7 +49,13 @@ CREATE TABLE holdings2Bibliographic (
 
     PRIMARY KEY ( holdingsAgencyId, bibliographicRecordId ),
     CONSTRAINT fk_h2b FOREIGN KEY (holdingsAgencyId, bibliographicRecordId ) REFERENCES holdingsItemsSolrKeys( agencyId, bibliographicRecordId )
-
 );
 
 create INDEX  h2b_biblio on holdings2Bibliographic( bibliographicRecordId, bibliographicagencyid );
+
+CREATE TABLE BibliographicToBibliographic (
+    oldRecordId TEXT NOT NULL CHECK ( oldRecordId <> '' ),
+    newRecordId TEXT NOT NULL  CHECK ( newRecordId <> '' ),
+    PRIMARY KEY  ( oldRecordId ),
+    CONSTRAINT newRecordUnique UNIQUE (oldRecordId, newRecordId)
+);
