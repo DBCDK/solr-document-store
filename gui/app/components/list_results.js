@@ -4,10 +4,10 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
 const columns = [{
-    Header: 'agencyId',
+    Header: 'Agency',
     accessor: 'agencyId'
 },{
-    Header: 'bibliographicRecordId',
+    Header: 'Record Id',
     accessor: 'bibliographicRecordId'
 },{
     Header: 'Producer Version',
