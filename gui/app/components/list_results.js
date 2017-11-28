@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactTable from 'react-table';
+// Webpack will bundle the included styling
+import 'react-table/react-table.css';
 
 const columns = [{
     Header: 'agencyId',
