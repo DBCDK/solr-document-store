@@ -36,20 +36,11 @@ public class FrontendAPIBean {
     @Path("getBibliographicRecord/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getBibliographicKeys(@PathParam("bibliographicRecordId") String bibliographicRecordId) {
-        // bibliographicRecordId could contain special characters, frontend encodes them
-        String cleanedId;
-        try {
-            cleanedId = URLDecoder.decode(bibliographicRecordId,"UTF-8");
-        } catch (UnsupportedEncodingException|IllegalArgumentException e) {
-            log.error(e.getMessage());
-            return Response.status(400).entity("{\"result\":[]}").build();
-        }
-
-        log.info("Requesting bibliographic record id: {}", cleanedId);
+        log.info("Requesting bibliographic record id: {}", bibliographicRecordId);
 
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
                 "WHERE b.bibliographicRecordId = :bibId",BibliographicEntity.class);
-        List<BibliographicEntity> res = query.setParameter("bibId",cleanedId).getResultList();
+        List<BibliographicEntity> res = query.setParameter("bibId",bibliographicRecordId).getResultList();
         return Response.ok(new FrontendReturnType(res),MediaType.APPLICATION_JSON).build();
     }
 
