@@ -2,7 +2,7 @@ import React from 'react';
 import ListResults  from './list_results';
 import DisplayError from './display_error';
 
-class App extends React.PureComponent {
+class SolrDocstoreGUI extends React.PureComponent {
     constructor(props){
         super(props);
         this.state = {
@@ -82,4 +82,4 @@ class App extends React.PureComponent {
     }
 }
 
-export default App;
+export default SolrDocstoreGUI;
