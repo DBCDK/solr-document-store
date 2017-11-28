@@ -19,7 +19,7 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     }
 
     @Before
-    public void ClearDatase() throws SQLException {
+    public void ClearDatabase() throws SQLException {
         try (Connection conn = env().getDatasource().getConnection();
              Statement statement = conn.createStatement() )  {
             statement.executeUpdate("DELETE FROM holdingsToBibliographic");
