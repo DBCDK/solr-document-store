@@ -19,11 +19,12 @@ public class DocStoreApplication extends Application {
     private static final Logger log = LoggerFactory.getLogger(DocStoreApplication.class);
 
     static final Set<Class<?>> classes = new HashSet<>();
-
+        
     static {
         classes.add(StatusBean.class);
         classes.add(BibliographicBean.class);
         classes.add(HoldingsItemBean.class);
+        classes.add(FrontendAPIBean.class);
 
         for (Class<?> clazz : classes) {
             log.info("Registered {} resource", clazz.getName());

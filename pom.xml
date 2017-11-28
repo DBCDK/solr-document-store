@@ -23,6 +23,7 @@
 
     <modules>
         <module>service</module>
+        <module>gui</module>
     </modules>
 
   <groupId>dk.dbc</groupId>
