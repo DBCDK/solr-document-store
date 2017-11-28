@@ -37,11 +37,11 @@ class SolrDocstoreGUI extends React.PureComponent {
                         {load}Søg
                     </button>
                 </div>
+                <DisplayError
+                    displayMessage={this.state.error}/>
                 <ListResults
                     loading={this.state.pendingSearch}
                     results={this.state.searchResults}/>
-                <DisplayError
-                    displayMessage={this.state.error}/>
             </div>
         )
     }
