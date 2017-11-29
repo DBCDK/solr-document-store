@@ -1,22 +1,24 @@
 import {
     SEARCH_SUCCESS,
     SEARCH_FAILED,
-    SEARCH_BIB_RECORD_ID} from '../actions';
+    SEARCH_BIB_RECORD_ID} from '../actions/searching';
 import update from 'immutability-helper';
 
 const initialState = {
     searchPending: false,
     searchTerm: '',
     searchErrorMessage: '',
-    searchResult: []
+    searchResults: []
 };
 
 export default function search(state = initialState,action = {}) {
     switch (action.type){
         case SEARCH_SUCCESS:
+            console.log("Search good!");
+            console.log(action.bibPosts);
             return update(state,{
                 searchPending: {$set: false},
-                searchResult: {$set: action.bibPosts},
+                searchResults: {$set: action.bibPosts},
                 searchErrorMessage: {$set: ''}
             });
         case SEARCH_FAILED:

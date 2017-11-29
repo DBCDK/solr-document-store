@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { searchBibRecord } from "../actions";
+import { searchBibRecord } from "../actions/searching";
 
 class SearchField extends React.Component {
     constructor(props){

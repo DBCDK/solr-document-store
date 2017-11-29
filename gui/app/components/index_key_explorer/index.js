@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 class IndexKeyExplorer extends React.PureComponent {
     constructor(props){
@@ -7,9 +8,13 @@ class IndexKeyExplorer extends React.PureComponent {
 
     render(){
         return (
-            <div></div>
+            <div>{JSON.stringify(this.props.item)}</div>
         )
     }
 }
 
-export default IndexKeyExplorer;
+const mapStateToProps = (state) => ({
+    item: state.filter.selectedItem
+});
+
+export default connect(mapStateToProps)(IndexKeyExplorer);
