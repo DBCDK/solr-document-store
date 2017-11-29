@@ -72,6 +72,15 @@
             <artifactId>solr-doc-store-service-gui</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-common -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>LATEST</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

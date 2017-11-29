@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -36,8 +38,33 @@ public class BibliographicBean {
         BibliographicEntity be = jsonbContext.unmarshall(KeyJsonContent, BibliographicEntity.class);
         log.info("AddBibliographicKeys called {}:{}", be.agencyId, be.bibliographicRecordId);
 
-        entityManager.merge(be);
+        BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(be.agencyId, be.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
+        if (dbbe == null) {
+            entityManager.merge(be);
+            updateHoldingsToBibliographic(be.agencyId, be.bibliographicRecordId);
+        } else {
+            throw new IllegalStateException("Missing implementation");
+        }
 
         return Response.ok().entity("{ \"ok\": True }").build();
+    }
+
+    private void updateHoldingsToBibliographic(int agency, String recordId) {
+        // For List of FBS biblioteker do
+        TypedQuery<Integer> query;
+
+        query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
+
+        query.setParameter("bibId", recordId);
+
+        for (Object holdingsAgencyObj : query.getResultList()) {
+            Integer holdingsAgency = (Integer) holdingsAgencyObj;
+            HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity();
+            h2b.bibliographicRecordId = recordId;
+            h2b.agencyId = holdingsAgency;
+            h2b.bibliographicAgencyId = agency;
+            entityManager.merge(h2b);
+        }
+
     }
 }
