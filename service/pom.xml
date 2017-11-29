@@ -72,6 +72,7 @@
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
             <version>LATEST</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
