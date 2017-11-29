@@ -65,5 +65,21 @@ module.exports = {
                 }
             }
         ]
+    },
+    devServer: {
+        port: 8090,
+        // Send API requests on localhost to API server get around CORS.
+        proxy: {
+            '/development/api': {
+                target: {
+                    host: "localhost",
+                    protocol: 'http:',
+                    port: 8080
+                },
+                pathRewrite: {
+                    '^/development/api': '/solr-doc-store/api'
+                }
+            }
+        }
     }
 };
