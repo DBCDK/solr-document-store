@@ -1,7 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import static dk.dbc.search.solrdocstore.LibraryConfig.LibraryType.NonFBS;
 import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.HashSet;
+import java.util.Set;
 
 @Stateless
 @Path("")
@@ -68,15 +69,27 @@ public class BibliographicBean {
         TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
         query.setParameter("bibId", recordId);
 
-        for (Integer holdingsAgency : query.getResultList()) {
-            if (libraryConfig.getLibraryType(holdingsAgency) == NonFBS) continue;
+        TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
+                "WHERE b.deleted=FALSE AND b.bibliographicRecordId = :recId", Integer.class);
 
-            // Check to see if holdings is places on higher priority record
-            HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity();
-            h2b.bibliographicRecordId = recordId;
-            h2b.agencyId = holdingsAgency;
-            h2b.bibliographicAgencyId = agency;
-            entityManager.merge(h2b);
+        q.setParameter("recId", recordId);
+
+        Set<Integer> bibRecords = new HashSet<>(q.getResultList());
+
+        for (Integer holdingsAgency : query.getResultList()) {
+            switch (libraryConfig.getLibraryType(holdingsAgency)) {
+                case NonFBS: // Ignore holdings for Non FBS libraries
+                    continue;
+                case FBS:
+                    if (agency == 300000) continue; // 300000 is only for FBSSchool records
+                    if (bibRecords.contains(holdingsAgency)) continue;
+                    break;
+                case FBSSchool:
+                    if (agency == 870970 && bibRecords.contains(300000)) continue;
+                    if (bibRecords.contains(holdingsAgency)) continue;
+                    break;
+            }
+            addHoldingsToBibliographic(agency, recordId, holdingsAgency);
         }
     }
 
@@ -85,12 +98,15 @@ public class BibliographicBean {
         query.setParameter("agency", agency);
         query.setParameter("bibId", recordId);
 
-
         Integer holdingsAgency = query.getSingleResult();
         if (holdingsAgency == null) {
             return; // no Holdings records
         }
 
+        addHoldingsToBibliographic(agency, recordId, holdingsAgency);
+    }
+
+    private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity();
         h2b.bibliographicRecordId = recordId;
         h2b.agencyId = holdingsAgency;
