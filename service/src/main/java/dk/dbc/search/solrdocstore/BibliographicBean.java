@@ -1,6 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
+import static dk.dbc.search.solrdocstore.LibraryConfig.LibraryType.NonFBS;
+import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,8 @@ public class BibliographicBean {
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
+    LibraryConfig libraryConfig;
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -49,22 +53,49 @@ public class BibliographicBean {
         return Response.ok().entity("{ \"ok\": True }").build();
     }
 
+    /*
+     *
+     */
     private void updateHoldingsToBibliographic(int agency, String recordId) {
-        // For List of FBS biblioteker do
-        TypedQuery<Integer> query;
+        if (libraryConfig.getRecordType(agency) == SingleRecord) {
+            updateHoldingsSingleRecord(agency, recordId);
+        } else {
+            updateHoldingsForCommonRecords(agency, recordId);
+        }
+    }
 
-        query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
-
+    private void updateHoldingsForCommonRecords(int agency, String recordId) {
+        TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
         query.setParameter("bibId", recordId);
 
-        for (Object holdingsAgencyObj : query.getResultList()) {
-            Integer holdingsAgency = (Integer) holdingsAgencyObj;
+        for (Integer holdingsAgency : query.getResultList()) {
+            if (libraryConfig.getLibraryType(holdingsAgency) == NonFBS) continue;
+
+            // Check to see if holdings is places on higher priority record
             HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity();
             h2b.bibliographicRecordId = recordId;
             h2b.agencyId = holdingsAgency;
             h2b.bibliographicAgencyId = agency;
             entityManager.merge(h2b);
         }
-
     }
+
+    private void updateHoldingsSingleRecord(int agency, String recordId) {
+        TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Integer.class);
+        query.setParameter("agency", agency);
+        query.setParameter("bibId", recordId);
+
+
+        Integer holdingsAgency = query.getSingleResult();
+        if (holdingsAgency == null) {
+            return; // no Holdings records
+        }
+
+        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity();
+        h2b.bibliographicRecordId = recordId;
+        h2b.agencyId = holdingsAgency;
+        h2b.bibliographicAgencyId = agency;
+        entityManager.merge(h2b);
+    }
+
 }
