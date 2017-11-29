@@ -14,8 +14,6 @@ const initialState = {
 export default function search(state = initialState,action = {}) {
     switch (action.type){
         case SEARCH_SUCCESS:
-            console.log("Search good!");
-            console.log(action.bibPosts);
             return update(state,{
                 searchPending: {$set: false},
                 searchResults: {$set: action.bibPosts},

@@ -11,6 +11,8 @@ var plugins = [
     new ExtractTextPlugin({
         filename: "solr-docstore-gui-styles.css"
     }),
+    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin()
 ];
 if (process.env.NODE_ENV === "production") {
     plugins.push(
@@ -34,13 +36,14 @@ if (process.env.NODE_ENV === "production") {
 
 
 module.exports = {
-    entry: './app/index.js',
+    entry: ['react-hot-loader/patch','./app/index.js'],
 
     output: {
         path: PATHS.build,
-        publicPath: '/public/',
+        publicPath: '/',
         filename: 'solr-docstore-gui-bundle.js'
     },
+    devtool: 'inline-source-map',
     plugins: plugins,
     module: {
         rules: [
@@ -67,6 +70,7 @@ module.exports = {
         ]
     },
     devServer: {
+        hot: true,
         port: 8090,
         // Send API requests on localhost to API server get around CORS.
         proxy: {
