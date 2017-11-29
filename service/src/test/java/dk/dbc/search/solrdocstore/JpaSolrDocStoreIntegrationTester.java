@@ -19,11 +19,13 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     }
 
     @Before
-    public void ClearDatase() throws SQLException {
-        try (Connection conn = env().getDatasource().getConnection() ;
-             Statement statement = conn.createStatement()) {
+    public void ClearDatabase() throws SQLException {
+        try (Connection conn = env().getDatasource().getConnection();
+             Statement statement = conn.createStatement() )  {
+            statement.executeUpdate("DELETE FROM holdingsToBibliographic");
+            statement.executeUpdate("DELETE FROM holdingsItemssolrkeys");
+            statement.executeUpdate("DELETE FROM bibliographicToBibliographic");
             statement.executeUpdate("delete from bibliographicSolrKeys");
-            statement.executeUpdate("delete from holdingsitemssolrkeys");
         }
     }
 
