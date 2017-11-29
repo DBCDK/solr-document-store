@@ -42,3 +42,21 @@ CREATE TABLE holdingsItemsSolrKeys (
     PRIMARY KEY ( agencyId, bibliographicRecordId )
 );
 
+CREATE TABLE holdingsToBibliographic (
+    holdingsAgencyId NUMERIC(6) NOT NULL,
+    bibliographicRecordId TEXT NOT NULL,
+    bibliographicAgencyId NUMERIC(6) NOT NULL,
+
+    PRIMARY KEY ( holdingsAgencyId, bibliographicRecordId ),
+    CONSTRAINT fk_h2b FOREIGN KEY (holdingsAgencyId, bibliographicRecordId ) REFERENCES holdingsItemsSolrKeys( agencyId, bibliographicRecordId )
+);
+
+CREATE INDEX holdingsToBibliographic_Bibliographic
+    ON holdingsToBibliographic (bibliographicRecordId, bibliographicAgencyId);
+
+CREATE TABLE BibliographicToBibliographic (
+    decommissionedRecordId TEXT NOT NULL CHECK ( decommissionedRecordId <> '' ),
+    currentRecordId        TEXT NOT NULL  CHECK ( currentRecordId <> '' ),
+    PRIMARY KEY (decommissionedRecordId),
+    CONSTRAINT newRecordUnique UNIQUE (decommissionedRecordId, currentRecordId)
+);

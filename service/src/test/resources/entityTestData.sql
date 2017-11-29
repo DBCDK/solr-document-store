@@ -4,3 +4,11 @@ INSERT INTO bibliographicSolrKeys ( AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, IN
 
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
      VALUES ( 300, '4321', '[{"id": ["argle"], "title": ["unix bogen"]}, {"id": ["argle"], "dyr": ["hest"], "title": ["unix bogen"]}]'::jsonb, 'revision','track');
+
+INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
+     VALUES ( 600, '600', '[{"id": ["argle"], "title": ["unix bogen"]}, {"id": ["argle"], "dyr": ["hest"], "title": ["unix bogen"]}]'::jsonb, 'revision','track');
+
+
+INSERT INTO holdingsTobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) VALUES (600, '600', 100);
+
+INSERT INTO bibliographictobibliographic (decommissionedRecordId, currentRecordId) VALUES ('399', '600');
