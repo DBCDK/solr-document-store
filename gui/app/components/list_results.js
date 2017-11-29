@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactTable from 'react-table';
+import { connect } from 'react-redux';
 // Webpack will bundle the included styling
 import 'react-table/react-table.css';
 
@@ -40,4 +41,9 @@ class ListResults extends React.PureComponent {
     }
 }
 
-export default ListResults;
+const mapStateToProps = (state) => ({
+    loading: state.search.pendingSearch,
+    results: state.search.searchResults
+});
+
+export default connect(mapStateToProps)(ListResults);
