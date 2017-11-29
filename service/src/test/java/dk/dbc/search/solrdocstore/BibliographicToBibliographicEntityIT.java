@@ -8,21 +8,21 @@ import javax.persistence.EntityManager;
 
 public class BibliographicToBibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
     @Test
-    public void StoreEntity() {
+    public void storeEntity() {
         executeScriptResource("/entityTestData.sql");
         EntityManager em=env().getEntityManager();
 
         env().getPersistenceContext().run( () -> {
             BibliographicToBibliographicEntity b2b=new BibliographicToBibliographicEntity();
-            b2b.oldRecordId = "300";
-            b2b.newRecordId = "4321";
+            b2b.decommissionedRecordId = "300";
+            b2b.currentRecordId = "4321";
 
             em.persist(b2b);
         });
     }
 
     @Test
-    public void LoadEntity() {
+    public void loadEntity() {
         executeScriptResource("/entityTestData.sql");
 
         EntityManager em = env().getEntityManager();
@@ -30,6 +30,6 @@ public class BibliographicToBibliographicEntityIT extends JpaSolrDocStoreIntegra
         BibliographicToBibliographicEntity b2b = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicToBibliographicEntity.class, "399"));
 
-        assertThat( b2b.newRecordId, is("600"));
+        assertThat(b2b.currentRecordId, is("600"));
     }
 }
