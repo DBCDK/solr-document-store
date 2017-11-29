@@ -38,7 +38,7 @@ class ListResults extends React.PureComponent {
                     //console.log(state,rowInfo,column);
                     return ({
                         onClick: (e,handleOriginal)=>{
-                            this.props.selectItem(this.props.results[rowInfo.index]);
+                            this.props.selectItem(this.props.results[rowInfo.index].indexKeys);
                             if(handleOriginal){
                                 handleOriginal();
                             }
