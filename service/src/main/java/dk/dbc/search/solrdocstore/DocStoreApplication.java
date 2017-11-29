@@ -3,7 +3,9 @@ package dk.dbc.search.solrdocstore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
@@ -34,5 +36,14 @@ public class DocStoreApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         return classes;
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> props = new HashMap<>();
+
+        props.put("jersey.config.server.disableMoxyJson", true);
+
+        return props;
     }
 }
