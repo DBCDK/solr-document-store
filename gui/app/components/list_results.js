@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactTable from 'react-table';
 import { connect } from 'react-redux';
+import { selectBibRecord } from '../actions/filtering';
 // Webpack will bundle the included styling
 import 'react-table/react-table.css';
 
@@ -33,6 +34,17 @@ class ListResults extends React.PureComponent {
                 loading={this.props.loading}
                 columns={columns}
                 data={this.props.results}
+                getTrProps={(state,rowInfo,column) => {
+                    //console.log(state,rowInfo,column);
+                    return ({
+                        onClick: (e,handleOriginal)=>{
+                            this.props.selectItem(this.props.results[rowInfo.index]);
+                            if(handleOriginal){
+                                handleOriginal();
+                            }
+                        }
+                    })
+                }}
                 showPaginagion={true}
                 showPageSizeOptions={true}
                 pageSizeOptions={[20, 50, 100, 200]}
@@ -46,4 +58,8 @@ const mapStateToProps = (state) => ({
     results: state.search.searchResults
 });
 
-export default connect(mapStateToProps)(ListResults);
+const mapDispatchToProps = (dispatch) => ({
+    selectItem: (item) => dispatch(selectBibRecord(item))
+})
+
+export default connect(mapStateToProps,mapDispatchToProps)(ListResults);

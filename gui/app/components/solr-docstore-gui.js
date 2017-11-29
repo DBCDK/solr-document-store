@@ -2,6 +2,7 @@ import React from 'react';
 import SearchField from './search_field';
 import ListResults  from './list_results';
 import DisplayError from './display_error';
+import IndexKeyExplorer from './index_key_explorer';
 
 class SolrDocstoreGUI extends React.PureComponent {
     constructor(props){
@@ -16,6 +17,7 @@ class SolrDocstoreGUI extends React.PureComponent {
         return (
             <div className="container">
                 <SearchField/>
+                <IndexKeyExplorer/>
                 <DisplayError/>
                 <ListResults/>
             </div>
