@@ -8,7 +8,7 @@ import javax.persistence.Table;
 @Table(name = "BibliographicToBibliographic")
 public class BibliographicToBibliographicEntity {
     @Id
-    public String oldRecordId;
+    public String decommissionedRecordId;
 
-    public String newRecordId;
+    public String currentRecordId;
 }
