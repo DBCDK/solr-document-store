@@ -9,22 +9,55 @@ const whiteListElement = (name,parentName,whiteListPending) => {
     return whiteListElement;
 };
 
-const Element = ({name,parentName,list,whiteListPending,setWhiteListPending,isWhiteListed}) => {
-    if(isWhiteListed){
-        let classNameWhiteListed = "fa fa-lg py-2 pr-4 fa-"+((whiteListPending) ? "times" : "check");
-        let firstElem = list[0];
-        return (
-            <div className="pl-4 d-flex">
-                <div className="mr-auto">
-                    <p><strong>{name}</strong> : {firstElem}</p>
-                </div>
-                <i className={classNameWhiteListed} onClick={()=>setWhiteListPending(whiteListElement(name,parentName,whiteListPending))} aria-hidden="true"/>
-            </div>
-        )
-    } else {
-        return null;
+class Element extends React.PureComponent {
+    constructor(props){
+        super(props);
+        this.state = {
+            listExpanded: false
+        }
+        this.toggleListExpanded = this.toggleListExpanded.bind(this)
     }
-};
+
+    render(){
+        let {name,parentName,list,whiteListPending,setWhiteListPending,isWhiteListed} = this.props;
+        if(isWhiteListed){
+            let classNameWhiteListed = "fa fa-lg py-2 pr-4 fa-"+((whiteListPending) ? "times" : "check");
+            let firstElem = list[0];
+            let moreElems = (list.length > 1) ?
+                <i
+                    className={"fa fa-lg py-2 pr-2 fa-"+((this.state.listExpanded) ? "compress" : "expand")}
+                    onClick={this.toggleListExpanded}
+                    aria-hidden="true"/> :
+                null;
+            return (
+                <div>
+                    <div className="pl-4 d-flex">
+                        <div
+                            className="mr-auto"
+                            style={{"whiteSpace": "nowrap","overflow": "hidden","textOverflow": "ellipsis"}}>
+                            <strong>{name}</strong> : {firstElem}
+                        </div>
+                        {moreElems}
+                        <i
+                            className={classNameWhiteListed}
+                            onClick={() =>
+                                setWhiteListPending(whiteListElement(name,parentName,whiteListPending))}
+                            aria-hidden="true"/>
+                    </div>
+                    {(this.state.listExpanded) ? list.map((e,i) => <p key={name+i} className="pl-5">{e}</p>) : null}
+                </div>
+            )
+        } else {
+            return null;
+        }
+    }
+
+    toggleListExpanded(){
+        this.setState({
+            listExpanded: !this.state.listExpanded
+        })
+    }
+}
 
 const mapStateToProps = (state,ownProps) => ({
     whiteListPending: state.filter.whiteListPending !== undefined &&
