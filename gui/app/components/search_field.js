@@ -10,6 +10,7 @@ class SearchField extends React.Component {
         };
         this.handleSearchTyped = this.handleSearchTyped.bind(this);
         this.searchSubmit = this.searchSubmit.bind(this);
+        this.onKeyPressed = this.onKeyPressed.bind(this);
     }
 
     render(){
@@ -24,6 +25,7 @@ class SearchField extends React.Component {
                         placeholder="Indtast faust nr"
                         type="text"
                         value={this.state.search}
+                        onKeyPress={this.onKeyPressed}
                         onChange={this.handleSearchTyped}/>
                 </div>
                 <button
@@ -35,6 +37,11 @@ class SearchField extends React.Component {
             </div>
 
         )
+    }
+
+    onKeyPressed(event){
+        if(event.key === 'Enter')
+            this.searchSubmit()
     }
 
     searchSubmit(){
