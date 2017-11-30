@@ -17,9 +17,9 @@ class SolrDocstoreGUI extends React.PureComponent {
         return (
             <div className="container">
                 <SearchField/>
-                <IndexKeyExplorer/>
                 <DisplayError/>
                 <ListResults/>
+                <IndexKeyExplorer/>
             </div>
         )
     }
