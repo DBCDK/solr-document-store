@@ -5,7 +5,7 @@ import ParentElement from "./parent_element";
 import {applyFilter, clearFilter} from "../../actions/filtering";
 
 const IndexKeyExplorer  = ({item,applyFilter,clearFilter})=>{
-    let elems = Object.keys(item).map((key) =>
+    let elems = Object.keys(item).sort().map((key) =>
         (item[key] instanceof Array) ?
             <ParentElement
                 key={key}
