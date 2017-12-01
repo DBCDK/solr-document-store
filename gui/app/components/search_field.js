@@ -57,7 +57,7 @@ class SearchField extends React.Component {
 }
 
 const mapStateToProps = (state) => ({
-    pendingSearch: state.search.pendingSearch
+    pendingSearch: state.search.searchPending
 });
 
 const mapDispatchToProps = (dispatch) => ({
