@@ -54,7 +54,7 @@ class ListResults extends React.PureComponent {
 }
 
 const mapStateToProps = (state) => ({
-    loading: state.search.pendingSearch,
+    loading: state.search.searchPending,
     results: state.search.searchResults
 });
 
