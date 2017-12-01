@@ -47,8 +47,8 @@ class ListResults extends React.PureComponent {
                 }}
                 showPaginagion={true}
                 showPageSizeOptions={true}
-                pageSizeOptions={[20, 50, 100, 200]}
-                defaultPageSize={20}/>
+                pageSizeOptions={[10, 20, 50, 100]}
+                defaultPageSize={10}/>
         )
     }
 }

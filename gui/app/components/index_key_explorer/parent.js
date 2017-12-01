@@ -24,7 +24,7 @@ class Parent extends React.PureComponent {
                 <i className={classNameExpanded} onClick={this.onExpandToggled} aria-hidden="true"/>
                 <i className="fa fa-lg fa-minus-square px-2 py-2" onClick={this.onWhiteList} aria-hidden="true"/>
             </div>;
-            let childElements = (this.state.expanded) ? Object.keys(children).map((key) =>
+            let childElements = (this.state.expanded) ? Object.keys(children).sort().map((key) =>
                     <Element
                         key={name+key}
                         name={key}

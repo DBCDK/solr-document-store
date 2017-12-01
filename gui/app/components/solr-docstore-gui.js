@@ -15,11 +15,19 @@ class SolrDocstoreGUI extends React.PureComponent {
 
     render(){
         return (
-            <div className="container">
-                <SearchField/>
-                <DisplayError/>
-                <ListResults/>
-                <IndexKeyExplorer/>
+            <div className="container-full">
+                <div className="row">
+                    <div className="col-6">
+                        <div style={{"top": "1px","position": "sticky"}}>
+                            <SearchField/>
+                            <DisplayError/>
+                            <ListResults/>
+                        </div>
+                    </div>
+                    <div className="col-6">
+                        <IndexKeyExplorer/>
+                    </div>
+                </div>
             </div>
         )
     }
