@@ -18,11 +18,6 @@ export default function configureStore() {
             const nextRootReducer = require('../reducers').default;
             store.replaceReducer(nextRootReducer);
         });
-        // If running sagas while reloading is an issue: https://gist.github.com/markerikson/dc6cee36b5b6f8d718f2e24a249e0491
-        /*module.hot.accept('../sagas/SagaManager', () => {
-            SagaManager.cancelSagas(store);
-            require('../sagas/SagaManager').default.startSagas(sagaMiddleware);
-        });*/
     }
 
     return store;

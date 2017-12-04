@@ -7,7 +7,6 @@ class DisplayError extends React.PureComponent {
     }
 
     render(){
-        console.log(this.props.displayMessage);
         return (this.props.displayMessage.length > 0) ?
             <div className="alert alert-danger" role="alert">{this.props.displayMessage}</div> : null;
     }
