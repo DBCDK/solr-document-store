@@ -1,7 +1,8 @@
 let converter = (indexKeys) => {
-    var response = {};
+    let response = {};
     Object.keys(indexKeys).forEach((elem)=>{
-        let pair = elem.split(".");
+        // Only split at the first dot
+        let pair = elem.split(/\.(.+)/);
         if(pair.length > 1){
             // Case where we have "." separated indexes
             if(response[pair[0]] === undefined){

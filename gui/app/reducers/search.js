@@ -27,6 +27,7 @@ export default function search(state = initialState,action = {}) {
         case SEARCH_BIB_RECORD_ID:
             return update(state,{
                 searchPending: {$set: true},
+                searchTerm: {$set: action.searchTerm},
                 searchErrorMessage: {$set: ''}
             });
         default:

@@ -59,6 +59,8 @@ class Element extends React.PureComponent {
     }
 }
 
+// If webapp becomes slow, use reselect (https://github.com/reactjs/reselect) to essentially cache
+// the computed values below, making them less expensive on re-renders
 const mapStateToProps = (state,ownProps) => ({
     whiteListPending: state.filter.whiteListPending !== undefined &&
         state.filter.whiteListPending[ownProps.parentName] !== undefined &&

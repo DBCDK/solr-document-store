@@ -21,19 +21,21 @@ export default function filter(state = initialState,action = {}) {
                 selectedItem: {$set: newItem}
             });
         case WHITE_LIST_SELECT_PENDING:
-            let newState = update(state,{
+            return update(state, {
                 whiteListPending: {
                     $apply: wlp => {
-                        let ret = null;
-                        Object.keys(action.whiteListedItem).forEach((k)=>{
-                            ret = update(wlp,{[k]: {$auto: {$merge: action.whiteListedItem[k]}}})
+                        let updater = {};
+                        Object.keys(action.whiteListedItem).forEach((k) => {
+                            if (typeof action.whiteListedItem[k] === 'boolean') {
+                                updater[k] = {$set: action.whiteListedItem[k]}
+                            } else {
+                                updater[k] = {$auto: {$merge: action.whiteListedItem[k]}}
+                            }
                         });
-                        return (ret !== null) ? ret : wlp;
+                        return update(state.whiteListPending, updater);
                     }
                 }
             });
-            console.log(newState);
-            return newState;
         case CONFIRM_WHITE_LIST:
             return update(state,{
                 whiteListPending: {$set: {}},
