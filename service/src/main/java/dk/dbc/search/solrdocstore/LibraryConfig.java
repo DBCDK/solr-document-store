@@ -22,14 +22,14 @@ public class LibraryConfig {
     }
 
     LibraryType getLibraryType(int agency) {
-        // Toto lookup Library type from openAgency
+        // Todo lookup Library type from openAgency
         return LibraryType.FBS;
     }
 
     RecordType getRecordType(int agency) {
         switch (agency) {
-            case 300000:
-            case 870970:
+            case 300000:  // Common Record Agency For School Libraries
+            case 870970:  // Common Record Agency For All Libraries
                 return RecordType.CommonRecord;
             default:
                 return RecordType.SingleRecord;
