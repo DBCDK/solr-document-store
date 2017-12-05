@@ -103,7 +103,6 @@ public class BibliographicBean {
         }
 
         addHoldingsToBibliographic(agency, recordId, holdingsAgency);
-        return Response.ok().entity("{ \"ok\": true }").build();
     }
 
     private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {

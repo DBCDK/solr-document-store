@@ -19,5 +19,5 @@ ADD corepo-ee-shard.sh /docker-entrypoint-confd.d/
 
 ADD pre/* $PAYARA_CFG/pre/
 ADD post/* $PAYARA_CFG/post/
-ADD res/solr-doc-store-corepo-worker.war $PAYARA_CFG/pre/
+ADD solr-doc-store-corepo-worker-1.0-SNAPSHOT.war $PAYARA_CFG/pre/solr-doc-store-corepo-worker.war
 RUN payara-setup $PAYARA_CFG/pre/
