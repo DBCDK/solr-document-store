@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
-@Table(name = "openagencytype")
+@Table(name = "holdingsItemsSolrKeys")
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
