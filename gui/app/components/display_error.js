@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 class DisplayError extends React.PureComponent {
     constructor(props){
@@ -11,4 +12,8 @@ class DisplayError extends React.PureComponent {
     }
 }
 
-export default DisplayError;
+const mapStateToProps = (state) => ({
+    displayMessage: state.search.searchErrorMessage
+});
+
+export default connect(mapStateToProps)(DisplayError);
