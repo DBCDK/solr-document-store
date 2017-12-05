@@ -12,6 +12,14 @@ public class AgencyItemKey implements Serializable {
     public int agencyId;
     public String bibliographicRecordId;
 
+    public AgencyItemKey() {
+    }
+
+    AgencyItemKey(int agencyId, String bibliographicRecordId) {
+        this.agencyId = agencyId;
+        this.bibliographicRecordId = bibliographicRecordId;
+    }
+
     public AgencyItemKey withAgencyId(int agencyId) {
         this.agencyId = agencyId;
         return this;
