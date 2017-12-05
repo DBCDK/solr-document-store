@@ -6,8 +6,8 @@ import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "OpenAgencyType")
-public class OpenAgencyTypeEntity implements Serializable {
+@Table(name = "AgencyLibraryType")
+public class AgencyLibraryTypeEntity implements Serializable {
 
     @Id
     public int agencyId;
