@@ -50,6 +50,19 @@
                             <arguments>run build</arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>Jest tests</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>test</arguments>
+                        </configuration>
+
+                        <!-- optional: the default plase is "test". Some developers
+                        choose to run karma in the "integration-test" phase. -->
+                        <phase>test</phase>
+                    </execution>
 
                 </executions>
             </plugin>

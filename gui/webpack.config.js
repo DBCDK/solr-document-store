@@ -7,15 +7,15 @@ const PATHS = {
     build: path.join(__dirname, 'target', 'classes', 'META-INF', 'resources', 'webjars', packageJSON.name, packageJSON.version)
 };
 
-module.exports = {
-    entry: './app/index.js',
-
-    output: {
-        path: PATHS.build,
-        publicPath: '/public/',
-        filename: 'solr-docstore-gui-bundle.js'
-    },
-    plugins: [
+var plugins = [
+    new ExtractTextPlugin({
+        filename: "solr-docstore-gui-styles.css"
+    }),
+    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin()
+];
+if (process.env.NODE_ENV === "production") {
+    plugins.push(
         new webpack.optimize.UglifyJsPlugin({
             beautify: false,
             minimize: true,
@@ -30,12 +30,21 @@ module.exports = {
                 dead_code: true, // big one--strip code that will never execute
             },
             comments: false
-        }),
-        // All css imported in js modules will be bundled into one file
-        new ExtractTextPlugin({
-            filename: "solr-docstore-gui-styles.css"
-        }),
-    ],
+        })
+    )
+}
+
+
+module.exports = {
+    entry: ['react-hot-loader/patch','./app/index.js'],
+
+    output: {
+        path: PATHS.build,
+        publicPath: '/',
+        filename: 'solr-docstore-gui-bundle.js'
+    },
+    devtool: 'inline-source-map',
+    plugins: plugins,
     module: {
         rules: [
             {
@@ -59,5 +68,22 @@ module.exports = {
                 }
             }
         ]
+    },
+    devServer: {
+        hot: true,
+        port: 8090,
+        // Send API requests on localhost to API server get around CORS.
+        proxy: {
+            '/development/api': {
+                target: {
+                    host: "localhost",
+                    protocol: 'http:',
+                    port: 8080
+                },
+                pathRewrite: {
+                    '^/development/api': '/solr-doc-store/api'
+                }
+            }
+        }
     }
 };
