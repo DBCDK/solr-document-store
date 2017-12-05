@@ -44,7 +44,6 @@ public class PgMapOfStringsToJsonConverter implements AttributeConverter<Map<Str
         final PGobject pgObject = new PGobject();
         pgObject.setType("jsonb");
         try {
-
             pgObject.setValue(context.marshall(content));
         } catch (SQLException | JSONBException e) {
             throw new IllegalStateException(e);
