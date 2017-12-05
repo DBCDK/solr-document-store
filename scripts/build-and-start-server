@@ -1,0 +1,2 @@
+export  DOCSTORE_POSTGRES_URL=${USER}:${USER}@192.168.9.5:5432/${USER}
+mvn clean  package &&  docker run -ti -e DOCSTORE_POSTGRES_URL -v ${PWD}/service/target/solr-doc-store-service-1.0-SNAPSHOT.war:/payara-micro/wars/solr-doc-store-service-1.0-SNAPSHOT.war -p 8080:8080 xx
