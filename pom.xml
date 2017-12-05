@@ -25,7 +25,6 @@
         <module>service</module>
         <module>gui</module>
         <module>corepo-worker</module>
-        <module>docker</module>
     </modules>
 
     <groupId>dk.dbc</groupId>
