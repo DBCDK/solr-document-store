@@ -1,0 +1,4 @@
+path = ${PAYARA_BASE}
+url = https://localhost:4848/
+auth = admin:admin
+timeout = ${PAYARA_STARTUP_TIMEOUT|30}

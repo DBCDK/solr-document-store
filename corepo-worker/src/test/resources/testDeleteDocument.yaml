@@ -1,0 +1,7 @@
+-   name: "870970 record present"
+    expected: true
+    expression:
+        ?:
+            bibliographicRecordId: "23645564"
+            agencyId: "870970"
+            deleted: true

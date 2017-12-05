@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 @Stateless
-@Path(".")
+@Path("holdings")
 public class HoldingsItemBean {
 
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
@@ -28,12 +28,11 @@ public class HoldingsItemBean {
     EntityManager entityManager;
 
     @POST
-    @Path("holdings")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public Response addHoldingsKeys(@Context UriInfo uriInfo, String KeyJsonContent) throws Exception {
+    public Response addHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
-        HoldingsItemEntity hi = jsonbContext.unmarshall(KeyJsonContent, HoldingsItemEntity.class);
+        HoldingsItemEntity hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntity.class);
         log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
 
         entityManager.merge(hi);
