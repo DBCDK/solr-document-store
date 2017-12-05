@@ -1,2 +1,10 @@
-export  DOCSTORE_POSTGRES_URL=${USER}:${USER}@192.168.9.5:5432/${USER}
+#!env sh
+
+
+#docker run -ti docker.dbc.dk/payara-micro /bin/bash
+
+# Setup URL to PostgreSQL database (should be running somewhere on your machine)
+export DOCSTORE_POSTGRES_URL=${USER}:${USER}@192.168.9.5:5432/${USER}
+
+# Nasty one-liner. Build everything, then start docker image
 mvn clean  package &&  docker run -ti -e DOCSTORE_POSTGRES_URL -v ${PWD}/service/target/solr-doc-store-service-1.0-SNAPSHOT.war:/payara-micro/wars/solr-doc-store-service-1.0-SNAPSHOT.war -p 8080:8080 xx
