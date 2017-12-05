@@ -18,6 +18,7 @@
     <groupId>dk.dbc</groupId>
     <artifactId>solr-doc-store-corepo-worker</artifactId>
     <packaging>war</packaging>
+    <name>solr-doc-store-corepo-worker</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
