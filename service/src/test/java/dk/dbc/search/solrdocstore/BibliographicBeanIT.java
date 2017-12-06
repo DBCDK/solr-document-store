@@ -133,7 +133,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         entity.bibliographicRecordId = "new";
         entity.unit = "u";
         entity.work = "w";
-        entity.commitWithin = 1000;
         entity.trackingId = "IT";
         return jsonbContext.marshall(entity);
     }

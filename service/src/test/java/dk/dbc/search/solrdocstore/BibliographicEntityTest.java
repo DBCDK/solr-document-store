@@ -30,17 +30,15 @@ public class BibliographicEntityTest {
         be.indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
         be.indexKeys.put("id", Collections.singletonList("argle"));
 
-        be.superceds = null;
-        be.commitWithin = 1000;
         be.trackingId = "";
 
         String s = context.marshall(be);
-        assertThat(s, is("{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"trackingId\":\"\",\"superceds\":null,\"commitWithin\":1000}"));
+        assertThat(s, is("{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"trackingId\":\"\"}"));
     }
 
     @Test
     public void SimpleDecode() throws Exception {
-        String jsonContent = "{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"superceds\":null,\"commitWithin\":1000,\"trackingId\":\"\"}";
+        String jsonContent = "{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"trackingId\":\"\"}";
 
         BibliographicEntity be = context.unmarshall(jsonContent, BibliographicEntity.class);
         assertThat(be.agencyId, is(200));
@@ -49,8 +47,6 @@ public class BibliographicEntityTest {
         assertThat(be.unit, is("unit:2"));
         assertThat(be.producerVersion, is("1234"));
         assertThat(be.deleted, is(false));
-        assertThat(be.commitWithin, is(1000));
-        assertNull(be.superceds);
         assertThat(be.trackingId, is(""));
 
         Map<String, List<String>> expected = new HashMap<>();

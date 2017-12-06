@@ -27,7 +27,6 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
             be.indexKeys = new HashMap<>();
             be.indexKeys.put("titel", Collections.singletonList("unix bogen"));
             be.indexKeys.put("id", Collections.singletonList("argle"));
-            be.commitWithin = 1000;
             be.trackingId = "";
             em.persist(be);
         });
