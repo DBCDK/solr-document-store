@@ -99,11 +99,9 @@ public class BibliographicBean {
         query.setParameter("agency", agency);
         query.setParameter("bibId", recordId);
 
-        if (query.getSingleResult() == 0) {
-            return; // no Holdings records
+        if (query.getSingleResult() > 0) {
+            addHoldingsToBibliographic(agency, recordId, agency);
         }
-
-        addHoldingsToBibliographic(agency, recordId, agency);
     }
 
     private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
