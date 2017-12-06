@@ -59,3 +59,11 @@ CREATE TABLE BibliographicToBibliographic (
     PRIMARY KEY (decommissionedRecordId),
     CONSTRAINT newRecordUnique UNIQUE (decommissionedRecordId, currentRecordId)
 );
+
+CREATE TABLE AgencyLibraryType (
+    agencyId NUMERIC(6) NOT NULL,
+    libraryType TEXT NOT NULL,
+    PRIMARY KEY (agencyId)
+);
+
+CREATE INDEX agencyLibraryType_AgencyId on AgencyLibraryType (agencyId);
