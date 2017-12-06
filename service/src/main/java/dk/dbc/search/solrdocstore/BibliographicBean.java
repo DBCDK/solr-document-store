@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
@@ -29,6 +30,7 @@ public class BibliographicBean {
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
+    @Inject
     LibraryConfig libraryConfig;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
@@ -93,16 +95,16 @@ public class BibliographicBean {
     }
 
     private void updateHoldingsSingleRecord(int agency, String recordId) {
-        TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Integer.class);
+        TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
         query.setParameter("agency", agency);
         query.setParameter("bibId", recordId);
 
-        Integer holdingsAgency = query.getSingleResult();
-        if (holdingsAgency == null) {
+        Long holdingsCount = query.getSingleResult();
+        if (holdingsCount == 0) {
             return; // no Holdings records
         }
 
-        addHoldingsToBibliographic(agency, recordId, holdingsAgency);
+        addHoldingsToBibliographic(agency, recordId, agency);
     }
 
     private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
