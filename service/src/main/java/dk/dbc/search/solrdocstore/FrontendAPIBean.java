@@ -13,8 +13,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
 
 @Stateless
@@ -41,7 +39,33 @@ public class FrontendAPIBean {
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
                 "WHERE b.bibliographicRecordId = :bibId",BibliographicEntity.class);
         List<BibliographicEntity> res = query.setParameter("bibId",bibliographicRecordId).getResultList();
-        return Response.ok(new FrontendReturnType(res),MediaType.APPLICATION_JSON).build();
+        return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
     }
 
+    /**
+     * Returns a json object with a result field, which is a list of json HoldingsItemEntity mapped via the
+     * holdingsToBibliographic table.
+     * @param bibliographicRecordId
+     * @param bibliographicAgencyId
+     * @return Response
+     */
+    @GET
+    @Path("getRelatedHoldings/{bibliographicRecordId}&{bibliographicAgencyId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getRelatedHoldings(@PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                       @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
+        log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",
+                bibliographicRecordId,bibliographicAgencyId);
+        TypedQuery<HoldingsItemEntity> query = entityManager.createQuery("SELECT h " +
+                "FROM HoldingsItemEntity h " +
+                "WHERE h.agencyId IN (" +
+                "SELECT h2b.agencyId " +
+                "FROM HoldingsToBibliographicEntity h2b " +
+                "WHERE h2b.bibliographicRecordId = :bibId AND h2b.bibliographicAgencyId = :agId)",
+                HoldingsItemEntity.class);
+        query.setParameter("bibId",bibliographicRecordId);
+        query.setParameter("agId",bibliographicAgencyId);
+        List<HoldingsItemEntity> res = query.getResultList();
+        return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
+    }
 }
