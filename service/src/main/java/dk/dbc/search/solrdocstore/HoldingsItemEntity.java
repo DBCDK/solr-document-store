@@ -19,6 +19,9 @@ public class HoldingsItemEntity implements Serializable {
 
     private static final long serialVersionUID = 2469572172167117328L;
 
+    public HoldingsItemEntity() {
+    }
+
     @Id
     public int agencyId;
 
@@ -34,6 +37,24 @@ public class HoldingsItemEntity implements Serializable {
 
     public String trackingId;
 
-    @Transient
-    public int commitWithin;
+    HoldingsItemEntity(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId) {
+        this.agencyId = agencyId;
+        this.bibliographicRecordId = bibliographicRecordId;
+        this.producerVersion = producerVersion;
+        this.indexKeys = indexKeys;
+        this.trackingId = trackingId;
+    }
+
+    /**
+     * Ensure the class is of type Entity, if needed make a shallow copy
+     *
+     * @return self or copy of self
+     */
+    public HoldingsItemEntity asHoldingsItemEntity() {
+        if (getClass().equals(HoldingsItemEntity.class)) {
+            return this;
+        }
+        return new HoldingsItemEntity(agencyId, bibliographicRecordId, producerVersion, indexKeys, trackingId);
+    }
+
 }
