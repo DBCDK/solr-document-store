@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -121,9 +122,22 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
-        assertThat(l.size(), is(1));
-        assertThat(l.get(0), is(new HoldingsToBibliographicEntity(800000, "new", 800000)));
+        assertThat(l, contains((new HoldingsToBibliographicEntity(800000, "new", 800000))));
+    }
 
+    @Test
+    public void updateNonFbsLibraryWithNoHolding() throws JSONBException {
+        String json = getBibliographicRequestJson(888000);
+
+        Response r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, json)
+                );
+
+        assertThat(r.getStatus(), is(200));
+
+        List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
+
+        assertThat(l.size(), is(0));
     }
 
 

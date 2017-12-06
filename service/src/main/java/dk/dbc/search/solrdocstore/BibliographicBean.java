@@ -99,8 +99,7 @@ public class BibliographicBean {
         query.setParameter("agency", agency);
         query.setParameter("bibId", recordId);
 
-        Long holdingsCount = query.getSingleResult();
-        if (holdingsCount == 0) {
+        if (query.getSingleResult() == 0) {
             return; // no Holdings records
         }
 
