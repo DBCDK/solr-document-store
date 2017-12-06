@@ -26,7 +26,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         bean.entityManager = em;
         bean.libraryConfig = new LibraryConfig() {
             @Override
-            LibraryType getLibraryType(int agencyId) {
+            public LibraryType getLibraryType(int agencyId) {
                 if (agencyId >= 800000) return LibraryType.NonFBS;
                 if (agencyId < 400000) return LibraryType.FBSSchool;
                 return LibraryType.FBS;
