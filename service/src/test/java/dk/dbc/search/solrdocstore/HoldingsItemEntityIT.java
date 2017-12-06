@@ -34,7 +34,6 @@ public class HoldingsItemEntityIT extends JpaSolrDocStoreIntegrationTester {
             doc2.put("dyr", Collections.singletonList("hest"));
             be.indexKeys.add(doc2);
 
-            be.commitWithin = 1000;
             be.trackingId = "";
             em.persist(be);
         });
