@@ -52,6 +52,7 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
         canReadRealAgency(); //Plants realAgency in the database
         update(realAgency, LibraryConfig.LibraryType.FBS);
         Assert.assertEquals(LibraryConfig.LibraryType.FBS,bean.fetchAndCacheLibraryType(realAgency));
+        remove(realAgency);
     }
 
     private void remove(int agency) {
