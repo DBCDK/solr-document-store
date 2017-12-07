@@ -1,21 +1,17 @@
 package dk.dbc.search.solrdocstore.openagency.libraryrules;
 
+import dk.dbc.search.solrdocstore.LibraryConfig;
+
+import javax.ejb.Singleton;
+import javax.ejb.Stateless;
+
+@Stateless
+@Singleton
 public class LibraryRulesProxy {
 
-    private static LibraryRulesProxy _instance=null;
 
-    public static LibraryRulesProxy getInstance(){
-        if (_instance!=null){
-            synchronized (_instance){
-                if (_instance != null){
-                    _instance = new LibraryRulesProxy();
-                }
-            }
-        }
-        return _instance;
+    public LibraryConfig.LibraryType fetchLibraryTypeFor(int agency){
+        return LibraryConfig.LibraryType.FBS;
     }
 
-    private LibraryRulesProxy(){
-        super();
-    }
 }
