@@ -29,6 +29,7 @@ public class DocStoreApplication extends Application {
         classes.add(BibliographicBean.class);
         classes.add(HoldingsItemBean.class);
         classes.add(FrontendAPIBean.class);
+        classes.add(DocumentRetrieveBean.class);
 
         for (Class<?> clazz : classes) {
             log.info("Registered {} resource", clazz.getName());
