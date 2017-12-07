@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactTable from 'react-table';
 import { connect } from 'react-redux';
-import { selectBibRecord } from '../actions/filtering';
+import { selectBibRecord } from '../actions/global';
 // Webpack will bundle the included styling
 import 'react-table/react-table.css';
 
@@ -35,10 +35,9 @@ class ListResults extends React.PureComponent {
                 columns={columns}
                 data={this.props.results}
                 getTrProps={(state,rowInfo,column) => {
-                    //console.log(state,rowInfo,column);
                     return ({
                         onClick: (e,handleOriginal)=>{
-                            this.props.selectItem(this.props.results[rowInfo.index].indexKeys);
+                            this.props.selectItem(this.props.results[rowInfo.index]);
                             if(handleOriginal){
                                 handleOriginal();
                             }
@@ -60,6 +59,6 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     selectItem: (item) => dispatch(selectBibRecord(item))
-})
+});
 
 export default connect(mapStateToProps,mapDispatchToProps)(ListResults);

@@ -16,13 +16,12 @@ jest.mock('../app/api',()=>{
                             }]
                         });
                     case 'handle error':
-                        throw new Error('You dun goof\'d!');
+                        throw new Error('We had an error');
                     default:
                         resolve({result: []});
                 }
             })
         },
-        culprit: true
     }
 });
 // This won't work
@@ -30,7 +29,7 @@ jest.mock('../app/api',()=>{
 import api from '../app/api/index';
 
 describe('Search saga unit test',()=>{
-    test('Wait for user to submit search', () => {
+    test('Listening for search events unit test', () => {
         const gen = watchSearch();
         expect(gen.next().value).toEqual(takeLatest(SEARCH_BIB_RECORD_ID,fetchBibliographicPost));
     });
@@ -53,10 +52,6 @@ describe('Search saga unit test',()=>{
         // Testing next step in saga is launching redux action searchSuccess with appropriate result
         expect(gen.next(mockResult).value).toEqual(put(searchSuccess(mockResult.result)));
     });
-    test('Search resulting in error should yield appropriate response', () => {
-        const gen = watchSearch();
-        expect(gen.next().value).toEqual(takeLatest(SEARCH_BIB_RECORD_ID,fetchBibliographicPost));
-    });
 });
 
 
@@ -76,6 +71,6 @@ describe('Search saga integration test',()=>{
         store.dispatch(searchBibRecord('handle error'));
         // Will await all promises to complete, which includes saga, could fail if timers are involved
         await Promise.resolve();
-        expect(store.getState().search.searchErrorMessage).toEqual('You dun goof\'d!');
+        expect(store.getState().search.searchErrorMessage).toEqual('We had an error');
     })
 });

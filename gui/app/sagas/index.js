@@ -1,5 +1,6 @@
 import { call, fork, takeLatest, select, put, all } from 'redux-saga/effects';
 import * as searchActions from '../actions/searching';
+import * as globalActions from '../actions/global';
 import * as relatedHoldingsActions from '../actions/related_holdings';
 import api from '../api';
 
@@ -15,11 +16,12 @@ export function* fetchBibliographicPost(action) {
 
 export function* pullRelatedHoldings(action) {
     try {
-        const holdings = yield call(api.pullRelatedHoldings,action.bibliographicRecordId,action.bibliographicAgencyId);
+        let {bibliographicRecordId,agencyId} = action.item;
+        const holdings = yield call(api.pullRelatedHoldings,bibliographicRecordId,agencyId);
         yield put(relatedHoldingsActions.pullSuccess(holdings.result));
     } catch (e) {
         console.log("We had the pull error: "+e.message);
-        yield put(searchActions.searchFailed(e));
+        yield put(relatedHoldingsActions.pullFailed(e));
     }
 }
 
@@ -28,7 +30,7 @@ export function* watchSearch() {
 }
 
 export function* watchPullRelatedHoldings() {
-    yield takeLatest(relatedHoldingsActions.PULL_RELATED_HOLDINGS,pullRelatedHoldings)
+    yield takeLatest(globalActions.SELECT_BIB_RECORD,pullRelatedHoldings)
 }
 
 export default function* root() {
