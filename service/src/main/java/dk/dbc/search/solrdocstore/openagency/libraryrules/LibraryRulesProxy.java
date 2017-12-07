@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.openagency.libraryrules;
 
 import dk.dbc.search.solrdocstore.LibraryConfig;
+import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 
 import javax.ejb.Singleton;
@@ -10,6 +11,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.concurrent.TimeUnit;
 
 @Stateless
 @Singleton
@@ -18,7 +20,13 @@ public class LibraryRulesProxy {
     private static String SCHOOLLIBRARY="Skolebibliotek";
 
     public LibraryConfig.LibraryType fetchLibraryTypeFor(int agency){
-        String json = fetchJSON(agency);
+        RetryPolicy retryPolicy = new RetryPolicy()
+                .withDelay(100, TimeUnit.MILLISECONDS)
+                .retryOn(Exception.class)
+                .withMaxRetries(4);
+
+        String json = Failsafe.with(retryPolicy).get(() -> fetchJSON(agency));
+
         LibraryRules libraryRules = JSONParser.getLibraryRules(json);
         if (libraryRules.canUseEnrichments){
             if (SCHOOLLIBRARY.equals(libraryRules.agencyType)){
@@ -33,7 +41,9 @@ public class LibraryRulesProxy {
 
 
     private String fetchJSON(int agency){
+
         Client client=null;
+
         try {
             String URI = "http://openagency.addi.dk/next_2.32/?action=libraryRules&outputType=json&agencyId=";
             client = ClientBuilder.newClient();
