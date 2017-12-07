@@ -15,7 +15,7 @@ class SolrDocstoreGUI extends React.PureComponent {
             activeItem: BIBLIOGRAPHIC_EXPLORER
         };
         this.activeTabComponent = this.activeTabComponent.bind(this);
-        this.activeTabWithKey = this.activeTabWithKey.bind(this);
+        this.activateTabWithKey = this.activateTabWithKey.bind(this);
         this.activateIndexKeyExplorer = this.activateIndexKeyExplorer.bind(this);
         this.activateRelatedHoldingsExplorer = this.activateRelatedHoldingsExplorer.bind(this);
         this.isActive = this.isActive.bind(this);
@@ -32,18 +32,18 @@ class SolrDocstoreGUI extends React.PureComponent {
         }
     }
 
-    activeTabWithKey(key){
+    activateTabWithKey(key){
         this.setState({
             activeItem: key
         })
     }
 
     activateIndexKeyExplorer(){
-        this.activeTabWithKey(BIBLIOGRAPHIC_EXPLORER);
+        this.activateTabWithKey(BIBLIOGRAPHIC_EXPLORER);
     }
 
     activateRelatedHoldingsExplorer(){
-        this.activeTabWithKey(RELATED_HOLDINGS_EXPLORER);
+        this.activateTabWithKey(RELATED_HOLDINGS_EXPLORER);
     }
 
     isActive(key){

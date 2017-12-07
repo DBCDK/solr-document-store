@@ -1,4 +1,5 @@
 import * as actions from '../app/actions/filtering';
+import {SELECT_BIB_RECORD,selectBibRecord} from '../app/actions/global';
 import filterReducer from '../app/reducers/filter';
 
 const filterInitialState = {
@@ -11,10 +12,10 @@ describe('Filtering actions',()=>{
     test('Select bibliographic record action',()=>{
         let item = {"id": ["gj5j3jg"],"term.isbn":["1234","5678"]};
         let desiredAction = {
-            type: actions.SELECT_BIB_RECORD,
+            type: SELECT_BIB_RECORD,
             item
         };
-        expect(actions.selectBibRecord(item)).toEqual(desiredAction);
+        expect(selectBibRecord(item)).toEqual(desiredAction);
     });
     test('Select white list pending action',()=>{
         let whiteListedItem = {"id": true,"term.isbn":true};
@@ -49,15 +50,15 @@ describe('Filter reducer',()=>{
             whiteListedElements: null
         };
         let action = {
-            type: actions.SELECT_BIB_RECORD,
-            item: {"id": ["123"]}
+            type: SELECT_BIB_RECORD,
+            item: {indexKeys: {"id": ["123"]}}
         };
         let newState = filterReducer(state,action);
         expect(newState).not.toBe(state);
         expect(newState).not.toEqual(state);
     });
     test('Should handle select bibliographic record',()=>{
-        let item = {"id": ["123"]};
+        let item = {indexKeys: {"id": ["123"]}};
         let wle = {
             "id": true
         };
@@ -67,14 +68,32 @@ describe('Filter reducer',()=>{
             whiteListedElements: wle
         };
         let action = {
-            type: actions.SELECT_BIB_RECORD,
+            type: SELECT_BIB_RECORD,
             item
         };
         expect(filterReducer(state,action)).toEqual({
-            selectedItem: item,
+            selectedItem: item.indexKeys,
             whiteListPending: {},
             whiteListedElements: wle
         })
+    });
+    test('Should handle selecting an item without index keys',()=>{
+        let item = {"id": ["123"]};
+        let state = {
+            selectedItem: {},
+            whiteListPending: {},
+            whiteListedElements: null
+        };
+        let action = {
+            type: SELECT_BIB_RECORD,
+            item
+        };
+        expect(filterReducer(state,action)).toEqual({
+            selectedItem: {},
+            whiteListPending: {},
+            whiteListedElements: null
+        })
+
     });
     test('Should handle white list pending',()=>{
         let whiteListedItem = {

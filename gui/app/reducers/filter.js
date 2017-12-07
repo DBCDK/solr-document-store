@@ -1,8 +1,8 @@
 import {
-    SELECT_BIB_RECORD,
     WHITE_LIST_SELECT_PENDING,
     CONFIRM_WHITE_LIST,
     CLEAR_WHITE_LIST } from '../actions/filtering';
+import { SELECT_BIB_RECORD } from '../actions/global';
 import update from 'immutability-helper';
 import converter from '../functions/index_key_converter';
 
@@ -16,7 +16,9 @@ update.extend('$auto',(value,object)=> update(object || {},value));
 export default function filter(state = initialState,action = {}) {
     switch (action.type){
         case SELECT_BIB_RECORD:
-            const newItem = converter(action.item);
+            // Selected item my not have index keys
+            const item = (action.item.indexKeys) ? action.item.indexKeys : {};
+            const newItem = converter(item);
             return update(state,{
                 selectedItem: {$set: newItem}
             });
