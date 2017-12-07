@@ -37,4 +37,7 @@ public class LibraryRulesProxy {
         }
     }
 
+    public void setOaclient(OpenAgencyClient oaclient) {
+        this.oaclient = oaclient;
+    }
 }
