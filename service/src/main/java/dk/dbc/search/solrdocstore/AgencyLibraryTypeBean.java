@@ -44,6 +44,14 @@ public class AgencyLibraryTypeBean {
         }
     }
 
+    private void updateAgencyTo(int agency, LibraryConfig.LibraryType libraryType){
+        AgencyLibraryTypeEntity e = findByAgency(agency);
+        if (e != null) {
+            e.libraryType = libraryType.name();
+            entityManager.merge(e);
+        }
+    }
+
     private AgencyLibraryTypeEntity findByAgency(int agency){
         AgencyLibraryTypeEntity e = entityManager.find(AgencyLibraryTypeEntity.class, agency);
         return e;
