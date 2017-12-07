@@ -1,0 +1,150 @@
+<schema name="example" version="1.1">
+    <types>
+        <fieldType name="string" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType><!-- boolean type: "true" or "false" -->
+        <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+        <fieldType name="integer" class="solr.TrieIntField" omitNorms="true"/>
+        <fieldType name="long" class="solr.TrieLongField" omitNorms="true"/>
+        <fieldType name="date" class="solr.TrieDateField" sortMissingLast="true" omitNorms="true"/>
+        <fieldType name="daterange" class="solr.DateRangeField" sortMissingLast="true" omitNorms="true"/>
+        <fieldType name="random" class="solr.RandomSortField" indexed="true"/>
+<!-- ... -->
+    </types>
+    <fields><!-- Required when updateLog is enabled-->
+        <field name="_version_" type="long" indexed="true" stored="true"/><!-- -->
+        <field name="alias" type="dbc-facet" indexed="true" stored="true" required="false"/>
+        <field name="fedoraPid" type="id" indexed="true" stored="true" required="false"/>
+        <field name="id" type="id" indexed="true" stored="true" required="false"/>
+        <field name="ac.source" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <field name="bib.classification" type="dbc-string" indexed="true" stored="true" required="false"/>
+        <field name="bib.titleSeries" type="dbc-phrase" indexed="true" stored="true" required="false"/>
+        <field name="dkcclterm.br" type="dbc-string" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.cl" type="dbc-string" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.dk" type="dbc-dk5" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.ib" type="dbc-isbn" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.is" type="dbc-isbn" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.kl" type="dbc-string" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.nr" type="dbc-isbn" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.ok" type="dbc-string" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="dkcclterm.ti" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <field name="ols.holding" type="dbc-phrase" indexed="true" stored="true" required="false"/>
+        <field name="ols.holdingLibrary" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <field name="ols.holdingsCount" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <field name="rec.bibliographicRecordId" type="id" indexed="true" stored="true" required="true"/>
+        <field name="rec.childDocId" type="id" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="rec.collectionIdentifier" type="id" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="rec.createdDate" type="date" indexed="true" stored="true" required="false"/>
+        <field name="rec.excludeFromUnionCatalogue" type="boolean" indexed="true" stored="true" multiValued="false"/>
+        <field name="rec.excludeFromWorldCat" type="boolean" indexed="true" stored="true" multiValued="false"/>
+        <field name="rec.fedoraStreamDate" type="date" indexed="true" stored="true" required="false"/>
+        <field name="rec.holdingsAgencyId" type="dbc-number" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="rec.id" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <field name="rec.indexedDate" type="date" indexed="true" stored="true" multiValued="false"/>
+        <field name="rec.modifiedDate" type="date" indexed="true" stored="true" required="false"/>
+        <field name="rec.repositoryId" type="id" indexed="true" stored="true" required="false"/>
+        <field name="rec.trackingId" type="id" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="rec.unitId" type="id" indexed="true" stored="true" required="false"/>
+        <field name="rec.workId" type="id" indexed="true" stored="true" required="false"/>
+        <field name="sort.date" type="integer" indexed="true" stored="true" multiValued="false" required="false"/>
+        <field name="sort.dateFirstEdition" type="integer" indexed="true" stored="true" multiValued="false" required="false"/>
+        <field name="sort.dk5" type="dbc-sort" indexed="true" stored="true" multiValued="false" required="false"/>
+        <field name="sort.genreCategory" type="dbc-sort" indexed="true" stored="true" multiValued="false" required="false"/>
+        <field name="sort.numberInSeries" type="long" indexed="true" stored="true" multiValued="false" required="false"/>
+        <field name="term.isbn" type="dbc-isbn" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="term.identifier" type="dbc-default" indexed="true" stored="true" multiValued="true" required="false"/>
+        <field name="unit.id" type="dbc-sort" indexed="true" stored="true" required="false"/>
+        <field name="work.id" type="dbc-sort" indexed="true" stored="true" required="false"/><!-- Experimental field enriched from ADHL data. Not generated by ordinary indexing: -->
+        <field name="loan.count" type="integer" indexed="true" stored="true" multiValued="false" required="false"/><!-- cql.anyIndexes are default in solrconfig and have to explicitly named in the schema.xml -->
+        <field name="cql.anyIndexes" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <field name="term.default" type="dbc-default" indexed="true" stored="true" required="false"/><!-- keys for ExternalFileField for ranking -->
+        <field name="term.primaryLanguage" type="dbc-default" indexed="true" stored="true" required="false" multiValued="false"/><!--    <field name="term.typeCategory"  type="dbc-default" indexed="true" stored="true" required="false" multiValued="false"/>--><!-- keeping the string type on the following since there is no need for charfiltering and they
+         are supposed to kept as one phrase -->
+        <field name="$/uid" type="string" indexed="true" stored="true" required="false"/>
+        <field name="submitter" type="string" indexed="true" stored="true" required="false"/>
+        <field name="original_format" type="string" indexed="true" stored="true" required="false"/>
+        <dynamicField name="term.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="dkcclterm.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="dc.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="cql.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="unit.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="work.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="facet.*" type="dbc-facet" indexed="true" stored="true" required="false"/>
+        <dynamicField name="display.*" type="dbc-facet" indexed="false" stored="true" required="false"/>
+        <dynamicField name="rankterm.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="rankphrase.*" type="dbc-phrase" indexed="true" stored="true" required="false"/>
+        <dynamicField name="scanterm.*" type="dbc-default" indexed="true" stored="true" required="false"/>
+        <dynamicField name="scanphrase.*" type="dbc-facet" indexed="true" stored="true" required="false"/>
+        <dynamicField name="dkcclphrase.*" type="dbc-phrase" indexed="true" stored="true" required="false"/>
+        <dynamicField name="phrase.*" type="dbc-phrase" indexed="true" stored="true" required="false"/>
+        <dynamicField name="sort.*" type="dbc-sort" indexed="true" stored="true" required="false"/>
+        <dynamicField name="exact.*" type="dbc-exact" indexed="true" stored="true" required="false"/><!-- Holdings documents fields -->
+        <field name="parentDocId" type="id" indexed="true" stored="true" docValues="true" required="optional"/><!-- reference to document in the dbc-core -->
+        <field name="holdingsitem.bibliographicRecordId" type="id" indexed="true" stored="true" docValues="true" required="optional"/>
+        <field name="holdingsitem.agencyId" type="integer" indexed="true" stored="true" docValues="true" required="optional"/>
+        <field name="holdingsitem.issueId" type="dbc-string-docvalue" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.issueText" type="dbc-string-docvalue" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.itemId" type="dbc-string-docvalue" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.branch" type="dbc-string" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.department" type="dbc-string" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.location" type="dbc-string" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.subLocation" type="dbc-string" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.circulationRule" type="keyword" indexed="true" stored="true" required="optional"/>
+        <field name="holdingsitem.status" type="dbc-string-docvalue" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.expectedDelivery" type="date" indexed="true" stored="true" docValues="true" required="optional"/>
+        <field name="holdingsitem.readyForLoan" type="integer" indexed="true" stored="true" docValues="true" required="optional"/><!-- number of items, which are NOT reserved -->
+        <field name="holdingsitem.accessionDate" type="daterange" indexed="true" stored="true" required="optional"/>
+        <field name="holdingsitem.note" type="dbc-string-docvalue" indexed="true" stored="true" required="optional" multiValued="false"/>
+        <field name="holdingsitem.collectionId" type="id" indexed="true" stored="true" docValues="true" required="optional"/><!-- agencyId and bibliographicRecordId concatenated - used for grouping -->
+    </fields><!-- Copying of rec fields to older fieldnamed for backwards compatibility -->
+    <copyField source="rec.repositoryId" dest="fedoraPid"/>
+    <copyField source="rec.unitId" dest="unit.id"/>
+    <copyField source="rec.workId" dest="work.id"/><!-- Copying various fields which values should also be part of other fields -->
+    <copyField source="dkcclterm.kl" dest="dkcclterm.cl"/>
+    <copyField source="dkcclphrase.lkl" dest="dkcclphrase.lcl"/>
+    <copyField source="dkcclphrase.lti" dest="phrase.title"/>
+    <copyField source="dkcclterm.ti" dest="term.title"/>
+    <copyField source="term.trackTitle" dest="term.title"/>
+    <copyField source="dkcclphrase.lfo" dest="phrase.creator"/>
+    <copyField source="dkcclterm.fo" dest="term.creator"/>
+    <copyField source="dkcclphrase.lem" dest="phrase.subject"/>
+    <copyField source="dkcclterm.em" dest="term.subject"/>
+    <copyField source="sort.dateFirstEdition" dest="term.dateFirstEdition"/>
+    <copyField source="sort.dateFirstEdition" dest="facet.dateFirstEdition"/>
+    <copyField source="term.nationality" dest="facet.nationality"/><!-- Copying of fields to term.default -->
+    <copyField source="dkcclterm.fo" dest="term.default"/>
+    <copyField source="dkcclterm.ti" dest="term.default"/>
+    <copyField source="dkcclterm.em" dest="term.default"/>
+    <copyField source="dkcclterm.no" dest="term.default"/>
+    <copyField source="dkcclterm.bc" dest="term.default"/>
+    <copyField source="dkcclterm.fb" dest="term.default"/>
+    <copyField source="dkcclterm.is" dest="term.default"/>
+    <copyField source="dkcclterm.vp" dest="term.default"/>
+    <copyField source="rec.id" dest="term.default"/>
+    <copyField source="term.identifier" dest="term.default"/>
+    <copyField source="term.creator" dest="term.default"/>
+    <copyField source="term.title" dest="term.default"/>
+    <copyField source="term.subject" dest="term.default"/>
+    <copyField source="term.description" dest="term.default"/>
+    <copyField source="term.partOf" dest="term.default"/>
+    <copyField source="term.trackTitle" dest="term.default"/>
+    <copyField source="term.defaultLocalData" dest="term.default"/><!-- Copying of term.default to cql.anyIndexes -->
+    <copyField source="term.default" dest="cql.anyIndexes"/><!-- Copying of dkcclphrase.lfo and lpo indices to scanphrase.invCreator and invMainCreator-->
+    <copyField source="dkcclphrase.lpo" dest="scanphrase.invMainCreator"/>
+    <copyField source="dkcclphrase.lfo" dest="scanphrase.invCreator"/><!-- Copying of scan indexes to scan*.default -->
+    <copyField source="scanterm.mainTitle" dest="scanterm.default"/>
+    <copyField source="scanterm.mainCreator" dest="scanterm.default"/>
+    <copyField source="scanphrase.mainTitle" dest="scanphrase.default"/>
+    <copyField source="scanphrase.mainCreator" dest="scanphrase.default"/><!-- Copying of fields to exact.* indexes-->
+    <copyField source="dkcclterm.fo" dest="exact.fo"/>
+    <copyField source="dkcclterm.ti" dest="exact.ti"/>
+    <copyField source="dkcclterm.em" dest="exact.em"/><!-- Copy collection identifier to digit only field --><!--<copyField source="rec.collectionIdentifier" dest="rec.holdingsAgencyId"/>--><!-- Field to use to determine and enforce document uniqueness.
+       Unless this field is marked with required="false", it will be a required field
+    -->
+    <uniqueKey>id</uniqueKey><!-- field for the QueryParser to use when an explicit fieldname is absent -->
+    <defaultSearchField>term.default</defaultSearchField><!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
+    <solrQueryParser defaultOperator="AND"/>
+</schema>
