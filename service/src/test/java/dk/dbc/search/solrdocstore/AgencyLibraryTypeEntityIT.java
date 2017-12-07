@@ -19,17 +19,21 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
         persist(key, fbs, em);
 
 
-        AgencyLibraryTypeEntity searchResult = findEntityWithKey(em, key);
+        AgencyLibraryTypeEntity searchResult = findEntityWithKey(key, em);
 
         assertEquals(key, searchResult.agencyId);
         assertEquals(fbs, LibraryConfig.LibraryType.valueOf(searchResult.libraryType));
 
-        env().getPersistenceContext().run( () -> em.remove(searchResult));
+        remove(searchResult, em);
 
-        AgencyLibraryTypeEntity res = findEntityWithKey(em, key);
+        AgencyLibraryTypeEntity res = findEntityWithKey(key, em);
 
         assertNull(res);
 
+    }
+
+    private void remove(AgencyLibraryTypeEntity entity, EntityManager em) {
+        env().getPersistenceContext().run( () -> em.remove(entity));
     }
 
     private void persist(int key, LibraryConfig.LibraryType fbs, EntityManager em) {
@@ -41,7 +45,7 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
         });
     }
 
-    private AgencyLibraryTypeEntity findEntityWithKey(EntityManager em, int key){
+    private AgencyLibraryTypeEntity findEntityWithKey(int key, EntityManager em){
         return env().getPersistenceContext().run(() -> em.find(AgencyLibraryTypeEntity.class, key));
 
     }

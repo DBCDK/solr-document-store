@@ -10,11 +10,24 @@ import javax.persistence.PersistenceContext;
 @Stateless
 public class AgencyLibraryTypeBean {
 
+    @Inject
+    LibraryRulesProxy proxy;
+
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
     public LibraryConfig.LibraryType fetchAndCacheLibraryType(int agency){
-        return LibraryConfig.LibraryType.FBS;
+        LibraryConfig.LibraryType returnValue;
+        AgencyLibraryTypeEntity cachedValue = findByAgency(agency);
+        if (cachedValue!=null){
+            returnValue = LibraryConfig.LibraryType.valueOf(cachedValue.libraryType);
+        } else {
+            LibraryConfig.LibraryType libraryType = proxy.fetchLibraryTypeFor(agency);
+            storeTypeOnAgency(agency,libraryType);
+            returnValue = libraryType;
+        }
+        return returnValue;
     }
 
     private void storeTypeOnAgency(int agency, LibraryConfig.LibraryType libraryType){
