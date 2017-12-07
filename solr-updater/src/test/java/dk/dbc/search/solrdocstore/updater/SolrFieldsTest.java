@@ -38,23 +38,30 @@ public class SolrFieldsTest {
     public void testIsKnownField() throws Exception {
         System.out.println("isKnownField");
 
+        SolrFields solrFields = newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
+
+        assertTrue("field", solrFields.isKnownField("_version_"));
+        assertTrue("dynamicField", solrFields.isKnownField("facet.fool"));
+        assertFalse("Unknown field", solrFields.isKnownField("foo"));
+    }
+
+    public static SolrFields newSolrFields(String schemaXmlLocation, String url) {
         SolrFields solrFields = new SolrFields() {
             @Override
             InputStream getSchemaXml(URI uri) throws EJBException {
-                return SolrFieldsTest.class.getClassLoader().getResourceAsStream("schema.xml");
+                return SolrFieldsTest.class.getClassLoader().getResourceAsStream(schemaXmlLocation);
             }
         };
         solrFields.config = new Config() {
             @Override
             public String getSolrUrl() {
-                return "http://some.crazy.host/with/a/strange/path";
+                return url;
             }
         };
 
         solrFields.init();
-        assertTrue("field", solrFields.isKnownField("_version_"));
-        assertTrue("dynamicField", solrFields.isKnownField("facet.fool"));
-        assertFalse("Unknown field", solrFields.isKnownField("foo"));
+
+        return solrFields;
     }
 
 }
