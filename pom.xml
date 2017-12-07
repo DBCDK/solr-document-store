@@ -25,7 +25,8 @@
         <module>service</module>
         <module>gui</module>
         <module>corepo-worker</module>
-    </modules>
+    <module>solr-updater</module>
+  </modules>
 
     <groupId>dk.dbc</groupId>
     <artifactId>solr-doc-store</artifactId>
