@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRuleException;
 import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRulesProxy;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,6 +54,16 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
         update(realAgency, LibraryConfig.LibraryType.FBS);
         Assert.assertEquals(LibraryConfig.LibraryType.FBS,bean.fetchAndCacheLibraryType(realAgency));
         remove(realAgency);
+    }
+
+    @Test
+    public void nonExisting(){
+        try {
+            bean.fetchAndCacheLibraryType(42);
+            Assert.fail("Should throw hard exception");
+        } catch (LibraryRuleException e){
+            // all good
+        }
     }
 
     private void remove(int agency) {
