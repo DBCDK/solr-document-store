@@ -38,15 +38,21 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private String solrUrl;
+    private String solrDocStoreUrl;
 
     @PostConstruct
     public void method() {
         Properties props = findProperties("solr-doc-store-updater");
         solrUrl = props.getProperty("corepoSolrUrl", System.getenv("COREPO_SOLR_URL"));
+        solrDocStoreUrl = props.getProperty("solrDocStoreUrl", System.getenv("SOLR_DOC_STORE_URL"));
     }
 
     public String getSolrUrl() {
         return solrUrl;
+    }
+
+    public String getSolrDocStoreUrl() {
+        return solrDocStoreUrl;
     }
 
     private Properties findProperties(String resourceName) {
@@ -62,6 +68,5 @@ public class Config {
         }
         return new Properties();
     }
-
 
 }

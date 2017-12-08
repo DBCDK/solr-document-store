@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-    <artifactId>solr-doc-store</artifactId>
-    <groupId>dk.dbc</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
+        <artifactId>solr-doc-store</artifactId>
+        <groupId>dk.dbc</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
     <groupId>dk.dbc</groupId>
     <artifactId>solr-doc-store-updater</artifactId>
@@ -25,6 +25,19 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>7.1.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>7.1.0</version>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <scope>provided</scope>
@@ -32,12 +45,23 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.2.3</version>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.26</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.26</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -48,14 +72,12 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-<!--                    <source>1.8</source>
-                    <target>1.7</target>-->
                     <compilerArguments>
                         <endorseddirs>${endorsed.dir}</endorseddirs>
                     </compilerArguments>
                 </configuration>
             </plugin>
-            <plugin>
+            <plugin> 
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.3</version>
@@ -86,8 +108,204 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy service.war</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <silent>true</silent>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.parent.artifactId}-service</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <destFileName>service.war</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <version>42.1.4</version>
+                                    <type>jar</type>
+                                    <destFileName>postgresql.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>solr config</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/test-classes/solr/corepo/conf</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>dk.dbc</groupId>
+                                    <artifactId>corepo-solr-config</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <classifier>no-stored</classifier>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>postgresql.port</portName>
+                                <portName>solr.port</portName>
+                                <portName>glassfish.http.port</portName>
+                                <portName>glassfish.jms.port</portName>
+                                <portName>glassfish.jndi.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>dk.dbc</groupId>
+                <artifactId>postgresql-maven-plugin</artifactId>
+                <version>1.3-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>start-postgresql</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <pgPort>${postgresql.port}</pgPort>
+                            <pgDbName>solrdocstore</pgDbName>
+                            <pgDbScripts>
+                            </pgDbScripts>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-postgresql</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>shutdown</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <!--<redirectTestOutputToFile>true</redirectTestOutputToFile>-->
+                    <systemPropertyVariables>
+                        <postgresql.port>${postgresql.port}</postgresql.port>
+                        <solr.port>${solr.port}</solr.port>
+                        <glassfish.port>${glassfish.http.port}</glassfish.port>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.glassfish.embedded</groupId>
+                <artifactId>maven-embedded-glassfish-plugin</artifactId>
+                <version>4.1.1</version>
+                <configuration>
+                    <autoDelete>false</autoDelete>
+                    <configFileReadOnly>false</configFileReadOnly>
+                    <ports>
+                        <http-listener>${glassfish.http.port}</http-listener>
+                    </ports>
+                    <systemProperties>
+                        <property>glassfish.embedded.tmpdir=${project.build.directory}/tmp</property>
+                    </systemProperties>
+                    <glassfishProperties>
+                        <property>embedded-glassfish-config.server.jms-service.jms-host.default_JMS_host.port=${glassfish.jms.port}</property>
+                        <property>embedded-glassfish-config.server.iiop-service.iiop-listener.orb-listener-1.port=${glassfish.jndi.port}</property>
+                    </glassfishProperties>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>42.1.4</version>
+                        <type>jar</type>
+                    </dependency>
+                </dependencies>
+                <!--Start GlassFish-->
+                <executions>
+                    <execution>
+                        <id>start-glassfish</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                        </configuration>
+                    </execution>
+                    <!-- setup config -->
+                    <execution>
+                        <id>custom-resources</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>admin</goal>
+                        </goals>
+                        <configuration>
+                            <commands>
+                                <!--<command>create-custom-resource -!-restype=java.util.Properties -!-factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory -!-property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.31/":solrDocumentStoreUrl="http://localhost:${docstore.port}/solr-doc-store/api/bibliographic":commitWithin=1000 solr-worker</command>
+                                -->
+                                <command>add-library --type common ${project.build.directory}/postgresql.jar</command>
+                                <command>restart-domain</command>
+                                <command>create-jdbc-connection-pool --restype=javax.sql.DataSource --datasourceclassname=org.postgresql.ds.PGSimpleDataSource --property=driverClass=org.postgresql.Driver:url="jdbc:postgresql://localhost:${postgresql.port}/solrdocstore":User=${user.name}:Password="" jdbc/solr-doc-store/pool</command>
+                                <command>create-jdbc-resource --connectionpoolid=jdbc/solr-doc-store/pool jdbc/solr-doc-store</command>
+                            </commands>
+                        </configuration>
+                    </execution>
+                    <!--Deploy workerin GlassFish-->
+                    <execution>
+                        <id>worker-deploy</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <app>${project.build.directory}/service.war</app>
+                            <contextRoot>/solr-doc-store</contextRoot>
+                            <name>service</name>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-glassfish</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
