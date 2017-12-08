@@ -1,11 +1,16 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRulesProxy;
+
 import javax.ejb.Singleton;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 @Stateless
-@Singleton
 public class LibraryConfig {
+
+    @Inject
+    AgencyLibraryTypeBean agencyLibraryTypeBean;
 
     /**
      * FBS and FBSSchool is allowed to hookup holdings to CommonRecords ( 870970 / 300000 )
@@ -22,8 +27,7 @@ public class LibraryConfig {
     }
 
     public LibraryType getLibraryType(int agency) {
-        // Todo lookup Library type from openAgency
-        return LibraryType.FBS;
+        return agencyLibraryTypeBean.fetchAndCacheLibraryType(agency);
     }
 
     public RecordType getRecordType(int agency) {
