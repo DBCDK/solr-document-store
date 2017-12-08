@@ -1,21 +1,43 @@
 package dk.dbc.search.solrdocstore.openagency.libraryrules;
 
-public class LibraryRulesProxy {
+import dk.dbc.search.solrdocstore.LibraryConfig;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
 
-    private static LibraryRulesProxy _instance=null;
+import javax.ejb.Singleton;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
-    public static LibraryRulesProxy getInstance(){
-        if (_instance!=null){
-            synchronized (_instance){
-                if (_instance != null){
-                    _instance = new LibraryRulesProxy();
-                }
+@Stateless
+public class LibraryRulesProxy implements Serializable{
+
+    @Inject
+    OpenAgencyClient oaclient;
+
+    private static String SCHOOLLIBRARY="Skolebibliotek";
+
+    public LibraryConfig.LibraryType fetchLibraryTypeFor(int agency){
+
+        LibraryRules libraryRules = oaclient.fetchLibraryRuleFor(agency);
+        if (libraryRules.canUseEnrichments){
+            if (SCHOOLLIBRARY.equals(libraryRules.agencyType)){
+                return LibraryConfig.LibraryType.FBSSchool;
+            } else {
+                return LibraryConfig.LibraryType.FBS;
             }
+        } else {
+            return LibraryConfig.LibraryType.NonFBS;
         }
-        return _instance;
     }
 
-    private LibraryRulesProxy(){
-        super();
+    public void setOaclient(OpenAgencyClient oaclient) {
+        this.oaclient = oaclient;
     }
 }
