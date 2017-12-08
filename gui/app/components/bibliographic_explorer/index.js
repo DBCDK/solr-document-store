@@ -1,11 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {applyFilter, clearFilter} from "../actions/filtering";
-import IndexKeyExplorer from './index_key_explorer';
+import {applyFilter, clearFilter} from "../../actions/filtering";
+import IndexKeyExplorer from '../index_key_explorer/index';
+import Header from "./header";
+import ParentElement from './parent_element';
+import Element from './element';
 
 const BibliographicExplorer = ({item,applyFilter,clearFilter}) => (
     <div>
         <IndexKeyExplorer
+            HeaderComponentClass={Header}
+            ParentElementComponentClass={ParentElement}
+            ElementComponentClass={Element}
             item={item}/>
         <div className="d-flex justify-content-center">
             <button
