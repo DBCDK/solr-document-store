@@ -9,6 +9,8 @@ import java.io.Serializable;
 @Table(name = "AgencyLibraryType")
 public class AgencyLibraryTypeEntity implements Serializable {
 
+    private static final long serialVersionUID = 2352663426617537636L;
+
     @Id
     public int agencyId;
 
