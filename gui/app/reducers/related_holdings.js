@@ -18,6 +18,7 @@ export default function relatedHoldings(state = initialState, action = {}) {
         case SELECT_BIB_RECORD:
             return update(state,{
                 loading: {$set: true},
+                errorMessage: {$set: ''},
                 selectedBibRecordId: {$set: action.item.bibliographicRecordId},
                 selectedBibAgencyId: {$set: action.item.agencyId}
             });
@@ -28,6 +29,7 @@ export default function relatedHoldings(state = initialState, action = {}) {
         case PULL_RELATED_HOLDINGS_SUCCESS:
             return update(state,{
                 loading: {$set: false},
+                errorMessage: {$set: ''},
                 relatedHoldings: {$set: action.result},
             });
         case PULL_RELATED_HOLDINGS_FAILED:
