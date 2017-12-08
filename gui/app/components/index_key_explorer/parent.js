@@ -1,7 +1,4 @@
 import React from 'react';
-import Element from "./element";
-import { connect } from 'react-redux';
-import { selectWhiteListPending } from '../../actions/filtering';
 
 class Parent extends React.PureComponent {
     constructor(props){
@@ -10,31 +7,25 @@ class Parent extends React.PureComponent {
             expanded: false,
         };
         this.onExpandToggled = this.onExpandToggled.bind(this);
-        this.onWhiteList = this.onWhiteList.bind(this);
     }
 
     render(){
-        if(this.props.isWhiteListed){
-            let {name,children} = this.props;
-            let classNameExpanded = "fa fa-lg px-2 py-2 fa-caret-"+((this.state.expanded) ? "down" : "up");
-            const parent = <div key={name} className="bg-light border d-flex">
-                <div onClick={this.onExpandToggled} style={{flex: 1}}>
-                    <p className="h5 font-weight-bold">{name}</p>
-                </div>
-                <i className={classNameExpanded} onClick={this.onExpandToggled} aria-hidden="true"/>
-                <i className="fa fa-lg fa-minus-square px-2 py-2" onClick={this.onWhiteList} aria-hidden="true"/>
-            </div>;
-            let childElements = (this.state.expanded) ? Object.keys(children).sort().map((key) =>
-                    <Element
-                        key={name+key}
-                        name={key}
-                        parentName={name}
-                        list={children[key]}/>
-            ) : [];
-            return [parent].concat(childElements);
-        } else {
-            return null
-        }
+        let {name,children,HeaderComponentClass,ElementComponentClass} = this.props;
+        const parent =
+            <HeaderComponentClass
+                key={name}
+                expanded={this.state.expanded}
+                children={children}
+                toggleExpand={this.onExpandToggled}
+                name={name}/>;
+        let childElements = (this.state.expanded) ? Object.keys(children).sort().map((key) =>
+                <ElementComponentClass
+                    key={name+key}
+                    name={key}
+                    parentName={name}
+                    list={children[key]}/>
+        ) : [];
+        return [parent].concat(childElements);
     }
 
     onExpandToggled(){
@@ -43,26 +34,7 @@ class Parent extends React.PureComponent {
         })
     }
 
-    onWhiteList(){
-        let {name,children} = this.props;
-        var whiteListedItem = {};
-        whiteListedItem[name] = {};
-        Object.keys(children).forEach((k)=>{
-            whiteListedItem[name][k] = true
-        });
-        this.props.setWhiteListPending(whiteListedItem);
-    }
 }
 
-// If webapp becomes slow, use reselect (https://github.com/reactjs/reselect) to essentially cache
-// the computed values below, making them less expensive on re-renders
-const mapStateToProps = (state,ownProps) => ({
-    pendingWhiteList: state.filter.whiteListPending[ownProps.name] !== undefined,
-    isWhiteListed: state.filter.whiteListedElements === null || state.filter.whiteListedElements[ownProps.name] !== undefined
-});
 
-const mapDispatchToProps = (dispatch,ownProps) => ({
-    setWhiteListPending: (whiteListedItem) => dispatch(selectWhiteListPending(whiteListedItem))
-});
-
-export default connect(mapStateToProps,mapDispatchToProps)(Parent);
+export default Parent;
