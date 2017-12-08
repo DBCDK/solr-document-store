@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loading from '../loading';
+import RelatedHoldingsItem from './related_holdings_item';
 
 class RelatedHoldingsExplorer extends React.PureComponent {
     constructor(props){
@@ -19,7 +20,11 @@ class RelatedHoldingsExplorer extends React.PureComponent {
         } else if(relatedHoldings.length === 0){
             return (<div>Nothing to show here</div>)
         } else {
-            return relatedHoldings.map((h,i) => <div key={i}>{JSON.stringify(h)}</div>)
+            return relatedHoldings.map((h,i) =>
+                    <RelatedHoldingsItem
+                        key={relatedHoldings[i].bibliographicRecordId+""+i}
+                        relatedHoldingItem={relatedHoldings[i]}/>
+            )
         }
     }
 }

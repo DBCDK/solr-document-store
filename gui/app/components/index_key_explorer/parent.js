@@ -18,7 +18,7 @@ class Parent extends React.PureComponent {
             let {name,children} = this.props;
             let classNameExpanded = "fa fa-lg px-2 py-2 fa-caret-"+((this.state.expanded) ? "down" : "up");
             const parent = <div key={name} className="bg-light border d-flex">
-                <div onClick={this.onExpandToggled} className="mr-auto">
+                <div onClick={this.onExpandToggled} style={{flex: 1}}>
                     <p className="h5 font-weight-bold">{name}</p>
                 </div>
                 <i className={classNameExpanded} onClick={this.onExpandToggled} aria-hidden="true"/>
