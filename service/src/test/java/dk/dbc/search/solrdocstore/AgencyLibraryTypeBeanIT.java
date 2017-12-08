@@ -3,6 +3,7 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRuleException;
 import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRulesProxy;
 import dk.dbc.search.solrdocstore.openagency.libraryrules.OpenAgencyClient;
+import dk.dbc.search.solrdocstore.openagency.libraryrules.OpenAgencyConfig;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,11 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
         bean = new AgencyLibraryTypeBean();
         bean.entityManager = em;
         bean.proxy = new LibraryRulesProxy();
-        bean.proxy.setOaclient(new OpenAgencyClient());
+        OpenAgencyClient openAgencyClient = new OpenAgencyClient();
+        OpenAgencyConfig openAgencyConfig = new OpenAgencyConfig();
+        openAgencyConfig.loadProperties();
+        openAgencyClient.setConfig(openAgencyConfig);
+        bean.proxy.setOaclient(openAgencyClient);
     }
 
     @Test

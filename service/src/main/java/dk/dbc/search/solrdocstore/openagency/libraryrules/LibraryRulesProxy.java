@@ -12,11 +12,11 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 @Stateless
-@Singleton
-public class LibraryRulesProxy {
+public class LibraryRulesProxy implements Serializable{
 
     @Inject
     OpenAgencyClient oaclient;
