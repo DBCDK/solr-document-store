@@ -7,7 +7,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 @Stateless
-@Singleton
 public class LibraryConfig {
 
     @Inject
