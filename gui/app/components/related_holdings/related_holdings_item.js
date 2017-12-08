@@ -1,5 +1,5 @@
 import React from 'react';
-import Manefistation from "./manefistation";
+import Manifestation from "./manifestation";
 
 class RelatedHoldingsItem extends React.PureComponent {
     constructor(props){
@@ -23,7 +23,7 @@ class RelatedHoldingsItem extends React.PureComponent {
                     <div style={{flex: "1"}}>commit within: {commitWithin}</div>
                 </div>
                 {relatedHoldingItem.indexKeys.map((e,i) =>
-                    <Manefistation
+                    <Manifestation
                         key={i}
                         item={e}/>
                 )}
