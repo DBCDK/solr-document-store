@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { selectWhiteListPending } from '../../actions/filtering';
 
 const whiteListElement = (name,parentName,whiteListPending) => {
-    var whiteListElement = {};
+    let whiteListElement = {};
     whiteListElement[parentName] = {};
     whiteListElement[parentName][name] = !whiteListPending;
     return whiteListElement;
