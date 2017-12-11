@@ -5,15 +5,15 @@ import {
 import { SELECT_BIB_RECORD } from '../actions/global';
 import update from 'immutability-helper';
 
-const initialState = {
+export const produceInitialState = () => ({
     loading: false,
     relatedHoldings: [],
     errorMessage: '',
     selectedBibRecordId: null,
     selectedBibAgencyId: null
-};
+});
 
-export default function relatedHoldings(state = initialState, action = {}) {
+export default function relatedHoldings(state = produceInitialState(), action = {}) {
     switch (action.type){
         case SELECT_BIB_RECORD:
             // handling invalid actions
