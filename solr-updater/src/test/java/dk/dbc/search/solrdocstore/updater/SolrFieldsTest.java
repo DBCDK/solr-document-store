@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore.updater;
 import java.io.InputStream;
 import java.net.URI;
 import javax.ejb.EJBException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -64,4 +65,27 @@ public class SolrFieldsTest {
         return solrFields;
     }
 
+    /**
+     * Run by hand with a known zk://
+     *
+     * Setting up a solr cloud for integration testing is overkill
+     */
+    @Test
+    @Ignore
+    public void testZkUrl() {
+        String solrUrl = "zk://[hosts]/[chroot]/[collection]";
+
+        SolrFields solrFields = new SolrFields();
+        solrFields.config = new Config() {
+            @Override
+            public String getSolrUrl() {
+                return solrUrl;
+            }
+        };
+
+        solrFields.init();
+
+        System.out.println("OK");
+        fail("OK");
+    }
 }
