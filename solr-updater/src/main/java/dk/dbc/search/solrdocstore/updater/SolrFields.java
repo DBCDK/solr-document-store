@@ -68,7 +68,7 @@ public class SolrFields {
     @PostConstruct
     public void init() {
         log.info("Getting solr fields");
-        URI uri = UriBuilder.fromPath(config.getSolrUrl())
+        URI uri = UriBuilder.fromPath(getUrl())
                 .path("admin/file")
                 .queryParam("file", "schema.xml")
                 .build();
@@ -81,6 +81,10 @@ public class SolrFields {
             throw new EJBException("Error parsing response from: " + uri, ex);
         }
         processDoc(doc);
+    }
+
+    String getUrl() {
+        return config.getSolrUrl();
     }
 
     /**
