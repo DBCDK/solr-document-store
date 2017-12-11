@@ -31,6 +31,13 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
+            <version>2.8.9</version>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <scope>provided</scope>
@@ -44,6 +51,13 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
         
+        <dependency>
+            <groupId>fish.payara.extras</groupId>
+            <artifactId>payara-micro</artifactId>
+            <version>4.1.152.1</version>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
@@ -133,13 +147,6 @@
                             <silent>true</silent>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.parent.artifactId}-service</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>war</type>
-                                    <destFileName>service.war</destFileName>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.postgresql</groupId>
                                     <artifactId>postgresql</artifactId>
                                     <version>42.1.4</version>
@@ -184,9 +191,7 @@
                             <portNames>
                                 <portName>postgresql.port</portName>
                                 <portName>solr.port</portName>
-                                <portName>glassfish.http.port</portName>
-                                <portName>glassfish.jms.port</portName>
-                                <portName>glassfish.jndi.port</portName>
+                                <portName>glassfish.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -230,7 +235,7 @@
                     <systemPropertyVariables>
                         <postgresql.port>${postgresql.port}</postgresql.port>
                         <solr.port>${solr.port}</solr.port>
-                        <glassfish.port>${glassfish.http.port}</glassfish.port>
+                        <glassfish.port>${glassfish.port}</glassfish.port>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -238,83 +243,6 @@
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.glassfish.embedded</groupId>
-                <artifactId>maven-embedded-glassfish-plugin</artifactId>
-                <version>4.1.1</version>
-                <configuration>
-                    <autoDelete>false</autoDelete>
-                    <configFileReadOnly>false</configFileReadOnly>
-                    <ports>
-                        <http-listener>${glassfish.http.port}</http-listener>
-                    </ports>
-                    <systemProperties>
-                        <property>glassfish.embedded.tmpdir=${project.build.directory}/tmp</property>
-                    </systemProperties>
-                    <glassfishProperties>
-                        <property>embedded-glassfish-config.server.jms-service.jms-host.default_JMS_host.port=${glassfish.jms.port}</property>
-                        <property>embedded-glassfish-config.server.iiop-service.iiop-listener.orb-listener-1.port=${glassfish.jndi.port}</property>
-                    </glassfishProperties>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>42.1.4</version>
-                        <type>jar</type>
-                    </dependency>
-                </dependencies>
-                <!--Start GlassFish-->
-                <executions>
-                    <execution>
-                        <id>start-glassfish</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <configuration>
-                        </configuration>
-                    </execution>
-                    <!-- setup config -->
-                    <execution>
-                        <id>custom-resources</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>admin</goal>
-                        </goals>
-                        <configuration>
-                            <commands>
-                                <!--<command>create-custom-resource -!-restype=java.util.Properties -!-factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory -!-property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://openagency.addi.dk/test_2.31/":solrDocumentStoreUrl="http://localhost:${docstore.port}/solr-doc-store/api/bibliographic":commitWithin=1000 solr-worker</command>
-                                -->
-                                <command>add-library --type common ${project.build.directory}/postgresql.jar</command>
-                                <command>restart-domain</command>
-                                <command>create-jdbc-connection-pool --restype=javax.sql.DataSource --datasourceclassname=org.postgresql.ds.PGSimpleDataSource --property=driverClass=org.postgresql.Driver:url="jdbc:postgresql://localhost:${postgresql.port}/solrdocstore":User=${user.name}:Password="" jdbc/solr-doc-store/pool</command>
-                                <command>create-jdbc-resource --connectionpoolid=jdbc/solr-doc-store/pool jdbc/solr-doc-store</command>
-                            </commands>
-                        </configuration>
-                    </execution>
-                    <!--Deploy workerin GlassFish-->
-                    <execution>
-                        <id>worker-deploy</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                        <configuration>
-                            <app>${project.build.directory}/service.war</app>
-                            <contextRoot>/solr-doc-store</contextRoot>
-                            <name>service</name>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>stop-glassfish</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
                         </goals>
                     </execution>
                 </executions>
