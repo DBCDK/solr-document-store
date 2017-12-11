@@ -44,60 +44,60 @@ public class HoldingsItemBean {
 
         entityManager.merge(hi);
 
-        AgencyItemKey agencyItemKey = new AgencyItemKey(hi.agencyId, hi.bibliographicRecordId);
-        tryToAttachToBibliographicRecord(agencyItemKey);
+        AgencyItemKey holdingsId = new AgencyItemKey(hi.agencyId, hi.bibliographicRecordId);
+        tryToAttachToBibliographicRecord(holdingsId);
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
-    private void tryToAttachToBibliographicRecord(AgencyItemKey itemKey) {
+    private void tryToAttachToBibliographicRecord(AgencyItemKey holdingsId) {
         boolean attached;
-        LibraryType libraryType = libraryConfig.getLibraryType(itemKey.agencyId);
+        LibraryType libraryType = libraryConfig.getLibraryType(holdingsId.agencyId);
 
         switch (libraryType) {
 
             case NonFBS:
-                attachToBibliographicRecord(itemKey, itemKey.agencyId);
+                attachToBibliographicRecord(holdingsId, holdingsId.agencyId);
                 break;
 
             case FBS:
 
-                attachToBibliographicRecord(itemKey, itemKey.agencyId,COMMON_AGENCY);
+                attachToBibliographicRecord(holdingsId, holdingsId.agencyId,COMMON_AGENCY);
                 break;
 
             case FBSSchool:
-                attachToBibliographicRecord(itemKey,itemKey.agencyId,COMMON_AGENCY,SCHOOL_COMMON_AGENCY);
+                attachToBibliographicRecord(holdingsId,holdingsId.agencyId,COMMON_AGENCY,SCHOOL_COMMON_AGENCY);
                 break;
         }
     }
 
-    private void attachToBibliographicRecord(AgencyItemKey itemKey, int ... agencyPriority) {
+    private void attachToBibliographicRecord(AgencyItemKey holdingsId, int ... agencyPriority) {
         boolean attached = false;
 
         for (int i=0; i<agencyPriority.length;i++) {
-            attached = attachIfExists(agencyPriority[i],itemKey);
+            attached = attachIfExists(agencyPriority[i],holdingsId);
             if (attached) return;
         }
     }
 
 
-    private boolean attachIfExists(int agencyId, AgencyItemKey itemKey) {
-        if (bibliographicRecordExists(agencyId,itemKey.bibliographicRecordId)){
-            attachToAgency(agencyId, itemKey);
+    private boolean attachIfExists(int agencyId, AgencyItemKey holdingsId) {
+        if (bibliographicEntityExists(agencyId,holdingsId.bibliographicRecordId)){
+            attachToAgency(agencyId, holdingsId);
             return true;
         }
         return false;
     }
 
-    private boolean bibliographicRecordExists(int agencyId, String bibliographicRecordId) {
+    private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
         AgencyItemKey k = new AgencyItemKey(agencyId, bibliographicRecordId);
-        HoldingsToBibliographicEntity e = entityManager.find(HoldingsToBibliographicEntity.class, k);
+        BibliographicEntity e = entityManager.find(BibliographicEntity.class, k);
         return (e!=null);
     }
 
     private void attachToAgency(int attachToAgency, AgencyItemKey itemKey) {
         if (alreadyAttachedToAgency(attachToAgency, itemKey)) return;
-        saveAttachment(attachToAgency, itemKey);
+        persist(attachToAgency, itemKey);
     }
 
     private boolean alreadyAttachedToAgency(int attachToAgency, AgencyItemKey itemKey) {
@@ -113,7 +113,7 @@ public class HoldingsItemBean {
         return false;
     }
 
-    private void saveAttachment(int attachToAgency, AgencyItemKey itemKey) {
+    private void persist(int attachToAgency, AgencyItemKey itemKey) {
         HoldingsToBibliographicEntity newEntity = new HoldingsToBibliographicEntity();
         newEntity.agencyId = itemKey.agencyId;
         newEntity.bibliographicRecordId = itemKey.bibliographicRecordId;
