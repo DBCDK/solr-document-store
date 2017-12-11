@@ -1,0 +1,13 @@
+{
+    "bibliographicRecordId": "23645564",
+    "agencyId": "710100",
+    "producerVersion": "MyProducer#2",
+    "trackingId": "woot",
+    "indexKeys": [
+        {
+            "rec.bibliographicRecordId": ["23645564"],
+            "holdingsitem.agencyId": ["710100"],
+            "holdingsitem.status": ["OnLoan", "OnOrder"]
+        }
+    ]
+}
