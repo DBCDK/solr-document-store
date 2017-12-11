@@ -20,6 +20,8 @@ package dk.dbc.search.solrdocstore.updater;
 
 import java.util.Properties;
 import javax.annotation.PostConstruct;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.naming.InitialContext;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author DBC {@literal <dbc.dk>}
  */
 @Singleton
+@Lock(LockType.READ)
 @Startup
 public class Config {
 
