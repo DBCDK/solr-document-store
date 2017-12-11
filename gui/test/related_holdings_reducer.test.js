@@ -1,14 +1,6 @@
 import * as actions from '../app/actions/related_holdings';
 import {SELECT_BIB_RECORD,selectBibRecord} from '../app/actions/global';
-import relatedHoldingsReducer from '../app/reducers/related_holdings';
-
-let produceInitialState = () => ({
-    loading: false,
-    relatedHoldings: [],
-    errorMessage: '',
-    selectedBibRecordId: null,
-    selectedBibAgencyId: null
-});
+import relatedHoldingsReducer,{produceInitialState} from '../app/reducers/related_holdings';
 
 describe('Related holdings action unit tests',()=>{
     test('Pull related holding successful action',()=>{
@@ -158,7 +150,7 @@ describe('Reducer negative testing, ignoring invalid actions',()=>{
         let desiredState = produceInitialState();
         desiredState.loading = false;
         desiredState.errorMessage = '';
-        expect(relatedHoldingsReducer(state,invalidAction)).toEqual(desiredState)
+        expect(relatedHoldingsReducer(state,invalidAction)).toEqual(desiredState);
         let invalidAction2 = {
             type: actions.PULL_RELATED_HOLDINGS_FAILED,
             message: new Error(message)
