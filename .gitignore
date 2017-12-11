@@ -27,6 +27,7 @@ hs_err_pid*
 
 # netbeans
 nb-*.xml
+/solr-updater/nbproject/
 
 # targets
 target/
