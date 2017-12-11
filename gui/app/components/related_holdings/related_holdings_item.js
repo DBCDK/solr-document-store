@@ -22,7 +22,7 @@ class RelatedHoldingsItem extends React.PureComponent {
                     <div style={{flex: "1"}}>tracking id: {trackingId}</div>
                     <div style={{flex: "1"}}>commit within: {commitWithin}</div>
                 </div>
-                {relatedHoldingItem.indexKeys.map((e,i) =>
+                {(relatedHoldingItem.indexKeys || []).map((e,i) =>
                     <Manifestation
                         key={i}
                         item={e}/>
