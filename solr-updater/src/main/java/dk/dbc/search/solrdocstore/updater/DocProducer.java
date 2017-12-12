@@ -180,8 +180,11 @@ public class DocProducer {
     private void addRecHoldingsAgencyId(JsonNode indexKeys, JsonNode collection) {
         JsonNode records = find(collection, "holdingsItemRecords");
         for (JsonNode record : records) {
-            String agency = find(record, "agencyId").asText();
-            addField(indexKeys, "rec.holdingsAgencyId", agency);
+            JsonNode holdingsIndexKeys = find(record, "indexKeys");
+            if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
+                String agency = find(record, "agencyId").asText();
+                addField(indexKeys, "rec.holdingsAgencyId", agency);
+            }
         }
     }
 
