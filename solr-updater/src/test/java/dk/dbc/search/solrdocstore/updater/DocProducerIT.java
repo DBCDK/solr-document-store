@@ -100,7 +100,10 @@ public class DocProducerIT {
 
         client = ClientBuilder.newClient();
 
-        config = new Config() {
+        config = new Config("queues=test",
+                            "solrDocStoreUrl=NONE",
+                            "solrUrl=NONE") {
+            // values are not ready at object construnction time
             @Override
             public String getSolrDocStoreUrl() {
                 return solrDocStoreUrl;
@@ -108,9 +111,9 @@ public class DocProducerIT {
 
             @Override
             public String getSolrUrl() {
+                System.out.println("solrUrl = " + solrUrl);
                 return solrUrl;
             }
-
         };
 
         inits.stream().forEach((f) -> {

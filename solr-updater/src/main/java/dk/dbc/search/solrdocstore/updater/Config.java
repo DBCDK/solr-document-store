@@ -39,16 +39,30 @@ import org.slf4j.LoggerFactory;
 public class Config {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
+
     public static final String DATABASE = "jdbc/solr-doc-store";
 
+    final Properties props;
     private String solrUrl;
     private String solrDocStoreUrl;
 
+    public Config() {
+        props = findProperties("solr-doc-store-updater");
+    }
+
+    public Config(String... configs) {
+        this.props = new Properties();
+        for (String config : configs) {
+            String[] kv = config.split("=", 2);
+            props.setProperty(kv[0], kv[1]);
+        }
+        init();
+    }
+
     @PostConstruct
-    public void method() {
-        Properties props = findProperties("solr-doc-store-updater");
-        solrUrl = props.getProperty("corepoSolrUrl", System.getenv("COREPO_SOLR_URL"));
-        solrDocStoreUrl = props.getProperty("solrDocStoreUrl", System.getenv("SOLR_DOC_STORE_URL"));
+    public final void init() {
+        solrUrl = get("solrUrl", "SOLR_URL", null);
+        solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
     }
 
     public String getSolrUrl() {
@@ -68,9 +82,27 @@ public class Config {
                 throw new NamingException("Found " + resourceName + ", but not of type Properties of type: " + loopup.getClass().getTypeName());
             }
         } catch (NamingException ex) {
-            log.error("Exception: {}", ex.getMessage());
+            log.info("Exception: {}", ex.getMessage());
         }
         return new Properties();
     }
 
+    private String get(String propertyName, String envName, String defaultValue) {
+        String value = firstOf(props.getProperty(propertyName),
+                               System.getenv(envName),
+                               defaultValue);
+        if (value == null) {
+            throw new IllegalArgumentException("Neither prop:" + propertyName + " nor env:" + envName + " is set");
+        }
+        return value;
+    }
+
+    private String firstOf(String... strings) {
+        for (String string : strings) {
+            if (string != null) {
+                return string;
+            }
+        }
+        return null;
+    }
 }

@@ -53,12 +53,9 @@ public class SolrFieldsTest {
                 return SolrFieldsTest.class.getClassLoader().getResourceAsStream(schemaXmlLocation);
             }
         };
-        solrFields.config = new Config() {
-            @Override
-            public String getSolrUrl() {
-                return url;
-            }
-        };
+        solrFields.config = new Config("queues=NONE",
+                                       "solrDocStoreUrl=NONE",
+                                       "solrUrl=" + url);
 
         solrFields.init();
 
@@ -76,12 +73,7 @@ public class SolrFieldsTest {
         String solrUrl = "zk://[hosts]/[chroot]/[collection]";
 
         SolrFields solrFields = new SolrFields();
-        solrFields.config = new Config() {
-            @Override
-            public String getSolrUrl() {
-                return solrUrl;
-            }
-        };
+        solrFields.config = new Config("solrUrl=" + solrUrl);
 
         solrFields.init();
 
