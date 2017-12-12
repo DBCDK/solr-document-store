@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class Config {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
+    public static final String DATABASE = "jdbc/solr-doc-store";
 
     private String solrUrl;
     private String solrDocStoreUrl;

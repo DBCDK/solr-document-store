@@ -36,7 +36,7 @@ public class DatabaseMigtator {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigtator.class);
 
-    @Resource(lookup = "jdbc/solr-doc-store")
+    @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
 
     @PostConstruct
