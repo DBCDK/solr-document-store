@@ -28,5 +28,8 @@ hs_err_pid*
 # netbeans
 nb-*.xml
 
+# docker
+src/main/docker/solr-doc-store*.war
+
 # targets
 target/
