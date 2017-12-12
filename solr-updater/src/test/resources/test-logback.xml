@@ -11,6 +11,7 @@
 
     <logger name="dk.dbc" level="DEBUG"/>
     <logger name="org.apache.solr" level="DEBUG"/>
+    <logger name="org.apache.solr.metrics" level="ERROR"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
