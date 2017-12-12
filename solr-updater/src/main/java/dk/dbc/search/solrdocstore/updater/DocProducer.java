@@ -162,7 +162,7 @@ public class DocProducer {
 
         JsonNode indexKeys = find(collection, "bibliographicRecord", "indexKeys");
         setField(indexKeys, "id", id);
-        setField(indexKeys, "t", "u"); // Unit type
+        setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
         addRecHoldingsAgencyId(indexKeys, collection);
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
