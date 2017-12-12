@@ -18,15 +18,14 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
-import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.HashSet;
 import org.glassfish.embeddable.BootstrapProperties;
-import org.glassfish.embeddable.CommandResult;
 import org.glassfish.embeddable.CommandRunner;
 import org.glassfish.embeddable.Deployer;
 import org.glassfish.embeddable.GlassFish;
+import org.glassfish.embeddable.GlassFishException;
 import org.glassfish.embeddable.GlassFishProperties;
 import org.glassfish.embeddable.GlassFishRuntime;
 
@@ -36,36 +35,49 @@ import org.glassfish.embeddable.GlassFishRuntime;
  */
 public class Payara {
 
-    int payaraPort;
-    GlassFish glassfish;
-    CommandRunner runner;
-    PostgresITDataSource pg;
-    String solrDocStoreUrl;
+    static int payaraPort;
+    static GlassFish glassfish;
+    static CommandRunner runner;
+    static HashSet<String> configured = new HashSet<>();
 
-    public Payara(String port, Object... objs) throws Exception {
-        payaraPort = Integer.parseInt(port);
-        BootstrapProperties bootstrap = new BootstrapProperties();
-        GlassFishRuntime runtime = GlassFishRuntime.bootstrap(bootstrap);
-        GlassFishProperties glassfishProperties = new GlassFishProperties();
-        glassfishProperties.setPort("http-listener", payaraPort);
-        glassfish = runtime.newGlassFish(glassfishProperties);
-        glassfish.start();
-        runner = glassfish.getCommandRunner();
-        runner.setTerse(true);
+    private Payara() {
+    }
 
-        Iterator<Object> i = Arrays.asList(objs).iterator();
+    private static boolean should(String id) {
+        if (configured.contains(id)) {
+            return false;
+        }
+        configured.add(id);
+        return true;
+    }
+
+    static Payara getInstance(String port) throws GlassFishException {
+        if (glassfish == null) {
+            payaraPort = Integer.parseInt(port);
+            BootstrapProperties bootstrap = new BootstrapProperties();
+            GlassFishRuntime runtime = GlassFishRuntime.bootstrap(bootstrap);
+            GlassFishProperties glassfishProperties = new GlassFishProperties();
+            glassfishProperties.setPort("http-listener", payaraPort);
+            glassfish = runtime.newGlassFish(glassfishProperties);
+            glassfish.start();
+            runner = glassfish.getCommandRunner();
+            runner.setTerse(true);
+        }
+        return new Payara();
     }
 
     public Payara deploy(String warFile, String contextRoot) throws Exception {
-        Deployer deployer = glassfish.getDeployer();
+        if (should("deploy " + contextRoot)) {
+            Deployer deployer = glassfish.getDeployer();
 
-        File war = new File(warFile);
+            File war = new File(warFile);
 
-        if (!war.exists()) {
-            throw new IllegalStateException("War doesn't exist: " + war.toString());
+            if (!war.exists()) {
+                throw new IllegalStateException("War doesn't exist: " + war.toString());
+            }
+
+            deployer.deploy(war, "--contextroot=" + contextRoot, "--force=true");
         }
-
-        deployer.deploy(war, "--contextroot=" + contextRoot, "--force=true");
         return this;
     }
 
@@ -75,7 +87,8 @@ public class Payara {
     }
 
     public Payara withJar(File file) throws Exception {
-        run("add-library --type common %s", file.getAbsolutePath());
+        String path = file.getAbsolutePath();
+        run("add-library --type common %s", path);
         return this;
     }
 
@@ -101,17 +114,15 @@ public class Payara {
         return this;
     }
 
-    public void stop() throws Exception {
-        glassfish.stop();
-    }
-
-    private CommandResult run(String format, Object... args) {
+    private void run(String format, Object... args) {
         String cmd = String.format(format, args);
         System.out.println("cmd = " + cmd);
-        String[] parts = cmd.split(" ");
-        String first = parts[0];
-        parts = Arrays.copyOfRange(parts, 1, parts.length);
-        return runner.run(first, parts);
+        if (should(cmd)) {
+            String[] parts = cmd.split(" ");
+            String first = parts[0];
+            parts = Arrays.copyOfRange(parts, 1, parts.length);
+            runner.run(first, parts);
+        }
     }
 
 }

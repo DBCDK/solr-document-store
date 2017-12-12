@@ -18,20 +18,13 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,10 +33,6 @@ import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -66,7 +55,6 @@ import static org.junit.Assert.*;
 public class DocProducerIT {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducerIT.class);
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static PostgresITDataSource pg;
     private static DataSource dataSource;
@@ -131,7 +119,7 @@ public class DocProducerIT {
         try {
             payaraPort = System.getProperty("glassfish.port", "18080");
             solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
-            payara = new Payara(payaraPort)
+            payara = Payara.getInstance(payaraPort)
                     .cmd("set-log-level dk.dbc=FINE")
                     .withDataSource("jdbc/solr-doc-store", pg.getUrl())
                     .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
@@ -153,7 +141,6 @@ public class DocProducerIT {
     @AfterClass
     public static void tearDownClass() throws Exception {
         solr.stop();
-        payara.stop();
     }
 
     @Before
@@ -171,7 +158,7 @@ public class DocProducerIT {
     @Test
     public void testInit() throws Exception {
         System.out.println("init");
-        load("test1-part1");
+        Requests.load(solrDocStoreUrl, "test1-part1");
 
         // FAKE relations
         try (Connection connection = dataSource.getConnection() ;
@@ -195,7 +182,7 @@ public class DocProducerIT {
 
         // Merge is no implemented yet, so clear table to load new (deleted) record
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
-        load("test1-part2");
+        Requests.load(solrDocStoreUrl, "test1-part2");
         System.out.println(client.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
 
         deployAndSearch(docProducer, solrClient, 0);
@@ -211,43 +198,5 @@ public class DocProducerIT {
         assertEquals(expected, response1.getResults().getNumFound());
     }
 
-    private void load(String testName) throws IOException {
-        String uuid = UUID.randomUUID().toString();
-        JsonNode rules;
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("ITRequests/load.json")) {
-            rules = OBJECT_MAPPER.readTree(is);
-        }
-        JsonNode test = rules.get(testName);
-        if (test == null) {
-            throw new IllegalStateException("Don't know about test: " + testName);
-        }
-        for (Iterator<Map.Entry<String, JsonNode>> iterator = test.fields() ; iterator.hasNext() ;) {
-            Map.Entry<String, JsonNode> entry = iterator.next();
-            String api = entry.getKey();
-            JsonNode array = entry.getValue();
-            if (!array.isArray()) {
-                throw new IllegalStateException("Value of " + api + " in test: " + testName + " is not an array");
-            }
-            WebTarget target = client.target(solrDocStoreUrl + "/api/" + api);
-            for (JsonNode file : array) {
-                String fileName = file.asText();
-                log.debug("fileName = {}", fileName);
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("ITRequests/" + fileName)) {
-                    JsonNode content = OBJECT_MAPPER.readTree(is);
-                    if (content.isObject()) {
-                        ( (ObjectNode) content ).put("trackingId", uuid);
-                    }
-                    Response resp = target.request(MediaType.APPLICATION_JSON_TYPE)
-                            .buildPost(Entity.entity(content.toString(), MediaType.APPLICATION_JSON))
-                            .invoke();
-                    System.out.println("resp.getStatusInfo() = " + resp.getStatusInfo());
-                    if (resp.getStatus() != 200) {
-                        throw new IllegalArgumentException("Cannot post: ITRequests/" + fileName + ": " + resp.getStatusInfo());
-                    }
-                }
-            }
-
-        }
-    }
 
 }
