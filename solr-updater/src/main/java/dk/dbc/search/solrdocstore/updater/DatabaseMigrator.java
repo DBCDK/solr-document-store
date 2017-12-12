@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @Startup
-public class DatabaseMigtator {
+public class DatabaseMigrator {
 
-    private static final Logger log = LoggerFactory.getLogger(DatabaseMigtator.class);
+    private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
