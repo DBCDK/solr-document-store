@@ -33,7 +33,6 @@ public class DatabaseMigrator {
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
     public static void migrate(DataSource dataSource) {
-        System.err.println("HERE!!!!!!");
         final Flyway flyway = new Flyway();
         flyway.setTable("solr_doc_store_queue_version");
         flyway.setBaselineOnMigrate(true);
