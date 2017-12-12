@@ -33,7 +33,7 @@ public class QueueJob {
 
     private final int agencyId;
     private final String bibliographicRecordId;
-    private final Long commitWithin;
+    private final Integer commitWithin;
 
     public QueueJob(int agencyId, String bibliographicRecordId) {
         this.agencyId = agencyId;
@@ -41,7 +41,7 @@ public class QueueJob {
         this.commitWithin = null;
     }
 
-    public QueueJob(int agencyId, String bibliographicRecordId, Long commitWithin) {
+    public QueueJob(int agencyId, String bibliographicRecordId, Integer commitWithin) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.commitWithin = commitWithin;
@@ -55,7 +55,7 @@ public class QueueJob {
         return bibliographicRecordId;
     }
 
-    public long getCommitwithin() {
+    public Integer getCommitwithin() {
         return commitWithin;
     }
 
@@ -67,7 +67,6 @@ public class QueueJob {
     public String toString() {
         return "QueueJob{" + "agencyId=" + agencyId + ", bibliographicRecordId=" + bibliographicRecordId + ", commitWithin=" + commitWithin + '}';
     }
-
 
     public static final QueueStorageAbstraction<QueueJob> STORAGE_ABSTRACTION = new QueueStorageAbstraction<QueueJob>() {
         private final String[] COLUMNS = "agencyId,bibliographicRecordId,commitWithin".split(",");
@@ -81,7 +80,7 @@ public class QueueJob {
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
             int agencyId = resultSet.getInt(startColumn++);
             String bibliographicRecordId = resultSet.getString(startColumn++);
-            Long commitwithin = resultSet.getLong(startColumn++);
+            Integer commitwithin = resultSet.getInt(startColumn++);
             if (resultSet.wasNull()) {
                 commitwithin = null;
             }
@@ -93,9 +92,9 @@ public class QueueJob {
             stmt.setInt(startColumn++, job.getAgencyId());
             stmt.setString(startColumn++, job.getBibliographicRecordId());
             if (job.hasCommitWithin()) {
-                stmt.setLong(startColumn++, job.getCommitwithin());
+                stmt.setInt(startColumn++, job.getCommitwithin());
             } else {
-                stmt.setNull(startColumn++, BIGINT);
+                stmt.setNull(startColumn++, INTEGER);
             }
         }
     };
