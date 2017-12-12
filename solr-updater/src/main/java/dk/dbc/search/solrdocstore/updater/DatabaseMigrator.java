@@ -41,7 +41,10 @@ public class DatabaseMigrator {
 
     @PostConstruct
     public void migrate() {
-        dk.dbc.search.solrdocstore.queue.DatabaseMigrator.migrate(dataSource);
+        migrate(dataSource);
     }
 
+    static void migrate(DataSource dataSource) {
+        dk.dbc.search.solrdocstore.queue.DatabaseMigrator.migrate(dataSource);
+    }
 }
