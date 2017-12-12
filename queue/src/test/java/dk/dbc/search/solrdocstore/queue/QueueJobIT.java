@@ -75,7 +75,7 @@ public class QueueJobIT {
         System.out.println("store-retrieve");
 
         QueueJob job1 = new QueueJob(888888, "12345678");
-        QueueJob job2 = new QueueJob(888888, "87654321", 1000L);
+        QueueJob job2 = new QueueJob(888888, "87654321", 1000);
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedQueueSupplier<QueueJob> supplier = QUEUE_SUPPLIER.preparedSupplier(connection);
