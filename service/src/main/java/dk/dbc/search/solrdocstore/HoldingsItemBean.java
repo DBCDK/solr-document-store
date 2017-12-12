@@ -17,8 +17,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import static dk.dbc.search.solrdocstore.LibraryConfig.*;
-
 @Stateless
 @Path("holdings")
 public class HoldingsItemBean {
@@ -28,7 +26,7 @@ public class HoldingsItemBean {
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @Inject
-    LibraryConfig libraryConfig;
+    HoldingsToBibliographicBean h2bBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -45,86 +43,8 @@ public class HoldingsItemBean {
         entityManager.merge(hi);
 
         AgencyItemKey holdingsId = new AgencyItemKey(hi.agencyId, hi.bibliographicRecordId);
-        tryToAttachToBibliographicRecord(holdingsId);
+        h2bBean.tryToAttachToBibliographicRecord(holdingsId);
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
-
-    private void tryToAttachToBibliographicRecord(AgencyItemKey holdingsId) {
-        boolean attached;
-        LibraryType libraryType = libraryConfig.getLibraryType(holdingsId.agencyId);
-
-        switch (libraryType) {
-
-            case NonFBS:
-                attachToBibliographicRecord(holdingsId, holdingsId.agencyId);
-                break;
-
-            case FBS:
-
-                attachToBibliographicRecord(holdingsId, holdingsId.agencyId,COMMON_AGENCY);
-                break;
-
-            case FBSSchool:
-                attachToBibliographicRecord(holdingsId,holdingsId.agencyId,COMMON_AGENCY,SCHOOL_COMMON_AGENCY);
-                break;
-        }
-    }
-
-    private void attachToBibliographicRecord(AgencyItemKey holdingsId, int ... agencyPriority) {
-        boolean attached = false;
-
-        for (int i=0; i<agencyPriority.length;i++) {
-            attached = attachIfExists(agencyPriority[i],holdingsId);
-            if (attached) return;
-        }
-    }
-
-
-    private boolean attachIfExists(int agencyId, AgencyItemKey holdingsId) {
-        if (bibliographicEntityExists(agencyId,holdingsId.bibliographicRecordId)){
-            attachToAgency(agencyId, holdingsId);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
-        AgencyItemKey k = new AgencyItemKey(agencyId, bibliographicRecordId);
-        BibliographicEntity e = entityManager.find(BibliographicEntity.class, k);
-        return (e!=null);
-    }
-
-    private void attachToAgency(int attachToAgency, AgencyItemKey itemKey) {
-        if (alreadyAttachedToAgency(attachToAgency, itemKey)) return;
-        persist(attachToAgency, itemKey);
-    }
-
-    private boolean alreadyAttachedToAgency(int attachToAgency, AgencyItemKey itemKey) {
-        HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, itemKey);
-        if (foundEntity!=null){
-            if (foundEntity.bibliographicAgencyId==attachToAgency) {
-                return true;
-            } else {
-                entityManager.remove(foundEntity);
-                addAttachEventQueue(foundEntity.bibliographicAgencyId, foundEntity.bibliographicRecordId);
-            }
-        }
-        return false;
-    }
-
-    private void persist(int attachToAgency, AgencyItemKey itemKey) {
-        HoldingsToBibliographicEntity newEntity = new HoldingsToBibliographicEntity();
-        newEntity.agencyId = itemKey.agencyId;
-        newEntity.bibliographicRecordId = itemKey.bibliographicRecordId;
-        newEntity.bibliographicAgencyId = attachToAgency;
-        entityManager.merge(newEntity);
-        addAttachEventQueue(attachToAgency,itemKey.bibliographicRecordId);
-    }
-
-
-    private void addAttachEventQueue(int bibliographicAgencyId, String bibliographicRecordId) {
-        //TODO: Implement
-    }
-
 }
