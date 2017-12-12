@@ -24,6 +24,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>pg-queue-common</artifactId>
+            <version>${pg-queue.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>pg-queue-consumer</artifactId>
+            <version>${pg-queue.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.9.0</version>
@@ -56,6 +66,12 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
         
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>pg-queue-supplier</artifactId>
+            <version>${pg-queue.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>fish.payara.extras</groupId>
             <artifactId>payara-micro</artifactId>
