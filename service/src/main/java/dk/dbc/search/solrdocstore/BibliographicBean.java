@@ -41,12 +41,12 @@ public class BibliographicBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
-        BibliographicEntity be = jsonbContext.unmarshall(jsonContent, BibliographicEntity.class);
+        BibliographicEntityRequest be = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
         log.info("AddBibliographicKeys called {}:{}", be.agencyId, be.bibliographicRecordId);
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(be.agencyId, be.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
         if (dbbe == null) {
-            entityManager.merge(be);
+            entityManager.merge(be.asBibliographicEntity());
             updateHoldingsToBibliographic(be.agencyId, be.bibliographicRecordId);
         } else {
             throw new IllegalStateException("Missing implementation");
