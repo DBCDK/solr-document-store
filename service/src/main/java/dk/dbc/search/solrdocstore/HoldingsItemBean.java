@@ -32,10 +32,10 @@ public class HoldingsItemBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response addHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
-        HoldingsItemEntity hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntity.class);
+        HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
 
-        entityManager.merge(hi);
+        entityManager.merge(hi.asHoldingsItemEntity());
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
