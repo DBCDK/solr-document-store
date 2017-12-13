@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
@@ -23,6 +24,9 @@ public class HoldingsItemBean {
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
 
     private final JSONBContext jsonbContext = new JSONBContext();
+
+    @Inject
+    HoldingsToBibliographicBean h2bBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
