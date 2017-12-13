@@ -38,8 +38,5 @@
     "webpack": "^3.8.1",
     "webpack-dev-server": "2.x"
   },
-  "jest": {
-    "collectCoverage": true
-  },
   "description": "GUI for the document store"
 }
