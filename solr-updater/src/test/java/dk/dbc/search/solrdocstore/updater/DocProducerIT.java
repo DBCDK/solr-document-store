@@ -158,7 +158,7 @@ public class DocProducerIT {
     @Test
     public void testInit() throws Exception {
         System.out.println("init");
-        Requests.load(solrDocStoreUrl, "test1-part1");
+        Requests.load("test1-part1", solrDocStoreUrl);
 
         // FAKE relations
         try (Connection connection = dataSource.getConnection() ;
@@ -182,7 +182,7 @@ public class DocProducerIT {
 
         // Merge is no implemented yet, so clear table to load new (deleted) record
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
-        Requests.load(solrDocStoreUrl, "test1-part2");
+        Requests.load("test1-part2", solrDocStoreUrl);
         System.out.println(client.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
 
         deployAndSearch(docProducer, solrClient, 0);
