@@ -21,7 +21,6 @@ package dk.dbc.search.solrdocstore.updater;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
-import dk.dbc.pgqueue.consumer.JobMetaData;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -33,19 +32,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.ejb.embeddable.EJBContainer;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -169,7 +164,7 @@ public class WorkerIT {
 
         try (Connection connection = dataSource.getConnection()) {
 
-            Requests.load(solrDocStoreUrl, "test1-part1");
+            Requests.load("test1-part1", solrDocStoreUrl);
 
             try (Statement stmt = connection.createStatement()) {
                 stmt.executeUpdate("DELETE FROM holdingstobibliographic");

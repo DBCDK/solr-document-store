@@ -44,9 +44,9 @@ public class Requests {
     private static final Logger log = LoggerFactory.getLogger(Requests.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final Client client = ClientBuilder.newClient();
+    private static final Client CLIENT = ClientBuilder.newClient();
 
-    static void load(String solrDocStoreUrl, String testName) throws IOException {
+    static void load(String testName, String solrDocStoreUrl) throws IOException {
         String uuid = UUID.randomUUID().toString();
         JsonNode rules;
         try (final InputStream is = Requests.class.getClassLoader().getResourceAsStream("ITRequests/load.json")) {
@@ -63,7 +63,7 @@ public class Requests {
             if (!array.isArray()) {
                 throw new IllegalStateException("Value of " + api + " in test: " + testName + " is not an array");
             }
-            WebTarget target = client.target(solrDocStoreUrl + "/api/" + api);
+            WebTarget target = CLIENT.target(solrDocStoreUrl + "/api/" + api);
             for (JsonNode file : array) {
                 String fileName = file.asText();
                 log.debug("fileName = {}", fileName);
