@@ -19,6 +19,7 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import dk.dbc.search.solrdocstore.updater.Config;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,6 +74,7 @@ public class Status {
     /**
      * Status payload
      */
+    @SuppressFBWarnings(value = {"URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"})
     public static final class StatusResponse {
 
         public boolean ok;

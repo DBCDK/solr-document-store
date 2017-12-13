@@ -23,8 +23,6 @@ import javax.annotation.Resource;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,8 +31,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Startup
 public class DatabaseMigrator {
-
-    private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
