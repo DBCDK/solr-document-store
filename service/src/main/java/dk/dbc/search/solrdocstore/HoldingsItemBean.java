@@ -42,8 +42,7 @@ public class HoldingsItemBean {
 
         entityManager.merge(hi);
 
-        AgencyItemKey holdingsId = new AgencyItemKey(hi.agencyId, hi.bibliographicRecordId);
-        h2bBean.tryToAttachToBibliographicRecord(holdingsId);
+        h2bBean.tryToAttachToBibliographicRecord(hi.agencyId,hi.bibliographicRecordId);
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
