@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import java.util.Arrays;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
@@ -46,7 +47,7 @@ public class Config {
     private String solrUrl;
     private String solrDocStoreUrl;
 
-    private String[] queues;
+    private String queues;
     private String databaseConnectThrottle;
     private String failureThrottle;
     private long emptyQueueSleep;
@@ -73,7 +74,7 @@ public class Config {
     public final void init() {
         solrUrl = get("solrUrl", "SOLR_URL", null);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
-        queues = get("queues", "QUEUES", null).split(",");
+        queues = get("queues", "QUEUES", null);
         databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
         failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
         emptyQueueSleep = Long.max(100L, Long.parseLong(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10000"), 10));
@@ -92,7 +93,7 @@ public class Config {
     }
 
     public String[] getQueues() {
-        return queues;
+        return queues.split(",");
     }
 
     public String getDatabaseConnectThrottle() {

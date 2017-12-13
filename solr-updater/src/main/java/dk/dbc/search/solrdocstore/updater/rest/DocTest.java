@@ -19,7 +19,6 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import dk.dbc.search.solrdocstore.updater.SolrApi;
@@ -49,8 +48,6 @@ import org.slf4j.LoggerFactory;
 @Stateless
 @Path("doctest")
 public class DocTest {
-
-    private static final ObjectMapper O = new ObjectMapper();
 
     private static final Logger log = LoggerFactory.getLogger(DocTest.class);
 
