@@ -65,7 +65,7 @@ pipeline {
                             }
 
                             println("In ${dirName} build ${projectArtifactId} as ${imageName}:$imageLabel")
-                            sh 'rm -f *.war ; cp  ../../../target/*.war .'
+                            sh 'rm -f *.war ; cp  ../../../target/*.war . ; if [ -e prepare.sh ] ; then chmod +x prepare.sh ; ./prepare.sh ; fi'
                             def app = docker.build("$imageName:${imageLabel}".toLowerCase(), '--pull --no-cache .')
 
                             if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
