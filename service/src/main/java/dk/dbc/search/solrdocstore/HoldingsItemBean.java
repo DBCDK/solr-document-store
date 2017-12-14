@@ -37,12 +37,15 @@ public class HoldingsItemBean {
     public Response addHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
-        log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
 
-        entityManager.merge(hi.asHoldingsItemEntity());
-
-        h2bBean.tryToAttachToBibliographicRecord(hi.agencyId,hi.bibliographicRecordId);
+        addHoldingsKeys(hi.asHoldingsItemEntity());
 
         return Response.ok().entity("{ \"ok\": true }").build();
+    }
+
+    public void addHoldingsKeys(HoldingsItemEntity hi){
+        log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
+        entityManager.merge(hi);
+        h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
     }
 }
