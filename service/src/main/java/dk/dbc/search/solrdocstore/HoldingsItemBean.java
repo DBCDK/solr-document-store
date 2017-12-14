@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
@@ -24,6 +25,9 @@ public class HoldingsItemBean {
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
+    @Inject
+    HoldingsToBibliographicBean h2bBean;
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -33,10 +37,15 @@ public class HoldingsItemBean {
     public Response addHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
-        log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
 
-        entityManager.merge(hi.asHoldingsItemEntity());
+        addHoldingsKeys(hi.asHoldingsItemEntity());
 
         return Response.ok().entity("{ \"ok\": true }").build();
+    }
+
+    public void addHoldingsKeys(HoldingsItemEntity hi){
+        log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
+        entityManager.merge(hi);
+        h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
     }
 }
