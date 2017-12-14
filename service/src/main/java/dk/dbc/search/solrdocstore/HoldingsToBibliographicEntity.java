@@ -9,11 +9,10 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "holdingsToBibliographic")
-@IdClass(AgencyItemKey.class)
+@IdClass(HoldingsToBibliographicKey.class)
 public class HoldingsToBibliographicEntity {
     @Id
-    @Column(name = "holdingsAgencyId")
-    public int agencyId;
+    public int holdingsAgencyId;
     @Id
     public String bibliographicRecordId;
     public int bibliographicAgencyId;
@@ -22,7 +21,7 @@ public class HoldingsToBibliographicEntity {
     }
 
     HoldingsToBibliographicEntity(int agencyId, String bibliographicRecordId, int bibliographicAgencyId) {
-        this.agencyId = agencyId;
+        this.holdingsAgencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.bibliographicAgencyId = bibliographicAgencyId;
     }
@@ -32,20 +31,20 @@ public class HoldingsToBibliographicEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HoldingsToBibliographicEntity that = (HoldingsToBibliographicEntity) o;
-        return agencyId == that.agencyId &&
+        return holdingsAgencyId == that.holdingsAgencyId &&
                 bibliographicAgencyId == that.bibliographicAgencyId &&
                 Objects.equals(bibliographicRecordId, that.bibliographicRecordId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agencyId, bibliographicRecordId, bibliographicAgencyId);
+        return Objects.hash(holdingsAgencyId, bibliographicRecordId, bibliographicAgencyId);
     }
 
     @Override
     public String toString() {
         return "HoldingsToBibliographicEntity{" +
-                "agencyId=" + agencyId +
+                "holdingsAgencyId=" + holdingsAgencyId +
                 ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
                 ", bibliographicAgencyId=" + bibliographicAgencyId +
                 '}';
