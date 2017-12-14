@@ -45,7 +45,7 @@ public class DocumentRetrieveBean {
                                   " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
                                   " AND h2b.bibliographicAgencyId = :agencyId" +
                                   " AND h2b.bibliographicRecordId = h.bibliographicRecordId" +
-                                  " AND h2b.agencyId = h.agencyId";
+                                  " AND h2b.holdingsAgencyId = h.agencyId";
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
