@@ -41,6 +41,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -148,7 +149,13 @@ public class DocProducerIT {
     @Before
     public void setUp() throws Exception {
         try {
-            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
+            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "agencylibrarytype");
+            try (Connection connection = dataSource.getConnection() ;
+                 Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300101, 'FBSSchool');");
+                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300102, 'FBSSchool');");
+                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300103, 'FBSSchool');");
+            }
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
@@ -162,25 +169,20 @@ public class DocProducerIT {
         docProducer.solrFields.config = config;
         docProducer.solrFields.init();
         docProducer.init();
-
     }
 
     @Test
+//    @Ignore
     public void loadAndDelete() throws Exception {
         System.out.println("loadAndDelete");
         SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         Requests.load("test1-part1", solrDocStoreUrl);
-        // FAKE relations
-        try (Connection connection = dataSource.getConnection() ;
-             Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("DELETE FROM holdingstobibliographic");
-            stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys;");
-        }
 
         deployAndSearch(docProducer, solrClient, 3);
 
         // Merge is no implemented yet, so clear table to load new (deleted) record
+        //! @todo remove clear, when merge and recalc h2b is done
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part2", solrDocStoreUrl);
 
@@ -193,29 +195,17 @@ public class DocProducerIT {
         SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         Requests.load("test1-part1", solrDocStoreUrl);
-        // FAKE relations
-        try (Connection connection = dataSource.getConnection() ;
-             Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("DELETE FROM holdingstobibliographic");
-            stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys");
-        }
 
         deployAndSearch(docProducer, solrClient, 3);
 
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part3", solrDocStoreUrl);
-        // FAKE relations
-        try (Connection connection = dataSource.getConnection() ;
-             Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("DELETE FROM holdingstobibliographic");
-            stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys");
-        }
 
         deployAndSearch(docProducer, solrClient, 2);
     }
 
     private void deployAndSearch(DocProducer docProducer, SolrClient solrClient, int expected) throws SolrServerException, IOException {
-        docProducer.deploy(300101, "23645564", solrClient, 0);
+        docProducer.deploy(300000, "23645564", solrClient, 0);
         solrClient.commit(true, true);
         QueryResponse response1 = solrClient.query(new SolrQuery("*:*"));
         System.out.println("response = " + response1);
