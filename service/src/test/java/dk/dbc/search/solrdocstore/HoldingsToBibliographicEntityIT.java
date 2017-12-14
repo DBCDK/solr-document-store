@@ -14,7 +14,7 @@ public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationT
 
         env().getPersistenceContext().run( () -> {
             HoldingsToBibliographicEntity h2b=new HoldingsToBibliographicEntity();
-            h2b.agencyId = 300;
+            h2b.holdingsAgencyId = 300;
             h2b.bibliographicRecordId = "4321";
             h2b.bibliographicAgencyId = 200;
             em.persist(h2b);
@@ -27,11 +27,11 @@ public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationT
 
         EntityManager em = env().getEntityManager();
 
-        AgencyItemKey key = new AgencyItemKey().withAgencyId(600).withBibliographicRecordId("600");
+        HoldingsToBibliographicKey key = new HoldingsToBibliographicKey().withHoldingAgencyId(600).withHoldingsBibliographicRecordId("600");
         HoldingsToBibliographicEntity h2b = env().getPersistenceContext()
                 .run(() -> em.find(HoldingsToBibliographicEntity.class, key));
 
-        assertThat( h2b.agencyId, is(600));
+        assertThat( h2b.holdingsAgencyId, is(600));
         assertThat( h2b.bibliographicRecordId, is("600"));
         assertThat( h2b.bibliographicAgencyId, is(100));
     }
