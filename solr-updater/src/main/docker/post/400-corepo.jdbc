@@ -1,0 +1,7 @@
+[jdbc/solr-doc-store/pool]
+postgres
+
+[properties]
+${SOLR_DOC_STORE_DATABASE}
+
+[jdbc/solr-doc-store]

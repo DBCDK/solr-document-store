@@ -1,8 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRulesProxy;
-
-import javax.ejb.Singleton;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 

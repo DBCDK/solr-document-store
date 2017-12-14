@@ -27,9 +27,11 @@ hs_err_pid*
 
 # netbeans
 nb-*.xml
+/solr-updater/nbproject/
 
 # docker
 src/main/docker/solr-doc-store*.war
 
 # targets
 target/
+/queue/nbproject/

@@ -19,12 +19,15 @@
     <properties>
         <flyway.version>4.1.0</flyway.version>
         <dbc-commons.version>1.3-SNAPSHOT</dbc-commons.version>
+        <pg-queue.version>1.0-SNAPSHOT</pg-queue.version>
     </properties>
 
     <modules>
         <module>service</module>
         <module>gui</module>
         <module>corepo-worker</module>
+    <module>solr-updater</module>
+        <module>queue</module>
     </modules>
 
     <groupId>dk.dbc</groupId>
