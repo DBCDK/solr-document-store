@@ -9,6 +9,10 @@ import javax.inject.Inject;
 @Stateless
 public class LibraryConfig {
 
+    public static int COMMON_AGENCY = 870970;
+    public static int SCHOOL_COMMON_AGENCY = 300000;
+
+
     @Inject
     AgencyLibraryTypeBean agencyLibraryTypeBean;
 
