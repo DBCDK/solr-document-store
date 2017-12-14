@@ -94,7 +94,6 @@ public class DocProducer {
         if (!deleted) {
             doc = inputDocument(collection);
         }
-        log.debug("doc = {}", doc);
         String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
         // Deletye by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
