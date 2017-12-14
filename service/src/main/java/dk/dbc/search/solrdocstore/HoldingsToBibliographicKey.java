@@ -7,21 +7,21 @@ public class HoldingsToBibliographicKey implements Serializable {
     private static final long serialVersionUID = -2054293971622143423L;
 
     public int holdingsAgencyId;
-    public String bibliographicRecordId;
+    public String holdingsBibliographicRecordId;
 
     public HoldingsToBibliographicKey() {
     }
 
     public HoldingsToBibliographicKey(int holdingsAgencyId, String bibliographicRecordId) {
         this.holdingsAgencyId = holdingsAgencyId;
-        this.bibliographicRecordId = bibliographicRecordId;
+        this.holdingsBibliographicRecordId = bibliographicRecordId;
     }
     public HoldingsToBibliographicKey withHoldingAgencyId(int agencyId){
         this.holdingsAgencyId = agencyId;
         return this;
     }
     public HoldingsToBibliographicKey withHoldingsBibliographicRecordId(String bibliographicRecordId){
-        this.bibliographicRecordId = bibliographicRecordId;
+        this.holdingsBibliographicRecordId = bibliographicRecordId;
         return this;
     }
 
@@ -31,12 +31,12 @@ public class HoldingsToBibliographicKey implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         HoldingsToBibliographicKey that = (HoldingsToBibliographicKey) o;
         return holdingsAgencyId == that.holdingsAgencyId &&
-                Objects.equals(bibliographicRecordId, that.bibliographicRecordId);
+                Objects.equals(holdingsBibliographicRecordId, that.holdingsBibliographicRecordId);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(holdingsAgencyId, bibliographicRecordId);
+        return Objects.hash(holdingsAgencyId, holdingsBibliographicRecordId);
     }
 }

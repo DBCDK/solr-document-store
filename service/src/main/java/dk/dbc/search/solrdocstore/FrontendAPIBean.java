@@ -28,7 +28,7 @@ public class FrontendAPIBean {
 
     /**
      * Returns a json object with a result field, which is a list of json BibliographicEntity that matches
-     * bibliographicRecordId with the argument.
+     * holdingsBibliographicRecordId with the argument.
      * @param bibliographicRecordId path parameter, expects URI encoding
      * @return Response
      */
