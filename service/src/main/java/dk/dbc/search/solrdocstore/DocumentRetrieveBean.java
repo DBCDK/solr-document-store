@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import java.io.FileNotFoundException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -56,10 +57,17 @@ public class DocumentRetrieveBean {
     public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
+        DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, bibliographicRecordId);
+        if (response == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
+        }
+        return Response.ok(response).build();
+    }
 
+    public DocumentRetrieveResponse getDocumentWithHoldingsitems(Integer agencyId, String bibliographicRecordId) throws Exception {
         BibliographicEntity biblEntity = entityManager.find(BibliographicEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
         if (biblEntity == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
+            return null;
         }
 
         DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
@@ -70,7 +78,6 @@ public class DocumentRetrieveBean {
             query.setParameter("agencyId", agencyId);
             response.holdingsItemRecords = query.getResultList();
         }
-
-        return Response.ok(response).build();
+        return response;
     }
 }
