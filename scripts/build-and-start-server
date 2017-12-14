@@ -1,4 +1,4 @@
-#!env sh
+#!/bin/bash
 
 
 #docker run -ti docker.dbc.dk/payara-micro /bin/bash
