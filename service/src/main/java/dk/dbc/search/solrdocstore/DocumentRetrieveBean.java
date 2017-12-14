@@ -45,7 +45,7 @@ public class DocumentRetrieveBean {
                                   " INNER JOIN HoldingsItemEntity h" +
                                   " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
                                   " AND h2b.bibliographicAgencyId = :agencyId" +
-                                  " AND h2b.bibliographicRecordId = h.bibliographicRecordId" +
+                                  " AND h2b.holdingsBibliographicRecordId = h.bibliographicRecordId" +
                                   " AND h2b.holdingsAgencyId = h.agencyId";
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
