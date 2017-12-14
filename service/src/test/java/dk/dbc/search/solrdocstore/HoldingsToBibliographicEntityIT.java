@@ -13,10 +13,11 @@ public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationT
         EntityManager em=env().getEntityManager();
 
         env().getPersistenceContext().run( () -> {
-            HoldingsToBibliographicEntity h2b=new HoldingsToBibliographicEntity();
-            h2b.holdingsAgencyId = 300;
-            h2b.bibliographicRecordId = "4321";
-            h2b.bibliographicAgencyId = 200;
+            HoldingsToBibliographicEntity h2b=new HoldingsToBibliographicEntity(
+                    300,
+                    "4321",
+                    200
+            );
             em.persist(h2b);
         });
     }
