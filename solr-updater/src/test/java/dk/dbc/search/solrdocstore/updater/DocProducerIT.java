@@ -70,6 +70,7 @@ public class DocProducerIT {
     private static Client client;
 
     private static Config config;
+    private DocProducer docProducer;
 
     @ClassRule
     public static final TemporaryFolder tempSolr = new TemporaryFolder();
@@ -94,6 +95,7 @@ public class DocProducerIT {
             // values are not ready at object construnction time
             @Override
             public String getSolrDocStoreUrl() {
+                System.out.println("solrDocStoreUrl = " + solrDocStoreUrl);
                 return solrDocStoreUrl;
             }
 
@@ -150,44 +152,66 @@ public class DocProducerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
+        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
+        solrClient.deleteByQuery("*:*");
+        solrClient.commit();
+
+        docProducer = new DocProducer();
+        docProducer.config = config;
+        docProducer.solrFields = new SolrFields();
+        docProducer.solrFields.config = config;
+        docProducer.solrFields.init();
+        docProducer.init();
+
     }
 
-    /*
-     * Test of init method, of class DocProducer.
-     */
     @Test
-    public void testInit() throws Exception {
-        System.out.println("init");
-        Requests.load("test1-part1", solrDocStoreUrl);
+    public void loadAndDelete() throws Exception {
+        System.out.println("loadAndDelete");
+        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
+        Requests.load("test1-part1", solrDocStoreUrl);
         // FAKE relations
         try (Connection connection = dataSource.getConnection() ;
              Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("DELETE FROM holdingstobibliographic");
             stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys;");
         }
-        System.out.println(client.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
-
-        DocProducer docProducer = new DocProducer();
-        docProducer.config = config;
-        docProducer.solrFields = new SolrFields();
-        docProducer.solrFields.config = config;
-        docProducer.solrFields.init();
-
-        docProducer.init();
-
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         deployAndSearch(docProducer, solrClient, 3);
 
         // Merge is no implemented yet, so clear table to load new (deleted) record
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part2", solrDocStoreUrl);
-        System.out.println(client.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
 
         deployAndSearch(docProducer, solrClient, 0);
+    }
 
-        System.out.println("OK");
+    @Test
+    public void loadAndFewerHolding() throws Exception {
+        System.out.println("loadAndFewerHolding");
+        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
+
+        Requests.load("test1-part1", solrDocStoreUrl);
+        // FAKE relations
+        try (Connection connection = dataSource.getConnection() ;
+             Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate("DELETE FROM holdingstobibliographic");
+            stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys");
+        }
+
+        deployAndSearch(docProducer, solrClient, 3);
+
+        pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
+        Requests.load("test1-part3", solrDocStoreUrl);
+        // FAKE relations
+        try (Connection connection = dataSource.getConnection() ;
+             Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate("DELETE FROM holdingstobibliographic");
+            stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys");
+        }
+
+        deployAndSearch(docProducer, solrClient, 2);
     }
 
     private void deployAndSearch(DocProducer docProducer, SolrClient solrClient, int expected) throws SolrServerException, IOException {
@@ -197,6 +221,5 @@ public class DocProducerIT {
         System.out.println("response = " + response1);
         assertEquals(expected, response1.getResults().getNumFound());
     }
-
 
 }

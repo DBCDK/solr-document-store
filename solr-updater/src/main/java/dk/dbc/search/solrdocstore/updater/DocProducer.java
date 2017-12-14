@@ -76,7 +76,7 @@ public class DocProducer {
     /**
      * Retrieve Document and process it
      *
-     * Send to solr as add or delete
+     * Delete from solr, of not deleted then add too
      *
      * @param agencyId              agency of document
      * @param bibliographicRecordId record id of document
@@ -90,18 +90,21 @@ public class DocProducer {
         JsonNode collection = get(agencyId, bibliographicRecordId);
         boolean deleted = isDeleted(collection);
 
-        if (deleted) {
-            String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
-            // Deletye by query:
-            // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
-            String query = "_root_:" + ClientUtils.escapeQueryChars(id);
-            if (commitWithin == null || commitWithin <= 0) {
-                client.deleteByQuery(query);
-            } else {
-                client.deleteByQuery(query, commitWithin);
-            }
+        SolrInputDocument doc = null;
+        if (!deleted) {
+            doc = inputDocument(collection);
+        }
+        log.debug("doc = {}", doc);
+        String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
+        // Deletye by query:
+        // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
+        String query = "_root_:" + ClientUtils.escapeQueryChars(id);
+        if (commitWithin == null || commitWithin <= 0) {
+            client.deleteByQuery(query);
         } else {
-            SolrInputDocument doc = inputDocument(collection);
+            client.deleteByQuery(query, commitWithin);
+        }
+        if (doc != null) {
             if (commitWithin == null || commitWithin <= 0) {
                 client.add(doc);
             } else {
