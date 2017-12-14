@@ -134,10 +134,11 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
     private void createH2BRecord(int agencyId, String bibliographicRecordId, int bibliographicAgencyId) {
         env().getPersistenceContext().run( () -> {
-           HoldingsToBibliographicEntity e = new HoldingsToBibliographicEntity();
-           e.holdingsAgencyId = agencyId;
-           e.bibliographicRecordId = bibliographicRecordId;
-           e.bibliographicAgencyId = bibliographicAgencyId;
+           HoldingsToBibliographicEntity e = new HoldingsToBibliographicEntity(
+                   agencyId,
+                   bibliographicRecordId,
+                   bibliographicAgencyId
+           );
            em.merge(e);
         });
     }
