@@ -44,10 +44,11 @@ CREATE TABLE holdingsItemsSolrKeys (
 
 CREATE TABLE holdingsToBibliographic (
     holdingsAgencyId NUMERIC(6) NOT NULL,
-    bibliographicRecordId TEXT NOT NULL,
+    holdingsBibliographicRecordId TEXT NOT NULL,
     bibliographicAgencyId NUMERIC(6) NOT NULL,
+    bibliographicRecordId TEXT NOT NULL,
 
-    PRIMARY KEY (holdingsAgencyId, bibliographicRecordId)
+    PRIMARY KEY (holdingsAgencyId, holdingsBibliographicRecordId)
 );
 
 CREATE INDEX holdingsToBibliographic_Bibliographic

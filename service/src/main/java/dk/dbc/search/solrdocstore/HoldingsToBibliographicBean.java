@@ -91,11 +91,11 @@ public class HoldingsToBibliographicBean {
     }
 
     private HoldingsToBibliographicEntity createH2B(int attachToAgency, HoldingsToBibliographicKey itemKey) {
-        HoldingsToBibliographicEntity newEntity = new HoldingsToBibliographicEntity();
-        newEntity.holdingsAgencyId = itemKey.holdingsAgencyId;
-        newEntity.bibliographicRecordId = itemKey.bibliographicRecordId;
-        newEntity.bibliographicAgencyId = attachToAgency;
-        return newEntity;
+        return new HoldingsToBibliographicEntity(
+                itemKey.holdingsAgencyId,
+                itemKey.holdingsBibliographicRecordId,
+                attachToAgency
+        );
     }
 
     private void addAttachEventQueue(int bibliographicAgencyId, String bibliographicRecordId) {
