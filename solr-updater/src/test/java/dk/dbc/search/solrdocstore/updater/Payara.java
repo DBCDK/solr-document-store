@@ -121,7 +121,7 @@ public class Payara {
             String[] parts = cmd.split(" ");
             String first = parts[0];
             parts = Arrays.copyOfRange(parts, 1, parts.length);
-            runner.run(first, parts);
+            System.out.println(runner.run(first, parts).getOutput());
         }
     }
 

@@ -56,6 +56,7 @@ public class Requests {
         if (test == null) {
             throw new IllegalStateException("Don't know about test: " + testName);
         }
+        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
         for (Iterator<Map.Entry<String, JsonNode>> iterator = test.fields() ; iterator.hasNext() ;) {
             Map.Entry<String, JsonNode> entry = iterator.next();
             String api = entry.getKey();
@@ -80,6 +81,7 @@ public class Requests {
                 }
             }
         }
+        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
     }
 
 }

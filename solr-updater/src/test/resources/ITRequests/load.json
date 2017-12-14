@@ -13,5 +13,13 @@
         "bibliographic": [
             "b-300101-23645564_deleted.json"
         ]
+    },
+    "test1-part3": {
+        "bibliographic": [
+            "b-300101-23645564.json"
+        ],
+        "holdings": [
+            "h-300101-23645564.json"
+        ]
     }
 }

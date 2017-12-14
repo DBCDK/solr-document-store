@@ -71,6 +71,7 @@ public class WorkerIT {
     private static Client client;
 
     private static Config config;
+    private Worker worker;
 
     @ClassRule
     public static final TemporaryFolder tempSolr = new TemporaryFolder();
@@ -156,39 +157,38 @@ public class WorkerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
+        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
+        solrClient.deleteByQuery("*:*");
+        solrClient.commit();
+
+        worker = new Worker();
+        worker.config = config;
+        worker.dataSource = dataSource;
+        worker.docProducer = new DocProducer();
+        worker.docProducer.config = config;
+        worker.docProducer.solrFields = new SolrFields();
+        worker.docProducer.solrFields.config = config;
+        worker.docProducer.solrFields.init();
+        worker.docProducer.init();
+        worker.init();
+
     }
 
     @Test(timeout = 5000L)
-    public void testWork() throws Exception {
+    public void work() throws Exception {
         System.out.println("work");
+        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         try (Connection connection = dataSource.getConnection()) {
 
             Requests.load("test1-part1", solrDocStoreUrl);
-
             try (Statement stmt = connection.createStatement()) {
                 stmt.executeUpdate("DELETE FROM holdingstobibliographic");
                 stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys;");
             }
 
-            System.out.println(client.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
-            SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
-            solrClient.deleteByQuery("*:*");
-            solrClient.commit(true, true);
-
             long count = solrClient.query(new SolrQuery("*:*")).getResults().getNumFound();
             assertEquals("After delete sorl document count: ", 0, count);
-
-            Worker worker = new Worker();
-            worker.config = config;
-            worker.dataSource = dataSource;
-            worker.docProducer = new DocProducer();
-            worker.docProducer.config = config;
-            worker.docProducer.solrFields = new SolrFields();
-            worker.docProducer.solrFields.config = config;
-            worker.docProducer.solrFields.init();
-            worker.docProducer.init();
-            worker.init();
 
             PreparedQueueSupplier supplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
                     .preparedSupplier(connection);
