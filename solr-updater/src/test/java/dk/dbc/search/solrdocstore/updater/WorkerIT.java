@@ -41,6 +41,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -153,7 +154,13 @@ public class WorkerIT {
     @Before
     public void setUp() throws Exception {
         try {
-            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
+            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "agencylibrarytype");
+            try (Connection connection = dataSource.getConnection() ;
+                 Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300101, 'FBSSchool');");
+                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300102, 'FBSSchool');");
+                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300103, 'FBSSchool');");
+            }
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
@@ -171,21 +178,16 @@ public class WorkerIT {
         worker.docProducer.solrFields.init();
         worker.docProducer.init();
         worker.init();
-
     }
 
     @Test(timeout = 5000L)
-    public void work() throws Exception {
-        System.out.println("work");
+    public void testQueueWorkerConsumes() throws Exception {
+        System.out.println("testQueueWorkerConsumes");
         SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         try (Connection connection = dataSource.getConnection()) {
 
             Requests.load("test1-part1", solrDocStoreUrl);
-            try (Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("DELETE FROM holdingstobibliographic");
-                stmt.executeUpdate("INSERT INTO holdingstobibliographic (holdingsagencyid, bibliographicrecordid, bibliographicagencyid) SELECT agencyid, bibliographicrecordid, 300101 FROM holdingsitemssolrkeys;");
-            }
 
             long count = solrClient.query(new SolrQuery("*:*")).getResults().getNumFound();
             assertEquals("After delete sorl document count: ", 0, count);
@@ -193,7 +195,7 @@ public class WorkerIT {
             PreparedQueueSupplier supplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
                     .preparedSupplier(connection);
 
-            supplier.enqueue("test", new QueueJob(300101, "23645564"));
+            supplier.enqueue("test", new QueueJob(300000, "23645564"));
 
             int maxRuns = 2500 / 50;
             while (solrClient.query(new SolrQuery("*:*")).getResults().getNumFound() == 0) {
