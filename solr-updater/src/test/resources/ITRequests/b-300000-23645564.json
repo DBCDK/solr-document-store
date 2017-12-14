@@ -1,0 +1,15 @@
+{
+    "bibliographicRecordId": "23645564",
+    "agencyId": "300000",
+    "deleted": false,
+    "unit": "unit:893270",
+    "work": "work:754877",
+    "producerVersion": "MyProducer#1",
+    "trackingId": "woot",
+    "indexKeys": {
+        "rec.bibliographicRecordId": ["23645564"],
+        "dkcclterm.po": ["Haruki", "Murakami"],
+        "display.title": ["My Title 1"]
+    }
+}
+

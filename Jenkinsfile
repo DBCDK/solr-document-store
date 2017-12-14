@@ -49,12 +49,12 @@ pipeline {
 
                         dir(dirName) {
                             modulePom = readMavenPom file: '../../../pom.xml'
-                            def projectName = modulePom.getName()
-                            if( !projectName ) {
-                                throw new hudson.AbortException("Unable to find module Name in ${dirName}/../../../pom.xml remember to add a <name> element")
+                            def projectArtifactId = modulePom.getArtifactId()
+                            if( !projectArtifactId ) {
+                                throw new hudson.AbortException("Unable to find module ArtifactId in ${dirName}/../../../pom.xml remember to add a <ArtifactId> element")
                             }
 
-                            def imageName = "${projectName}-${version}".toLowerCase()
+                            def imageName = "${projectArtifactId}-${version}".toLowerCase()
                             def imageLabel = env.BUILD_NUMBER
                             if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
                                 println("Using branch_name ${BRANCH_NAME}")
@@ -64,8 +64,8 @@ pipeline {
                                 println(" Using Master branch ${BRANCH_NAME}")
                             }
 
-                            println("In ${dirName} build ${projectName} as ${imageName}:$imageLabel")
-                            sh 'rm -f *.war ; cp  ../../../target/*.war . ; if [ -e prepare.sh ] ; then chmod +x prepare.sh ; ./prepare.sh ; fi '
+                            println("In ${dirName} build ${projectArtifactId} as ${imageName}:$imageLabel")
+                            sh 'rm -f *.war ; cp  ../../../target/*.war . ; if [ -e prepare.sh ] ; then chmod +x prepare.sh ; ./prepare.sh ; fi'
                             def app = docker.build("$imageName:${imageLabel}".toLowerCase(), '--pull --no-cache .')
 
                             if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {

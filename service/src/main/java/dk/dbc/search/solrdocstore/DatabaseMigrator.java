@@ -30,6 +30,7 @@ public class DatabaseMigrator {
             LOGGER.info("db task {} : {} from file '{}'", i.getVersion(), i.getDescription(), i.getScript());
         }
         flyway.migrate();
+        dk.dbc.search.solrdocstore.queue.DatabaseMigrator.migrate(dataSource);
     }
 
     public DatabaseMigrator() {
