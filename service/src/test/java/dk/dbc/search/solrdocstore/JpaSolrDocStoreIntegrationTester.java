@@ -25,7 +25,8 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
             statement.executeUpdate("DELETE FROM holdingsToBibliographic");
             statement.executeUpdate("DELETE FROM holdingsItemssolrkeys");
             statement.executeUpdate("DELETE FROM bibliographicToBibliographic");
-            statement.executeUpdate("delete from bibliographicSolrKeys");
+            statement.executeUpdate("DELETE FROM bibliographicSolrKeys");
+            statement.executeUpdate("DELETE FROM agencylibrarytype");
         }
     }
 
