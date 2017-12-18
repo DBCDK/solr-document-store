@@ -11,9 +11,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
-
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Stateless
 @Startup
@@ -26,31 +28,54 @@ public class Config {
     @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-service");
-        oaURL = props.getProperty("openAgencyUrl", System.getenv("OPEN_AGENCY_URL"));
-        if (oaURL==null){
-            throw new EJBException("No URL found for Open Agency. Please provide env:OPEN_AGENCY_URL or property:openAgencyURL");
-        }
+        oaURL = getValue(props, "openAgencyUrl", "OPEN_AGENCY_URL", null, "No URL found for Open Agency");
     }
 
     public String getOaURL() {
         return oaURL;
     }
 
+    private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
+        String value = props.getProperty(propertyName);
+        if (value == null) {
+            value = System.getenv(envName);
+        }
+        if (value == null) {
+            value = defaultValue;
+        }
+        if (value == null) {
+            throw new EJBException(error + ". " +
+                                   "Please provide env:" + envName +
+                                   " or property:" + propertyName);
+        }
+        return value;
+    }
+
+    private static <T> T getValue(Properties props, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
+        return mapper.apply(getValue(props, propertyName, envName, defaultValue, error));
+    }
+
+    private static List<String> asStringList(String str) {
+        return Arrays.stream(str.split("[\\s,]+"))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+    }
+
     private Properties findProperties(String resourceName) {
         try {
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(resourceName + ".properties");
-            if (resource!=null){
+            if (resource != null) {
                 Properties fromFile = new Properties();
                 try {
                     fromFile.load(resource);
                     return fromFile;
-                } catch (IOException e){
-                    throw new EJBException("Property file" + resourceName + ".properties exists. But I can't load it?",e);
+                } catch (IOException e) {
+                    throw new EJBException("Property file" + resourceName + ".properties exists. But I can't load it?", e);
                 }
             }
             Object lookup = InitialContext.doLookup(resourceName);
             if (lookup instanceof Properties) {
-                return (Properties) lookup;
+                return (Properties)lookup;
             } else {
                 throw new NamingException("Found " + resourceName + ", but not of type Properties of type: " + lookup.getClass().getTypeName());
             }
@@ -59,6 +84,4 @@ public class Config {
         }
         return new Properties();
     }
-
 }
-
