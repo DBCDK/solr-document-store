@@ -1,11 +1,13 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.commons.jsonb.JSONBContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.Response;
 import java.util.*;
 
 
@@ -14,6 +16,7 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
     int[] holdingAgencies = { 133, 134, 135};
 
     EntityManager em ;
+    JSONBContext jsonbContext = new JSONBContext();
 
     FrontendAPIBean bean;
 
@@ -26,9 +29,9 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
 
         // Setup records
         env().getPersistenceContext().run( () -> {
-            createBib(commonAgency, "ABC", holdingAgencies);
-            createBib(commonAgency,"XYZ",holdingAgencies);
-
+            createBibAndHoldings(commonAgency, "ABC", holdingAgencies);
+            createBibAndHoldings(commonAgency,"XYZ",holdingAgencies);
+            createBibliographicEntity(4711,"XYZ");
         });
 
     }
@@ -43,10 +46,17 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void testGetBibliographicKeys(){
+        String bibliographicRecordId = "XYZ";
+        Response json = bean.getBibliographicKeysJSON(bibliographicRecordId);
+        FrontendReturnListType<BibliographicEntity> frontendReturnListType =
+                (FrontendReturnListType<BibliographicEntity>) json.getEntity();
+        Assert.assertEquals(2, frontendReturnListType.result.size());
 
+
+        return;
     }
 
-    private BibliographicEntity createBib(
+    private BibliographicEntity createBibAndHoldings(
             int agencyId,
             String bibliographicRecordId,
             @NotNull int ... agencies){
