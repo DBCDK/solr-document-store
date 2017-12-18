@@ -24,15 +24,21 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private String oaURL;
+    private List<String> manifestationQueues;
 
     @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-service");
         oaURL = getValue(props, "openAgencyUrl", "OPEN_AGENCY_URL", null, "No URL found for Open Agency");
+        manifestationQueues = getValue(props, "manifestationQueues", "MANIFESTATION_QUEUES", "", "No URL found for Open Agency", Config::asStringList);
     }
 
     public String getOaURL() {
         return oaURL;
+    }
+
+    public List<String> getManifestationQueues() {
+        return manifestationQueues;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
