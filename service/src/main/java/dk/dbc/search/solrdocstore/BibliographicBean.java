@@ -1,10 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.HashSet;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -19,9 +17,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.HashSet;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 @Stateless
 @Path("bibliographic")
 public class BibliographicBean {
