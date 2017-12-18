@@ -1,6 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
-import javax.persistence.Column;
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -10,7 +10,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "holdingsToBibliographic")
 @IdClass(HoldingsToBibliographicKey.class)
-public class HoldingsToBibliographicEntity {
+public class HoldingsToBibliographicEntity implements Serializable {
+
+    private static final long serialVersionUID = -6441410794836406593L;
+
     @Id
     public int holdingsAgencyId;
     @Id
