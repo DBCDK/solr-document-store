@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore.openagency.libraryrules;
+package dk.dbc.search.solrdocstore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +17,9 @@ import java.util.Properties;
 
 @Stateless
 @Startup
-public class OpenAgencyConfig {
+public class Config {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenAgencyConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private String oaURL;
 
