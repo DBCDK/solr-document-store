@@ -14,7 +14,7 @@ export default {
             .then(parse);
     },
     pullRelatedHoldings(bibliographicRecordId,bibliographicAgencyId){
-        return fetch('api/getRelatedHoldings/'+encodeURIComponent(bibliographicRecordId)+'&'+bibliographicAgencyId)
+        return fetch('api/getRelatedHoldings/'+encodeURIComponent(bibliographicRecordId)+'/'+bibliographicAgencyId)
             .then(parse)
     }
 }
