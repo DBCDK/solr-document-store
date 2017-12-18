@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -33,7 +34,7 @@ public class FrontendAPIBean {
     @GET
     @Path("getBibliographicRecord/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getBibliographicKeys(@PathParam("bibliographicRecordId") String bibliographicRecordId) {
+    public Response getBibliographicKeysJSON(@PathParam("bibliographicRecordId") String bibliographicRecordId) {
         log.info("Requesting bibliographic record id: {}", bibliographicRecordId);
 
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
@@ -50,22 +51,30 @@ public class FrontendAPIBean {
      * @return Response
      */
     @GET
-    @Path("getRelatedHoldings/{bibliographicRecordId}&{bibliographicAgencyId}")
+    @Path("getRelatedHoldings/{bibliographicRecordId}/{bibliographicAgencyId}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getRelatedHoldings(@PathParam("bibliographicRecordId") String bibliographicRecordId,
+    public Response getRelatedHoldingsJSON(@PathParam("bibliographicRecordId") String bibliographicRecordId,
                                        @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
         log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",
                 bibliographicRecordId,bibliographicAgencyId);
-        TypedQuery<HoldingsItemEntity> query = entityManager.createQuery("SELECT h " +
-                "FROM HoldingsItemEntity h " +
-                "WHERE h.agencyId IN (" +
-                "SELECT h2b.agencyId " +
-                "FROM HoldingsToBibliographicEntity h2b " +
-                "WHERE h2b.bibliographicRecordId = :bibId AND h2b.bibliographicAgencyId = :agId)",
-                HoldingsItemEntity.class);
-        query.setParameter("bibId",bibliographicRecordId);
-        query.setParameter("agId",bibliographicAgencyId);
-        List<HoldingsItemEntity> res = query.getResultList();
+        List<HoldingsItemEntity> res = getRelatedHoldings(bibliographicRecordId, bibliographicAgencyId);
         return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
+    }
+
+    public List<HoldingsItemEntity>  getRelatedHoldings( String bibliographicRecordId, int bibliographicAgencyId){
+
+        Query query = entityManager.createNativeQuery(
+                "select * " +
+                        "from holdingsitemssolrkeys  " +
+                        "where (agencyid,bibliographicrecordid) " +
+                        "IN ( select holdingsagencyid,holdingsbibliographicrecordid " +
+                                "FROM holdingstobibliographic h2b " +
+                                "where h2b.bibliographicagencyid = ? " +
+                                "and h2b.bibliographicrecordid = ?)",
+                HoldingsItemEntity.class);
+        query.setParameter(1,bibliographicAgencyId);
+        query.setParameter(2,bibliographicRecordId);
+        return query.getResultList();
+
     }
 }
