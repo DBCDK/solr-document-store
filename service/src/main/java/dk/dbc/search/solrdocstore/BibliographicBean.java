@@ -107,10 +107,9 @@ public class BibliographicBean {
     }
 
     private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
-        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity();
-        h2b.bibliographicRecordId = recordId;
-        h2b.holdingsAgencyId = holdingsAgency;
-        h2b.bibliographicAgencyId = agency;
+        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
+                holdingsAgency, recordId,agency
+        );
         entityManager.merge(h2b);
     }
 
