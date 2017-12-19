@@ -152,6 +152,7 @@
                         <configuration>
                             <portNames>
                                 <portName>glassfish.http.port</portName>
+                                <portName>glassfish.https.port</portName>
                                 <portName>glassfish.jms.port</portName>
                                 <portName>glassfish.jndi.port</portName>
                                 <portName>corepo.port</portName>
@@ -293,6 +294,7 @@
                     <autoDelete>false</autoDelete>
                     <configFileReadOnly>false</configFileReadOnly>
                     <ports>
+                        <https-listener>${glassfish.https.port}</https-listener>
                         <http-listener>${glassfish.http.port}</http-listener>
                     </ports>
                     <systemProperties>
