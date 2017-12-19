@@ -154,7 +154,10 @@
                                 <portName>glassfish.http.port</portName>
                                 <portName>glassfish.https.port</portName>
                                 <portName>glassfish.jms.port</portName>
-                                <portName>glassfish.jndi.port</portName>
+                                <portName>glassfish.jndi1.port</portName>
+                                <portName>glassfish.jndi2.port</portName>
+                                <portName>glassfish.jndi3.port</portName>
+                                <portName>glassfish.jmx.port</portName>
                                 <portName>corepo.port</portName>
                                 <portName>docstore.port</portName>
                             </portNames>
@@ -302,7 +305,10 @@
                     </systemProperties>
                     <glassfishProperties>
                         <property>embedded-glassfish-config.server.jms-service.jms-host.default_JMS_host.port=${glassfish.jms.port}</property>
-                        <property>embedded-glassfish-config.server.iiop-service.iiop-listener.orb-listener-1.port=${glassfish.jndi.port}</property>
+                        <property>embedded-glassfish-config.server.iiop-service.iiop-listener.orb-listener-1.port=${glassfish.jndi1.port}</property>
+                        <property>embedded-glassfish-config.server.iiop-service.iiop-listener.SSL.port=${glassfish.jndi2.port}</property>
+                        <property>embedded-glassfish-config.server.iiop-service.iiop-listener.SSL_MUTUALAUTH.port=${glassfish.jndi3.port}</property>
+                        <property>embedded-glassfish-config.server.admin-service.jmx-connector.system.port=${glassfish.jmx.port}</property>
                     </glassfishProperties>
                 </configuration>
                 <!--Start GlassFish-->
