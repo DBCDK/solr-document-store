@@ -34,16 +34,16 @@ public class HoldingsItemBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public Response addHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
+    public Response setHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
 
-        addHoldingsKeys(hi.asHoldingsItemEntity());
+        setHoldingsKeys(hi.asHoldingsItemEntity());
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
-    public void addHoldingsKeys(HoldingsItemEntity hi){
+    public void setHoldingsKeys(HoldingsItemEntity hi){
         log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
         entityManager.merge(hi);
         h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
