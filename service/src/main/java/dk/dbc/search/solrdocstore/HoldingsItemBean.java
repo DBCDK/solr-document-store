@@ -8,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 @Stateless
 @Path("holdings")
@@ -48,4 +50,22 @@ public class HoldingsItemBean {
         entityManager.merge(hi);
         h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
     }
+
+    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId){
+
+        Query query = entityManager.createNativeQuery(
+                "select * " +
+                        "from holdingsitemssolrkeys  " +
+                        "where (agencyid,bibliographicrecordid) " +
+                        "IN ( select holdingsagencyid,holdingsbibliographicrecordid " +
+                        "FROM holdingstobibliographic h2b " +
+                        "where h2b.bibliographicagencyid = ? " +
+                        "and h2b.bibliographicrecordid = ?)",
+                HoldingsItemEntity.class);
+        query.setParameter(1,bibliographicAgencyId);
+        query.setParameter(2,bibliographicRecordId);
+        return query.getResultList();
+
+    }
+
 }
