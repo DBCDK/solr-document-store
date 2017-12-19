@@ -27,6 +27,15 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
         bean = new FrontendAPIBean();
         bean.entityManager = em;
 
+        bean.bibliographicBean = new BibliographicBean();
+        bean.bibliographicBean.entityManager = em;
+
+        bean.holdingsItemBean = new HoldingsItemBean();
+        bean.holdingsItemBean.entityManager = em;
+        bean.holdingsItemBean.h2bBean = new HoldingsToBibliographicBean();
+        bean.holdingsItemBean.h2bBean.entityManager = em;
+
+
         // Setup records
         env().getPersistenceContext().run( () -> {
             createBibAndHoldings(commonAgency, "ABC", holdingAgencies);
@@ -39,7 +48,10 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void testGetRelatedHoldings(){
         String bibliographicRecordId = "ABC";
-        List<HoldingsItemEntity> abcHoldings = bean.getRelatedHoldings(bibliographicRecordId, commonAgency);
+
+        Response relatedHoldings = bean.getRelatedHoldings(bibliographicRecordId, commonAgency);
+        FrontendReturnListType<HoldingsItemEntity> abcHoldings2 = (FrontendReturnListType<HoldingsItemEntity>) relatedHoldings.getEntity();
+        List<HoldingsItemEntity> abcHoldings = abcHoldings2.result;
         int expected = 3;
         Assert.assertEquals(expected,abcHoldings.size());
     }
@@ -47,7 +59,7 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void testGetBibliographicKeys(){
         String bibliographicRecordId = "XYZ";
-        Response json = bean.getBibliographicKeysJSON(bibliographicRecordId);
+        Response json = bean.getBibliographicKeys(bibliographicRecordId);
         FrontendReturnListType<BibliographicEntity> frontendReturnListType =
                 (FrontendReturnListType<BibliographicEntity>) json.getEntity();
         Assert.assertEquals(2, frontendReturnListType.result.size());
