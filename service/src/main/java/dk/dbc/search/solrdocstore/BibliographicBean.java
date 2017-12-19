@@ -42,19 +42,30 @@ public class BibliographicBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
-        BibliographicEntityRequest be = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        log.info("AddBibliographicKeys called {}:{}", be.agencyId, be.bibliographicRecordId);
+        BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
+        addBibliographicKeys(request.asBibliographicEntity(), request.superceds);
+        return Response.ok().entity("{ \"ok\": true }").build();
+    }
 
-        BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(be.agencyId, be.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
+    public List<BibliographicEntity> getBibliographicEntities(String bibliographicRecordId) {
+        TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
+                "WHERE b.bibliographicRecordId = :bibId",BibliographicEntity.class);
+        return query.setParameter("bibId",bibliographicRecordId).getResultList();
+    }
+
+    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
+
+        log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+
+        BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
         if (dbbe == null) {
-            entityManager.merge(be.asBibliographicEntity());
-            updateHoldingsToBibliographic(be.agencyId, be.bibliographicRecordId);
+            entityManager.merge(bibliographicEntity.asBibliographicEntity());
+            updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
         } else {
             throw new IllegalStateException("Missing implementation");
         }
 
-        updateSuperceded(be.bibliographicRecordId, be.superceds); //! @todo recalc h2b for bibliographicrecordids returned
-        return Response.ok().entity("{ \"ok\": true }").build();
+        updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds); //! @todo recalc h2b for bibliographicrecordids returned
     }
 
     /*
