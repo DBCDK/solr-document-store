@@ -1,10 +1,10 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -19,9 +19,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.HashSet;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 @Stateless
 @Path("bibliographic")
 public class BibliographicBean {
@@ -52,6 +53,7 @@ public class BibliographicBean {
             throw new IllegalStateException("Missing implementation");
         }
 
+        updateSuperceded(be.bibliographicRecordId, be.superceds); //! @todo recalc h2b for bibliographicrecordids returned
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
@@ -109,6 +111,29 @@ public class BibliographicBean {
                 holdingsAgency, recordId,agency
         );
         entityManager.merge(h2b);
+    }
+
+    private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
+        if (supercededs == null) {
+            return Collections.EMPTY_SET;
+        }
+        HashSet<String> changedBibliographicRecordIds = new HashSet<>();
+        for (String superceded : supercededs) {
+            BibliographicToBibliographicEntity b2b = entityManager.find(BibliographicToBibliographicEntity.class, superceded, LockModeType.PESSIMISTIC_WRITE);
+            if (b2b == null) {
+                b2b = new BibliographicToBibliographicEntity();
+                b2b.decommissionedRecordId = superceded;
+                b2b.currentRecordId = bibliographicRecordId;
+            } else {
+                if (b2b.currentRecordId.equals(bibliographicRecordId)) {
+                    continue;
+                }
+                b2b.currentRecordId = bibliographicRecordId;
+            }
+            entityManager.merge(b2b);
+            changedBibliographicRecordIds.add(superceded);
+        }
+        return changedBibliographicRecordIds;
     }
 
 }

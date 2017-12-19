@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response;
 @Path("evict-all")
 public class EvictAll {
 
-        @PersistenceContext(unitName = "solrDocumentStore_PU")
+    @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
     @GET
