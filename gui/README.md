@@ -19,6 +19,10 @@ and should act as a proxy for the service to run on localhost:8080.
 
 Webpack-dev-server requires node to run, so make sure it is installed.
 
+## Style guide
+
+Project uses `prettier` with `--single-quote` argument.
+
 ## TODO
  * Set up development server as a docker image, maybe a docker compose to
  launch service as well and configure ports for proxy etc.
