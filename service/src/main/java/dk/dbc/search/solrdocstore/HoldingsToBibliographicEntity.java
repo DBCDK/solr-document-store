@@ -63,4 +63,8 @@ public class HoldingsToBibliographicEntity implements Serializable {
 
         return Objects.hash(holdingsAgencyId, holdingsBibliographicRecordId, bibliographicRecordId, bibliographicAgencyId);
     }
+
+    public HoldingsToBibliographicKey asKey() {
+        return new HoldingsToBibliographicKey(holdingsAgencyId,holdingsBibliographicRecordId);
+    }
 }
