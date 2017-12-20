@@ -119,20 +119,19 @@ public class HoldingsToBibliographicBean {
 
     private void attachToAgency(HoldingsToBibliographicEntity expectedState) {
 
-        HoldingsToBibliographicEntity updatedEntity = updateHoldingToBibliographic(expectedState);
-        if (updatedEntity!=null){
-            addAttachEventQueue(updatedEntity.holdingsAgencyId,updatedEntity.bibliographicRecordId);
-            entityManager.merge(updatedEntity);
+        if (needToUpdate(expectedState)){
+            addAttachEventQueue(expectedState.holdingsAgencyId,expectedState.bibliographicRecordId);
+            entityManager.merge(expectedState);
         }
 
     }
 
-    private HoldingsToBibliographicEntity updateHoldingToBibliographic(HoldingsToBibliographicEntity expectedState) {
+    private boolean needToUpdate(HoldingsToBibliographicEntity expectedState) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
         if ((foundEntity!=null) && foundEntity.equals(expectedState)) {
-            return null;
+            return false;
         }
-        return expectedState;
+        return true;
     }
 
     private HoldingsToBibliographicEntity createH2B(int attachToAgency, HoldingsToBibliographicKey itemKey) {
