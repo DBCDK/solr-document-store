@@ -23,35 +23,45 @@ public class HoldingsToBibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    public void tryToAttachToBibliographicRecord(int agencyId, String bibliographicRecordId) {
-        log.info("Update HoldingsToBibliographic for {} {}", agencyId,bibliographicRecordId);
-        LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(agencyId);
+    public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
+        log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
+        LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
 
 
         switch (libraryType) {
             case NonFBS:
-                attachToBibliographicRecord(agencyId, bibliographicRecordId, agencyId);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
                 break;
             case FBS:
-                attachToBibliographicRecord(agencyId, bibliographicRecordId, agencyId,COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, superceed(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
                 break;
             case FBSSchool:
-                attachToBibliographicRecord(agencyId, bibliographicRecordId, agencyId,COMMON_AGENCY,SCHOOL_COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, superceed(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
                 break;
         }
     }
 
-    private void attachToBibliographicRecord(int agencyId, String bibliographicRecordId, int ... agencyPriority) {
-        for (int i=0; i<agencyPriority.length;i++) {
-            boolean attached = attachIfExists(agencyPriority[i],agencyId, bibliographicRecordId);
+    private String superceed(String bibliographicRecordId) {
+        BibliographicToBibliographicEntity e = entityManager.find(BibliographicToBibliographicEntity.class, bibliographicRecordId);
+        if (e==null) {
+            return bibliographicRecordId;
+        } else {
+            return e.currentRecordId;
+        }
+    }
+
+    private void attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
+        for (int i=0; i<bibliographicAgencyPriorities.length;i++) {
+            boolean attached = attachIfExists(bibliographicAgencyPriorities[i], bibliographicRecordId, holdingsAgencyId, holdingsBibliographicRecordId);
             if (attached) return;
         }
     }
 
 
-    private boolean attachIfExists(int bibliographicAgencyId, int holdingAgencyId, String holdingBibliographicRecordId) {
-        if (bibliographicEntityExists(bibliographicAgencyId,holdingBibliographicRecordId)){
-            attachToAgency(bibliographicAgencyId, holdingAgencyId, holdingBibliographicRecordId);
+    private boolean attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
+        if (bibliographicEntityExists(bibliographicAgencyId,bibliographicRecordId)){
+            HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
+            attachToAgency(expectedState);
             return true;
         }
         return false;
@@ -63,12 +73,9 @@ public class HoldingsToBibliographicBean {
         return ((e!=null)&&(!e.deleted));
     }
 
-    private void attachToAgency(int attachToAgency, int holdingAgencyId, String holdingBibliographicRecordId) {
+    private void attachToAgency(HoldingsToBibliographicEntity expectedState) {
 
-        HoldingsToBibliographicEntity updatedEntity = updateHoldingToBibliographic(attachToAgency,
-                new HoldingsToBibliographicKey()
-                        .withHoldingAgencyId(holdingAgencyId)
-                        .withHoldingsBibliographicRecordId(holdingBibliographicRecordId));
+        HoldingsToBibliographicEntity updatedEntity = updateHoldingToBibliographic(expectedState);
         if (updatedEntity!=null){
             addAttachEventQueue(updatedEntity.holdingsAgencyId,updatedEntity.bibliographicRecordId);
             entityManager.merge(updatedEntity);
@@ -76,18 +83,12 @@ public class HoldingsToBibliographicBean {
 
     }
 
-    private HoldingsToBibliographicEntity updateHoldingToBibliographic(int attachToAgency, HoldingsToBibliographicKey itemKey) {
-        HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, itemKey);
-        if (foundEntity!=null){
-            if (foundEntity.bibliographicAgencyId==attachToAgency) {
-                return null;
-            } else {
-                foundEntity.bibliographicAgencyId = attachToAgency;
-                return foundEntity;
-            }
-        } else {
-            return createH2B(attachToAgency,itemKey);
+    private HoldingsToBibliographicEntity updateHoldingToBibliographic(HoldingsToBibliographicEntity expectedState) {
+        HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
+        if ((foundEntity!=null) && foundEntity.equals(expectedState)) {
+            return null;
         }
+        return expectedState;
     }
 
     private HoldingsToBibliographicEntity createH2B(int attachToAgency, HoldingsToBibliographicKey itemKey) {

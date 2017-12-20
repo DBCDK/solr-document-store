@@ -97,6 +97,67 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         Assert.assertNull(e);
     }
 
+    @Test
+    public void onFBSwillReadB2B(){
+        int agencyId = 132;
+        String bibliographicRecordId = "ABC";
+        String newRecordId="DEF";
+
+        bean.libraryConfig = mockToReturn(LibraryConfig.LibraryType.FBS);
+
+        createBibRecord(LibraryConfig.COMMON_AGENCY, bibliographicRecordId);
+        createBibRecord(agencyId,newRecordId);
+        createB2B(bibliographicRecordId,newRecordId);
+        bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+        HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
+        Assert.assertNotNull(e);
+        Assert.assertEquals(agencyId,e.bibliographicAgencyId);
+        Assert.assertEquals(newRecordId,e.bibliographicRecordId);
+    }
+
+    @Test
+    public void onFBCSchoolWillReadB2B(){
+        int agencyId = 132;
+        String bibliographicRecordId = "ABC";
+        String newRecordId="DEF";
+
+        bean.libraryConfig = mockToReturn(LibraryConfig.LibraryType.FBSSchool);
+        createBibRecord(LibraryConfig.SCHOOL_COMMON_AGENCY,bibliographicRecordId);
+        createBibRecord(LibraryConfig.COMMON_AGENCY,newRecordId);
+        createB2B(bibliographicRecordId,newRecordId);
+        bean.tryToAttachToBibliographicRecord(agencyId,bibliographicRecordId);
+        HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId,bibliographicRecordId);
+        Assert.assertNotNull(e);
+        Assert.assertEquals(LibraryConfig.COMMON_AGENCY,e.bibliographicAgencyId);
+        Assert.assertEquals(newRecordId,e.bibliographicRecordId);
+    }
+    @Test
+    public void onNonFBSWillIgnoreB2B(){
+        int agencyId = 132;
+        String bibliographicRecordId = "ABC";
+        String newRecordId="DEF";
+
+        bean.libraryConfig = mockToReturn(LibraryConfig.LibraryType.NonFBS);
+        createBibRecord(agencyId,bibliographicRecordId);
+        createBibRecord(LibraryConfig.COMMON_AGENCY,bibliographicRecordId);
+        createBibRecord(LibraryConfig.COMMON_AGENCY,newRecordId);
+        createB2B(bibliographicRecordId,newRecordId);
+        bean.tryToAttachToBibliographicRecord(agencyId,bibliographicRecordId);
+        HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId,bibliographicRecordId);
+        Assert.assertNotNull(e);
+        Assert.assertEquals(agencyId,e.bibliographicAgencyId);
+        Assert.assertEquals(bibliographicRecordId,e.bibliographicRecordId);
+    }
+
+    private void createB2B(String oldRecordId, String newRecordId) {
+        BibliographicToBibliographicEntity e = new BibliographicToBibliographicEntity();
+        e.decommissionedRecordId = oldRecordId;
+        e.currentRecordId = newRecordId;
+        env().getPersistenceContext().run( () -> {
+            em.merge(e);
+        });
+    }
+
     private LibraryConfig mockToReturn(LibraryConfig.LibraryType libraryType){
         LibraryConfig mock = Mockito.mock(LibraryConfig.class);
         Mockito.when(mock.getLibraryType(Mockito.anyInt())).thenReturn(libraryType);
