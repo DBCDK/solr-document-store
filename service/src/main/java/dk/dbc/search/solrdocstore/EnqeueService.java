@@ -54,7 +54,6 @@ public class EnqeueService<T> {
         QueueJob job = jobCreator.apply(t, commitWithin);
         for (String queueName : queueNames) {
             log.debug("queueName = {}", queueName);
-            System.out.println("queueName = " + queueName);
             queueSupplier.enqueue(queueName, job);
         }
     }
