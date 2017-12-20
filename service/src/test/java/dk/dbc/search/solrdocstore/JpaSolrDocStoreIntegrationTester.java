@@ -3,6 +3,7 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.commons.persistence.JpaIntegrationTest;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import org.junit.Before;
+import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import java.sql.Connection;
@@ -53,4 +54,13 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         dbMigrator.migrate();
     }
 
+
+    /**
+        When IDEA tries to run all unit tests in the project - it will fail on this class.
+        Since {@link JpaSolrDocStoreIntegrationTester} has a @Before annotation - it is considered a test class
+        But since it has no methods to execute, then IDEA will fail the class with "No runnable method".
+     */
+    @Test
+    public void noTest(){
+    }
 }
