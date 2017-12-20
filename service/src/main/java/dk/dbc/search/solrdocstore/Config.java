@@ -30,7 +30,7 @@ public class Config {
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-service");
         oaURL = getValue(props, "openAgencyUrl", "OPEN_AGENCY_URL", null, "No URL found for Open Agency");
-        manifestationQueues = getValue(props, "manifestationQueues", "MANIFESTATION_QUEUES", "", "No URL found for Open Agency", Config::asStringList);
+        manifestationQueues = getValue(props, "manifestationQueues", "MANIFESTATION_QUEUES", "", null, Config::asStringList);
     }
 
     public String getOaURL() {
