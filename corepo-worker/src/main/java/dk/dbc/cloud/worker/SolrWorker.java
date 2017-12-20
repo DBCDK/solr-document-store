@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -173,7 +174,7 @@ public class SolrWorker implements MessageListener {
             for (DeleteMessage deletedDocument : updater.getDeletedDocuments()) {
                 ObjectNode record = O.createObjectNode();
                 String id = deletedDocument.getDocumentId();
-                makeMetadata(record, id, true, unit, work, trackingId, marc002a);
+                makeMetadata(record, id, true, unit, work, trackingId, Collections.EMPTY_SET);
                 sendRecordToSolrDocStore(id, record);
             }
 
@@ -198,7 +199,7 @@ public class SolrWorker implements MessageListener {
      * @param superceds  which other ids do this record cover (only
      *                   bibliographicrecordid)
      */
-    private void makeMetadata(ObjectNode record, String id, boolean deleted, String unit, String work, String trackingId, HashSet<String> superceds) {
+    private void makeMetadata(ObjectNode record, String id, boolean deleted, String unit, String work, String trackingId, Set<String> superceds) {
         String idAfterColon = id.substring(id.indexOf(':') + 1);
         String[] idPart = idAfterColon.split("-");
         if (idPart.length != 3) {
