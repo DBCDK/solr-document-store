@@ -7,6 +7,11 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static dk.dbc.search.solrdocstore.LibraryConfig.COMMON_AGENCY;
 import static dk.dbc.search.solrdocstore.LibraryConfig.SCHOOL_COMMON_AGENCY;
@@ -33,15 +38,54 @@ public class HoldingsToBibliographicBean {
                 attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
                 break;
             case FBS:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, superceed(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, supersede(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
                 break;
             case FBSSchool:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, superceed(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, supersede(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
                 break;
         }
     }
 
-    private String superceed(String bibliographicRecordId) {
+
+    public void recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
+        Map<Integer,LibraryConfig.LibraryType> map = new HashMap<>();
+        for (String supersededRecordId : supersededRecordIds) {
+            List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
+            for (HoldingsToBibliographicEntity h2b : recalcCandidates){
+                LibraryConfig.LibraryType libraryType = getFromCache(map, h2b.holdingsAgencyId);
+                switch (libraryType){
+                    case NonFBS:
+                        break;
+                    case FBS:
+                        attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY);
+                        break;
+                    case FBSSchool:
+                        attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                        break;
+                }
+            }
+        }
+    }
+
+    private LibraryConfig.LibraryType getFromCache(Map<Integer, LibraryConfig.LibraryType> map, int holdingsAgencyId) {
+        LibraryConfig.LibraryType t = map.get(holdingsAgencyId);
+        if (t==null){
+            t = libraryConfig.getLibraryType(holdingsAgencyId);
+            map.put(holdingsAgencyId,t);
+        }
+        return t;
+    }
+
+    private List<HoldingsToBibliographicEntity> findRecalcCandidates(String bibliographicRecordId) {
+
+        Query q = entityManager.createQuery(
+                "SELECT h FROM HoldingsToBibliographicEntity h " +
+                        "WHERE h.bibliographicRecordId = :recId", HoldingsToBibliographicEntity.class);
+        q.setParameter("recId", bibliographicRecordId);
+        return  q.getResultList();
+    }
+
+    private String supersede(String bibliographicRecordId) {
         BibliographicToBibliographicEntity e = entityManager.find(BibliographicToBibliographicEntity.class, bibliographicRecordId);
         if (e==null) {
             return bibliographicRecordId;
@@ -102,7 +146,4 @@ public class HoldingsToBibliographicBean {
     private void addAttachEventQueue(int bibliographicAgencyId, String bibliographicRecordId) {
         //TODO: Implement
     }
-
-
-
 }

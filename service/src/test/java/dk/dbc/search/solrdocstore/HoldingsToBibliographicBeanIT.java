@@ -6,6 +6,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import javax.persistence.EntityManager;
+import java.util.Arrays;
+import java.util.HashSet;
+
+import static org.junit.Assert.assertEquals;
 
 public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -31,7 +35,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
         HoldingsToBibliographicEntity abc = fetchH2BRecord(agencyId, bibliographicRecordId);
         Assert.assertNotNull(abc);
-        Assert.assertEquals(132,abc.bibliographicAgencyId);
+        assertEquals(132,abc.bibliographicAgencyId);
     }
 
     @Test
@@ -44,7 +48,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
         HoldingsToBibliographicEntity h2BRecord = fetchH2BRecord(agencyId, bibliographicRecordId);
         Assert.assertNotNull(h2BRecord);
-        Assert.assertEquals(132,h2BRecord.bibliographicAgencyId);
+        assertEquals(132,h2BRecord.bibliographicAgencyId);
     }
 
     @Test
@@ -70,7 +74,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
         HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
         Assert.assertNotNull(e);
-        Assert.assertEquals(LibraryConfig.COMMON_AGENCY,e.bibliographicAgencyId);
+        assertEquals(LibraryConfig.COMMON_AGENCY,e.bibliographicAgencyId);
     }
 
     @Test
@@ -83,7 +87,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId,bibliographicRecordId);
         HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId,bibliographicRecordId);
         Assert.assertNotNull(e);
-        Assert.assertEquals(LibraryConfig.SCHOOL_COMMON_AGENCY,e.bibliographicAgencyId);
+        assertEquals(LibraryConfig.SCHOOL_COMMON_AGENCY,e.bibliographicAgencyId);
     }
 
     @Test
@@ -111,8 +115,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
         HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
         Assert.assertNotNull(e);
-        Assert.assertEquals(agencyId,e.bibliographicAgencyId);
-        Assert.assertEquals(newRecordId,e.bibliographicRecordId);
+        assertEquals(agencyId,e.bibliographicAgencyId);
+        assertEquals(newRecordId,e.bibliographicRecordId);
     }
 
     @Test
@@ -128,9 +132,46 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId,bibliographicRecordId);
         HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId,bibliographicRecordId);
         Assert.assertNotNull(e);
-        Assert.assertEquals(LibraryConfig.COMMON_AGENCY,e.bibliographicAgencyId);
-        Assert.assertEquals(newRecordId,e.bibliographicRecordId);
+        assertEquals(LibraryConfig.COMMON_AGENCY,e.bibliographicAgencyId);
+        assertEquals(newRecordId,e.bibliographicRecordId);
     }
+
+    @Test
+    public void onB2BUpdateRecalc(){
+        bean.libraryConfig = new LibraryConfig();
+        bean.libraryConfig.agencyLibraryTypeBean=new AgencyLibraryTypeBean();
+        bean.libraryConfig.agencyLibraryTypeBean.entityManager = em;
+        int[] agencies = { 4711, 300000, 870970 };
+        String[] recordIds = { "A","B"};
+        for ( int a: agencies) {
+            for(String r : recordIds){
+                createBibRecord(a,r);
+            }
+        }
+        createH2BRecord(4711,"A", LibraryConfig.COMMON_AGENCY,"A");
+        createH2BRecord( 3711,"A", LibraryConfig.SCHOOL_COMMON_AGENCY,"A");
+        createH2BRecord( 4712, "A", 4712,"A");
+        createB2B("A","B");
+        createAgency(3711, LibraryConfig.LibraryType.FBSSchool);
+        createAgency(4711, LibraryConfig.LibraryType.FBS);
+        createAgency(4712, LibraryConfig.LibraryType.NonFBS);
+
+        bean.recalcAttachments("B", new HashSet<>(  Arrays.asList(new String[]{ "A" })) );
+
+        assertH2B(4711,"A",LibraryConfig.COMMON_AGENCY,"B");
+        assertH2B(3711,"A",LibraryConfig.SCHOOL_COMMON_AGENCY,"B");
+        assertH2B(4712,"A",4712,"A");
+    }
+    private void assertH2B(
+            int holdingsAgencyId,
+            String holdingsBibliographicRecordId,
+            int bibliographicAgencyId,
+            String bibliographicRecordId){
+        HoldingsToBibliographicEntity e = fetchH2BRecord(holdingsAgencyId, holdingsBibliographicRecordId);
+        assertEquals(e.toString(),bibliographicAgencyId, e.bibliographicAgencyId);
+        assertEquals(e.toString(),bibliographicRecordId, e.bibliographicRecordId);
+    }
+
     @Test
     public void onNonFBSWillIgnoreB2B(){
         int agencyId = 132;
@@ -145,8 +186,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         bean.tryToAttachToBibliographicRecord(agencyId,bibliographicRecordId);
         HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId,bibliographicRecordId);
         Assert.assertNotNull(e);
-        Assert.assertEquals(agencyId,e.bibliographicAgencyId);
-        Assert.assertEquals(bibliographicRecordId,e.bibliographicRecordId);
+        assertEquals(agencyId,e.bibliographicAgencyId);
+        assertEquals(bibliographicRecordId,e.bibliographicRecordId);
     }
 
     private void createB2B(String oldRecordId, String newRecordId) {
@@ -193,15 +234,35 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         });
     }
 
-    private void createH2BRecord(int agencyId, String bibliographicRecordId, int bibliographicAgencyId) {
+    private void createH2BRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId) {
+        createH2BRecord(holdingsAgencyId,holdingsBibliographicRecordId,bibliographicAgencyId,holdingsBibliographicRecordId);
+    }
+
+    private void createH2BRecord(
+            int holdingsAgencyId,
+            String holdingsBibliographicRecordId,
+            int bibliographicAgencyId,
+            String bibliographicRecordId) {
+
         env().getPersistenceContext().run( () -> {
            HoldingsToBibliographicEntity e = new HoldingsToBibliographicEntity(
-                   agencyId,
-                   bibliographicRecordId,
-                   bibliographicAgencyId
-           );
+                   holdingsAgencyId,
+                   holdingsBibliographicRecordId,
+                   bibliographicAgencyId,
+                   bibliographicRecordId
+                   );
            em.merge(e);
         });
+    }
+
+    private void createAgency(int agencyId, LibraryConfig.LibraryType t){
+        env().getPersistenceContext().run( () ->{
+            AgencyLibraryTypeEntity e = new AgencyLibraryTypeEntity();
+            e.libraryType = t.name();
+            e.agencyId = agencyId;
+            em.merge(e);
+        });
+
     }
 
 }
