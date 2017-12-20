@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore.openagency.libraryrules;
 
+import dk.dbc.search.solrdocstore.Config;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class OpenAgencyClient implements Serializable {
 
     @Inject
-    OpenAgencyConfig config;
+    Config config;
 
     private RetryPolicy retryPolicy = new RetryPolicy()
             .withDelay(100, TimeUnit.MILLISECONDS)
@@ -49,7 +50,7 @@ public class OpenAgencyClient implements Serializable {
         }
     }
 
-    public void setConfig(OpenAgencyConfig config) {
+    public void setConfig(Config config) {
         this.config = config;
     }
 }
