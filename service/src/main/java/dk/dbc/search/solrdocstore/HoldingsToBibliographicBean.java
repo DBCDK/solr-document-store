@@ -68,11 +68,7 @@ public class HoldingsToBibliographicBean {
     }
 
     private LibraryConfig.LibraryType getFromCache(Map<Integer, LibraryConfig.LibraryType> map, int holdingsAgencyId) {
-        LibraryConfig.LibraryType t = map.get(holdingsAgencyId);
-        if (t==null){
-            t = libraryConfig.getLibraryType(holdingsAgencyId);
-            map.put(holdingsAgencyId,t);
-        }
+        LibraryConfig.LibraryType t = map.computeIfAbsent(holdingsAgencyId, k->libraryConfig.getLibraryType(holdingsAgencyId));
         return t;
     }
 
