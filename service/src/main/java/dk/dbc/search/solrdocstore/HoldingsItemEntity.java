@@ -10,6 +10,9 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.Basic;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
@@ -30,6 +33,7 @@ public class HoldingsItemEntity implements Serializable {
     public String producerVersion;
 
     @SuppressWarnings("JpaAttributeTypeInspection")
+    @Basic(fetch = LAZY)
     @Mutable
     @Convert(converter = PgHoldingsKeysToPgConverter.class)
     public List<Map<String, List<String>>> indexKeys;
