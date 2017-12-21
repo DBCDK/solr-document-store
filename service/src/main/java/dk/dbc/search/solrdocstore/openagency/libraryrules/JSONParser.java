@@ -70,7 +70,7 @@ public class JSONParser {
 
     protected static void failIfNull(JsonNode jsonNode, String fieldName) {
         if (jsonNode==null){
-            log.error("Failed to read {} from input {}",fieldName,jsonNode);
+            log.error("Failed to read element: \"{}\" from input \"{}\"",fieldName,jsonNode);
             throw new LibraryRuleException("Failed to read field " + fieldName);
         }
     }
