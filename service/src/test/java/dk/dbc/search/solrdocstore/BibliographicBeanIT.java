@@ -2,18 +2,17 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import javax.persistence.EntityManager;
-import javax.ws.rs.core.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
+import javax.persistence.EntityManager;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
@@ -36,7 +35,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 return LibraryType.FBS;
             }
         };
-
+        bean.h2bBean = new HoldingsToBibliographicBean();
+        bean.h2bBean.entityManager = em;
+        bean.h2bBean.libraryConfig = bean.libraryConfig;
         executeScriptResource("/bibliographicUpdate.sql");
     }
 

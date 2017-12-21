@@ -1,10 +1,9 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -19,8 +18,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 @Stateless
@@ -33,6 +34,9 @@ public class BibliographicBean {
 
     @Inject
     LibraryConfig libraryConfig;
+
+    @Inject
+    HoldingsToBibliographicBean h2bBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -65,7 +69,10 @@ public class BibliographicBean {
             throw new IllegalStateException("Missing implementation");
         }
 
-        updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds); //! @todo recalc h2b for bibliographicrecordids returned
+        Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds);
+        if (supersededRecordIds.size()>0){
+            h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
+        }
     }
 
     /*
