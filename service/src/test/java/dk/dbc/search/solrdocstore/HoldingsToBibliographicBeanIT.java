@@ -192,7 +192,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
     private void createB2B(String oldRecordId, String newRecordId) {
         BibliographicToBibliographicEntity e = new BibliographicToBibliographicEntity();
-        e.deadBibliograohicRecordId = oldRecordId;
+        e.deadBibliographicRecordId = oldRecordId;
         e.liveBibliographicRecordId = newRecordId;
         env().getPersistenceContext().run( () -> {
             em.merge(e);

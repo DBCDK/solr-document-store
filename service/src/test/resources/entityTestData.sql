@@ -11,4 +11,4 @@ INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, P
 
 INSERT INTO holdingsTobibliographic (holdingsagencyid,holdingsbibliographicrecordid, bibliographicagencyid, bibliographicrecordid ) VALUES (600, '600', 100,'600');
 
-INSERT INTO bibliographictobibliographic (deadBibliograohicRecordId, liveBibliographicRecordId) VALUES ('399', '600');
+INSERT INTO bibliographictobibliographic (deadBibliographicRecordId, liveBibliographicRecordId) VALUES ('399', '600');
