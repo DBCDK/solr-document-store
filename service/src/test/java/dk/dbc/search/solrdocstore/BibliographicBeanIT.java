@@ -151,11 +151,11 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         Response r = env().getPersistenceContext()
                  .run(() -> bean.addBibliographicKeys(null, json));
         assertThat(r.getStatus(), is(200));
-        List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.currentRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
+        List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
 
         assertThat(l.size(), is(2));
-        Assert.assertTrue("One superceded named 'a'", l.stream().anyMatch(b2b -> b2b.decommissionedRecordId.equals("a")));
-        Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.decommissionedRecordId.equals("b")));
+        Assert.assertTrue("One superceded named 'a'", l.stream().anyMatch(b2b -> b2b.deadBibliographicRecordId.equals("a")));
+        Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.deadBibliographicRecordId.equals("b")));
     }
 
     private String makeBibliographicRequestJson(int agency) throws JSONBException {
