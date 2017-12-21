@@ -86,7 +86,7 @@ public class HoldingsToBibliographicBean {
         if (e==null) {
             return bibliographicRecordId;
         } else {
-            return e.currentRecordId;
+            return e.liveBibliographicRecordId;
         }
     }
 

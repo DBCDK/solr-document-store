@@ -55,10 +55,10 @@ CREATE INDEX holdingsToBibliographic_Bibliographic
     ON holdingsToBibliographic (bibliographicRecordId, bibliographicAgencyId);
 
 CREATE TABLE BibliographicToBibliographic (
-    decommissionedRecordId TEXT NOT NULL CHECK ( decommissionedRecordId <> '' ),
-    currentRecordId        TEXT NOT NULL  CHECK ( currentRecordId <> '' ),
-    PRIMARY KEY (decommissionedRecordId),
-    CONSTRAINT newRecordUnique UNIQUE (decommissionedRecordId, currentRecordId)
+    deadBibliographicRecordId TEXT NOT NULL CHECK ( deadBibliographicRecordId <> '' ),
+    liveBibliographicRecordId TEXT NOT NULL CHECK ( liveBibliographicRecordId <> '' ),
+    PRIMARY KEY (deadBibliographicRecordId),
+    CONSTRAINT newRecordUnique UNIQUE (deadBibliographicRecordId, liveBibliographicRecordId)
 );
 
 CREATE TABLE AgencyLibraryType (
