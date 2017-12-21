@@ -14,7 +14,7 @@ public class BibliographicToBibliographicEntityIT extends JpaSolrDocStoreIntegra
 
         env().getPersistenceContext().run( () -> {
             BibliographicToBibliographicEntity b2b=new BibliographicToBibliographicEntity();
-            b2b.deadBibliograohicRecordId = "300";
+            b2b.deadBibliographicRecordId = "300";
             b2b.liveBibliographicRecordId = "4321";
 
             em.persist(b2b);
