@@ -38,10 +38,10 @@ public class HoldingsToBibliographicBean {
                 attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
                 break;
             case FBS:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, supersede(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
                 break;
             case FBSSchool:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, supersede(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
                 break;
         }
     }
@@ -85,7 +85,7 @@ public class HoldingsToBibliographicBean {
         return  q.getResultList();
     }
 
-    private String supersede(String bibliographicRecordId) {
+    private String findLiveBibliographicRecordId(String bibliographicRecordId) {
         BibliographicToBibliographicEntity e = entityManager.find(BibliographicToBibliographicEntity.class, bibliographicRecordId);
         if (e==null) {
             return bibliographicRecordId;
