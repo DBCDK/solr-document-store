@@ -53,13 +53,10 @@ public class BibliographicEntity implements Serializable {
 
     @Override
     public boolean equals(Object o){
-        System.out.println("Am I being called?");
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        System.out.println("Same class?");
         BibliographicEntity that = (BibliographicEntity) o;
-        System.out.println(""+this.toString()+" vs. "+o.toString());
-        boolean result = agencyId == that.agencyId &&
+        return agencyId == that.agencyId &&
                 Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
                 Objects.equals(work, that.work) &&
                 Objects.equals(unit, that.unit) &&
@@ -67,8 +64,6 @@ public class BibliographicEntity implements Serializable {
                 deleted == that.deleted &&
                 Objects.equals(indexKeys,that.indexKeys) &&
                 Objects.equals(trackingId, that.trackingId);
-        System.out.println("Result: "+result);
-        return result;
     }
 
     /**
