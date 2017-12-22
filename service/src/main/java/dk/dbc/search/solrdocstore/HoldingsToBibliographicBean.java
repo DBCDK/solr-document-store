@@ -38,10 +38,10 @@ public class HoldingsToBibliographicBean {
                 attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
                 break;
             case FBS:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, supersede(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
                 break;
             case FBSSchool:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, supersede(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
                 break;
         }
     }
@@ -68,21 +68,8 @@ public class HoldingsToBibliographicBean {
     }
 
     private LibraryConfig.LibraryType getFromCache(Map<Integer, LibraryConfig.LibraryType> map, int holdingsAgencyId) {
-        LibraryConfig.LibraryType t = map.get(holdingsAgencyId);
-        if (t==null){
-            t = libraryConfig.getLibraryType(holdingsAgencyId);
-            map.put(holdingsAgencyId,t);
-        }
+        LibraryConfig.LibraryType t = map.computeIfAbsent(holdingsAgencyId, k->libraryConfig.getLibraryType(holdingsAgencyId));
         return t;
-    }
-
-    public List<HoldingsToBibliographicEntity> findRecalcCandidates(String bibliographicRecordId) {
-
-        Query q = entityManager.createQuery(
-                "SELECT h FROM HoldingsToBibliographicEntity h " +
-                        "WHERE h.bibliographicRecordId = :recId", HoldingsToBibliographicEntity.class);
-        q.setParameter("recId", bibliographicRecordId);
-        return  q.getResultList();
     }
 
     public List<HoldingsToBibliographicEntity> getRelatedHoldingsToBibliographic(int bibliographicAgencyId, String bibliographicRecordId){
@@ -94,12 +81,21 @@ public class HoldingsToBibliographicBean {
                 .setParameter("bibId",bibliographicRecordId).getResultList();
     }
 
-    private String supersede(String bibliographicRecordId) {
+    public List<HoldingsToBibliographicEntity> findRecalcCandidates(String bibliographicRecordId) {
+
+        Query q = entityManager.createQuery(
+                "SELECT h FROM HoldingsToBibliographicEntity h " +
+                        "WHERE h.bibliographicRecordId = :recId", HoldingsToBibliographicEntity.class);
+        q.setParameter("recId", bibliographicRecordId);
+        return  q.getResultList();
+    }
+
+    private String findLiveBibliographicRecordId(String bibliographicRecordId) {
         BibliographicToBibliographicEntity e = entityManager.find(BibliographicToBibliographicEntity.class, bibliographicRecordId);
         if (e==null) {
             return bibliographicRecordId;
         } else {
-            return e.currentRecordId;
+            return e.liveBibliographicRecordId;
         }
     }
 

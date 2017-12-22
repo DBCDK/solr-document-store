@@ -6,11 +6,14 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
+import javax.persistence.Basic;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.persistence.annotations.Mutable;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "bibliographicSolrKeys")
@@ -34,6 +37,7 @@ public class BibliographicEntity implements Serializable {
     public boolean deleted;
 
     @SuppressWarnings("JpaAttributeTypeInspection")
+    @Basic(fetch = LAZY)
     @Mutable
     @Convert(converter = PgMapOfStringsToJsonConverter.class)
     public Map<String, List<String>> indexKeys;

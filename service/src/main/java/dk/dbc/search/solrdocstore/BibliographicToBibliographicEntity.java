@@ -12,7 +12,7 @@ public class BibliographicToBibliographicEntity implements Serializable {
     private static final long serialVersionUID = -4000756841976185211L;
 
     @Id
-    public String decommissionedRecordId;
+    public String deadBibliographicRecordId;
 
-    public String currentRecordId;
+    public String liveBibliographicRecordId;
 }

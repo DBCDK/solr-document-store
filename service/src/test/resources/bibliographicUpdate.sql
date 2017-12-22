@@ -194,7 +194,7 @@ VALUES (600401, 'onDeleteSupersede', '[]' :: JSONB, 'revision', 'track');
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (600402, 'onDeleteSupersede', '[]' :: JSONB, 'revision', 'track');
 
-INSERT INTO bibliographicToBibliographic (DECOMMISSIONEDRECORDID,CURRENTRECORDID)
+INSERT INTO bibliographicToBibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGRAPHICRECORDID)
 VALUES ('onDeleteSupersede','onDeleteSupersedeNew');
 -- Delete supersede FBSSchool
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
@@ -218,7 +218,7 @@ VALUES (300401, 'onDeleteSchoolSupersede', '[]' :: JSONB, 'revision', 'track');
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (300402, 'onDeleteSchoolSupersede', '[]' :: JSONB, 'revision', 'track');
 
-INSERT INTO bibliographicToBibliographic (DECOMMISSIONEDRECORDID,CURRENTRECORDID)
+INSERT INTO bibliographicToBibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGRAPHICRECORDID)
 VALUES ('onDeleteSchoolSupersede','onDeleteSchoolSupersedeNew');
 
 -- Re-create supersede FBS
@@ -243,7 +243,7 @@ VALUES (600501, 'onDeleteSupersede', '[]' :: JSONB, 'revision', 'track');
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (600502, 'onDeleteSupersede', '[]' :: JSONB, 'revision', 'track');
 
-INSERT INTO bibliographicToBibliographic (DECOMMISSIONEDRECORDID,CURRENTRECORDID)
+INSERT INTO bibliographicToBibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGRAPHICRECORDID)
 VALUES ('onRecreateSupersede','onRecreateSupersedeNew');
 -- Re-create supersede FBSSchool
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
@@ -269,6 +269,6 @@ VALUES (600501, 'onRecreateSchoolSupersede', '[]' :: JSONB, 'revision', 'track')
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (600502, 'onRecreateSchoolSupersede', '[]' :: JSONB, 'revision', 'track');
 
-INSERT INTO bibliographicToBibliographic (DECOMMISSIONEDRECORDID,CURRENTRECORDID)
+INSERT INTO bibliographicToBibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGRAPHICRECORDID)
 VALUES ('onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew');
 
