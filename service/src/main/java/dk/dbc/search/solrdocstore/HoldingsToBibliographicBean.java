@@ -72,7 +72,16 @@ public class HoldingsToBibliographicBean {
         return t;
     }
 
-    private List<HoldingsToBibliographicEntity> findRecalcCandidates(String bibliographicRecordId) {
+    public List<HoldingsToBibliographicEntity> getRelatedHoldingsToBibliographic(int bibliographicAgencyId, String bibliographicRecordId){
+        return entityManager.createQuery(
+                "SELECT h FROM HoldingsToBibliographicEntity h WHERE " +
+                        "h.bibliographicRecordId=:bibId and " +
+                        "h.bibliographicAgencyId=:agencyId", HoldingsToBibliographicEntity.class)
+                .setParameter("agencyId",bibliographicAgencyId)
+                .setParameter("bibId",bibliographicRecordId).getResultList();
+    }
+
+    public List<HoldingsToBibliographicEntity> findRecalcCandidates(String bibliographicRecordId) {
 
         Query q = entityManager.createQuery(
                 "SELECT h FROM HoldingsToBibliographicEntity h " +
