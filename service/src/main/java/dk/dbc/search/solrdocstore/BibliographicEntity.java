@@ -1,12 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import java.io.Serializable;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
-import javax.persistence.Basic;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +12,7 @@ import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "bibliographicSolrKeys")
+@NamedEntityGraph(name = "bibPostWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class BibliographicEntity implements Serializable {
 
