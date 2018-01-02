@@ -66,7 +66,7 @@ public class BibliographicBean {
     public List<BibliographicEntity> getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId) {
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
                 "WHERE b.bibliographicRecordId = :bibId",BibliographicEntity.class)
-                .setHint("javax.persistence.fetchgraph",entityManager.getEntityGraph("bibPostWithIndexKeys"));
+                .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("bibPostWithIndexKeys"));
         return query.setParameter("bibId",bibliographicRecordId).getResultList();
     }
 
