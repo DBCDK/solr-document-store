@@ -66,7 +66,25 @@ public class BibliographicBean {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
         } else {
-            throw new IllegalStateException("Missing implementation");
+            log.info("AddBibliographicKeys - Updating existing entity");
+            // If we delete or re-create, related holdings must be moved appropriately
+            if(bibliographicEntity.deleted != dbbe.deleted){
+                log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}",dbbe.deleted,bibliographicEntity.deleted);
+                // We must flush since the tryAttach looks at the deleted field
+                entityManager.merge(bibliographicEntity.asBibliographicEntity());
+                entityManager.flush();
+                List<HoldingsToBibliographicEntity> relatedHoldings = (bibliographicEntity.deleted) ?
+                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.agencyId,dbbe.bibliographicRecordId) :
+                        h2bBean.findRecalcCandidates(dbbe.bibliographicRecordId);
+                for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
+                    h2bBean.tryToAttachToBibliographicRecord(
+                            relatedHolding.holdingsAgencyId,
+                            relatedHolding.holdingsBibliographicRecordId);
+                }
+            } else {
+                // Simple update
+                entityManager.merge(bibliographicEntity.asBibliographicEntity());
+            }
         }
 
         Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds);

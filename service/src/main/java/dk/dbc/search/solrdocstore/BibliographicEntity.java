@@ -6,9 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
+import javax.persistence.Basic;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Basic;
+import java.util.Objects;
 
 import org.eclipse.persistence.annotations.Mutable;
 
@@ -52,6 +53,21 @@ public class BibliographicEntity implements Serializable {
         this.deleted = deleted;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BibliographicEntity that = (BibliographicEntity) o;
+        return agencyId == that.agencyId &&
+                Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+                Objects.equals(work, that.work) &&
+                Objects.equals(unit, that.unit) &&
+                Objects.equals(producerVersion, that.producerVersion) &&
+                deleted == that.deleted &&
+                Objects.equals(indexKeys,that.indexKeys) &&
+                Objects.equals(trackingId, that.trackingId);
     }
 
     /**
