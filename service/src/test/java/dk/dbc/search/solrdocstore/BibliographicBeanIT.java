@@ -141,23 +141,37 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
      */
     @Test
     public void deleteUpdateHoldings() throws JSONBException {
+        // Before common FBS update
+        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDelete");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(600200,"onDelete",600200),
+                new HoldingsToBibliographicEntity(620520,"onDelete",600200),
+                new HoldingsToBibliographicEntity(620521,"onDelete",600521)
+        ));
         // Update common for FBS
         runDeleteUpdate(600200,"onDelete",true);
 
         // Ensure related holdings are moved to a higher level
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDelete");
+        l = getRelatedHoldings("onDelete");
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(600200,"onDelete",870970),
                 new HoldingsToBibliographicEntity(620520,"onDelete",870970),
                 new HoldingsToBibliographicEntity(620521,"onDelete",600521)
         ));
-        // Update common FBS School
+        // Before common FBS School update
+        l = getRelatedHoldings("onDeleteSchool");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(320520,"onDeleteSchool",300200),
+                new HoldingsToBibliographicEntity(320521,"onDeleteSchool",870970)
+        ));
+        // Update common FBS School, moved one level up
         runDeleteUpdate(300200,"onDeleteSchool",true);
         l = getRelatedHoldings("onDeleteSchool");
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(320520,"onDeleteSchool",870970),
                 new HoldingsToBibliographicEntity(320521,"onDeleteSchool",870970)
         ));
+        // Update common FBS School, moved up yet again
         runDeleteUpdate(870970,"onDeleteSchool",true);
         l = getRelatedHoldings("onDeleteSchool");
         assertThat(l,containsInAnyOrder(
@@ -182,13 +196,23 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
      */
     @Test
     public void recreateUpdateHoldings() throws JSONBException {
+        // Before update
+        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreate");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(600300,"onRecreate",870970)
+        ));
         // Recreate FBS library
         runDeleteUpdate(600300,"onRecreate",false);
 
-        // Ensure related holdings are moved to a higher level
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreate");
+        // Ensure related holdings are moved back to their lower level
+        l = getRelatedHoldings("onRecreate");
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(600300,"onRecreate",600300)
+        ));
+        // Before update of FBS School
+        l = getRelatedHoldings("onRecreateSchool");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(300300,"onRecreateSchool",300000)
         ));
         // Recreate FBS School
         runDeleteUpdate(300300,"onRecreateSchool",false);
@@ -198,10 +222,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(300300,"onRecreateSchool",300300)
         ));
-        // Recreate no descendants
+        // Recreate no holdings on lower level, nothing is moved
         runDeleteUpdate(655555,"onRecreateSingle",false);
-
-        // Ensure related holdings are moved to a higher level
         l = getRelatedHoldings("onRecreateSingle");
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(607000,"onRecreateSingle",655555)
@@ -210,15 +232,29 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void deleteUpdateHoldingsSupersede() throws JSONBException {
-        // Delete update FBS
-        runDeleteUpdate(600400,"onDeleteSupersedeNew",true);
+        // Before supersede update FBS
         List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDeleteSupersedeNew");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(600400,"onDeleteSupersede",600400,"onDeleteSupersedeNew"),
+                new HoldingsToBibliographicEntity(600401,"onDeleteSupersede",600400,"onDeleteSupersedeNew"),
+                new HoldingsToBibliographicEntity(600402,"onDeleteSupersede",600400,"onDeleteSupersedeNew")
+        ));
+        // Delete update FBS, records moved to higher level
+        runDeleteUpdate(600400,"onDeleteSupersedeNew",true);
+        l = getRelatedHoldings("onDeleteSupersedeNew");
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(600400,"onDeleteSupersede",870970,"onDeleteSupersedeNew"),
                 new HoldingsToBibliographicEntity(600401,"onDeleteSupersede",870970,"onDeleteSupersedeNew"),
                 new HoldingsToBibliographicEntity(600402,"onDeleteSupersede",870970,"onDeleteSupersedeNew")
         ));
-        // Delete update FBS School
+        // Before supersede update FBS School
+        l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(300400,"onDeleteSchoolSupersede",300400,"onDeleteSchoolSupersedeNew"),
+                new HoldingsToBibliographicEntity(300401,"onDeleteSchoolSupersede",300400,"onDeleteSchoolSupersedeNew"),
+                new HoldingsToBibliographicEntity(300402,"onDeleteSchoolSupersede",300400,"onDeleteSchoolSupersedeNew")
+        ));
+        // Delete update FBS School, moved to higher level
         runDeleteUpdate(300400,"onDeleteSchoolSupersedeNew",true);
         l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
         assertThat(l,containsInAnyOrder(
@@ -237,13 +273,27 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void recreateUpdateHoldingsSupersede() throws JSONBException {
+        // Before FBS re-create
+        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreateSupersedeNew");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(600500,"onRecreateSupersede",870970,"onRecreateSupersedeNew"),
+                new HoldingsToBibliographicEntity(600501,"onRecreateSupersede",870970,"onRecreateSupersedeNew"),
+                new HoldingsToBibliographicEntity(600502,"onRecreateSupersede",600502,"onRecreateSupersedeNew")
+        ));
         // Re-create FBS
         runDeleteUpdate(600500,"onRecreateSupersedeNew",false);
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreateSupersedeNew");
+        l = getRelatedHoldings("onRecreateSupersedeNew");
         assertThat(l,containsInAnyOrder(
                 new HoldingsToBibliographicEntity(600500,"onRecreateSupersede",600500,"onRecreateSupersedeNew"),
                 new HoldingsToBibliographicEntity(600501,"onRecreateSupersede",870970,"onRecreateSupersedeNew"),
                 new HoldingsToBibliographicEntity(600502,"onRecreateSupersede",600502,"onRecreateSupersedeNew")
+        ));
+        // Before FBS School re-create
+        l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
+        assertThat(l,containsInAnyOrder(
+                new HoldingsToBibliographicEntity(300500,"onRecreateSchoolSupersede",300000,"onRecreateSchoolSupersedeNew"),
+                new HoldingsToBibliographicEntity(300501,"onRecreateSchoolSupersede",300000,"onRecreateSchoolSupersedeNew"),
+                new HoldingsToBibliographicEntity(300502,"onRecreateSchoolSupersede",300000,"onRecreateSchoolSupersedeNew")
         ));
         // Re-create FBSSchool
         runDeleteUpdate(870970,"onRecreateSchoolSupersedeNew",false);
