@@ -4,9 +4,11 @@ import * as globalActions from "../actions/global";
 import * as relatedHoldingsActions from "../actions/related_holdings";
 import api from "../api";
 
+export const getSearchParameter = state => state.search.searchParameter;
+
 export function* fetchBibliographicPost(action) {
   try {
-    const parameter = yield select(state => state.search.searchParameter);
+    const parameter = yield select(getSearchParameter);
     const bibPosts = yield call(api.fetchBibliographicPost, action.searchTerm, parameter);
     yield put(searchActions.searchSuccess(bibPosts.result));
   } catch (e) {
