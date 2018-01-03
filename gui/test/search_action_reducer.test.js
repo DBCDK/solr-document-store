@@ -1,12 +1,9 @@
 import * as actions from "../app/actions/searching";
-import searchReducer from "../app/reducers/search";
+import searchReducer,{produceInitialState} from "../app/reducers/search";
+import {SEARCH_SELECT_PARAMETER} from "../app/actions/searching";
+import {SEARCH_REPO_ID} from "../app/api";
 
-let searchInitialState = {
-  searchPending: false,
-  searchTerm: "",
-  searchErrorMessage: "",
-  searchResults: []
-};
+let searchInitialState = produceInitialState();
 
 let bibPosts = [{ id: ["sub"], "term.isbn": ["1234", "5678"] }];
 
@@ -40,6 +37,9 @@ describe("Search reducer", () => {
   test("Should return initial state", () => {
     expect(searchReducer(undefined, {})).toEqual(searchInitialState);
   });
+  test("Invalid action does nothing", () => {
+    expect(searchReducer(produceInitialState(),undefined)).toEqual(produceInitialState())
+  });
   test("Reducer purity", () => {
     let state = {
       searchPending: true,
@@ -55,53 +55,54 @@ describe("Search reducer", () => {
     expect(newState).not.toBe(state);
     expect(newState).not.toEqual(state);
   });
+  test("Should handle selecting search parameter", () => {
+    let parameter = SEARCH_REPO_ID;
+    let startState = produceInitialState();
+    let selectSearchParameterAction = {
+      type: SEARCH_SELECT_PARAMETER,
+      parameter
+    };
+    let desiredState = produceInitialState();
+    desiredState.searchParameter = parameter;
+    expect(searchReducer(startState,selectSearchParameterAction)).toEqual(desiredState);
+  });
   test("Should handle search bibliographic record", () => {
     let searchTerm = "Looking for someone";
     let searchBibRecordAction = {
       type: actions.SEARCH_BIB_RECORD_ID,
       searchTerm
     };
-    expect(searchReducer(undefined, searchBibRecordAction)).toEqual({
-      searchPending: true,
-      searchTerm: searchTerm,
-      searchErrorMessage: "",
-      searchResults: []
-    });
+    let desiredState = produceInitialState();
+    desiredState.searchPending = true;
+    desiredState.searchTerm = searchTerm;
+    expect(searchReducer(undefined, searchBibRecordAction)).toEqual(desiredState);
   });
   test("Should handle search success", () => {
-    let state = {
-      searchPending: true,
-      searchTerm: "Looking...",
-      searchErrorMessage: "",
-      searchResults: []
-    };
+    let searchTerm = "Looking...";
+    let startState = produceInitialState();
+    startState.searchTerm = searchTerm;
     let searchSuccessAction = {
       type: actions.SEARCH_SUCCESS,
       bibPosts
     };
-    expect(searchReducer(state, searchSuccessAction)).toEqual({
-      searchPending: false,
-      searchTerm: "Looking...",
-      searchErrorMessage: "",
-      searchResults: bibPosts
-    });
+    let desiredState = produceInitialState();
+    desiredState.searchResults = bibPosts;
+    desiredState.searchTerm = searchTerm;
+    expect(searchReducer(startState, searchSuccessAction)).toEqual(desiredState);
   });
   test("Should handle search failed", () => {
-    let state = {
-      searchPending: true,
-      searchTerm: "Looking...",
-      searchErrorMessage: "",
-      searchResults: []
-    };
+    let searchTerm = "Looking...";
+    let startState = produceInitialState();
+    startState.searchTerm = searchTerm;
+    startState.searchPending = true;
     let searchSuccessAction = {
       type: actions.SEARCH_FAILED,
       message: "It went badly"
     };
-    expect(searchReducer(state, searchSuccessAction)).toEqual({
-      searchPending: false,
-      searchTerm: "Looking...",
-      searchErrorMessage: "It went badly",
-      searchResults: []
-    });
+    let desiredState = produceInitialState();
+    desiredState.searchPending = false;
+    desiredState.searchTerm = searchTerm;
+    desiredState.searchErrorMessage = "It went badly";
+    expect(searchReducer(startState, searchSuccessAction)).toEqual(desiredState);
   });
 });
