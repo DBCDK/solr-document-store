@@ -1,5 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonpCharacterEscapes;
+import dk.dbc.search.solrdocstore.openagency.libraryrules.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +22,7 @@ import java.util.List;
 @Path("")
 public class FrontendAPIBean {
     private static final Logger log = LoggerFactory.getLogger(FrontendAPIBean.class);
+    private static final JSONParser parser = new JSONParser();
 
     @Inject
     BibliographicBean bibliographicBean;
@@ -36,13 +40,29 @@ public class FrontendAPIBean {
      * @return Response
      */
     @GET
-    @Path("getBibliographicRecord/{bibliographicRecordId}")
+    @Path("getBibliographicRecords/bibliographicRecordId/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getBibliographicKeys(@PathParam("bibliographicRecordId") String bibliographicRecordId) {
         log.info("Requesting bibliographic record id: {}", bibliographicRecordId);
 
         // Must be queried with index keys set, because of the Jackson parser ignores lazy loading
         List<BibliographicEntity> res = bibliographicBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId);
+        return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
+    }
+
+    @GET
+    @Path("getBibliographicRecords/repositoryId/{repositoryId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getBibliographicKeysByRepositoryId(@PathParam("repositoryId") String repositoryID) {
+
+        log.info("Requesting bibliographic record with repository id: {}",repositoryID);
+
+        // Escaping quotes to avoid parameter injections
+        String param = "{\"rec.repositoryId\":[\""+repositoryID.replaceAll("\"","\\\"")+"\"]}";
+        List<BibliographicEntity> res = entityManager.createNativeQuery("SELECT b.* FROM bibliographicsolrkeys b WHERE b.indexkeys @> ?::jsonb",BibliographicEntity.class)
+                .setParameter(1,param)
+                .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("bibPostWithIndexKeys"))
+                .getResultList();
         return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
     }
 
