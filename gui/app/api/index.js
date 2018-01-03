@@ -1,3 +1,6 @@
+export const SEARCH_BIB_ID = "searchBibId";
+export const SEARCH_REPO_ID = "searchRepoId";
+
 let parse = res => {
   if (res.status === 200) return res.json();
   else if (res.status === 400)
