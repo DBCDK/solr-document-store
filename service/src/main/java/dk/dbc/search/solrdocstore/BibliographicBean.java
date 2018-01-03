@@ -57,6 +57,19 @@ public class BibliographicBean {
         return query.setParameter("bibId",bibliographicRecordId).getResultList();
     }
 
+    /**
+     * Query bibliographic posts with the indexKey field set. This is necessary for the API, as the Jackson parser does
+     * not use the getter, thereby not using the lazy load.
+     * @param bibliographicRecordId
+     * @return All bibliographic posts matching the record id
+     */
+    public List<BibliographicEntity> getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId) {
+        TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
+                "WHERE b.bibliographicRecordId = :bibId",BibliographicEntity.class)
+                .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("bibPostWithIndexKeys"));
+        return query.setParameter("bibId",bibliographicRecordId).getResultList();
+    }
+
     public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);

@@ -41,7 +41,8 @@ public class FrontendAPIBean {
     public Response getBibliographicKeys(@PathParam("bibliographicRecordId") String bibliographicRecordId) {
         log.info("Requesting bibliographic record id: {}", bibliographicRecordId);
 
-        List<BibliographicEntity> res = bibliographicBean.getBibliographicEntities(bibliographicRecordId);
+        // Must be queried with index keys set, because of the Jackson parser ignores lazy loading
+        List<BibliographicEntity> res = bibliographicBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId);
         return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
     }
 
