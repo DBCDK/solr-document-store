@@ -5,17 +5,17 @@ import {
   SEARCH_SELECT_PARAMETER
 } from "../actions/searching";
 import update from "immutability-helper";
-import { SEARCH_BIB_ID, SEARCH_REPO_ID } from "../api";
+import { SEARCH_BIB_ID } from "../api";
 
-const initialState = {
+export const produceInitialState = () => ({
   searchPending: false,
   searchTerm: "",
   searchErrorMessage: "",
   searchParameter: SEARCH_BIB_ID,
   searchResults: []
-};
+});
 
-export default function search(state = initialState, action = {}) {
+export default function search(state = produceInitialState(), action = {}) {
   switch (action.type) {
     case SEARCH_SUCCESS:
       return update(state, {
@@ -37,7 +37,7 @@ export default function search(state = initialState, action = {}) {
     case SEARCH_SELECT_PARAMETER:
       return update(state, {
         searchParameter: { $set: action.parameter }
-      })
+      });
     default:
       return state;
   }

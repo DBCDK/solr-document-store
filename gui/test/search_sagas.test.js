@@ -1,6 +1,6 @@
 import configureStore from "../app/reducers/configure_store";
-import { takeLatest, call, put } from "redux-saga/effects";
-import { watchSearch, fetchBibliographicPost } from "../app/sagas/index";
+import { takeLatest, call, put, select } from "redux-saga/effects";
+import { watchSearch, fetchBibliographicPost, getSearchParameter } from "../app/sagas/index";
 import {
   SEARCH_BIB_RECORD_ID,
   searchBibRecord,
@@ -10,7 +10,7 @@ import {
 // A bit ugly, but can't make the __mocks__ thing working
 jest.mock("../app/api", () => {
   return {
-    fetchBibliographicPost(searchTerm) {
+    fetchBibliographicPost(searchTerm,parameter) {
       return new Promise((resolve, reject) => {
         switch (searchTerm) {
           case "4321":
@@ -49,7 +49,10 @@ describe("Search saga unit test", () => {
 
     // Testing next step in saga is a call to api with appropriate search term
     expect(gen.next().value).toEqual(
-      call(api.fetchBibliographicPost, searchAction.searchTerm)
+      select(getSearchParameter)
+    );
+    expect(gen.next().value).toEqual(
+        call(api.fetchBibliographicPost, searchAction.searchTerm, undefined)
     );
     // Mock result of fetch request
     let mockResult = {
