@@ -10,7 +10,7 @@ let parse = res => {
 export default {
   fetchBibliographicPost(searchTerm) {
     return fetch(
-      'api/getBibliographicRecord/' + encodeURIComponent(searchTerm)
+      'api/getBibliographicRecords/bibliographicRecordId/' + encodeURIComponent(searchTerm)
     ).then(parse);
   },
   pullRelatedHoldings(bibliographicRecordId, bibliographicAgencyId) {
