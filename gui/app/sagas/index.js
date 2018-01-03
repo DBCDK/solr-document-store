@@ -6,7 +6,8 @@ import api from "../api";
 
 export function* fetchBibliographicPost(action) {
   try {
-    const bibPosts = yield call(api.fetchBibliographicPost, action.searchTerm);
+    const parameter = yield select(state => state.search.searchParameter);
+    const bibPosts = yield call(api.fetchBibliographicPost, action.searchTerm, parameter);
     yield put(searchActions.searchSuccess(bibPosts.result));
   } catch (e) {
     console.log("We had the error: " + e.message);
