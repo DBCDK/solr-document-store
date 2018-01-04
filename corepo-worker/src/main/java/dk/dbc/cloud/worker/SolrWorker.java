@@ -317,13 +317,18 @@ public class SolrWorker implements MessageListener {
                         throw ex;
                     }
                     sendToDeadPidQueue(pid, "Redelivery limit reached, " + LogAppender.getCauses(ex));
+                    log.error("Sent to dead pid queue: {}", ex.getMessage());
+                    log.debug("Sent to dead pid queue: ", ex);
                 } else {
                     sendToDeadPidQueue(pid, LogAppender.getCauses(ex));
+                    log.error("Sent to dead pid queue: {}", ex.getMessage());
+                    log.debug("Sent to dead pid queue: ", ex);
                 }
             }
 
         } catch (Exception ex) {
             log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED), "Unable to process message {}", message, ex);
+            log.debug("Error processing message: ", ex);
             failureHandler.failure();
             throw new EJBException(ex.getMessage());
         } finally {
