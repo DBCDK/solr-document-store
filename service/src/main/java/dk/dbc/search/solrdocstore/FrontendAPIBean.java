@@ -1,8 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonpCharacterEscapes;
-import dk.dbc.search.solrdocstore.openagency.libraryrules.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +19,6 @@ import java.util.List;
 @Path("")
 public class FrontendAPIBean {
     private static final Logger log = LoggerFactory.getLogger(FrontendAPIBean.class);
-    private static final JSONParser parser = new JSONParser();
 
     @Inject
     BibliographicBean bibliographicBean;
