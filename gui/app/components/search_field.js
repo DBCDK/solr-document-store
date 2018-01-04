@@ -12,7 +12,6 @@ class SearchField extends React.Component {
     this.handleSearchTyped = this.handleSearchTyped.bind(this);
     this.searchSubmit = this.searchSubmit.bind(this);
     this.onKeyPressed = this.onKeyPressed.bind(this);
-    this.selectSearchParameter = this.selectSearchParameter.bind(this);
     this.selectSearchBibId = this.selectSearchBibId.bind(this);
     this.selectSearchRepoId = this.selectSearchRepoId.bind(this);
   }
@@ -73,15 +72,11 @@ class SearchField extends React.Component {
   }
 
   selectSearchRepoId(event){
-    this.selectSearchParameter(SEARCH_REPO_ID);
+    this.props.selectParameter(SEARCH_REPO_ID)
   }
 
   selectSearchBibId(event){
-    this.selectSearchParameter(SEARCH_BIB_ID);
-  }
-
-  selectSearchParameter(param) {
-    this.props.selectParameter(param)
+    this.props.selectParameter(SEARCH_BIB_ID)
   }
 
   searchSubmit() {
