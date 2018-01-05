@@ -20,7 +20,7 @@ package dk.dbc.search.solrdocstore;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import javax.persistence.EntityManager;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -43,9 +43,9 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> {
 
             EnqueueSupplierBean bean = new EnqueueSupplierBean();
-            bean.config = new Config() {
+            bean.daemon = new QueueRulesDaemon() {
                 @Override
-                public List<String> getManifestationQueues() {
+                public Collection<String> getManifestationQueues() {
                     return Arrays.asList("a", "b");
                 }
             };
