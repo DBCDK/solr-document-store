@@ -89,7 +89,7 @@ module.exports = {
           port: 8080
         },
         pathRewrite: {
-          "^/development/api": "/solr-doc-store/api"
+          "^/development/api": "/api"
         }
       }
     }
