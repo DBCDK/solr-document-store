@@ -82,6 +82,11 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
     public void syncWithDatabase() throws Exception {
         System.out.println("syncWithDatabase");
 
+        // This is only testing of LISTEN/NOTIFY
+        // Logic testing is in QueueRulesBeanIT, since
+        // the interface for creating/deleting queuerules
+        // is much simpler there.
+
         assertThat("Start with empty queuerule", daemon.getManifestationQueues().isEmpty(), is(true));
         try (Connection connection = datasource.getConnection() ;
              Statement stmt = connection.createStatement()) {
