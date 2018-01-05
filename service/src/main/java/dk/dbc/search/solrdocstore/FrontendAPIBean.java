@@ -60,7 +60,7 @@ public class FrontendAPIBean {
                                        @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
         log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",
                 bibliographicRecordId,bibliographicAgencyId);
-        List<HoldingsItemEntity> res = holdingsItemBean.getRelatedHoldings(bibliographicRecordId, bibliographicAgencyId);
+        List<HoldingsItemEntity> res = holdingsItemBean.getRelatedHoldingsWithIndexKeys(bibliographicRecordId, bibliographicAgencyId);
         return Response.ok(new FrontendReturnListType<>(res),MediaType.APPLICATION_JSON).build();
     }
 
