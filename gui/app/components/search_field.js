@@ -17,10 +17,10 @@ class SearchField extends React.Component {
   }
 
   render() {
-    let load = this.props.pendingSearch ? (
+    const load = this.props.pendingSearch ? (
       <i className="fa fa-refresh fa-spin fa-fw" aria-hidden="true" />
     ) : null;
-    let {
+    const {
       pendingSearch,
       searchParameter
     } = this.props;
