@@ -23,7 +23,7 @@ import dk.dbc.pgqueue.QueueSupplier;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +37,10 @@ public class EnqeueService<T> {
     private static final Logger log = LoggerFactory.getLogger(EnqeueService.class);
 
     private final BiFunction<T, Integer, QueueJob> jobCreator;
-    private final List<String> queueNames;
+    private final Collection<String> queueNames;
     private final PreparedQueueSupplier queueSupplier;
 
-    public EnqeueService(Connection connection, List<String> queueNames, BiFunction<T, Integer, QueueJob> jobCreator) {
+    public EnqeueService(Connection connection, Collection<String> queueNames, BiFunction<T, Integer, QueueJob> jobCreator) {
         this.jobCreator = jobCreator;
         this.queueNames = queueNames;
         this.queueSupplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
