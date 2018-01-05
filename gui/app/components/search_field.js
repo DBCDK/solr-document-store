@@ -3,6 +3,9 @@ import { connect } from "react-redux";
 import {searchBibRecord, selectSearchParameter} from "../actions/searching";
 import {SEARCH_BIB_ID, SEARCH_REPO_ID} from "../api";
 
+export const SEARCH_BIB_ID_BUTTON_TITLE = "bibliographic record ID";
+export const SEARCH_REPO_ID_BUTTON_TITLE = "repository ID";
+
 class SearchField extends React.Component {
   constructor(props) {
     super(props);
@@ -43,21 +46,21 @@ class SearchField extends React.Component {
         <div className="btn-group px-4" role="group" aria-label="Search parameter options">
           <button
               type="button"
-              className={"btn btn-secondary"+((searchParameter === SEARCH_BIB_ID) ? " active" : "")}
+              className={"btn btn-select-search-bib-id btn-secondary"+((searchParameter === SEARCH_BIB_ID) ? " active" : "")}
               onClick={this.selectSearchBibId}
           >
-            bibliographic record ID
+            {SEARCH_BIB_ID_BUTTON_TITLE}
           </button>
           <button
               type="button"
-              className={"btn btn-secondary"+((searchParameter === SEARCH_REPO_ID) ? " active" : "")}
+              className={"btn btn-select-search-repo-id btn-secondary"+((searchParameter === SEARCH_REPO_ID) ? " active" : "")}
               onClick={this.selectSearchRepoId}
           >
-            repository ID
+            {SEARCH_REPO_ID_BUTTON_TITLE}
           </button>
         </div>
         <button
-          className="btn btn-primary btn-lg my-2"
+          className="btn btn-primary btn-lg my-2 search-btn"
           disabled={pendingSearch}
           onClick={this.searchSubmit}
         >
