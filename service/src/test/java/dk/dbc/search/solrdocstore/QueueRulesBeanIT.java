@@ -94,7 +94,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertNotNull("queuerule for foo exists", getFoo());
         System.out.println("getAllQueueRules() = " + getAllQueueRules());
         assertThat("queuerule table is no longer empty", getAllQueueRules().isEmpty(), is(false));
-        waitForQueuesEmptyIs(false);
+        waitForQueueCountIs(1);
         assertThat("Daemon has heard about the new queue", daemon.getManifestationQueues(), contains("foo"));
 
         System.out.println(" - del foo - DO");
@@ -103,13 +103,35 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println(" - del foo - DONE");
         assertNull("Non existing queue foo", getFoo());
         assertThat("queuerule table is again empty", getAllQueueRules().isEmpty(), is(true));
-        waitForQueuesEmptyIs(true);
+        waitForQueueCountIs(0);
         assertThat("Daemon has no longer knows about the queue", daemon.getManifestationQueues().isEmpty(), is(true));
     }
 
-    public void waitForQueuesEmptyIs(boolean isEmpty) throws InterruptedException {
+    @Test
+    public void multipleQueues() throws Exception {
+        System.out.println("multiple queues");
+        assertTrue("queuerule table is empty", getAllQueueRules().isEmpty());
+
+        System.out.println(" - set foo");
+        env().getPersistenceContext().run(() -> bean.setQueueRule(new QueueRuleEntity("foo")));
+        System.out.println(" - set bar");
+        env().getPersistenceContext().run(() -> bean.setQueueRule(new QueueRuleEntity("bar")));
+        waitForQueueCountIs(2);
+        assertThat("Daemon has heard about the new queues", daemon.getManifestationQueues(), containsInAnyOrder("foo", "bar"));
+
+        System.out.println(" - del foo");
+        QueueRuleEntity foo = getFoo();
+        env().getPersistenceContext().run(() -> bean.delQueueRule(foo));
+
+        waitForQueueCountIs(1);
+        assertThat("Daemon has forgotten about foo", daemon.getManifestationQueues(), not(containsInAnyOrder("foo")));
+        assertThat("Daemon still knoes about bar", daemon.getManifestationQueues(), containsInAnyOrder("bar"));
+
+    }
+
+    public void waitForQueueCountIs(int count) throws InterruptedException {
         for (int i = 0 ; i < 1000 ; i++) {
-            if (daemon.getManifestationQueues().isEmpty() == isEmpty) {
+            if (daemon.getManifestationQueues().size() == count) {
                 break;
             }
             Thread.sleep(1L);
