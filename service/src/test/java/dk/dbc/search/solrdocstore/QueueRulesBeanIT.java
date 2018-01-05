@@ -153,7 +153,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         waitForQueueCountIs(1);
         assertThat("Daemon has forgotten about foo", daemon.getManifestationQueues(), not(containsInAnyOrder("foo")));
-        assertThat("Daemon still knoes about bar", daemon.getManifestationQueues(), containsInAnyOrder("bar"));
+        assertThat("Daemon still knows about bar", daemon.getManifestationQueues(), containsInAnyOrder("bar"));
     }
 
     @Test
