@@ -36,12 +36,12 @@ public class EnqueueSupplierBean {
     EntityManager entityManager;
 
     @Inject
-    Config config;
+    QueueRulesDaemon daemon;
 
     public EnqeueService<AgencyItemKey> getManifestationEnqueueService() {
         // EclipseLink specific
         Connection connection = entityManager.unwrap(java.sql.Connection.class);
-        return new EnqeueService<>(connection, config.getManifestationQueues(),
+        return new EnqeueService<>(connection, daemon.getManifestationQueues(),
                                    (key, commitWithin) ->
                                    new QueueJob(key.agencyId,
                                                 key.bibliographicRecordId,
