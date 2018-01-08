@@ -180,7 +180,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
 
 
-    //TODO: @Test
+    @Test
     public void commonAndSchoolRecords(){
         /*
          * Common & School records
@@ -190,9 +190,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Queue contains [870970, 300000], clear queue
          * Queue is empty
          *
-         * add Holding (FBS) -> Holding attaches to Bib (870970)
          * add Holding (SCHOOL) -> Holding attaches to Bib (300000)
-         * Queue contains [870970, 300000], clear queue
+         * Queue contains [300000], clear queue
          *
          * Delete Bib(300000)
          * Holding reattaches to 870970
@@ -203,7 +202,25 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Queue contains (OWN, 870970)
          *
          */
-        fail("Not implemented");
+        env().getPersistenceContext().run( ()-> {
+            String id = "test";
+            addBibliographic(commonAgency,id);
+            BibliographicEntity toDelete = addBibliographic(schoolCommonAgency, id);
+            queueIs(em,
+                    queueItem(commonAgency,id),
+                    queueItem(schoolCommonAgency,id));
+            clearQueue(em);
+
+            addHoldings(schoolAgency,id);
+            queueIs(em,
+                    queueItem(schoolCommonAgency,id));
+            clearQueue(em);
+
+            deleteBibliographic(toDelete);
+            queueIs(em,
+                    queueItem(commonAgency,id),
+                    queueItem(schoolCommonAgency,id));
+        });
 
     }
 
