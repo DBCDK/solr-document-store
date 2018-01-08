@@ -116,7 +116,7 @@ VALUES (300200, 'onDeleteSchool', FALSE, '{"something": ["true"]}' :: JSONB, '55
 INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, HOLDINGSBIBLIOGRAPHICRECORDID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID)
 VALUES (320520,'onDeleteSchool','onDeleteSchool',300200);
 INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, HOLDINGSBIBLIOGRAPHICRECORDID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID)
-VALUES (320521,'onDeleteSchool','onDeleteSchool',870970);
+VALUES (320521,'onDeleteSchool','onDeleteSchool',300000);
 
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (320520, 'onDeleteSchool', '[]' :: JSONB, 'revision', 'track');
@@ -247,20 +247,20 @@ INSERT INTO bibliographicToBibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGR
 VALUES ('onRecreateSupersede','onRecreateSupersedeNew');
 -- Re-create supersede FBSSchool
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
-VALUES (300000, 'onRecreateSchoolSupersedeNew', FALSE, '{"somethingElse": ["true"]}' :: JSONB, '5544:higher', 'track:higher', 'unit:higher', 'work:higher');
+VALUES (300000, 'onRecreateSchoolSupersedeNew', TRUE, '{"somethingElse": ["true"]}' :: JSONB, '5544:higher', 'track:higher', 'unit:higher', 'work:higher');
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
-VALUES (870970, 'onRecreateSchoolSupersedeNew', TRUE, '{"somethingElse": ["true"]}' :: JSONB, '5544:higher', 'track:higher', 'unit:higher', 'work:higher');
+VALUES (870970, 'onRecreateSchoolSupersedeNew', FALSE, '{"somethingElse": ["true"]}' :: JSONB, '5544:higher', 'track:higher', 'unit:higher', 'work:higher');
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
 VALUES (300500, 'onRecreateSchoolSupersedeNew', TRUE, '{"somethingElse": ["true"]}' :: JSONB, '5544:higher', 'track:higher', 'unit:higher', 'work:higher');
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
 VALUES (300502, 'onRecreateSchoolSupersedeNew', TRUE, '{"somethingElse": ["true"]}' :: JSONB, '5544:higher', 'track:higher', 'unit:higher', 'work:higher');
 
 INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, HOLDINGSBIBLIOGRAPHICRECORDID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID)
-VALUES (300500,'onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew',300000);
+VALUES (300500,'onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew',870970);
 INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, HOLDINGSBIBLIOGRAPHICRECORDID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID)
-VALUES (300501,'onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew',300000);
+VALUES (300501,'onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew',870970);
 INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, HOLDINGSBIBLIOGRAPHICRECORDID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID)
-VALUES (300502,'onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew',300000);
+VALUES (300502,'onRecreateSchoolSupersede','onRecreateSchoolSupersedeNew',870970);
 
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (600500, 'onRecreateSchoolSupersede', '[]' :: JSONB, 'revision', 'track');
