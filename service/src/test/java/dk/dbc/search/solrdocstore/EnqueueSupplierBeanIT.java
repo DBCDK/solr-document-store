@@ -224,7 +224,35 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     }
 
-    //TODO: @Test
+    @Test
+    public void holdingsUpdate() {
+        /*
+         * Add Bib( 870970 )
+         * Add Holding ( FBS )
+         * Queue contains 870970
+         * Clear queue
+         *
+         * Fetch Holding back, update some field
+         * Queue contains 870970
+         */
+        env().getPersistenceContext().run(() -> {
+            String id = "test";
+            addBibliographic(commonAgency,id);
+            HoldingsItemEntity h = addHoldings(fbsAgency, id);
+            queueIs(em,
+                    queueItem(commonAgency,id));
+            clearQueue(em);
+
+            h.trackingId = "NEW";
+            holdingsItemBean.setHoldingsKeys(h);
+            queueIs(em,
+                    queueItem(commonAgency,id));
+        });
+
+    }
+
+
+        //TODO: @Test
     public void superseeds(){
         /*
          * Superseeds
@@ -239,7 +267,28 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Queue contains 870970: 1,2,3,4
          *
          */
+        env().getPersistenceContext().run(()->{
+            List<String> ids = Arrays.asList("test1","test2","test3");
+            String superseedId = "test4";
 
+            for(String id : ids){
+                addBibliographic(commonAgency,id);
+                addHoldings(fbsAgency,id);
+            }
+            queueIs(em,
+                    queueItem(commonAgency,"test1"),
+                    queueItem(commonAgency,"test2"),
+                    queueItem(commonAgency,"test3"));
+            clearQueue(em);
+
+            addBibliographic(commonAgency,superseedId,Optional.of(ids));
+            queueIs(em,
+                    queueItem(commonAgency,"test1"),
+                    queueItem(commonAgency,"test2"),
+                    queueItem(commonAgency,"test3"),
+                    queueItem(commonAgency,"test4"));
+
+        });
 
     }
 
