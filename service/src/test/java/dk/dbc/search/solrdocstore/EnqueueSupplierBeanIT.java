@@ -45,7 +45,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void onTest(){
         bibliographicBean = BeanFactoryUtil.createBibliographicBean( env() );
-        holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(bibliographicBean.entityManager, bibliographicBean.h2bBean, bibliographicBean.queue);
+        holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(bibliographicBean.entityManager, bibliographicBean.h2bBean);
         em = bibliographicBean.entityManager;
     }
 
@@ -94,6 +94,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private Integer nonfbsAgency = 800111;
     private Integer schoolAgency = 300111;
     private Integer fbsAgency = 600111;
+    private Integer commonAgency = LibraryConfig.COMMON_AGENCY;
+    private Integer schoolCommonAgency = LibraryConfig.SCHOOL_COMMON_AGENCY;
 
     @Test
     public void checkConfig(){
@@ -115,12 +117,13 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Queue contains OWN
          */
         env().getPersistenceContext().run(() -> {
-            BibliographicEntity fbsOwnEntryToDelete = addBibliographic(nonfbsAgency, "test");
-            addHoldings(nonfbsAgency, "test");
+            String id = "test";
+            BibliographicEntity fbsOwnEntryToDelete = addBibliographic(nonfbsAgency, id);
+            addHoldings(nonfbsAgency, id);
 
             // Check setup of base holdings are showing up
             queueIs(em,
-                    queueItem(nonfbsAgency, "test")
+                    queueItem(nonfbsAgency, id)
             );
 
             // No need to keep the old updates.
@@ -128,30 +131,51 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             deleteBibliographic(fbsOwnEntryToDelete);
             queueIs(em,
-                    queueItem(nonfbsAgency, "test")
+                    queueItem(nonfbsAgency, id)
             );
 
         });
 
     }
 
-    //TODO: @Test
-    public void localBibAndHoldings(){
+    @Test
+    public void localAndCommonBibAndHoldings(){
         /*
          * Local bib and holdings
          * ----------------------
          * Add Bib (870970)
          * Add Bib (OWN)
-         * Queue contains (OWN, 870970), clear queue
-         * Add Holding (OWN) -> Holding attaches to Bib (OWN)
          * Queue contains (OWN, 870970)
+         * clear queue
+         *
+         * Add Holding (OWN) -> Holding attaches to Bib (OWN)
+         * Queue contains (OWN)
          * Clear queue
          *
          * Delete Bib(OWN)
          * Holding reattaches to 870970
-         * Queue contains both.
+         * Queue contains (870970, OWN).
          */
-        fail("Not implemented");
+        env().getPersistenceContext().run( () -> {
+            String id = "test";
+            addBibliographic(commonAgency, id);
+            BibliographicEntity fbsToDelete = addBibliographic(fbsAgency, id);
+            queueIs(em,
+                    queueItem(commonAgency, id),
+                    queueItem(fbsAgency, id)
+                    );
+            clearQueue(em);
+
+            addHoldings(fbsAgency, id);
+            queueIs(em,
+                    queueItem(fbsAgency, id));
+            clearQueue(em);
+
+            deleteBibliographic(fbsToDelete);
+            queueIs(em,
+                    queueItem(fbsAgency, id),
+                    queueItem(commonAgency, id));
+        });
     }
 
 

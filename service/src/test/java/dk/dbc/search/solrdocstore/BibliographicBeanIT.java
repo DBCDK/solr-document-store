@@ -43,6 +43,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         bean.h2bBean = new HoldingsToBibliographicBean();
         bean.h2bBean.entityManager = em;
         bean.h2bBean.libraryConfig = bean.libraryConfig;
+        bean.h2bBean.queue = bean.queue;
         executeScriptResource("/bibliographicUpdate.sql");
     }
 

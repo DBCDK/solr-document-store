@@ -24,24 +24,25 @@ public class BeanFactoryUtil {
         bean.entityManager = em;
         bean.libraryConfig = config;
         bean.queue = createEnqueueSupplier(env,em);
-        bean.h2bBean = createHoldingsToBibliographicBean(em,config);
+        bean.h2bBean = createHoldingsToBibliographicBean(em,config, bean.queue);
         return bean;
     }
 
-    public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em, LibraryConfig config){
+    public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em, LibraryConfig config, EnqueueSupplierBean queue){
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
         bean.entityManager = em;
         bean.libraryConfig = config;
+        bean.queue = queue;
         return bean;
     }
 
     public static EnqueueSupplierBean createEnqueueSupplier(JpaTestEnvironment env, EntityManager entityManager){
         EnqueueSupplierBean bean = new EnqueueSupplierBean();
         bean.daemon = new QueueRulesDaemon() {
-            @Override
-            public Collection<String> getManifestationQueues() {
-                return Arrays.asList("a");
-            }
+                @Override
+                public Collection<String> getManifestationQueues() {
+                    return Arrays.asList("a");
+                }
         };
         bean.entityManager = entityManager;
         env.getPersistenceContext().run( () -> {
@@ -50,11 +51,10 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static HoldingsItemBean createHoldingsItemBean(EntityManager em, HoldingsToBibliographicBean h2bBean, EnqueueSupplierBean queue) {
+    public static HoldingsItemBean createHoldingsItemBean(EntityManager em, HoldingsToBibliographicBean h2bBean) {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = em;
         bean.h2bBean = h2bBean;
-        bean.queue = queue;
         return bean;
     }
 }
