@@ -24,6 +24,7 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

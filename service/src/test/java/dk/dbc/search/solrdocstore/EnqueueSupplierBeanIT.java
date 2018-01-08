@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.QueueTestUtil.clearQueue;
 import static dk.dbc.search.solrdocstore.QueueTestUtil.queueIs;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
@@ -89,98 +91,118 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
 
-    public void queueReactsToChanges()  {
-        int fbsLibrary       = 471100;
-        int fbsSchoolLibrary = 222222;
+    private Integer nonfbsAgency = 800111;
+    private Integer schoolAgency = 300111;
+    private Integer fbsAgency = 600111;
 
-        String bibliographicRecordId1 = "q1";
-        String bibliographicRecordId2 = "q2";
-        String bibliographicRecordId3 = "q3";
-        String bibliographicRecordId4 = "q4";
+    @Test
+    public void checkConfig(){
+        assertEquals(LibraryConfig.LibraryType.NonFBS, bibliographicBean.libraryConfig.getLibraryType(nonfbsAgency));
+        assertEquals(LibraryConfig.LibraryType.FBS, bibliographicBean.libraryConfig.getLibraryType(fbsAgency));
+        assertEquals(LibraryConfig.LibraryType.FBSSchool, bibliographicBean.libraryConfig.getLibraryType(schoolAgency));
+    }
 
+
+    @Test
+    public void singleRecords(){
+        /*
+         * Single records
+         * --------------
+         * Add Bib (OWN:NONFBS), with (OWN) holding
+         * Queue contains OWN, clear queue
+         *
+         * Delete holding
+         * Queue contains OWN
+         */
         env().getPersistenceContext().run(() -> {
-            addBibliographic(LibraryConfig.COMMON_AGENCY,bibliographicRecordId1);
-            addHoldings(fbsLibrary,bibliographicRecordId1);
-
-            addBibliographic(LibraryConfig.COMMON_AGENCY,bibliographicRecordId2);
-            addHoldings(fbsLibrary,bibliographicRecordId2);
-
-            addBibliographic(LibraryConfig.COMMON_AGENCY,bibliographicRecordId3);
-            addHoldings(fbsLibrary,bibliographicRecordId3);
-
-            BibliographicEntity fbsSchoolCommonEntryToDelete = addBibliographic(LibraryConfig.SCHOOL_COMMON_AGENCY, bibliographicRecordId3);
-
-            addHoldings(fbsSchoolLibrary,bibliographicRecordId3);
-
-            BibliographicEntity fbsOwnEntryToDelete = addBibliographic(fbsLibrary,bibliographicRecordId1);
-            addHoldings(fbsLibrary,bibliographicRecordId1);
+            BibliographicEntity fbsOwnEntryToDelete = addBibliographic(nonfbsAgency, "test");
+            addHoldings(nonfbsAgency, "test");
 
             // Check setup of base holdings are showing up
             queueIs(em,
-                    queueItem(LibraryConfig.COMMON_AGENCY, bibliographicRecordId1),
-                    queueItem(LibraryConfig.COMMON_AGENCY, bibliographicRecordId2),
-                    queueItem(LibraryConfig.COMMON_AGENCY, bibliographicRecordId3),
-                    queueItem(LibraryConfig.SCHOOL_COMMON_AGENCY, bibliographicRecordId3),
-                    queueItem(fbsLibrary,bibliographicRecordId1)
+                    queueItem(nonfbsAgency, "test")
             );
 
             // No need to keep the old updates.
             clearQueue(em);
 
-            // Delete 471100's own version of "q1"
-            deleteBibliographic( fbsOwnEntryToDelete );
-
-            // The holdings on "q1" will now the moved to the common bibliographic record.
-            // Expect notification on both the deleted own-record and the common record.
-
+            deleteBibliographic(fbsOwnEntryToDelete);
             queueIs(em,
-                    queueItem(fbsLibrary,bibliographicRecordId1),
-                    queueItem( LibraryConfig.COMMON_AGENCY,bibliographicRecordId1));
-
-            // No need to keep the old updates.
-            clearQueue(em);
-
-            // Add a holding in fbsLibrary to "q2"
-            addHoldings(fbsLibrary,bibliographicRecordId2);
-            // Expect notification on own book
-            queueIs(em,
-                    queueItem( LibraryConfig.COMMON_AGENCY, bibliographicRecordId2));
-
-            clearQueue(em);
-
-            // Will attach to common school record
-            addHoldings(fbsSchoolLibrary,bibliographicRecordId3);
-
-            queueIs(em,
-                    queueItem(LibraryConfig.SCHOOL_COMMON_AGENCY,bibliographicRecordId3) );
-
-            clearQueue(em);
-
-            deleteBibliographic(fbsSchoolCommonEntryToDelete);
-
-            queueIs(em,
-                    queueItem(LibraryConfig.SCHOOL_COMMON_AGENCY,bibliographicRecordId3),
-                    queueItem(LibraryConfig.COMMON_AGENCY,bibliographicRecordId3));
-
-            // At this point only LibraryConfig.COMMON_AGENCY, bibliographicRecordId1-3 exist
-            // and all holdings are pointing to them.
-
-            addBibliographic(LibraryConfig.COMMON_AGENCY, bibliographicRecordId4,
-                    Optional.of(Arrays.asList( bibliographicRecordId1,bibliographicRecordId2,bibliographicRecordId3)));
-
-            queueIs(em,
-                    queueItem(LibraryConfig.COMMON_AGENCY,bibliographicRecordId1),
-                    queueItem(LibraryConfig.COMMON_AGENCY,bibliographicRecordId2),
-                    queueItem(LibraryConfig.COMMON_AGENCY,bibliographicRecordId3),
-                    queueItem(LibraryConfig.COMMON_AGENCY,bibliographicRecordId4)
+                    queueItem(nonfbsAgency, "test")
             );
 
         });
+
     }
 
-    private void flushAndFail() {
-        em.flush(); fail("Hard stop");
+    //TODO: @Test
+    public void localBibAndHoldings(){
+        /*
+         * Local bib and holdings
+         * ----------------------
+         * Add Bib (870970)
+         * Add Bib (OWN)
+         * Queue contains (OWN, 870970), clear queue
+         * Add Holding (OWN) -> Holding attaches to Bib (OWN)
+         * Queue contains (OWN, 870970)
+         * Clear queue
+         *
+         * Delete Bib(OWN)
+         * Holding reattaches to 870970
+         * Queue contains both.
+         */
+        fail("Not implemented");
     }
+
+
+
+    //TODO: @Test
+    public void commonAndSchoolRecords(){
+        /*
+         * Common & School records
+         * -----------------------
+         * add Bib (870970), queue includes new Bib
+         * add Bib (300000)
+         * Queue contains [870970, 300000], clear queue
+         * Queue is empty
+         *
+         * add Holding (FBS) -> Holding attaches to Bib (870970)
+         * add Holding (SCHOOL) -> Holding attaches to Bib (300000)
+         * Queue contains [870970, 300000], clear queue
+         *
+         * Delete Bib(300000)
+         * Holding reattaches to 870970
+         * Queue contains [870970, 300000]
+         *
+         * Delete Bib(OWN)
+         * Holding reattaches to (FBS).
+         * Queue contains (OWN, 870970)
+         *
+         */
+        fail("Not implemented");
+
+    }
+
+    //TODO: @Test
+    public void superseeds(){
+        /*
+         * Superseeds
+         * ----------
+         * Add Bib(870970) rec 1,2,3
+         * Add Holdings (OWN:FBS) rec 1,2,3
+         * Attaches to Bib
+         * Queue contains 870970: 1,2,3
+         *
+         * Add Bib(870970) 4 (to superseed 1,2,3).
+         * Holdings reattaches to new Bib
+         * Queue contains 870970: 1,2,3,4
+         *
+         */
+
+
+    }
+
+
 
     private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId){
         return addBibliographic(agency,bibliographicRecordId,Optional.empty());
