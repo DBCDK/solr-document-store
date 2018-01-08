@@ -41,7 +41,7 @@ public class HoldingsToBibliographicBean {
                 attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
                 break;
             case FBSSchool:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY);
                 break;
         }
     }
@@ -60,7 +60,7 @@ public class HoldingsToBibliographicBean {
                         attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY);
                         break;
                     case FBSSchool:
-                        attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                        attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY);
                         break;
                 }
             }
