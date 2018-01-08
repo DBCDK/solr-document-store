@@ -1,9 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.*;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -18,10 +16,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 @Stateless
@@ -36,6 +32,9 @@ public class BibliographicBean {
     LibraryConfig libraryConfig;
 
     @Inject
+    EnqueueSupplierBean queue;
+
+    @Inject
     HoldingsToBibliographicBean h2bBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
@@ -47,7 +46,7 @@ public class BibliographicBean {
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        addBibliographicKeys(request.asBibliographicEntity(), request.superceds);
+        addBibliographicKeys(request.asBibliographicEntity(), request.superceds, Optional.empty());
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
@@ -71,6 +70,10 @@ public class BibliographicBean {
     }
 
     public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
+        addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
+    }
+
+    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
 
@@ -162,9 +165,10 @@ public class BibliographicBean {
         entityManager.merge(h2b);
     }
 
+
     private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
         if (supercededs == null) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
         HashSet<String> changedBibliographicRecordIds = new HashSet<>();
         for (String superceded : supercededs) {
