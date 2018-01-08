@@ -39,6 +39,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 return LibraryType.FBS;
             }
         };
+        bean.queue = BeanFactoryUtil.createEnqueueSupplier(env(),em);
         bean.h2bBean = new HoldingsToBibliographicBean();
         bean.h2bBean.entityManager = em;
         bean.h2bBean.libraryConfig = bean.libraryConfig;

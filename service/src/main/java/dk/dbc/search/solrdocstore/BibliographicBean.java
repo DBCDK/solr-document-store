@@ -74,13 +74,16 @@ public class BibliographicBean {
     }
 
     public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
+        Set<AgencyItemKey> affectedKeys = new HashSet<>();
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
         if (dbbe == null) {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
-            updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+            affectedKeys.add( new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId));
+            Set<AgencyItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+            affectedKeys.addAll(updatedHoldings);
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
@@ -88,6 +91,7 @@ public class BibliographicBean {
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}",dbbe.deleted,bibliographicEntity.deleted);
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
+                affectedKeys.add ( new AgencyItemKey(bibliographicEntity.agencyId,bibliographicEntity.bibliographicRecordId));
                 entityManager.flush();
                 List<HoldingsToBibliographicEntity> relatedHoldings = (bibliographicEntity.deleted) ?
                         h2bBean.getRelatedHoldingsToBibliographic(dbbe.agencyId,dbbe.bibliographicRecordId) :
@@ -107,21 +111,23 @@ public class BibliographicBean {
         if (supersededRecordIds.size()>0){
             h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
         }
+        EnqueueAdapter.enqueueAll(queue,affectedKeys, commitWithin.orElse(null));
     }
 
     /*
      *
      */
-    private void updateHoldingsToBibliographic(int agency, String recordId) {
+    private Set<AgencyItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
         if (libraryConfig.getRecordType(agency) == SingleRecord) {
-            updateHoldingsSingleRecord(agency, recordId);
+            return updateHoldingsSingleRecord(agency, recordId);
         } else {
-            updateHoldingsForCommonRecords(agency, recordId);
+            return updateHoldingsForCommonRecords(agency, recordId);
         }
     }
 
-    private void updateHoldingsForCommonRecords(int agency, String recordId) {
+    private Set<AgencyItemKey> updateHoldingsForCommonRecords(int agency, String recordId) {
         TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
+        Set<AgencyItemKey> affectedKeys = new HashSet<>();
         query.setParameter("bibId", recordId);
 
         TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
@@ -145,17 +151,21 @@ public class BibliographicBean {
                     break;
             }
             addHoldingsToBibliographic(agency, recordId, holdingsAgency);
+            affectedKeys.add( new AgencyItemKey(agency,recordId));
         }
+        return affectedKeys;
     }
 
-    private void updateHoldingsSingleRecord(int agency, String recordId) {
+    private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
         TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
         query.setParameter("agency", agency);
         query.setParameter("bibId", recordId);
 
         if (query.getSingleResult() > 0) {
             addHoldingsToBibliographic(agency, recordId, agency);
+            return EnqueueAdapter.setOfOne(agency,recordId);
         }
+        return Collections.emptySet();
     }
 
     private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
