@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import java.sql.SQLException;
+import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,10 @@ public class HoldingsToBibliographicBean {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
+
+
+    @Inject
+    EnqueueSupplierBean queue;
 
     public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
@@ -123,31 +129,25 @@ public class HoldingsToBibliographicBean {
     }
 
     private void attachToAgency(HoldingsToBibliographicEntity expectedState) {
-
-        if (needToUpdate(expectedState)){
-            addAttachEventQueue(expectedState.holdingsAgencyId,expectedState.bibliographicRecordId);
-            entityManager.merge(expectedState);
-        }
-
-    }
-
-    private boolean needToUpdate(HoldingsToBibliographicEntity expectedState) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
-        if ((foundEntity!=null) && foundEntity.equals(expectedState)) {
-            return false;
+        if ((foundEntity!=null) && foundEntity.equals(expectedState)){
+            addToQueue(foundEntity.bibliographicAgencyId,foundEntity.bibliographicRecordId);
         }
-        return true;
+        addToQueue(expectedState.bibliographicAgencyId, expectedState.bibliographicRecordId);
+        entityManager.merge(expectedState);
+
     }
 
-    private HoldingsToBibliographicEntity createH2B(int attachToAgency, HoldingsToBibliographicKey itemKey) {
-        return new HoldingsToBibliographicEntity(
-                itemKey.holdingsAgencyId,
-                itemKey.holdingsBibliographicRecordId,
-                attachToAgency
-        );
+    private void addToQueue(int bibliographicAgencyId, String bibliographicRecordId) {
+        //if (1==1) return;
+        AgencyItemKey k = new AgencyItemKey(bibliographicAgencyId, bibliographicRecordId);
+        try {
+            queue.getManifestationEnqueueService().enqueue(k);
+        } catch (SQLException e) {
+            log.error("Failed to enqueue: " + k);
+            log.error("Failed to enqueue: " + k,e);
+            throw new PersistenceException("Failed to enqueue: " + k,e);
+        }
     }
 
-    private void addAttachEventQueue(int bibliographicAgencyId, String bibliographicRecordId) {
-        //TODO: Implement
-    }
 }

@@ -28,9 +28,6 @@ public class HoldingsItemBean {
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @Inject
-    EnqueueSupplierBean queue;
-
-    @Inject
     HoldingsToBibliographicBean h2bBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
