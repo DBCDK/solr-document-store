@@ -93,6 +93,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         };
         bibl = new BibliographicBean();
         bibl.entityManager = em;
+        bibl.queue = BeanFactoryUtil.createEnqueueSupplier(env(),em);
         bibl.h2bBean = new HoldingsToBibliographicBean();
         bibl.h2bBean.entityManager = em;
         bibl.h2bBean.libraryConfig = libraryConfig;
@@ -171,6 +172,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
             entity.deleted = true;
             bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
         });
+        clearQueue(dataSource);
         bean.queueAllManifestations("foo");
         queueIs(dataSource,
                 "foo,700000,a0", "foo,700000,a1", "foo,700000,a2",
@@ -203,6 +205,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
             entity.deleted = true;
             bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
         });
+        clearQueue(dataSource);
         bean.queueNotDeletedManifestations("foo");
         queueIs(dataSource,
                 "foo,700000,a0", "foo,700000,a1", "foo,700000,a2",
