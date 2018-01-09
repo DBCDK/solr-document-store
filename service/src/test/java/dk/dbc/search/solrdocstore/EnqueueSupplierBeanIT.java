@@ -251,8 +251,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     }
 
-
-        //TODO: @Test
+    @Test
     public void superseeds(){
         /*
          * Superseeds
@@ -281,12 +280,13 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                     queueItem(commonAgency,"test3"));
             clearQueue(em);
 
-            addBibliographic(commonAgency,superseedId,Optional.of(ids));
+            int commitWithin = 100;
+            addBibliographic(commonAgency,superseedId,Optional.of(ids), Optional.of(commitWithin));
             queueIs(em,
-                    queueItem(commonAgency,"test1"),
-                    queueItem(commonAgency,"test2"),
-                    queueItem(commonAgency,"test3"),
-                    queueItem(commonAgency,"test4"));
+                    queueItem(commonAgency,"test1", commitWithin),
+                    queueItem(commonAgency,"test2", commitWithin),
+                    queueItem(commonAgency,"test3", commitWithin),
+                    queueItem(commonAgency,"test4", commitWithin));
 
         });
 
@@ -298,8 +298,10 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         return addBibliographic(agency,bibliographicRecordId,Optional.empty());
     }
     private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed){
+        return addBibliographic(agency,bibliographicRecordId,superseed,Optional.empty());
+    }
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin){
         List<String> superseedList = superseed.orElse(Collections.emptyList());
-        Optional<Integer> commitWithin  = Optional.empty();
         BibliographicEntityRequest e = new BibliographicEntityRequest();
         e.agencyId = agency;
         e.bibliographicRecordId = bibliographicRecordId;
@@ -327,5 +329,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
     private String queueItem(int agency, String bibliographicRecordId){
         return "a," + agency + "," + bibliographicRecordId;
+    }
+    private String queueItem(int agency, String bibliographicRecordId, int commitWithin){
+        return "a," + agency + "," + bibliographicRecordId + "," + commitWithin;
     }
 }
