@@ -45,7 +45,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void onTest(){
         bibliographicBean = BeanFactoryUtil.createBibliographicBean( env() );
-        holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(bibliographicBean.entityManager, bibliographicBean.h2bBean);
+        holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(bibliographicBean.entityManager, bibliographicBean.queue, bibliographicBean.h2bBean);
         em = bibliographicBean.entityManager;
     }
 
@@ -244,7 +244,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             clearQueue(em);
 
             h.trackingId = "NEW";
-            holdingsItemBean.setHoldingsKeys(h);
+            holdingsItemBean.setHoldingsKeys(h, Optional.empty());
             queueIs(em,
                     queueItem(commonAgency,id));
         });
@@ -322,7 +322,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         e.indexKeys = Collections.emptyList();
         e.producerVersion = "1";
         e.trackingId = "IT";
-        holdingsItemBean.setHoldingsKeys(e);
+        holdingsItemBean.setHoldingsKeys(e, Optional.empty());
         return e;
     }
     private String queueItem(int agency, String bibliographicRecordId){
