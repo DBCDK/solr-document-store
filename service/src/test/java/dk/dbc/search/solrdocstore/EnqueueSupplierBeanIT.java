@@ -315,11 +315,6 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         bibliographicBean.addBibliographicKeys(ownRecord,Collections.emptyList(),Optional.empty());
     }
 
-    private void superseedBibliographic(int agencyId, String bibliographicRecordId, List<String> strings) {
-
-    }
-
-
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {
         HoldingsItemEntity e = new HoldingsItemEntity();
         e.agencyId = holdingAgency;
