@@ -51,8 +51,7 @@ public class HoldingsItemBean {
         h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
     }
 
-    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId){
-
+    private Query generateRelatedHoldingsQuery(String bibliographicRecordId,int bibliographicAgencyId){
         Query query = entityManager.createNativeQuery(
                 "select * " +
                         "from holdingsitemssolrkeys  " +
@@ -64,8 +63,16 @@ public class HoldingsItemBean {
                 HoldingsItemEntity.class);
         query.setParameter(1,bibliographicAgencyId);
         query.setParameter(2,bibliographicRecordId);
-        return query.getResultList();
-
+        return query;
     }
 
+    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId){
+        return generateRelatedHoldingsQuery(bibliographicRecordId,bibliographicAgencyId).getResultList();
+
+    }
+    public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId){
+        return generateRelatedHoldingsQuery(bibliographicRecordId,bibliographicAgencyId)
+                .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("holdingItemsWithIndexKeys"))
+                .getResultList();
+    }
 }

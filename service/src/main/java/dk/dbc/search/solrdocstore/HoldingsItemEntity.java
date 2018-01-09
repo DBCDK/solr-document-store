@@ -3,19 +3,22 @@ package dk.dbc.search.solrdocstore;
 import java.io.Serializable;
 import org.eclipse.persistence.annotations.Mutable;
 
+import javax.persistence.Basic;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Basic;
 
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
+@NamedEntityGraph(name = "holdingItemsWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
