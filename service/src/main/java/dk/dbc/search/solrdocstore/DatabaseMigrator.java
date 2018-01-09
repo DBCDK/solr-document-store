@@ -1,5 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfo;
 import org.slf4j.Logger;
@@ -15,9 +18,9 @@ import javax.sql.DataSource;
 @Startup
 public class DatabaseMigrator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
-    @Resource(lookup = "jdbc/solr-doc-store")
+    @Resource(lookup = "jdbc/solr-doc-store-flyway")
     DataSource dataSource;
 
     @PostConstruct
@@ -27,7 +30,7 @@ public class DatabaseMigrator {
         flyway.setBaselineOnMigrate(true);
         flyway.setDataSource(dataSource);
         for (MigrationInfo i : flyway.info().all()) {
-            LOGGER.info("db task {} : {} from file '{}'", i.getVersion(), i.getDescription(), i.getScript());
+            log.info("db task {} : {} from file '{}'", i.getVersion(), i.getDescription(), i.getScript());
         }
         flyway.migrate();
         dk.dbc.search.solrdocstore.queue.DatabaseMigrator.migrate(dataSource);
