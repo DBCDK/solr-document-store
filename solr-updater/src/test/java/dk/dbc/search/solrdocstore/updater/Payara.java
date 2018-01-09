@@ -114,6 +114,28 @@ public class Payara {
         return this;
     }
 
+    public Payara withDataSourceNonTransactional(String jdbc, String url) {
+        String user = System.getProperty("user.name");
+        String pass = "";
+        String hostportbase;
+        String[] atParts = url.split("@", 2);
+        if (atParts.length == 1) {
+            hostportbase = atParts[0];
+        } else {
+            String[] userpass = atParts[0].split(":", 2);
+            user = userpass[0];
+            if (userpass.length == 2) {
+                pass = userpass[1];
+            }
+            hostportbase = atParts[1];
+        }
+        run("create-jdbc-connection-pool --nontransactionalconnections --restype=javax.sql.DataSource --datasourceclassname=org.postgresql.ds.PGSimpleDataSource --property=driverClass=org.postgresql.Driver:url=\"jdbc:postgresql://%s\":User=\"%s\":Password=\"%s\" %s/pool",
+            hostportbase, user, pass, jdbc);
+        run("create-jdbc-resource --connectionpoolid=%s/pool %s",
+            jdbc, jdbc);
+        return this;
+    }
+
     private void run(String format, Object... args) {
         String cmd = String.format(format, args);
         System.out.println("cmd = " + cmd);
