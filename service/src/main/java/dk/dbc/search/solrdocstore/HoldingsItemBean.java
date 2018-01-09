@@ -45,7 +45,7 @@ public class HoldingsItemBean {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
 
-        setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.of(hi.commitWithin));
+        setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.commitWithin));
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
