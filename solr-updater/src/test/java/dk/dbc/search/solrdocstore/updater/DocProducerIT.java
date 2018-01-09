@@ -41,7 +41,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -125,6 +124,7 @@ public class DocProducerIT {
             payara = Payara.getInstance(payaraPort)
                     .cmd("set-log-level dk.dbc=FINE")
                     .withDataSource("jdbc/solr-doc-store", pg.getUrl())
+                    .withDataSourceNonTransactional("jdbc/solr-doc-store-flyway", pg.getUrl())
                     .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
         } catch (Exception ex) {
             throw new RuntimeException(ex);
