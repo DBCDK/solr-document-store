@@ -19,7 +19,11 @@
 package dk.dbc.search.solrdocstore;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import static dk.dbc.search.solrdocstore.QueueTestUtil.clearQueue;
 import static dk.dbc.search.solrdocstore.QueueTestUtil.queueIs;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  *
