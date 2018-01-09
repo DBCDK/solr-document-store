@@ -32,7 +32,6 @@ public class BeanFactoryUtil {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
         bean.entityManager = em;
         bean.libraryConfig = config;
-        bean.queue = queue;
         return bean;
     }
 
@@ -51,10 +50,11 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static HoldingsItemBean createHoldingsItemBean(EntityManager em, HoldingsToBibliographicBean h2bBean) {
+    public static HoldingsItemBean createHoldingsItemBean(EntityManager em, EnqueueSupplierBean queue, HoldingsToBibliographicBean h2bBean) {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = em;
         bean.h2bBean = h2bBean;
+        bean.queue = queue;
         return bean;
     }
 }

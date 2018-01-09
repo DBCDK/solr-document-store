@@ -1,6 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
+import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,9 @@ public class HoldingsItemBean {
     @Inject
     HoldingsToBibliographicBean h2bBean;
 
+    @Inject
+    EnqueueSupplierBean queue;
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -40,15 +45,17 @@ public class HoldingsItemBean {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
 
-        setHoldingsKeys(hi.asHoldingsItemEntity());
+        setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.of(hi.commitWithin));
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
-    public void setHoldingsKeys(HoldingsItemEntity hi){
+    public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin){
         log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
         entityManager.merge(hi);
-        h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
+        Set<AgencyItemKey> affectedKeys =
+            h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
+        EnqueueAdapter.enqueueAll(queue, affectedKeys,commitWithin);
     }
 
     public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId){

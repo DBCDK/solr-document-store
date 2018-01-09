@@ -97,9 +97,11 @@ public class BibliographicBean {
                         h2bBean.getRelatedHoldingsToBibliographic(dbbe.agencyId,dbbe.bibliographicRecordId) :
                         h2bBean.findRecalcCandidates(dbbe.bibliographicRecordId);
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
-                    h2bBean.tryToAttachToBibliographicRecord(
-                            relatedHolding.holdingsAgencyId,
-                            relatedHolding.holdingsBibliographicRecordId);
+                    Set<AgencyItemKey> reattachedKeys =
+                            h2bBean.tryToAttachToBibliographicRecord(
+                                relatedHolding.holdingsAgencyId,
+                                relatedHolding.holdingsBibliographicRecordId);
+                    affectedKeys.addAll(reattachedKeys);
                 }
             } else {
                 // Simple update
@@ -109,9 +111,12 @@ public class BibliographicBean {
 
         Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds);
         if (supersededRecordIds.size()>0){
-            h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
+            Set<AgencyItemKey> recalculatedKeys =
+                h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
+            affectedKeys.addAll(recalculatedKeys);
         }
-        EnqueueAdapter.enqueueAll(queue,affectedKeys, commitWithin.orElse(null));
+
+        EnqueueAdapter.enqueueAll(queue,affectedKeys, commitWithin);
     }
 
     /*
@@ -150,8 +155,10 @@ public class BibliographicBean {
                     if (bibRecords.contains(holdingsAgency)) continue;
                     break;
             }
-            addHoldingsToBibliographic(agency, recordId, holdingsAgency);
-            affectedKeys.add( new AgencyItemKey(agency,recordId));
+            affectedKeys.addAll(
+                    addHoldingsToBibliographic(agency, recordId, holdingsAgency)
+            );
+
         }
         return affectedKeys;
     }
@@ -168,11 +175,12 @@ public class BibliographicBean {
         return Collections.emptySet();
     }
 
-    private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
+    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                 holdingsAgency, recordId,agency
         );
-        entityManager.merge(h2b);
+        return h2bBean.attachToAgency(h2b);
+
     }
 
 
