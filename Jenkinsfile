@@ -57,6 +57,7 @@ pipeline {
                     mvn sonar:sonar \
                         -Dsonar.host.url=http://sonarqube.mcp1.dbc.dk
                         -Dsonar.login=d8cfb40a9c988e2875590545628605811327660a
+                        -Dsonar.branch=$BRANCH_NAME}
                 """
             }
         }
