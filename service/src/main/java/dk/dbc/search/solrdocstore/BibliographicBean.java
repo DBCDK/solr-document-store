@@ -46,7 +46,7 @@ public class BibliographicBean {
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        addBibliographicKeys(request.asBibliographicEntity(), request.superceds, Optional.empty());
+        addBibliographicKeys(request.asBibliographicEntity(), request.superceds, Optional.ofNullable(request.commitWithin));
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
