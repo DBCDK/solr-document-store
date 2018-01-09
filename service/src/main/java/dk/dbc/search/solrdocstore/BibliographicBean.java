@@ -1,7 +1,11 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;

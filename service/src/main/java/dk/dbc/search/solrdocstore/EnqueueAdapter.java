@@ -26,7 +26,7 @@ public class EnqueueAdapter {
 
     public static Set<AgencyItemKey> setOfOne(int agency, String recordId) {
         HashSet<AgencyItemKey> s = new HashSet<>();
-        s.add( new AgencyItemKey(agency,recordId));
+        s.add( makeKey(agency,recordId));
         return s;
     }
 
