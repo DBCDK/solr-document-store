@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -63,11 +64,21 @@ public class BibliographicBean {
      * @param bibliographicRecordId
      * @return All bibliographic posts matching the record id
      */
-    public List<BibliographicEntity> getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId) {
+    public TypedQuery<BibliographicEntity> getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId,String orderBy,boolean desc) {
+        String direction = (desc) ? "DESC" : "ASC";
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
-                "WHERE b.bibliographicRecordId = :bibId",BibliographicEntity.class)
+                "WHERE b.bibliographicRecordId = :bibId ORDER BY b."+orderBy+" "+direction,BibliographicEntity.class)
                 .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("bibPostWithIndexKeys"));
-        return query.setParameter("bibId",bibliographicRecordId).getResultList();
+        return query.setParameter("bibId",bibliographicRecordId);
+
+    }
+
+    public long getBibliographicEntityCountById(String bibliographicRecordId){
+        Query queryTotal = entityManager.createQuery
+                ("SELECT COUNT(b.bibliographicRecordId) FROM BibliographicEntity b WHERE b.bibliographicRecordId = :bibId")
+                .setParameter("bibId",bibliographicRecordId);
+        return (long)queryTotal.getSingleResult();
+
     }
 
     public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
