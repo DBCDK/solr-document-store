@@ -37,27 +37,17 @@ pipeline {
 
         stage("sonarqube") {
             steps {
-                // Fail Early..
-                script {
-                    if (! env.BRANCH_NAME) {
-                        currentBuild.rawBuild.result = Result.ABORTED
-                        throw new hudson.AbortException('Job Started from non MultiBranch Build')
-                    } else {
-                        println(" Building BRANCH_NAME == ${BRANCH_NAME}")
-                    }
-
-                }
-
                 sh """
-                    mvn clean \
-                        org.jacoco:jacoco-maven-plugin:prepare-agent \
-                        verify \
-                        -Dmaven.test.failure.ignore=false
+                    if [ $BRANCH_NAME -eq "master" ]; then
+                        mvn clean \
+                            org.jacoco:jacoco-maven-plugin:prepare-agent \
+                            verify \
+                            -Dmaven.test.failure.ignore=false
 
-                    mvn sonar:sonar \
-                        -Dsonar.host.url=http://sonarqube.mcp1.dbc.dk \
-                        -Dsonar.login=d8cfb40a9c988e2875590545628605811327660a \
-                        -Dsonar.branch=${BRANCH_NAME}
+                        mvn sonar:sonar \
+                            -Dsonar.host.url=http://sonarqube.mcp1.dbc.dk \
+                            -Dsonar.login=d8cfb40a9c988e2875590545628605811327660a
+                    fi
                 """
             }
         }
