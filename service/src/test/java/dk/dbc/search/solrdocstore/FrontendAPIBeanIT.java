@@ -95,16 +95,12 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
 
     public List<BibliographicEntity> getFrontendResultBibIdWithOrder(String bibliographicRecordId, String order, boolean desc){
         Response json = bean.getBibliographicKeys(bibliographicRecordId,1,10,order,desc);
-        FrontendReturnListType<BibliographicEntity> frontendReturnListType =
-                (FrontendReturnListType<BibliographicEntity>) json.getEntity();
-        return frontendReturnListType.result;
+        return ((FrontendReturnListType<BibliographicEntity>) json.getEntity()).result;
     }
 
     public List<BibliographicEntity> getFrontendResultRepoIdWithOrder(String repositoryId, String order, boolean desc) throws JsonProcessingException {
         Response json = bean.getBibliographicKeysByRepositoryId(repositoryId,1,10,order,desc);
-        FrontendReturnListType<BibliographicEntity> frontendReturnListType =
-                (FrontendReturnListType<BibliographicEntity>) json.getEntity();
-        return frontendReturnListType.result;
+        return ((FrontendReturnListType<BibliographicEntity>) json.getEntity()).result;
     }
 
     public<A> List<A> getColumn(List<BibliographicEntity> of,Function<BibliographicEntity,A> fun){
