@@ -41,32 +41,6 @@ describe("Search saga unit test", () => {
       takeLatest(SEARCH_BIB_RECORD_ID, fetchBibliographicPost)
     );
   });
-  test("fetch bib post unit test", () => {
-    // Test action
-    const searchAction = searchBibRecord("4321");
-    // Starting generator
-    const gen = fetchBibliographicPost(searchAction);
-
-    // Testing next step in saga is a call to api with appropriate search term
-    expect(gen.next().value).toEqual(
-      select(getSearchParameter)
-    );
-    expect(gen.next().value).toEqual(
-        call(api.fetchBibliographicPost, searchAction.searchTerm, undefined)
-    );
-    // Mock result of fetch request
-    let mockResult = {
-      result: [
-        {
-          id: "4321"
-        }
-      ]
-    };
-    // Testing next step in saga is launching redux action searchSuccess with appropriate result
-    expect(gen.next(mockResult).value).toEqual(
-      put(searchSuccess(mockResult.result))
-    );
-  });
 });
 
 describe("Search saga integration test", () => {

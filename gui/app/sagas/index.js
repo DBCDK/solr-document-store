@@ -6,14 +6,33 @@ import api from "../api";
 
 export const getSearchParameter = state => state.search.searchParameter;
 
-export function* fetchBibliographicPost(action) {
+function* fetchBibPost(searchTerm, apiArgs) {
   try {
-    const parameter = yield select(getSearchParameter);
-    const bibPosts = yield call(api.fetchBibliographicPost, action.searchTerm, parameter);
-    yield put(searchActions.searchSuccess(bibPosts.result));
+    apiArgs.pageSize = yield select(state => state.search.searchPageSize);
+    const bibPosts = yield call(api.fetchBibliographicPost, searchTerm, apiArgs);
+    yield put(searchActions.searchSuccess(bibPosts));
   } catch (e) {
     console.log("We had the error: " + e.message);
     yield put(searchActions.searchFailed(e));
+  }
+}
+
+export function* fetchBibliographicPost(action) {
+  const parameter = yield select(getSearchParameter);
+  yield fetchBibPost(action.searchTerm,{parameter: parameter})
+}
+
+export function* fetchBibliographicPostPaged(action) {
+  const pageCount = yield select(state => state.search.searchPageCount);
+  const searchTerm = yield select(state => state.search.searchTerm);
+  const page = action.pageIndex + 1;
+  if(pageCount >= 1 && pageCount !== -1 && page <= pageCount && searchTerm.length > 0){
+    const parameter = yield select(getSearchParameter);
+    yield fetchBibPost(searchTerm,{
+      parameter,
+      page,
+      orderBy: action.orderBy
+    });
   }
 }
 
@@ -36,10 +55,14 @@ export function* watchSearch() {
   yield takeLatest(searchActions.SEARCH_BIB_RECORD_ID, fetchBibliographicPost);
 }
 
+export function* watchFetchPage() {
+  yield takeLatest(searchActions.SEARCH_FETCH_PAGE, fetchBibliographicPostPaged);
+}
+
 export function* watchPullRelatedHoldings() {
   yield takeLatest(globalActions.SELECT_BIB_RECORD, pullRelatedHoldings);
 }
 
 export default function* root() {
-  yield all([fork(watchSearch), fork(watchPullRelatedHoldings)]);
+  yield all([fork(watchSearch), fork(watchPullRelatedHoldings),fork(watchFetchPage)]);
 }

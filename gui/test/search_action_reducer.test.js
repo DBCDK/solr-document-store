@@ -83,11 +83,12 @@ describe("Search reducer", () => {
     startState.searchTerm = searchTerm;
     let searchSuccessAction = {
       type: actions.SEARCH_SUCCESS,
-      bibPosts
+      bibPosts: {result: bibPosts,pages: 1}
     };
     let desiredState = produceInitialState();
     desiredState.searchResults = bibPosts;
     desiredState.searchTerm = searchTerm;
+    desiredState.searchPageCount = 1;
     expect(searchReducer(startState, searchSuccessAction)).toEqual(desiredState);
   });
   test("Should handle search failed", () => {
