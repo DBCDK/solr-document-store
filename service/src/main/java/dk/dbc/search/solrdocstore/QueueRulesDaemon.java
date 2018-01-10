@@ -74,7 +74,7 @@ public class QueueRulesDaemon {
 
     @PreDestroy
     public void destroy() {
-        log.debug("destroy ");
+        log.debug("destroy");
         if (future.cancel(false)) {
             return;
         }
@@ -212,6 +212,7 @@ public class QueueRulesDaemon {
                 queueNames.add(queue);
             }
             manifestationQueues = queueNames;
+            log.info("set queue rules");
         }
     }
 
