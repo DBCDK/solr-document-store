@@ -1,9 +1,11 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -19,10 +21,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 @Stateless
@@ -37,6 +37,9 @@ public class BibliographicBean {
     LibraryConfig libraryConfig;
 
     @Inject
+    EnqueueSupplierBean queue;
+
+    @Inject
     HoldingsToBibliographicBean h2bBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
@@ -48,7 +51,7 @@ public class BibliographicBean {
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        addBibliographicKeys(request.asBibliographicEntity(), request.superceds);
+        addBibliographicKeys(request.asBibliographicEntity(), request.superceds, Optional.ofNullable(request.commitWithin));
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
@@ -82,13 +85,20 @@ public class BibliographicBean {
     }
 
     public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
+        addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
+    }
+
+    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
+        Set<AgencyItemKey> affectedKeys = new HashSet<>();
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
         if (dbbe == null) {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
-            updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+            affectedKeys.add( new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId));
+            Set<AgencyItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+            affectedKeys.addAll(updatedHoldings);
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
@@ -96,14 +106,17 @@ public class BibliographicBean {
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}",dbbe.deleted,bibliographicEntity.deleted);
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
+                affectedKeys.add ( new AgencyItemKey(bibliographicEntity.agencyId,bibliographicEntity.bibliographicRecordId));
                 entityManager.flush();
                 List<HoldingsToBibliographicEntity> relatedHoldings = (bibliographicEntity.deleted) ?
                         h2bBean.getRelatedHoldingsToBibliographic(dbbe.agencyId,dbbe.bibliographicRecordId) :
                         h2bBean.findRecalcCandidates(dbbe.bibliographicRecordId);
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
-                    h2bBean.tryToAttachToBibliographicRecord(
-                            relatedHolding.holdingsAgencyId,
-                            relatedHolding.holdingsBibliographicRecordId);
+                    Set<AgencyItemKey> reattachedKeys =
+                            h2bBean.tryToAttachToBibliographicRecord(
+                                relatedHolding.holdingsAgencyId,
+                                relatedHolding.holdingsBibliographicRecordId);
+                    affectedKeys.addAll(reattachedKeys);
                 }
             } else {
                 // Simple update
@@ -113,23 +126,28 @@ public class BibliographicBean {
 
         Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds);
         if (supersededRecordIds.size()>0){
-            h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
+            Set<AgencyItemKey> recalculatedKeys =
+                h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
+            affectedKeys.addAll(recalculatedKeys);
         }
+
+        EnqueueAdapter.enqueueAll(queue,affectedKeys, commitWithin);
     }
 
     /*
      *
      */
-    private void updateHoldingsToBibliographic(int agency, String recordId) {
+    private Set<AgencyItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
         if (libraryConfig.getRecordType(agency) == SingleRecord) {
-            updateHoldingsSingleRecord(agency, recordId);
+            return updateHoldingsSingleRecord(agency, recordId);
         } else {
-            updateHoldingsForCommonRecords(agency, recordId);
+            return updateHoldingsForCommonRecords(agency, recordId);
         }
     }
 
-    private void updateHoldingsForCommonRecords(int agency, String recordId) {
+    private Set<AgencyItemKey> updateHoldingsForCommonRecords(int agency, String recordId) {
         TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
+        Set<AgencyItemKey> affectedKeys = new HashSet<>();
         query.setParameter("bibId", recordId);
 
         TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
@@ -152,30 +170,38 @@ public class BibliographicBean {
                     if (bibRecords.contains(holdingsAgency)) continue;
                     break;
             }
-            addHoldingsToBibliographic(agency, recordId, holdingsAgency);
+            affectedKeys.addAll(
+                    addHoldingsToBibliographic(agency, recordId, holdingsAgency)
+            );
+
         }
+        return affectedKeys;
     }
 
-    private void updateHoldingsSingleRecord(int agency, String recordId) {
+    private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
         TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
         query.setParameter("agency", agency);
         query.setParameter("bibId", recordId);
 
         if (query.getSingleResult() > 0) {
             addHoldingsToBibliographic(agency, recordId, agency);
+            return EnqueueAdapter.setOfOne(agency,recordId);
         }
+        return Collections.emptySet();
     }
 
-    private void addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
+    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                 holdingsAgency, recordId,agency
         );
-        entityManager.merge(h2b);
+        return h2bBean.attachToAgency(h2b);
+
     }
+
 
     private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
         if (supercededs == null) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
         HashSet<String> changedBibliographicRecordIds = new HashSet<>();
         for (String superceded : supercededs) {

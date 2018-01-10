@@ -133,7 +133,7 @@ public class SolrIndexer {
         } catch (Exception ex) {
             String error = String.format("Error calling indexing logic for '%s'", pid);
             log.error(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.FAILED), error);
-            throw new Exception(error, ex);
+            throw ex;
         } finally {
             DBCTrackedLogContext.remove();
         }

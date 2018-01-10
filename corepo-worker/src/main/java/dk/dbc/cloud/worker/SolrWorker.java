@@ -114,8 +114,8 @@ public class SolrWorker implements MessageListener {
     boolean prettyPrintJson;
 
     @Inject
-    @EEConfig.Name("solrDocumentStoreUrl")
-    private String solrDocumentStoreUrl;
+    @EEConfig.Name("solrDocStoreUrl")
+    private String solrDocStoreUrl;
 
     @Inject
     @EEConfig.Name("commitWithin")
@@ -130,7 +130,7 @@ public class SolrWorker implements MessageListener {
         log.info("Initializing SolrWorker");
         onMessageTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "onMessage"));
         solrDocStoreTimer = registry.getRegistry().timer(MetricRegistry.name(SolrWorker.class, "solrDocStore"));
-        log.info("solrDocumentStoreUrl = {}", solrDocumentStoreUrl);
+        log.info("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.client = HttpClientBuilder.create()
                 .build();
         this.printer = prettyPrintJson ?
@@ -234,7 +234,7 @@ public class SolrWorker implements MessageListener {
      */
     private void sendRecordToSolrDocStore(String pid, ObjectNode record) throws JsonProcessingException, IOException {
         try (Timer.Context timer = solrDocStoreTimer.time()) {
-            HttpPost post = new HttpPost(solrDocumentStoreUrl);
+            HttpPost post = new HttpPost(solrDocStoreUrl);
             post.setEntity(new ByteArrayEntity(
                     printer.writeValueAsBytes(record),
                     ContentType.APPLICATION_JSON));
@@ -317,13 +317,18 @@ public class SolrWorker implements MessageListener {
                         throw ex;
                     }
                     sendToDeadPidQueue(pid, "Redelivery limit reached, " + LogAppender.getCauses(ex));
+                    log.error("Sent to dead pid queue: {}", ex.getMessage());
+                    log.debug("Sent to dead pid queue: ", ex);
                 } else {
                     sendToDeadPidQueue(pid, LogAppender.getCauses(ex));
+                    log.error("Sent to dead pid queue: {}", ex.getMessage());
+                    log.debug("Sent to dead pid queue: ", ex);
                 }
             }
 
         } catch (Exception ex) {
             log.error(LogAppender.getMarker(App.APP_NAME, LogAppender.FAILED), "Unable to process message {}", message, ex);
+            log.debug("Error processing message: ", ex);
             failureHandler.failure();
             throw new EJBException(ex.getMessage());
         } finally {
