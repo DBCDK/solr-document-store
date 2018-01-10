@@ -12,13 +12,13 @@ public class EnqueueAdapter {
 
     private static Logger log = LoggerFactory.getLogger(EnqueueAdapter.class);
 
-    public static void enqueueAll(EnqueueSupplierBean queue, Set<AgencyItemKey> setOfT, Optional<Integer> commitWithin) {
-        for (AgencyItemKey t: setOfT) {
+    public static void enqueueAll(EnqueueSupplierBean queue, Set<AgencyItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+        for (AgencyItemKey k: agencyItemKeys) {
             try {
-                queue.getManifestationEnqueueService().enqueue(t,commitWithin.orElse(null));
+                queue.getManifestationEnqueueService().enqueue(k,commitWithin.orElse(null));
             } catch (SQLException e) {
-                log.error("Error enqueuing item: " + t);
-                log.debug("Error enqueuing item: " + t,e);
+                log.error("Error enqueuing item: " + k);
+                log.debug("Error enqueuing item: " + k,e);
                 throw new PersistenceException(e);
             }
         }
