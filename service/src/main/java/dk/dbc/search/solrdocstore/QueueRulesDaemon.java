@@ -59,7 +59,7 @@ public class QueueRulesDaemon {
     @Resource(type = ManagedExecutorService.class)
     ExecutorService mes;
 
-    @Resource(lookup = "jdbc/solr-doc-store")
+    @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
     private Future<?> future;
