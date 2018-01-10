@@ -59,7 +59,7 @@ public class QueueRulesDaemon {
     @Resource(type = ManagedExecutorService.class)
     ExecutorService mes;
 
-    @Resource(lookup = "jdbc/solr-doc-store")
+    @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
     private Future<?> future;
@@ -74,7 +74,7 @@ public class QueueRulesDaemon {
 
     @PreDestroy
     public void destroy() {
-        log.debug("destroy ");
+        log.debug("destroy");
         if (future.cancel(false)) {
             return;
         }
@@ -212,6 +212,7 @@ public class QueueRulesDaemon {
                 queueNames.add(queue);
             }
             manifestationQueues = queueNames;
+            log.info("set queue rules");
         }
     }
 
