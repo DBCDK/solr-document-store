@@ -20,7 +20,7 @@ public class DatabaseMigrator {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
-    @Resource(lookup = "jdbc/solr-doc-store-flyway")
+    @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
     @PostConstruct

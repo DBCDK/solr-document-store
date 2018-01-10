@@ -124,7 +124,7 @@ public class DocProducerIT {
             payara = Payara.getInstance(payaraPort)
                     .cmd("set-log-level dk.dbc=FINE")
                     .withDataSource("jdbc/solr-doc-store", pg.getUrl())
-                    .withDataSourceNonTransactional("jdbc/solr-doc-store-flyway", pg.getUrl())
+                    .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
                     .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
         } catch (Exception ex) {
             throw new RuntimeException(ex);
