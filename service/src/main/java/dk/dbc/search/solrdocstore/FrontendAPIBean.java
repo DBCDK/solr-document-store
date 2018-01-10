@@ -45,6 +45,7 @@ public class FrontendAPIBean {
     /**
      * Returns a json object with a result field, which is a list of json BibliographicEntity that matches
      * holdingsBibliographicRecordId with the argument.
+     * @param bibliographicRecordId path parameter, expects URI encoding
      * @return Response
      */
     @GET
@@ -122,7 +123,7 @@ public class FrontendAPIBean {
                                        @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
         log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",
                 bibliographicRecordId,bibliographicAgencyId);
-        List<HoldingsItemEntity> res = holdingsItemBean.getRelatedHoldings(bibliographicRecordId, bibliographicAgencyId);
+        List<HoldingsItemEntity> res = holdingsItemBean.getRelatedHoldingsWithIndexKeys(bibliographicRecordId, bibliographicAgencyId);
         return Response.ok(new FrontendReturnListType<>(res,0),MediaType.APPLICATION_JSON).build();
     }
 

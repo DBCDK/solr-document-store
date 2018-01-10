@@ -1,5 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
+import java.sql.SQLException;
+import java.util.*;
+import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,10 +11,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static dk.dbc.search.solrdocstore.LibraryConfig.COMMON_AGENCY;
 import static dk.dbc.search.solrdocstore.LibraryConfig.SCHOOL_COMMON_AGENCY;
@@ -28,43 +27,48 @@ public class HoldingsToBibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
+    public Set<AgencyItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
         LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
 
 
         switch (libraryType) {
             case NonFBS:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
-                break;
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
+
             case FBS:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
-                break;
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
+
             case FBSSchool:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
-                break;
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY);
+
         }
+        return Collections.emptySet();
     }
 
 
-    public void recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
+    public Set<AgencyItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
         Map<Integer,LibraryConfig.LibraryType> map = new HashMap<>();
+        Set<AgencyItemKey> keysUpdated = EnqueueAdapter.makeSet();
+
         for (String supersededRecordId : supersededRecordIds) {
             List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
             for (HoldingsToBibliographicEntity h2b : recalcCandidates){
+
                 LibraryConfig.LibraryType libraryType = getFromCache(map, h2b.holdingsAgencyId);
                 switch (libraryType){
                     case NonFBS:
                         break;
                     case FBS:
-                        attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY);
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY));
                         break;
                     case FBSSchool:
-                        attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY, SCHOOL_COMMON_AGENCY);
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY));
                         break;
                 }
             }
         }
+        return keysUpdated;
     }
 
     private LibraryConfig.LibraryType getFromCache(Map<Integer, LibraryConfig.LibraryType> map, int holdingsAgencyId) {
@@ -99,21 +103,27 @@ public class HoldingsToBibliographicBean {
         }
     }
 
-    private void attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
+    private Set<AgencyItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
         for (int i=0; i<bibliographicAgencyPriorities.length;i++) {
-            boolean attached = attachIfExists(bibliographicAgencyPriorities[i], bibliographicRecordId, holdingsAgencyId, holdingsBibliographicRecordId);
-            if (attached) return;
+            Set<AgencyItemKey> keysUpdated;
+            keysUpdated =
+                    attachIfExists(
+                            bibliographicAgencyPriorities[i],
+                            bibliographicRecordId,
+                            holdingsAgencyId,
+                            holdingsBibliographicRecordId);
+            if (!keysUpdated.isEmpty()) return keysUpdated;
         }
+        return Collections.emptySet();
     }
 
 
-    private boolean attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
+    private Set<AgencyItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
         if (bibliographicEntityExists(bibliographicAgencyId,bibliographicRecordId)){
             HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
-            attachToAgency(expectedState);
-            return true;
+            return attachToAgency(expectedState);
         }
-        return false;
+        return Collections.emptySet();
     }
 
     private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
@@ -122,32 +132,16 @@ public class HoldingsToBibliographicBean {
         return ((e!=null)&&(!e.deleted));
     }
 
-    private void attachToAgency(HoldingsToBibliographicEntity expectedState) {
-
-        if (needToUpdate(expectedState)){
-            addAttachEventQueue(expectedState.holdingsAgencyId,expectedState.bibliographicRecordId);
-            entityManager.merge(expectedState);
-        }
-
-    }
-
-    private boolean needToUpdate(HoldingsToBibliographicEntity expectedState) {
+    public Set<AgencyItemKey> attachToAgency(HoldingsToBibliographicEntity expectedState) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
-        if ((foundEntity!=null) && foundEntity.equals(expectedState)) {
-            return false;
+        Set<AgencyItemKey> affectedKeys = EnqueueAdapter.makeSet();
+
+        if ((foundEntity!=null) && !foundEntity.equals(expectedState)){
+            affectedKeys.add( EnqueueAdapter.makeKey(foundEntity.bibliographicAgencyId,foundEntity.bibliographicRecordId) );
         }
-        return true;
+        affectedKeys.add( EnqueueAdapter.makeKey(expectedState.bibliographicAgencyId, expectedState.bibliographicRecordId) );
+        entityManager.merge(expectedState);
+        return affectedKeys;
     }
 
-    private HoldingsToBibliographicEntity createH2B(int attachToAgency, HoldingsToBibliographicKey itemKey) {
-        return new HoldingsToBibliographicEntity(
-                itemKey.holdingsAgencyId,
-                itemKey.holdingsBibliographicRecordId,
-                attachToAgency
-        );
-    }
-
-    private void addAttachEventQueue(int bibliographicAgencyId, String bibliographicRecordId) {
-        //TODO: Implement
-    }
 }

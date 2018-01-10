@@ -8,5 +8,5 @@ public class BibliographicEntityRequest extends BibliographicEntity {
 
     public List<String> superceds;
 
-    public int commitWithin;
+    public Integer commitWithin;
 }

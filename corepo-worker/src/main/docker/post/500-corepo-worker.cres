@@ -1,4 +1,4 @@
-[corepo-content-service]
+[solr-worker]
 
 resourceBase=corepo
 jmxDomain=solr-cloud-indexer-worker

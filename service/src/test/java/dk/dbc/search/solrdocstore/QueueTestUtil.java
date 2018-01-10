@@ -25,11 +25,13 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.persistence.EntityManager;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -42,8 +44,9 @@ public class QueueTestUtil {
     /**
      * Test queue content
      *
-     * @param em entity manager, that provides a connection
-     * @param elements list of string with {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     * @param em       entity manager, that provides a connection
+     * @param elements list of string with
+     *                 {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
      */
     public static void queueIs(EntityManager em, String... elements) {
         Connection connection = em.unwrap(java.sql.Connection.class);
@@ -53,8 +56,24 @@ public class QueueTestUtil {
     /**
      * Test queue content
      *
+     * @param dataSource data source, that provides a connection
+     * @param elements   list of string with
+     *                   {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     */
+    public static void queueIs(DataSource dataSource, String... elements) {
+        try (Connection connection = dataSource.getConnection()) {
+            queueIs(connection, elements);
+        } catch (SQLException ex) {
+            fail("Error testing queue: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Test queue content
+     *
      * @param connection database connection
-     * @param elements list of string with {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     * @param elements   list of string with
+     *                   {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
      */
     public static void queueIs(Connection connection, String... elements) {
         HashSet<String> enqueued = new HashSet<>();
@@ -76,12 +95,20 @@ public class QueueTestUtil {
         assertThat("Nothing extra", enqueued.size(), is(elements.length));
     }
 
+    public static void clearQueue(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            clearQueue(connection);
+        } catch (SQLException ex) {
+            fail("Error testing queue: " + ex.getMessage());
+        }
+    }
+
     public static void clearQueue(EntityManager em) {
         Connection connection = em.unwrap(java.sql.Connection.class);
         clearQueue(connection);
     }
 
-    private static void clearQueue(Connection connection) {
+    public static void clearQueue(Connection connection) {
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("TRUNCATE queue");
         } catch (SQLException ex) {
