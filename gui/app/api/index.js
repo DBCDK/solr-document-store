@@ -11,7 +11,7 @@ let parse = res => {
 };
 
 export default {
-  fetchBibliographicPost(searchTerm,parameter) {
+  fetchBibliographicPost(searchTerm,{parameter,page = 1,pageSize = 10,orderBy}) {
     let urlParam = "";
     switch (parameter) {
       case SEARCH_BIB_ID:
@@ -23,8 +23,12 @@ export default {
       default:
         throw new Error("Invalid parameter");
     }
+    let queryParams = '?page='+page+'&page_size='+pageSize;
+    if(orderBy){
+      queryParams += '&order_by='+orderBy.id+'&desc='+orderBy.desc;
+    }
     return fetch(
-      'api/getBibliographicRecords/'+urlParam+'/' + encodeURIComponent(searchTerm)
+      'api/getBibliographicRecords/'+urlParam+'/' + encodeURIComponent(searchTerm) + queryParams
     ).then(parse);
   },
   pullRelatedHoldings(bibliographicRecordId, bibliographicAgencyId) {
