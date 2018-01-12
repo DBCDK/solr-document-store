@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.commons.jsonb.JSONBContext;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +10,10 @@ import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
@@ -42,7 +47,7 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
             createBibAndHoldings(commonAgency,"XYZ",holdingAgencies);
             createBibliographicEntity(4711,"XYZ");
         });
-
+        executeScriptResource("/frontendIT.sql");
     }
 
     @Test
@@ -59,13 +64,137 @@ public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void testGetBibliographicKeys(){
         String bibliographicRecordId = "XYZ";
-        Response json = bean.getBibliographicKeys(bibliographicRecordId);
+        Response json = bean.getBibliographicKeys(bibliographicRecordId,1,10,"agencyId",true);
         FrontendReturnListType<BibliographicEntity> frontendReturnListType =
                 (FrontendReturnListType<BibliographicEntity>) json.getEntity();
         Assert.assertEquals(2, frontendReturnListType.result.size());
 
 
         return;
+    }
+
+    @Test
+    public void testPagingBibliographicRecordId(){
+        String bibliographicRecordId = "page-order";
+        // Should have 8 results, which with a pagesize of 5 is 2 pages
+        Response json = bean.getBibliographicKeys(bibliographicRecordId,1,2,"agencyId",false);
+        FrontendReturnListType<BibliographicEntity> frontendReturnListType =
+                (FrontendReturnListType<BibliographicEntity>) json.getEntity();
+        Assert.assertEquals(4, frontendReturnListType.pages);
+    }
+
+    @Test
+    public void testPagingRepositoryId() throws JsonProcessingException {
+        String bibliographicRecordId = "p-o";
+        // Should have 8 results, which with a pagesize of 5 is 2 pages
+        Response json = bean.getBibliographicKeysByRepositoryId(bibliographicRecordId,1,2,"agencyId",false);
+        FrontendReturnListType<BibliographicEntity> frontendReturnListType =
+                (FrontendReturnListType<BibliographicEntity>) json.getEntity();
+        Assert.assertEquals(4, frontendReturnListType.pages);
+    }
+
+    public List<BibliographicEntity> getFrontendResultBibIdWithOrder(String bibliographicRecordId, String order, boolean desc){
+        Response json = bean.getBibliographicKeys(bibliographicRecordId,1,10,order,desc);
+        return ((FrontendReturnListType<BibliographicEntity>) json.getEntity()).result;
+    }
+
+    public List<BibliographicEntity> getFrontendResultRepoIdWithOrder(String repositoryId, String order, boolean desc) throws JsonProcessingException {
+        Response json = bean.getBibliographicKeysByRepositoryId(repositoryId,1,10,order,desc);
+        return ((FrontendReturnListType<BibliographicEntity>) json.getEntity()).result;
+    }
+
+    public<A> List<A> getColumn(List<BibliographicEntity> of,Function<BibliographicEntity,A> fun){
+        return of.stream().map(fun).collect(Collectors.toList());
+    }
+
+    public<A> List<A> getColumnOfBib(String bibliographicRecordId, String columnName, boolean desc, Function<BibliographicEntity,A> fun){
+        return getColumn(getFrontendResultBibIdWithOrder(bibliographicRecordId,columnName,desc),fun);
+    }
+
+    public<A> List<A> getColumnOfRepo(String repositoryId, String columnName, boolean desc, Function<BibliographicEntity,A> fun) throws JsonProcessingException {
+        return getColumn(getFrontendResultRepoIdWithOrder(repositoryId,columnName,desc),fun);
+    }
+
+    @Test
+    public void testAgencyIdOrderingBibliographicRecordId(){
+        String bibliographicRecordId = "page-order";
+        // Sort by producerVersion in descending order
+        List<Integer> result = getColumnOfBib(bibliographicRecordId,"agencyId",false, bibItem -> bibItem.agencyId);
+        assertEquals(result, Arrays.asList(103862,207130,305421,401685,504758,602306,706244,808077));
+        // Sort by producerVersion in ascending order
+        result = getColumnOfBib(bibliographicRecordId,"agencyId",true, bibItem -> bibItem.agencyId);
+        assertEquals(result, Arrays.asList(808077,706244,602306,504758,401685,305421,207130,103862));
+    }
+
+    @Test
+    public void testProducerVersionOrderingBibliographicRecordId(){
+        String bibliographicRecordId = "page-order";
+        // Sort by agencyId in descending order
+        List<String> result = getColumnOfBib(bibliographicRecordId,"producerVersion",false, bibItem -> bibItem.producerVersion);
+        assertEquals(result, Arrays.asList("producer:1","producer:2","producer:3","producer:4","producer:5","producer:6","producer:7","producer:8"));
+        // Sort by agencyId in ascending order
+        result = getColumnOfBib(bibliographicRecordId,"producerVersion",true, bibItem -> bibItem.producerVersion);
+        assertEquals(result, Arrays.asList("producer:8","producer:7","producer:6","producer:5","producer:4","producer:3","producer:2","producer:1"));
+    }
+
+    @Test
+    public void testTrackingIdBibliographicRecordId(){
+        String bibliographicRecordId = "page-order";
+        // Sort by agencyId in descending order
+        List<String> result = getColumnOfBib(bibliographicRecordId,"trackingId",false, bibItem -> bibItem.trackingId);
+        assertEquals(result, Arrays.asList("track:1","track:2","track:3","track:4","track:5","track:6","track:7","track:8"));
+        result = getColumnOfBib(bibliographicRecordId,"trackingId",true, bibItem -> bibItem.trackingId);
+        assertEquals(result, Arrays.asList("track:8","track:7","track:6","track:5","track:4","track:3","track:2","track:1"));
+    }
+
+    @Test
+    public void testDeletedOrderingBibliographicRecordId(){
+        String bibliographicRecordId = "page-order";
+        List<Boolean> result = getColumnOfBib(bibliographicRecordId,"deleted",false, bibItem -> bibItem.deleted);
+        assertEquals(result, Arrays.asList(false,false,false,false,false,true,true,true));
+        result = getColumnOfBib(bibliographicRecordId,"deleted",true, bibItem -> bibItem.deleted);
+        assertEquals(result, Arrays.asList(true,true,true,false,false,false,false,false));
+    }
+
+    @Test
+    public void testAgencyIdOrderingRepositoryId() throws JsonProcessingException {
+        String repositoryId = "p-o";
+        // Sort by producerVersion in descending order
+        List<Integer> result = getColumnOfRepo(repositoryId,"agencyId",false, bibItem -> bibItem.agencyId);
+        assertEquals(result, Arrays.asList(103862,207130,305421,401685,504758,602306,706244,808077));
+        // Sort by producerVersion in ascending order
+        result = getColumnOfRepo(repositoryId,"agencyId",true, bibItem -> bibItem.agencyId);
+        assertEquals(result, Arrays.asList(808077,706244,602306,504758,401685,305421,207130,103862));
+    }
+
+    @Test
+    public void testProducerVersionOrderingRepositoryId() throws JsonProcessingException {
+        String repositoryId = "p-o";
+        // Sort by agencyId in descending order
+        List<String> result = getColumnOfRepo(repositoryId,"producerVersion",false, bibItem -> bibItem.producerVersion);
+        assertEquals(result, Arrays.asList("producer:1","producer:2","producer:3","producer:4","producer:5","producer:6","producer:7","producer:8"));
+        // Sort by agencyId in ascending order
+        result = getColumnOfRepo(repositoryId,"producerVersion",true, bibItem -> bibItem.producerVersion);
+        assertEquals(result, Arrays.asList("producer:8","producer:7","producer:6","producer:5","producer:4","producer:3","producer:2","producer:1"));
+    }
+
+    @Test
+    public void testTrackingIdOrderingRepositoryId() throws JsonProcessingException {
+        String repositoryId = "p-o";
+        // Sort by agencyId in descending order
+        List<String> result = getColumnOfRepo(repositoryId,"trackingId",false, bibItem -> bibItem.trackingId);
+        assertEquals(result, Arrays.asList("track:1","track:2","track:3","track:4","track:5","track:6","track:7","track:8"));
+        result = getColumnOfRepo(repositoryId,"trackingId",true, bibItem -> bibItem.trackingId);
+        assertEquals(result, Arrays.asList("track:8","track:7","track:6","track:5","track:4","track:3","track:2","track:1"));
+    }
+
+    @Test
+    public void testDeletedOrderingRepositoryId() throws JsonProcessingException {
+        String repositoryId = "p-o";
+        List<Boolean> result = getColumnOfRepo(repositoryId,"deleted",false, bibItem -> bibItem.deleted);
+        assertEquals(result, Arrays.asList(false,false,false,false,false,true,true,true));
+        result = getColumnOfRepo(repositoryId,"deleted",true, bibItem -> bibItem.deleted);
+        assertEquals(result, Arrays.asList(true,true,true,false,false,false,false,false));
     }
 
     private BibliographicEntity createBibAndHoldings(
