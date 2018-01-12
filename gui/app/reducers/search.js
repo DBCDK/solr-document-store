@@ -1,23 +1,31 @@
 import {
   SEARCH_SUCCESS,
   SEARCH_FAILED,
-  SEARCH_BIB_RECORD_ID
+  SEARCH_BIB_RECORD_ID,
+  SEARCH_SELECT_PARAMETER,
+  SEARCH_FETCH_PAGE,
+  SEARCH_PAGE_SIZE
 } from "../actions/searching";
 import update from "immutability-helper";
+import { SEARCH_BIB_ID } from "../api";
 
-const initialState = {
+export const produceInitialState = () => ({
   searchPending: false,
   searchTerm: "",
   searchErrorMessage: "",
+  searchParameter: SEARCH_BIB_ID,
+  searchPageCount: -1,
+  searchPageSize: 10,
   searchResults: []
-};
+});
 
-export default function search(state = initialState, action = {}) {
+export default function search(state = produceInitialState(), action = {}) {
   switch (action.type) {
     case SEARCH_SUCCESS:
       return update(state, {
         searchPending: { $set: false },
-        searchResults: { $set: action.bibPosts },
+        searchResults: { $set: action.bibPosts.result },
+        searchPageCount: { $set: action.bibPosts.pages },
         searchErrorMessage: { $set: "" }
       });
     case SEARCH_FAILED:
@@ -30,6 +38,20 @@ export default function search(state = initialState, action = {}) {
         searchPending: { $set: true },
         searchTerm: { $set: action.searchTerm },
         searchErrorMessage: { $set: "" }
+      });
+    case SEARCH_FETCH_PAGE:
+      let canFetch = (state.searchPageCount !== -1);
+      return update(state, {
+        searchPending: { $set: canFetch },
+        searchErrorMessage: { $set: "" }
+      });
+    case SEARCH_PAGE_SIZE:
+      return update(state, {
+        searchPageSize: { $set: action.pageSize }
+      });
+    case SEARCH_SELECT_PARAMETER:
+      return update(state, {
+        searchParameter: { $set: action.parameter }
       });
     default:
       return state;

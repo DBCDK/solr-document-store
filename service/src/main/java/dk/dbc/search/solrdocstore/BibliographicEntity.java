@@ -9,6 +9,7 @@ import javax.persistence.IdClass;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import static javax.persistence.FetchType.LAZY;
 @NamedEntityGraph(name = "bibPostWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class BibliographicEntity implements Serializable {
+    public static final List<String> sortableColumns = Arrays.asList("agencyId","bibliographicRecordId","producerVersion","deleted","trackingId");
 
     private static final long serialVersionUID = -2773872842011755768L;
 
