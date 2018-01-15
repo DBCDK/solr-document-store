@@ -7,14 +7,14 @@ import { SELECT_BIB_RECORD } from "../actions/global";
 import update from "immutability-helper";
 import converter from "../functions/index_key_converter";
 
-const initialState = {
+export const produceInitialState = () => ({
   selectedItem: {},
   whiteListPending: {},
   whiteListedElements: null
-};
+});
 update.extend("$auto", (value, object) => update(object || {}, value));
 
-export default function filter(state = initialState, action = {}) {
+export default function filter(state = produceInitialState(), action = {}) {
   switch (action.type) {
     case SELECT_BIB_RECORD:
       // Selected item my not have index keys

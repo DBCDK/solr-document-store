@@ -6,7 +6,6 @@ import rootSaga from "../sagas";
 export default function configureStore(initialState = undefined) {
   const sagaMiddleware = createSagaMiddleware();
 
-  console.log(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__);
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   let store = createStore(

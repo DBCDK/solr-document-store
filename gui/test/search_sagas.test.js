@@ -6,32 +6,11 @@ import {
   searchBibRecord,
   searchSuccess
 } from "../app/actions/searching";
+import * as searchActions from "../app/actions/searching";
+import SagaTester from 'redux-saga-tester';
+import reducers from "../app/reducers";
+import ourSaga from '../app/sagas';
 
-// A bit ugly, but can't make the __mocks__ thing working
-jest.mock("../app/api", () => {
-  return {
-    fetchBibliographicPost(searchTerm,parameter) {
-      return new Promise((resolve, reject) => {
-        switch (searchTerm) {
-          case "4321":
-            resolve({
-              result: [
-                {
-                  bibliographicRecordId: "4321"
-                }
-              ]
-            });
-          case "handle error":
-            throw new Error("We had an error");
-          default:
-            resolve({ result: [] });
-        }
-      });
-    }
-  };
-});
-// This won't work
-//jest.mock('../app/api');
 import api from "../app/api/index";
 
 describe("Search saga unit test", () => {
@@ -45,23 +24,35 @@ describe("Search saga unit test", () => {
 
 describe("Search saga integration test", () => {
   let store;
+  let sagaTester;
   // Set up new Redux store for each test
   beforeEach(() => {
     store = configureStore();
+    sagaTester = new SagaTester({ reducers });
+    sagaTester.start(ourSaga);
   });
   test("Successful request should end up in store", async () => {
-    store.dispatch(searchBibRecord("4321"));
+    fetch.mockResponse(JSON.stringify({
+          result: [
+            {
+              bibliographicRecordId: "4321"
+            }
+          ]
+        }
+    ));
+    sagaTester.dispatch(searchBibRecord("4321"));
     // Will await all promises to complete, which includes saga, could fail if timers are involved
-    await Promise.resolve();
-    expect(store.getState().search.searchResults[0]).toEqual({
+    await sagaTester.waitFor(searchActions.SEARCH_SUCCESS);
+    expect(sagaTester.getState().search.searchResults[0]).toEqual({
       bibliographicRecordId: "4321"
     });
   });
   test("Error in API should result in error message", async () => {
-    store.dispatch(searchBibRecord("handle error"));
+    fetch.mockReject(new Error("We had an error"));
+    sagaTester.dispatch(searchBibRecord("handle error"));
     // Will await all promises to complete, which includes saga, could fail if timers are involved
-    await Promise.resolve();
-    expect(store.getState().search.searchErrorMessage).toEqual(
+    await sagaTester.waitFor(searchActions.SEARCH_FAILED);
+    expect(sagaTester.getState().search.searchErrorMessage).toEqual(
       "We had an error"
     );
   });

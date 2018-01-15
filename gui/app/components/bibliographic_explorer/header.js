@@ -34,7 +34,7 @@ const Header = ({
           aria-hidden="true"
         />
         <i
-          className="fa fa-lg fa-minus-square px-2 py-2"
+          className="fa fa-lg fa-minus-square px-2 py-2 whitelist-button-header"
           onClick={whiteList}
           aria-hidden="true"
         />
