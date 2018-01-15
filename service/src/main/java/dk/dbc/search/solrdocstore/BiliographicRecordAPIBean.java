@@ -25,9 +25,9 @@ import java.util.List;
 
 @Stateless
 @Path("")
-public class FrontendAPIBean {
+public class BiliographicRecordAPIBean {
     private static final ObjectMapper O = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(FrontendAPIBean.class);
+    private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
 
     @Inject
     BibliographicBean bibliographicBean;

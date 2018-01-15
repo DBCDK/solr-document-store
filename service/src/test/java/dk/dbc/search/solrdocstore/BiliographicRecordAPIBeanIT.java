@@ -16,20 +16,20 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 
 
-public class FrontendAPIBeanIT  extends JpaSolrDocStoreIntegrationTester {
+public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
     int commonAgency = LibraryConfig.COMMON_AGENCY;
     int[] holdingAgencies = { 133, 134, 135};
 
     EntityManager em ;
     JSONBContext jsonbContext = new JSONBContext();
 
-    FrontendAPIBean bean;
+    BiliographicRecordAPIBean bean;
 
     @Before
     public void before(){
         // Setup bean
         em = env().getEntityManager();
-        bean = new FrontendAPIBean();
+        bean = new BiliographicRecordAPIBean();
         bean.entityManager = em;
 
         bean.bibliographicBean = new BibliographicBean();
