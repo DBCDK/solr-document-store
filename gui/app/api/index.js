@@ -15,10 +15,10 @@ export default {
     let urlParam = "";
     switch (parameter) {
       case SEARCH_BIB_ID:
-        urlParam = "bibliographicRecordId";
+        urlParam = "bibliographic-record-id";
         break;
       case SEARCH_REPO_ID:
-        urlParam = "repositoryId";
+        urlParam = "repository-id";
         break;
       default:
         throw new Error("Invalid parameter");
@@ -28,12 +28,12 @@ export default {
       queryParams += '&order_by='+orderBy.id+'&desc='+orderBy.desc;
     }
     return fetch(
-      'api/getBibliographicRecords/'+urlParam+'/' + encodeURIComponent(searchTerm) + queryParams
+      'api/bibliographic-records/'+urlParam+'/' + encodeURIComponent(searchTerm) + queryParams
     ).then(parse);
   },
   pullRelatedHoldings(bibliographicRecordId, bibliographicAgencyId) {
     return fetch(
-      'api/getRelatedHoldings/' +
+      'api/related-holdings/' +
         encodeURIComponent(bibliographicRecordId) +
         '/' +
         bibliographicAgencyId
