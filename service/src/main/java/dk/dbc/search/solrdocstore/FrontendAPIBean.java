@@ -49,7 +49,7 @@ public class FrontendAPIBean {
      * @return Response
      */
     @GET
-    @Path("getBibliographicRecords/bibliographicRecordId/{bibliographicRecordId}")
+    @Path("bibliographic-records/bibliographic-record-id/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getBibliographicKeys(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
@@ -72,7 +72,7 @@ public class FrontendAPIBean {
     }
 
     @GET
-    @Path("getBibliographicRecords/repositoryId/{repositoryId}")
+    @Path("bibliographic-records/repository-id/{repositoryId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getBibliographicKeysByRepositoryId(
             @PathParam("repositoryId") String repositoryID,
@@ -117,7 +117,7 @@ public class FrontendAPIBean {
      * @return Response
      */
     @GET
-    @Path("getRelatedHoldings/{bibliographicRecordId}/{bibliographicAgencyId}")
+    @Path("related-holdings/{bibliographicRecordId}/{bibliographicAgencyId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getRelatedHoldings(@PathParam("bibliographicRecordId") String bibliographicRecordId,
                                        @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
