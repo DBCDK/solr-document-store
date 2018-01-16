@@ -2,7 +2,7 @@ import React from "react";
 import ReactTable from "react-table";
 import { connect } from "react-redux";
 import { selectBibRecord } from "../actions/global";
-import { fetchPage,setPageSize } from "../actions/searching";
+import { fetchPage, setPageSize } from "../actions/searching";
 
 // Webpack will bundle the included styling
 import "react-table/react-table.css";
@@ -68,12 +68,10 @@ class ListResults extends React.PureComponent {
         pageSizeOptions={[10, 20, 50, 100]}
         defaultPageSize={10}
         manual
-        onFetchData={(state,instance) => {
-          console.log("Fetch data");
-          fetchPage(state.page,state.sorted[0]);
+        onFetchData={(state, instance) => {
+          fetchPage(state.page, state.sorted[0]);
         }}
-        onPageSizeChange={(pageSize,pageIndex)=>{
-          console.log("Page size change");
+        onPageSizeChange={(pageSize, pageIndex) => {
           setPageSize(pageSize);
           fetchPage(pageIndex);
         }}
@@ -90,7 +88,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   selectItem: item => dispatch(selectBibRecord(item)),
-  fetchPage: (pageIndex,orderBy) => dispatch(fetchPage(pageIndex,orderBy)),
+  fetchPage: (pageIndex, orderBy) => dispatch(fetchPage(pageIndex, orderBy)),
   setPageSize: pageSize => dispatch(setPageSize(pageSize))
 });
 

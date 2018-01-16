@@ -6,14 +6,13 @@ import rootSaga from "../sagas";
 export default function configureStore(initialState = undefined) {
   const sagaMiddleware = createSagaMiddleware();
 
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   let store = createStore(
     rootReducer,
     initialState,
-    composeEnhancers(
-        applyMiddleware(sagaMiddleware)
-    )
+    composeEnhancers(applyMiddleware(sagaMiddleware))
   );
   sagaMiddleware.run(rootSaga);
   if (module.hot) {

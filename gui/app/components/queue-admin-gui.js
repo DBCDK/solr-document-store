@@ -1,10 +1,8 @@
 import React from "react";
 
 class QueueAdminGUI extends React.PureComponent {
-  render(){
-    return (
-        <div>Testing</div>
-    )
+  render() {
+    return <div className="container-full">Testing</div>;
   }
 }
 

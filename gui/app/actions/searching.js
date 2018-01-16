@@ -20,7 +20,7 @@ export const searchBibRecord = searchTerm => ({
   searchTerm
 });
 
-export const fetchPage = (pageIndex,orderBy) => ({
+export const fetchPage = (pageIndex, orderBy) => ({
   type: SEARCH_FETCH_PAGE,
   pageIndex,
   orderBy
