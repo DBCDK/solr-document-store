@@ -16,12 +16,12 @@ let store = configureStore();
 
 const render = Component => {
   ReactDOM.render(
-      <AppContainer>
-        <Provider store={store}>
-          <Component />
-        </Provider>
-      </AppContainer>,
-      document.getElementById("queue-admin-gui-root")
+    <AppContainer>
+      <Provider store={store}>
+        <Component />
+      </Provider>
+    </AppContainer>,
+    document.getElementById("queue-admin-gui-root")
   );
 };
 
