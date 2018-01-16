@@ -1,8 +1,30 @@
 # Solr Document Store
 
 Solr Document Store for Corepo &amp; HoldingsItems index Documents
+
+## License
+
+  DataIO - Data IO  
+  Copyright (C) 2015 Dansk Bibliotekscenter a/s, Tempovej 7-11, DK-2750 Ballerup,
+  Denmark. CVR: 15149043  
+
+  All files are part of DataIO.
+
+  DataIO is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  DataIO is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public licenses
+  along with DataIO.  If not, see <http://www.gnu.org/licenses/>.
   
-# Purpose  
+## Purpose  
 
 To Hold and Track changes of Bibliographic and Item index values, 
 to at different indexing Different parts of the Broend at different 
@@ -10,7 +32,7 @@ levels of [FRBS](https://en.wikipedia.org/wiki/Functional_Requirements_for_Bibli
 
 To populate and update a SOLR schema with bibliographic documents including holdings and misc. search keys.
 
-# Overview
+## Overview
 
 Solr Document Store reads data from corepo and holdingsitems. And maintains its own PostgreSQL database with Bibliographic Records and HoldingsItems attached to those. 
 
@@ -33,7 +55,7 @@ When a Bibliographic item are updated the postgres database is updated and the k
 
 
 
-
+## Open Agency integration
 
 SOLR Document Store queries Open-Agency (libraryRules) for information on the Agencies. The following types of Agencies (libraries) are identified:
 
