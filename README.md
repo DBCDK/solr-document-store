@@ -54,6 +54,8 @@ When a Bibliographic item are updated the postgres database is updated and the k
   Holds Holdings Documents fragments at the Item level.
 
 
+# Technical setup
+
 
 ## Open Agency integration
 
@@ -74,8 +76,6 @@ SOLR Document Store queries Open-Agency (libraryRules) for information on the Ag
   Library maintaining own Bibliographic records only.
 
 
-# Technical setup
-
 ## Dependencies
 
 * docker
@@ -86,8 +86,7 @@ SOLR Document Store queries Open-Agency (libraryRules) for information on the Ag
 
   Integration tests expects a postgres database to be available. Build uses $USER as value for dbname, user and password
 
-  Ex. jdbc:postgresql://localhost:5432/myuser and
-  will connect with (username,password): (myuser,myuser)
+  Ex. jdbc:postgresql://localhost:5432/__myuser__?user=__myuser__&password=__myuser__
 
 * Open-agency
 
