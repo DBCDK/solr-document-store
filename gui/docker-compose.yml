@@ -35,3 +35,10 @@ services:
     environment:
       - NODE_ENV=development
       - IS_DOCKERIZED=true
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.11.1/22
