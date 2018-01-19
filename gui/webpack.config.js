@@ -23,7 +23,9 @@ const extract = new ExtractTextPlugin({
 
 var plugins = [
   new webpack.DefinePlugin({
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+    "process.env.NODE_ENV": JSON.stringify(
+      process.env.NODE_ENV || "development"
+    )
   }),
   extract
 ];
@@ -47,7 +49,7 @@ if (process.env.NODE_ENV === "production") {
     }),
     new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
-      minChunks: function (module) {
+      minChunks: function(module) {
         // this assumes your vendor imports exist in the node_modules directory
         return module.context && module.context.includes("node_modules");
       }
@@ -57,13 +59,13 @@ if (process.env.NODE_ENV === "production") {
   plugins.push(
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin()
-  )
+  );
 }
 
 module.exports = {
   entry: {
     "solr-docstore-gui": ["react-hot-loader/patch", "./app/index.js"],
-    "queue-admin-gui": ["react-hot-loader/patch","./app/queue-admin.js"]
+    "queue-admin-gui": ["react-hot-loader/patch", "./app/queue-admin.js"]
   },
   output: {
     path: PATHS.build,
@@ -103,7 +105,7 @@ module.exports = {
     proxy: {
       "/development/api": {
         target: {
-          host: "localhost",
+          host: process.env.IS_DOCKERIZED ? "docstore-service" : "localhost",
           protocol: "http:",
           port: 8080
         },
