@@ -69,7 +69,6 @@ public class BibliographicEntity implements Serializable {
         hash = 43 * hash + Objects.hashCode(this.unit);
         hash = 43 * hash + Objects.hashCode(this.producerVersion);
         hash = 43 * hash + ( this.deleted ? 1 : 0 );
-        hash = 43 * hash + Objects.hashCode(this.indexKeys);
         hash = 43 * hash + Objects.hashCode(this.trackingId);
         return hash;
     }
@@ -85,7 +84,6 @@ public class BibliographicEntity implements Serializable {
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(producerVersion, that.producerVersion) &&
                 deleted == that.deleted &&
-                Objects.equals(indexKeys,that.indexKeys) &&
                 Objects.equals(trackingId, that.trackingId);
     }
 
