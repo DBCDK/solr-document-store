@@ -45,16 +45,16 @@ public class HoldingsItemBean {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
 
-        setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.commitWithin));
+        setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.getCommitWithin()));
 
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
     public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin){
-        log.info("Updating holdings for {}:{}", hi.agencyId, hi.bibliographicRecordId);
+        log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
         Set<AgencyItemKey> affectedKeys =
-            h2bBean.tryToAttachToBibliographicRecord(hi.agencyId, hi.bibliographicRecordId);
+            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
         EnqueueAdapter.enqueueAll(queue, affectedKeys,commitWithin);
     }
 

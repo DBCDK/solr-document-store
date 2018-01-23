@@ -245,7 +245,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                     queueItem(commonAgency,id));
             clearQueue(em);
 
-            h.trackingId = "NEW";
+            h.setTrackingId("NEW");
             holdingsItemBean.setHoldingsKeys(h, Optional.empty());
             queueIs(em,
                     queueItem(commonAgency,id));
@@ -315,12 +315,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {
-        HoldingsItemEntity e = new HoldingsItemEntity();
-        e.agencyId = holdingAgency;
-        e.bibliographicRecordId = holdingBibliographicId;
-        e.indexKeys = Collections.emptyList();
-        e.producerVersion = "1";
-        e.trackingId = "IT";
+        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Collections.EMPTY_LIST, "IT");
         holdingsItemBean.setHoldingsKeys(e, Optional.empty());
         return e;
     }
