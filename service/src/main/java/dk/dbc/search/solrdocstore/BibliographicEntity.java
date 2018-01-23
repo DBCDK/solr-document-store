@@ -31,23 +31,23 @@ public class BibliographicEntity implements Serializable {
     }
 
     @Id
-    public int agencyId;
+    private int agencyId;
 
     @Id
-    public String bibliographicRecordId;
+    private String bibliographicRecordId;
 
-    public String work;
-    public String unit;
-    public String producerVersion;
-    public boolean deleted;
+    private String work;
+    private String unit;
+    private String producerVersion;
+    private boolean deleted;
 
     @SuppressWarnings("JpaAttributeTypeInspection")
     @Basic(fetch = LAZY)
     @Mutable
     @Convert(converter = PgMapOfStringsToJsonConverter.class)
-    public Map<String, List<String>> indexKeys;
+    private Map<String, List<String>> indexKeys;
 
-    public String trackingId;
+    private String trackingId;
 
     BibliographicEntity(int agencyId, String bibliographicRecordId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
@@ -58,6 +58,20 @@ public class BibliographicEntity implements Serializable {
         this.deleted = deleted;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 43 * hash + this.agencyId;
+        hash = 43 * hash + Objects.hashCode(this.bibliographicRecordId);
+        hash = 43 * hash + Objects.hashCode(this.work);
+        hash = 43 * hash + Objects.hashCode(this.unit);
+        hash = 43 * hash + Objects.hashCode(this.producerVersion);
+        hash = 43 * hash + ( this.deleted ? 1 : 0 );
+        hash = 43 * hash + Objects.hashCode(this.indexKeys);
+        hash = 43 * hash + Objects.hashCode(this.trackingId);
+        return hash;
     }
 
     @Override
@@ -88,4 +102,67 @@ public class BibliographicEntity implements Serializable {
 
     }
 
+    public int getAgencyId() {
+        return agencyId;
+    }
+
+    public void setAgencyId(int agencyId) {
+        this.agencyId = agencyId;
+    }
+
+    public String getBibliographicRecordId() {
+        return bibliographicRecordId;
+    }
+
+    public void setBibliographicRecordId(String bibliographicRecordId) {
+        this.bibliographicRecordId = bibliographicRecordId;
+    }
+
+    public String getWork() {
+        return work;
+    }
+
+    public void setWork(String work) {
+        this.work = work;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getProducerVersion() {
+        return producerVersion;
+    }
+
+    public void setProducerVersion(String producerVersion) {
+        this.producerVersion = producerVersion;
+    }
+
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(String trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Map<String, List<String>> getIndexKeys() {
+        return indexKeys;
+    }
+
+    public void setIndexKeys(Map<String, List<String>> indexKeys) {
+        this.indexKeys = indexKeys;
+    }
 }

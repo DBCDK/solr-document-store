@@ -12,6 +12,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -125,7 +126,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
 
         // Ensure update came through
-        BibliographicEntity updatedBibEntity = em.find(BibliographicEntity.class, new AgencyItemKey(b.agencyId, b.bibliographicRecordId));
+        BibliographicEntity updatedBibEntity = em.find(BibliographicEntity.class, new AgencyItemKey(b.getAgencyId(), b.getBibliographicRecordId()));
         assertThat(updatedBibEntity,equalTo(b));
         //assertThat(true,equalTo(true));
 
@@ -370,7 +371,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String json = makeBibliographicRequestJson(
                888000,
                e -> {
-           e.superceds = Arrays.asList("a", "b");
+           e.setSuperceds(Arrays.asList("a", "b"));
        });
 
         Response r = env().getPersistenceContext()
@@ -406,13 +407,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity1 = new BibliographicEntityRequest();
-        entity1.agencyId = agency;
-        entity1.bibliographicRecordId = "new";
-        entity1.unit = "u";
-        entity1.work = "w";
-        entity1.trackingId = "IT";
-        BibliographicEntityRequest entity = entity1;
+        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "new", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT", null, null);
         modifier.accept(entity);
         return jsonbContext.marshall(entity);
     }

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
@@ -169,7 +170,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
                 bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
             }
             BibliographicEntity entity = makeBiblEntity(700001, "dd");
-            entity.deleted = true;
+            entity.setDeleted(true);
             bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
         });
         clearQueue(dataSource);
@@ -202,7 +203,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
                 bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
             }
             BibliographicEntity entity = makeBiblEntity(700001, "dd");
-            entity.deleted = true;
+            entity.setDeleted(true);
             bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
         });
         clearQueue(dataSource);
@@ -240,16 +241,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private BibliographicEntity makeBiblEntity(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity entity = new BibliographicEntity();
-        entity.agencyId = agencyId;
-        entity.bibliographicRecordId = bibliographicRecordId;
-        entity.deleted = false;
-        entity.indexKeys = Collections.EMPTY_MAP;
-        entity.producerVersion = "ANY";
-        entity.trackingId = "ANY";
-        entity.unit = "unit:-1";
-        entity.work = "work:-1";
-        return entity;
+        return new BibliographicEntity(agencyId, bibliographicRecordId, "work:-1", "unit:-1", "v0.1", false, Collections.EMPTY_MAP, "IT");
     }
 
 }

@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.EntityManager;
@@ -262,17 +263,12 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     }
     private void deleteBibRecord(int agencyId, String bibliographicRecordId){
         BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyItemKey().withAgencyId(agencyId).withBibliographicRecordId(bibliographicRecordId));
-        e.deleted = true;
+        e.setDeleted(true);
         em.merge(e);
     }
+
     private void createBibRecord(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity e = new BibliographicEntity();
-        e.bibliographicRecordId = bibliographicRecordId;
-        e.agencyId = agencyId;
-        e.work = "{}";
-        e.unit = "{}";
-        e.deleted=false;
-        e.trackingId = "dummy";
+        BibliographicEntity e = new BibliographicEntity(agencyId, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         em.merge(e);
     }
 

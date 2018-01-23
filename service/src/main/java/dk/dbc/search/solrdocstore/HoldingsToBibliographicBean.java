@@ -129,7 +129,7 @@ public class HoldingsToBibliographicBean {
     private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
         AgencyItemKey k = new AgencyItemKey(agencyId, bibliographicRecordId);
         BibliographicEntity e = entityManager.find(BibliographicEntity.class, k);
-        return ((e!=null)&&(!e.deleted));
+        return ((e!=null)&&(!e.isDeleted()));
     }
 
     public Set<AgencyItemKey> attachToAgency(HoldingsToBibliographicEntity expectedState) {
