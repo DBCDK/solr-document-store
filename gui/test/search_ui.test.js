@@ -7,7 +7,7 @@ import ConnectedSearchField from "../app/components/search_field";
 import * as searchActions from "../app/actions/searching";
 import SagaTester from "redux-saga-tester";
 import reducers from "../app/reducers/docstore_gui_root_reducer";
-import ourSaga from "../app/sagas";
+import ourSaga from "../app/sagas/docstore_gui_sagas";
 
 Enzyme.configure({ adapter: new Adapter() });
 

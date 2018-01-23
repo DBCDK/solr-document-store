@@ -1,8 +1,11 @@
 import { createStore, combineReducers, applyMiddleware, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
-import rootSaga from "../sagas";
 
-export default function config(rootReducer, initialState = undefined) {
+export default function config(
+  rootReducer,
+  rootSaga,
+  initialState = undefined
+) {
   const sagaMiddleware = createSagaMiddleware();
 
   const composeEnhancers =

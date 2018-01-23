@@ -8,7 +8,7 @@ import * as filterActions from "../app/actions/filtering";
 import SagaTester from "redux-saga-tester";
 import reducers from "../app/reducers/docstore_gui_root_reducer";
 import { produceInitialState } from "../app/reducers/filter";
-import ourSaga from "../app/sagas";
+import ourSaga from "../app/sagas/docstore_gui_sagas";
 import FilterHeader from "../app/components/bibliographic_explorer/header";
 import FilterParentElement from "../app/components/bibliographic_explorer/parent_element";
 

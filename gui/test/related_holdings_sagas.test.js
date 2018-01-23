@@ -3,7 +3,7 @@ import { selectBibRecord } from "../app/actions/global";
 import * as relatedHoldingsActions from "../app/actions/related_holdings";
 import SagaTester from "redux-saga-tester";
 import reducers from "../app/reducers/docstore_gui_root_reducer";
-import ourSaga from "../app/sagas";
+import ourSaga from "../app/sagas/docstore_gui_sagas";
 
 describe("Search saga integration test", () => {
   let store;
