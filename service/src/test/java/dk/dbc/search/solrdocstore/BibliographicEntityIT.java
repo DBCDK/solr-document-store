@@ -17,17 +17,10 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
     public void StoreEntity() {
         EntityManager em = env().getEntityManager();
         env().getPersistenceContext().run(() -> {
-            BibliographicEntity be = new BibliographicEntity();
-            be.agencyId = 200;
-            be.bibliographicRecordId = "1234";
-            be.work = "work:1";
-            be.unit = "unit:2";
-            be.producerVersion = "1234";
-            be.deleted = false;
-            be.indexKeys = new HashMap<>();
-            be.indexKeys.put("titel", Collections.singletonList("unix bogen"));
-            be.indexKeys.put("id", Collections.singletonList("argle"));
-            be.trackingId = "";
+            Map<String, List<String>> indexKeys = new HashMap<>();
+            indexKeys.put("titel", Collections.singletonList("unix bogen"));
+            indexKeys.put("id", Collections.singletonList("argle"));
+            BibliographicEntity be = new BibliographicEntity(200, "1234", "work:1", "unit:2", "1234", false, indexKeys, "");
             em.persist(be);
         });
 
@@ -35,8 +28,8 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity be2 = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicEntity.class, key));
 
-        assertThat(be2.agencyId, is(200));
-        assertThat(be2.bibliographicRecordId, is("1234"));
+        assertThat(be2.getAgencyId(), is(200));
+        assertThat(be2.getBibliographicRecordId(), is("1234"));
     }
 
     @Test
@@ -48,21 +41,21 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity be = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicEntity.class, key));
 
-        assertThat(be.agencyId, is(300));
-        assertThat(be.bibliographicRecordId, is("4321"));
+        assertThat(be.getAgencyId(), is(300));
+        assertThat(be.getBibliographicRecordId(), is("4321"));
 
-        assertThat(be.agencyId, is(300));
-        assertThat(be.bibliographicRecordId, is("4321"));
-        assertThat(be.work, is("work:3"));
-        assertThat(be.unit, is("unit:3"));
-        assertThat(be.producerVersion, is("5544"));
-        assertThat(be.deleted, is(true));
+        assertThat(be.getAgencyId(), is(300));
+        assertThat(be.getBibliographicRecordId(), is("4321"));
+        assertThat(be.getWork(), is("work:3"));
+        assertThat(be.getUnit(), is("unit:3"));
+        assertThat(be.getProducerVersion(), is("5544"));
+        assertThat(be.isDeleted(), is(true));
         Map<String, List<String>> expected = new HashMap<>();
         expected.put("ti", Arrays.asList("isdnBogen", "title2"));
         expected.put("001", Collections.singletonList("argle"));
-        assertThat(be.indexKeys, is(expected));
+        assertThat(be.getIndexKeys(), is(expected));
 
-        assertThat(be.trackingId, is("track"));
+        assertThat(be.getTrackingId(), is("track"));
 
     }
 }

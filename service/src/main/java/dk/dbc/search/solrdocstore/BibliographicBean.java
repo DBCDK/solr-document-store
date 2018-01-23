@@ -51,7 +51,7 @@ public class BibliographicBean {
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        addBibliographicKeys(request.asBibliographicEntity(), request.superceds, Optional.ofNullable(request.commitWithin));
+        addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
@@ -91,31 +91,29 @@ public class BibliographicBean {
     public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
         Set<AgencyItemKey> affectedKeys = new HashSet<>();
 
-        log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+        log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
 
-        BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
+        BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, new AgencyItemKey(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId()), LockModeType.PESSIMISTIC_WRITE);
         if (dbbe == null) {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
-            affectedKeys.add( new AgencyItemKey(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId));
-            Set<AgencyItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.agencyId, bibliographicEntity.bibliographicRecordId);
+            affectedKeys.add( new AgencyItemKey(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId()));
+            Set<AgencyItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
             affectedKeys.addAll(updatedHoldings);
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
-            if(bibliographicEntity.deleted != dbbe.deleted){
-                log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}",dbbe.deleted,bibliographicEntity.deleted);
+            if(bibliographicEntity.isDeleted() != dbbe.isDeleted()){
+                log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
-                affectedKeys.add ( new AgencyItemKey(bibliographicEntity.agencyId,bibliographicEntity.bibliographicRecordId));
+                affectedKeys.add ( new AgencyItemKey(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId()));
                 entityManager.flush();
-                List<HoldingsToBibliographicEntity> relatedHoldings = (bibliographicEntity.deleted) ?
-                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.agencyId,dbbe.bibliographicRecordId) :
-                        h2bBean.findRecalcCandidates(dbbe.bibliographicRecordId);
+                List<HoldingsToBibliographicEntity> relatedHoldings = (bibliographicEntity.isDeleted()) ?
+                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
+                        h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
                     Set<AgencyItemKey> reattachedKeys =
-                            h2bBean.tryToAttachToBibliographicRecord(
-                                relatedHolding.holdingsAgencyId,
-                                relatedHolding.holdingsBibliographicRecordId);
+                            h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId());
                     affectedKeys.addAll(reattachedKeys);
                 }
             } else {
@@ -124,10 +122,10 @@ public class BibliographicBean {
             }
         }
 
-        Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.bibliographicRecordId, superceds);
+        Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
         if (supersededRecordIds.size()>0){
             Set<AgencyItemKey> recalculatedKeys =
-                h2bBean.recalcAttachments(bibliographicEntity.bibliographicRecordId,supersededRecordIds);
+                h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(),supersededRecordIds);
             affectedKeys.addAll(recalculatedKeys);
         }
 
@@ -207,14 +205,12 @@ public class BibliographicBean {
         for (String superceded : supercededs) {
             BibliographicToBibliographicEntity b2b = entityManager.find(BibliographicToBibliographicEntity.class, superceded, LockModeType.PESSIMISTIC_WRITE);
             if (b2b == null) {
-                b2b = new BibliographicToBibliographicEntity();
-                b2b.deadBibliographicRecordId = superceded;
-                b2b.liveBibliographicRecordId = bibliographicRecordId;
+                b2b = new BibliographicToBibliographicEntity(superceded, bibliographicRecordId);
             } else {
-                if (b2b.liveBibliographicRecordId.equals(bibliographicRecordId)) {
+                if (b2b.getLiveBibliographicRecordId().equals(bibliographicRecordId)) {
                     continue;
                 }
-                b2b.liveBibliographicRecordId = bibliographicRecordId;
+                b2b.setLiveBibliographicRecordId(bibliographicRecordId);
             }
             entityManager.merge(b2b);
             changedBibliographicRecordIds.add(superceded);

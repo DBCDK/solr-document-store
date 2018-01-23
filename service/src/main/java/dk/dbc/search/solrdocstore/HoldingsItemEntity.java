@@ -13,6 +13,7 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -28,20 +29,20 @@ public class HoldingsItemEntity implements Serializable {
     }
 
     @Id
-    public int agencyId;
+    private int agencyId;
 
     @Id
-    public String bibliographicRecordId;
+    private String bibliographicRecordId;
 
-    public String producerVersion;
+    private String producerVersion;
 
     @SuppressWarnings("JpaAttributeTypeInspection")
     @Basic(fetch = LAZY)
     @Mutable
     @Convert(converter = PgHoldingsKeysToPgConverter.class)
-    public List<Map<String, List<String>>> indexKeys;
+    private List<Map<String, List<String>>> indexKeys;
 
-    public String trackingId;
+    private String trackingId;
 
     HoldingsItemEntity(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
@@ -61,6 +62,83 @@ public class HoldingsItemEntity implements Serializable {
             return this;
         }
         return new HoldingsItemEntity(agencyId, bibliographicRecordId, producerVersion, indexKeys, trackingId);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 41 * hash + this.agencyId;
+        hash = 41 * hash + Objects.hashCode(this.bibliographicRecordId);
+        hash = 41 * hash + Objects.hashCode(this.producerVersion);
+        hash = 41 * hash + Objects.hashCode(this.trackingId);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final HoldingsItemEntity other = (HoldingsItemEntity) obj;
+        if (this.agencyId != other.agencyId) {
+            return false;
+        }
+        if (!Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId)) {
+            return false;
+        }
+        if (!Objects.equals(this.producerVersion, other.producerVersion)) {
+            return false;
+        }
+        if (!Objects.equals(this.trackingId, other.trackingId)) {
+            return false;
+        }
+        return true;
+    }
+
+    public int getAgencyId() {
+        return agencyId;
+    }
+
+    public void setAgencyId(int agencyId) {
+        this.agencyId = agencyId;
+    }
+
+    public String getBibliographicRecordId() {
+        return bibliographicRecordId;
+    }
+
+    public void setBibliographicRecordId(String bibliographicRecordId) {
+        this.bibliographicRecordId = bibliographicRecordId;
+    }
+
+    public String getProducerVersion() {
+        return producerVersion;
+    }
+
+    public void setProducerVersion(String producerVersion) {
+        this.producerVersion = producerVersion;
+    }
+
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(String trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    public List<Map<String, List<String>>> getIndexKeys() {
+        return indexKeys;
+    }
+
+    public void setIndexKeys(List<Map<String, List<String>>> indexKeys) {
+        this.indexKeys = indexKeys;
     }
 
 }

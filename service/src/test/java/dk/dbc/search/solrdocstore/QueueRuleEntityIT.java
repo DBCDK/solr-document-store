@@ -13,15 +13,13 @@ public class QueueRuleEntityIT extends JpaSolrDocStoreIntegrationTester {
     public void StoreEntity() {
         EntityManager em = env().getEntityManager();
         env().getPersistenceContext().run(() -> {
-            QueueRuleEntity qr = new QueueRuleEntity();
-            qr.queue = "foo";
-            em.persist(qr);
+            em.persist(new QueueRuleEntity("foo"));
         });
 
         QueueRuleEntity qr = env().getPersistenceContext()
                 .run(() -> em.find(QueueRuleEntity.class, "foo"));
 
-        assertThat(qr.queue, is("foo"));
+        assertThat(qr.getQueue(), is("foo"));
     }
 
     @Test
@@ -32,6 +30,6 @@ public class QueueRuleEntityIT extends JpaSolrDocStoreIntegrationTester {
         QueueRuleEntity qr = env().getPersistenceContext()
                 .run(() -> em.find(QueueRuleEntity.class, "bar"));
 
-        assertThat(qr.queue, is("bar"));
+        assertThat(qr.getQueue(), is("bar"));
     }
 }

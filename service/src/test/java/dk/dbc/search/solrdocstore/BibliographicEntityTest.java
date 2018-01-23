@@ -19,19 +19,11 @@ public class BibliographicEntityTest {
 
     @Test
     public void SimpleEncode() throws Exception {
-        BibliographicEntity be = new BibliographicEntity();
-        be.agencyId = 200;
-        be.bibliographicRecordId = "1234";
-        be.work = "work:1";
-        be.unit = "unit:2";
-        be.producerVersion = "1234";
-        be.deleted = false;
-        be.indexKeys = new HashMap<>();
-        be.indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
-        be.indexKeys.put("id", Collections.singletonList("argle"));
+        Map<String, List<String>> indexKeys = new HashMap<>();
+        indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
+        indexKeys.put("id", Collections.singletonList("argle"));
 
-        be.trackingId = "";
-
+        BibliographicEntity be = new BibliographicEntity(200, "1234", "work:1", "unit:2", "1234", false, indexKeys, "");
         String s = context.marshall(be);
         assertThat(s, is("{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"trackingId\":\"\"}"));
     }
@@ -41,18 +33,18 @@ public class BibliographicEntityTest {
         String jsonContent = "{\"agencyId\":200,\"bibliographicRecordId\":\"1234\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"trackingId\":\"\"}";
 
         BibliographicEntity be = context.unmarshall(jsonContent, BibliographicEntity.class);
-        assertThat(be.agencyId, is(200));
-        assertThat(be.bibliographicRecordId, is("1234"));
-        assertThat(be.work, is("work:1"));
-        assertThat(be.unit, is("unit:2"));
-        assertThat(be.producerVersion, is("1234"));
-        assertThat(be.deleted, is(false));
-        assertThat(be.trackingId, is(""));
+        assertThat(be.getAgencyId(), is(200));
+        assertThat(be.getBibliographicRecordId(), is("1234"));
+        assertThat(be.getWork(), is("work:1"));
+        assertThat(be.getUnit(), is("unit:2"));
+        assertThat(be.getProducerVersion(), is("1234"));
+        assertThat(be.isDeleted(), is(false));
+        assertThat(be.getTrackingId(), is(""));
 
         Map<String, List<String>> expected = new HashMap<>();
         expected.put("title", Arrays.asList("unix bogen", "title2"));
         expected.put("id", Collections.singletonList("argle"));
-        assertThat(be.indexKeys, is(expected));
+        assertThat(be.getIndexKeys(), is(expected));
 
     }
 }

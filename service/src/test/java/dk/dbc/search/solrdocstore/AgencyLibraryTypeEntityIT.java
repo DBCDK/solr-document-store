@@ -21,8 +21,8 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
 
         AgencyLibraryTypeEntity searchResult = findEntityWithKey(key, em);
 
-        assertEquals(key, searchResult.agencyId);
-        assertEquals(fbs, LibraryConfig.LibraryType.valueOf(searchResult.libraryType));
+        assertEquals(key, searchResult.getAgencyId());
+        assertEquals(fbs, LibraryConfig.LibraryType.valueOf(searchResult.getLibraryType()));
 
         remove(searchResult, em);
 
@@ -38,10 +38,7 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
 
     private void persist(int key, LibraryConfig.LibraryType fbs, EntityManager em) {
         env().getPersistenceContext().run(() -> {
-            AgencyLibraryTypeEntity e = new AgencyLibraryTypeEntity();
-            e.agencyId = key;
-            e.libraryType = fbs.name();
-            em.persist(e);
+            em.persist(new AgencyLibraryTypeEntity(key, fbs.name()));
         });
     }
 

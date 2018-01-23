@@ -79,16 +79,13 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private void update(int agency, LibraryConfig.LibraryType libraryType) {
         AgencyLibraryTypeEntity entity = findEntityWithKey(agency);
-        entity.libraryType = libraryType.name();
+        entity.setLibraryType(libraryType.name());
         env().getPersistenceContext().run( () -> em.merge(entity));
     }
 
     private void persist(int key, LibraryConfig.LibraryType fbs) {
         env().getPersistenceContext().run(() -> {
-            AgencyLibraryTypeEntity e = new AgencyLibraryTypeEntity();
-            e.agencyId = key;
-            e.libraryType = fbs.name();
-            em.persist(e);
+            em.persist(new AgencyLibraryTypeEntity(key, fbs.name()));
         });
     }
 

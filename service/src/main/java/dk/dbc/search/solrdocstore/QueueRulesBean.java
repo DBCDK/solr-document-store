@@ -106,8 +106,7 @@ public class QueueRulesBean {
     private EnqeueService<AgencyItemKey> getManifestationEnqueueService(Connection connection, String queue) {
         return new EnqeueService<>(connection, Arrays.asList(queue),
                                    (key, commitWithin) ->
-                                   new QueueJob(key.agencyId,
-                                                key.bibliographicRecordId,
+                                   new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
                                                 commitWithin));
     }
 

@@ -245,7 +245,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                     queueItem(commonAgency,id));
             clearQueue(em);
 
-            h.trackingId = "NEW";
+            h.setTrackingId("NEW");
             holdingsItemBean.setHoldingsKeys(h, Optional.empty());
             queueIs(em,
                     queueItem(commonAgency,id));
@@ -304,28 +304,18 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
     private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin){
         List<String> superseedList = superseed.orElse(Collections.emptyList());
-        BibliographicEntityRequest e = new BibliographicEntityRequest();
-        e.agencyId = agency;
-        e.bibliographicRecordId = bibliographicRecordId;
-        e.unit = "u";
-        e.work = "w";
-        e.trackingId = "IT";
+        BibliographicEntity e = new BibliographicEntity(agency, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         bibliographicBean.addBibliographicKeys(e,superseedList, commitWithin);
         return e;
     }
 
     private void deleteBibliographic(BibliographicEntity ownRecord) {
-        ownRecord.deleted = true;
+        ownRecord.setDeleted(true);
         bibliographicBean.addBibliographicKeys(ownRecord,Collections.emptyList(),Optional.empty());
     }
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {
-        HoldingsItemEntity e = new HoldingsItemEntity();
-        e.agencyId = holdingAgency;
-        e.bibliographicRecordId = holdingBibliographicId;
-        e.indexKeys = Collections.emptyList();
-        e.producerVersion = "1";
-        e.trackingId = "IT";
+        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Collections.EMPTY_LIST, "IT");
         holdingsItemBean.setHoldingsKeys(e, Optional.empty());
         return e;
     }
