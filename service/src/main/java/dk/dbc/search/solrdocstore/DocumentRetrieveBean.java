@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import java.io.FileNotFoundException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

@@ -3,7 +3,6 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import javax.persistence.EntityManager;
 
 import static dk.dbc.search.solrdocstore.QueueTestUtil.clearQueue;
