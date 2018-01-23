@@ -21,7 +21,7 @@ public class AgencyLibraryTypeBean {
         LibraryConfig.LibraryType returnValue;
         AgencyLibraryTypeEntity cachedValue = findByAgency(agency);
         if (cachedValue!=null){
-            returnValue = LibraryConfig.LibraryType.valueOf(cachedValue.libraryType);
+            returnValue = LibraryConfig.LibraryType.valueOf(cachedValue.getLibraryType());
         } else {
             LibraryConfig.LibraryType libraryType = proxy.fetchLibraryTypeFor(agency);
             storeTypeOnAgency(agency,libraryType);
@@ -32,8 +32,8 @@ public class AgencyLibraryTypeBean {
 
     private void storeTypeOnAgency(int agency, LibraryConfig.LibraryType libraryType){
         AgencyLibraryTypeEntity e = new AgencyLibraryTypeEntity();
-        e.agencyId = agency;
-        e.libraryType = libraryType.name();
+        e.setAgencyId(agency);
+        e.setLibraryType(libraryType.name());
         entityManager.persist(e);
     }
 
@@ -47,7 +47,7 @@ public class AgencyLibraryTypeBean {
     private void updateAgencyTo(int agency, LibraryConfig.LibraryType libraryType){
         AgencyLibraryTypeEntity e = findByAgency(agency);
         if (e != null) {
-            e.libraryType = libraryType.name();
+            e.setLibraryType(libraryType.name());
             entityManager.merge(e);
         }
     }

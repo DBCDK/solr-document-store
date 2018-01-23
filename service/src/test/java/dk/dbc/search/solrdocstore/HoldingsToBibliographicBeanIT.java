@@ -297,10 +297,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     }
 
     private void createAgency(int agencyId, LibraryConfig.LibraryType t){
-            AgencyLibraryTypeEntity e = new AgencyLibraryTypeEntity();
-            e.libraryType = t.name();
-            e.agencyId = agencyId;
-            em.merge(e);
+            em.merge(new AgencyLibraryTypeEntity(agencyId, t.name()));
     }
 
 }
