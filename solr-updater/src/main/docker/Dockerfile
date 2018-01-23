@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/dbc-payara-mq
+FROM docker.dbc.dk/dbc-payara
 MAINTAINER os-team
 
 ENV KAFKA_LOG_APPNAME solr-indexer-cloud-worker
