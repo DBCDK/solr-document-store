@@ -43,8 +43,7 @@ public class EnqueueSupplierBean {
         Connection connection = entityManager.unwrap(java.sql.Connection.class);
         return new EnqeueService<>(connection, daemon.getManifestationQueues(),
                                    (key, commitWithin) ->
-                                   new QueueJob(key.agencyId,
-                                                key.bibliographicRecordId,
+                                   new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
                                                 commitWithin));
     }
 

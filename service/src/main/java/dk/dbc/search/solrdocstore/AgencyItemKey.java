@@ -9,8 +9,8 @@ public class AgencyItemKey implements Serializable {
 
     private static final long serialVersionUID = -2054293971622143423L;
 
-    public int agencyId;
-    public String bibliographicRecordId;
+    private int agencyId;
+    private String bibliographicRecordId;
 
     public AgencyItemKey() {
     }
@@ -65,5 +65,21 @@ public class AgencyItemKey implements Serializable {
                 "agencyId=" + agencyId +
                 ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
                 '}';
+    }
+
+    public int getAgencyId() {
+        return agencyId;
+    }
+
+    public void setAgencyId(int agencyId) {
+        this.agencyId = agencyId;
+    }
+
+    public String getBibliographicRecordId() {
+        return bibliographicRecordId;
+    }
+
+    public void setBibliographicRecordId(String bibliographicRecordId) {
+        this.bibliographicRecordId = bibliographicRecordId;
     }
 }
