@@ -8,9 +8,7 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -380,8 +378,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
 
         assertThat(l.size(), is(2));
-        Assert.assertTrue("One superceded named 'a'", l.stream().anyMatch(b2b -> b2b.deadBibliographicRecordId.equals("a")));
-        Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.deadBibliographicRecordId.equals("b")));
+        Assert.assertTrue("One superceded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
+        Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
     }
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {

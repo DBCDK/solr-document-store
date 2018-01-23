@@ -205,14 +205,12 @@ public class BibliographicBean {
         for (String superceded : supercededs) {
             BibliographicToBibliographicEntity b2b = entityManager.find(BibliographicToBibliographicEntity.class, superceded, LockModeType.PESSIMISTIC_WRITE);
             if (b2b == null) {
-                b2b = new BibliographicToBibliographicEntity();
-                b2b.deadBibliographicRecordId = superceded;
-                b2b.liveBibliographicRecordId = bibliographicRecordId;
+                b2b = new BibliographicToBibliographicEntity(superceded, bibliographicRecordId);
             } else {
-                if (b2b.liveBibliographicRecordId.equals(bibliographicRecordId)) {
+                if (b2b.getLiveBibliographicRecordId().equals(bibliographicRecordId)) {
                     continue;
                 }
-                b2b.liveBibliographicRecordId = bibliographicRecordId;
+                b2b.setLiveBibliographicRecordId(bibliographicRecordId);
             }
             entityManager.merge(b2b);
             changedBibliographicRecordIds.add(superceded);

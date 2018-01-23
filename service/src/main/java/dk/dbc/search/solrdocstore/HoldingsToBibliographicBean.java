@@ -1,8 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
-import java.sql.SQLException;
 import java.util.*;
-import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +97,7 @@ public class HoldingsToBibliographicBean {
         if (e==null) {
             return bibliographicRecordId;
         } else {
-            return e.liveBibliographicRecordId;
+            return e.getLiveBibliographicRecordId();
         }
     }
 
