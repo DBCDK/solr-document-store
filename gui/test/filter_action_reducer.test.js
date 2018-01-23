@@ -1,12 +1,6 @@
 import * as actions from "../app/actions/filtering";
 import { SELECT_BIB_RECORD, selectBibRecord } from "../app/actions/global";
-import filterReducer from "../app/reducers/filter";
-
-const filterInitialState = {
-  selectedItem: {},
-  whiteListPending: {},
-  whiteListedElements: null
-};
+import filterReducer, { produceInitialState } from "../app/reducers/filter";
 
 describe("Filtering actions", () => {
   test("Select bibliographic record action", () => {
@@ -43,7 +37,12 @@ describe("Filtering actions", () => {
 
 describe("Filter reducer", () => {
   test("Should return initial state", () => {
-    expect(filterReducer(undefined, {})).toEqual(filterInitialState);
+    expect(filterReducer(undefined, {})).toEqual(produceInitialState());
+  });
+  test("Invalid action does nothing", () => {
+    expect(filterReducer(produceInitialState(), undefined)).toEqual(
+      produceInitialState()
+    );
   });
   test("Reducer purity", () => {
     let state = {

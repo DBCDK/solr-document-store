@@ -33,7 +33,7 @@ The development server can be launched by running `npm run-script dev-server`.
 
 The webpack development server is already configured to run on localhost:8090, and should act as a proxy for the service to run on localhost:8080.
 
-`webpack-dev-server` requires node to run, so make sure it is installed.
+`webpack` and `webpack-dev-server` requires `node` >= 5.10 to run, so make sure it is installed.
 
 ## Project structure
 
@@ -42,7 +42,7 @@ Even though we create several bundles for several web pages, everything is writt
 ### Folder structure
 
  - `app`: Contains all application code
- 	- `actions`: Each file contains action producers and relevant type constants, that mirrors a reducer. Only exception is `global.js` which contains action relevant to several reducers.
+ 	- `actions`: Each file contains action producers and relevant type constants, that mirrors a reducer. Only exception is `global.js` which contains actions relevant to several reducers.
  	- `api`: Contains functions for interacting with the `service` backend API. All results are delivered as a `Promise`.
  	- `components`: Contains all react components.
  	- `functions`: Contains helper functions for non-trivial operations that also needs to be re-used in several places.

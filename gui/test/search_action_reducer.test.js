@@ -1,7 +1,7 @@
 import * as actions from "../app/actions/searching";
-import searchReducer,{produceInitialState} from "../app/reducers/search";
-import {SEARCH_SELECT_PARAMETER} from "../app/actions/searching";
-import {SEARCH_REPO_ID} from "../app/api";
+import searchReducer, { produceInitialState } from "../app/reducers/search";
+import { SEARCH_SELECT_PARAMETER } from "../app/actions/searching";
+import { SEARCH_REPO_ID } from "../app/api";
 
 let searchInitialState = produceInitialState();
 
@@ -31,6 +31,21 @@ describe("Search actions", () => {
     };
     expect(actions.searchFailed(error)).toEqual(desiredAction);
   });
+  test("Search page size correct", () => {
+    let desiredAction = {
+      type: actions.SEARCH_PAGE_SIZE,
+      pageSize: 5
+    };
+    expect(actions.setPageSize(5)).toEqual(desiredAction);
+  });
+  test("Search fetch page correct", () => {
+    let desiredAction = {
+      type: actions.SEARCH_FETCH_PAGE,
+      pageIndex: 3,
+      orderBy: "deleted"
+    };
+    expect(actions.fetchPage(3, "deleted")).toEqual(desiredAction);
+  });
 });
 
 describe("Search reducer", () => {
@@ -38,7 +53,9 @@ describe("Search reducer", () => {
     expect(searchReducer(undefined, {})).toEqual(searchInitialState);
   });
   test("Invalid action does nothing", () => {
-    expect(searchReducer(produceInitialState(),undefined)).toEqual(produceInitialState())
+    expect(searchReducer(produceInitialState(), undefined)).toEqual(
+      produceInitialState()
+    );
   });
   test("Reducer purity", () => {
     let state = {
@@ -64,7 +81,9 @@ describe("Search reducer", () => {
     };
     let desiredState = produceInitialState();
     desiredState.searchParameter = parameter;
-    expect(searchReducer(startState,selectSearchParameterAction)).toEqual(desiredState);
+    expect(searchReducer(startState, selectSearchParameterAction)).toEqual(
+      desiredState
+    );
   });
   test("Should handle search bibliographic record", () => {
     let searchTerm = "Looking for someone";
@@ -75,7 +94,9 @@ describe("Search reducer", () => {
     let desiredState = produceInitialState();
     desiredState.searchPending = true;
     desiredState.searchTerm = searchTerm;
-    expect(searchReducer(undefined, searchBibRecordAction)).toEqual(desiredState);
+    expect(searchReducer(undefined, searchBibRecordAction)).toEqual(
+      desiredState
+    );
   });
   test("Should handle search success", () => {
     let searchTerm = "Looking...";
@@ -83,13 +104,15 @@ describe("Search reducer", () => {
     startState.searchTerm = searchTerm;
     let searchSuccessAction = {
       type: actions.SEARCH_SUCCESS,
-      bibPosts: {result: bibPosts,pages: 1}
+      bibPosts: { result: bibPosts, pages: 1 }
     };
     let desiredState = produceInitialState();
     desiredState.searchResults = bibPosts;
     desiredState.searchTerm = searchTerm;
     desiredState.searchPageCount = 1;
-    expect(searchReducer(startState, searchSuccessAction)).toEqual(desiredState);
+    expect(searchReducer(startState, searchSuccessAction)).toEqual(
+      desiredState
+    );
   });
   test("Should handle search failed", () => {
     let searchTerm = "Looking...";
@@ -104,6 +127,36 @@ describe("Search reducer", () => {
     desiredState.searchPending = false;
     desiredState.searchTerm = searchTerm;
     desiredState.searchErrorMessage = "It went badly";
-    expect(searchReducer(startState, searchSuccessAction)).toEqual(desiredState);
+    expect(searchReducer(startState, searchSuccessAction)).toEqual(
+      desiredState
+    );
+  });
+  test("Should handle search fetch page", () => {
+    let initialStateCannotFetch = produceInitialState();
+    let searchFetchPageAction = {
+      type: actions.SEARCH_FETCH_PAGE
+    };
+    let desiredStateCannotFetch = produceInitialState();
+    console.log(desiredStateCannotFetch);
+    expect(
+      searchReducer(initialStateCannotFetch, searchFetchPageAction)
+    ).toEqual(desiredStateCannotFetch);
+    let initialStateCanFetch = produceInitialState();
+    initialStateCanFetch.searchPageCount = 2;
+    let desiredStateCanFetch = produceInitialState();
+    desiredStateCanFetch.searchPending = true;
+    desiredStateCanFetch.searchPageCount = 2;
+    expect(searchReducer(initialStateCanFetch, searchFetchPageAction)).toEqual(
+      desiredStateCanFetch
+    );
+  });
+  test("Should handle search page size", () => {
+    let initialState = produceInitialState();
+    let searchPageSizeAction = actions.setPageSize(5);
+    let desiredState = produceInitialState();
+    desiredState.searchPageSize = 5;
+    expect(searchReducer(initialState, searchPageSizeAction)).toEqual(
+      desiredState
+    );
   });
 });
