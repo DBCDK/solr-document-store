@@ -34,8 +34,8 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.getDocumentWithHoldingsitems(300000, "12345678")
                 );
 
-        assertThat(doc.bibliographicRecord.agencyId, is(300000));
-        assertThat(doc.bibliographicRecord.bibliographicRecordId, is("12345678"));
+        assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
+        assertThat(doc.bibliographicRecord.getBibliographicRecordId(), is("12345678"));
         assertThat(doc.holdingsItemRecords.size(), is(2));
     }
 }

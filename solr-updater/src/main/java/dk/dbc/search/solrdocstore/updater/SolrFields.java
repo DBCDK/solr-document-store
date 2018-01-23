@@ -122,7 +122,6 @@ public class SolrFields {
             }
 
             Replica replica = liveReplicas.get((int) Math.floor(Math.random() * liveReplicas.size()));
-            System.out.println("replica = " + replica);
             return replica.getBaseUrl() + "/" + collectionName;
         }
         throw new IllegalStateException("Don't know about this solr client type: " + client.getClass().getSimpleName());

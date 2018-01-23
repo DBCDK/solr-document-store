@@ -12,7 +12,33 @@ public class BibliographicToBibliographicEntity implements Serializable {
     private static final long serialVersionUID = -4000756841976185211L;
 
     @Id
-    public String deadBibliographicRecordId;
+    private String deadBibliographicRecordId;
 
-    public String liveBibliographicRecordId;
+    private String liveBibliographicRecordId;
+
+    public BibliographicToBibliographicEntity() {
+    }
+
+    public BibliographicToBibliographicEntity(String deadBibliographicRecordId, String liveBibliographicRecordId) {
+        this.deadBibliographicRecordId = deadBibliographicRecordId;
+        this.liveBibliographicRecordId = liveBibliographicRecordId;
+    }
+
+    public String getLiveBibliographicRecordId() {
+        return liveBibliographicRecordId;
+    }
+
+    public void setLiveBibliographicRecordId(String liveBibliographicRecordId) {
+        this.liveBibliographicRecordId = liveBibliographicRecordId;
+    }
+
+    public String getDeadBibliographicRecordId() {
+        return deadBibliographicRecordId;
+    }
+
+    public void setDeadBibliographicRecordId(String deadBibliographicRecordId) {
+        this.deadBibliographicRecordId = deadBibliographicRecordId;
+    }
+    
+    
 }

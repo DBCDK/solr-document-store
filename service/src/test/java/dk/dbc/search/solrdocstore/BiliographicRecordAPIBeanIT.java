@@ -119,10 +119,10 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void testAgencyIdOrderingBibliographicRecordId(){
         String bibliographicRecordId = "page-order";
         // Sort by producerVersion in descending order
-        List<Integer> result = getColumnOfBib(bibliographicRecordId,"agencyId",false, bibItem -> bibItem.agencyId);
+        List<Integer> result = getColumnOfBib(bibliographicRecordId,"agencyId",false, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(103862,207130,305421,401685,504758,602306,706244,808077));
         // Sort by producerVersion in ascending order
-        result = getColumnOfBib(bibliographicRecordId,"agencyId",true, bibItem -> bibItem.agencyId);
+        result = getColumnOfBib(bibliographicRecordId,"agencyId",true, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(808077,706244,602306,504758,401685,305421,207130,103862));
     }
 
@@ -130,10 +130,10 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void testProducerVersionOrderingBibliographicRecordId(){
         String bibliographicRecordId = "page-order";
         // Sort by agencyId in descending order
-        List<String> result = getColumnOfBib(bibliographicRecordId,"producerVersion",false, bibItem -> bibItem.producerVersion);
+        List<String> result = getColumnOfBib(bibliographicRecordId,"producerVersion",false, bibItem -> bibItem.getProducerVersion());
         assertEquals(result, Arrays.asList("producer:1","producer:2","producer:3","producer:4","producer:5","producer:6","producer:7","producer:8"));
         // Sort by agencyId in ascending order
-        result = getColumnOfBib(bibliographicRecordId,"producerVersion",true, bibItem -> bibItem.producerVersion);
+        result = getColumnOfBib(bibliographicRecordId,"producerVersion",true, bibItem -> bibItem.getProducerVersion());
         assertEquals(result, Arrays.asList("producer:8","producer:7","producer:6","producer:5","producer:4","producer:3","producer:2","producer:1"));
     }
 
@@ -141,18 +141,18 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void testTrackingIdBibliographicRecordId(){
         String bibliographicRecordId = "page-order";
         // Sort by agencyId in descending order
-        List<String> result = getColumnOfBib(bibliographicRecordId,"trackingId",false, bibItem -> bibItem.trackingId);
+        List<String> result = getColumnOfBib(bibliographicRecordId,"trackingId",false, bibItem -> bibItem.getTrackingId());
         assertEquals(result, Arrays.asList("track:1","track:2","track:3","track:4","track:5","track:6","track:7","track:8"));
-        result = getColumnOfBib(bibliographicRecordId,"trackingId",true, bibItem -> bibItem.trackingId);
+        result = getColumnOfBib(bibliographicRecordId,"trackingId",true, bibItem -> bibItem.getTrackingId());
         assertEquals(result, Arrays.asList("track:8","track:7","track:6","track:5","track:4","track:3","track:2","track:1"));
     }
 
     @Test
     public void testDeletedOrderingBibliographicRecordId(){
         String bibliographicRecordId = "page-order";
-        List<Boolean> result = getColumnOfBib(bibliographicRecordId,"deleted",false, bibItem -> bibItem.deleted);
+        List<Boolean> result = getColumnOfBib(bibliographicRecordId,"deleted",false, bibItem -> bibItem.isDeleted());
         assertEquals(result, Arrays.asList(false,false,false,false,false,true,true,true));
-        result = getColumnOfBib(bibliographicRecordId,"deleted",true, bibItem -> bibItem.deleted);
+        result = getColumnOfBib(bibliographicRecordId,"deleted",true, bibItem -> bibItem.isDeleted());
         assertEquals(result, Arrays.asList(true,true,true,false,false,false,false,false));
     }
 
@@ -160,10 +160,10 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void testAgencyIdOrderingRepositoryId() throws JsonProcessingException {
         String repositoryId = "p-o";
         // Sort by producerVersion in descending order
-        List<Integer> result = getColumnOfRepo(repositoryId,"agencyId",false, bibItem -> bibItem.agencyId);
+        List<Integer> result = getColumnOfRepo(repositoryId,"agencyId",false, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(103862,207130,305421,401685,504758,602306,706244,808077));
         // Sort by producerVersion in ascending order
-        result = getColumnOfRepo(repositoryId,"agencyId",true, bibItem -> bibItem.agencyId);
+        result = getColumnOfRepo(repositoryId,"agencyId",true, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(808077,706244,602306,504758,401685,305421,207130,103862));
     }
 
@@ -171,10 +171,10 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void testProducerVersionOrderingRepositoryId() throws JsonProcessingException {
         String repositoryId = "p-o";
         // Sort by agencyId in descending order
-        List<String> result = getColumnOfRepo(repositoryId,"producerVersion",false, bibItem -> bibItem.producerVersion);
+        List<String> result = getColumnOfRepo(repositoryId,"producerVersion",false, bibItem -> bibItem.getProducerVersion());
         assertEquals(result, Arrays.asList("producer:1","producer:2","producer:3","producer:4","producer:5","producer:6","producer:7","producer:8"));
         // Sort by agencyId in ascending order
-        result = getColumnOfRepo(repositoryId,"producerVersion",true, bibItem -> bibItem.producerVersion);
+        result = getColumnOfRepo(repositoryId,"producerVersion",true, bibItem -> bibItem.getProducerVersion());
         assertEquals(result, Arrays.asList("producer:8","producer:7","producer:6","producer:5","producer:4","producer:3","producer:2","producer:1"));
     }
 
@@ -182,18 +182,18 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void testTrackingIdOrderingRepositoryId() throws JsonProcessingException {
         String repositoryId = "p-o";
         // Sort by agencyId in descending order
-        List<String> result = getColumnOfRepo(repositoryId,"trackingId",false, bibItem -> bibItem.trackingId);
+        List<String> result = getColumnOfRepo(repositoryId,"trackingId",false, bibItem -> bibItem.getTrackingId());
         assertEquals(result, Arrays.asList("track:1","track:2","track:3","track:4","track:5","track:6","track:7","track:8"));
-        result = getColumnOfRepo(repositoryId,"trackingId",true, bibItem -> bibItem.trackingId);
+        result = getColumnOfRepo(repositoryId,"trackingId",true, bibItem -> bibItem.getTrackingId());
         assertEquals(result, Arrays.asList("track:8","track:7","track:6","track:5","track:4","track:3","track:2","track:1"));
     }
 
     @Test
     public void testDeletedOrderingRepositoryId() throws JsonProcessingException {
         String repositoryId = "p-o";
-        List<Boolean> result = getColumnOfRepo(repositoryId,"deleted",false, bibItem -> bibItem.deleted);
+        List<Boolean> result = getColumnOfRepo(repositoryId,"deleted",false, bibItem -> bibItem.isDeleted());
         assertEquals(result, Arrays.asList(false,false,false,false,false,true,true,true));
-        result = getColumnOfRepo(repositoryId,"deleted",true, bibItem -> bibItem.deleted);
+        result = getColumnOfRepo(repositoryId,"deleted",true, bibItem -> bibItem.isDeleted());
         assertEquals(result, Arrays.asList(true,true,true,false,false,false,false,false));
     }
 
@@ -213,14 +213,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     }
 
     private BibliographicEntity createBibliographicEntity(int agencyId, String bibliographicRecordId) {
-        String dummy = "qw";
-        BibliographicEntity b = new BibliographicEntity();
-        b.agencyId = agencyId;
-        b.bibliographicRecordId = bibliographicRecordId;
-        b.work = dummy;
-        b.unit = dummy;
-        b.deleted = false;
-        b.trackingId = dummy;
+        BibliographicEntity b = new BibliographicEntity(agencyId, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         em.persist(b);
         return b;
     }

@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import java.io.FileNotFoundException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -72,7 +71,7 @@ public class DocumentRetrieveBean {
 
         DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
 
-        if (!biblEntity.deleted) {
+        if (!biblEntity.isDeleted()) {
             TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
             query.setParameter("bibliographicRecordId", bibliographicRecordId);
             query.setParameter("agencyId", agencyId);

@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

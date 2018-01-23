@@ -19,7 +19,7 @@ public class QueueRuleEntity implements Serializable {
     }
 
     @Id
-    public String queue;
+    private String queue;
 
     @Override
     public int hashCode() {
@@ -34,6 +34,14 @@ public class QueueRuleEntity implements Serializable {
     @Override
     public String toString() {
         return "QueueRuleEntity{" + "queue=" + queue + '}';
+    }
+
+    public String getQueue() {
+        return queue;
+    }
+
+    public void setQueue(String queue) {
+        this.queue = queue;
     }
 
 }
