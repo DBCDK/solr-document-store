@@ -2,26 +2,23 @@ version: "3.3"
 
 services:
   db:
-    image: postgres:10.1
+    image: docker-os.dbc.dk/docstore_postgres_demo:latest
     ports:
-      - "8001:5432"
-    environment:
-      - POSTGRES_PASSWORD=${USER}
-      - POSTGRES_USER=${USER}
-      - POSTGRES_DB=${USER}
+      - "5000:5432"
 
   docstore-service:
     build:
     #../service/src/main/docker
-      context: ../
-      dockerfile: service/src/main/docker/Dockerfile
+      #context: ../
+      context: ../service/src/main/docker/
+      dockerfile: Dockerfile
     container_name: docstore-server-container
     ports:
       - "8080:8080"
       #- "5432:5432"
     environment:
       #- DOCSTORE_POSTGRES_URL=${DOCSTORE_POSTGRES_URL:-${USER}:${USER}@192.168.9.5:5432/${USER}}
-      - DOCSTORE_POSTGRES_URL=${USER}:${USER}@db:5432/${USER}
+      - DOCSTORE_POSTGRES_URL=test_db:test_db@db:5432/test_db
     volumes:
       - ${PWD}/../service/target/solr-doc-store-service-1.0-SNAPSHOT.war:/payara-micro/wars/solr-doc-store-service-1.0-SNAPSHOT.war
 
@@ -38,6 +35,8 @@ services:
 
 networks:
   default:
+    #external:
+    #  name: docker_default
     ipam:
       driver: default
       config:
