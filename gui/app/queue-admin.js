@@ -6,7 +6,7 @@ import { AppContainer } from "react-hot-loader";
 import QueueAdminGUI from "./components/queue-admin-gui";
 // Redux related
 import { Provider } from "react-redux";
-import configureStore from "./reducers/configure_store";
+import configureStore from "./reducers/admin_queue_store";
 
 // Webpack will bundle styling
 import "bootstrap/dist/css/bootstrap.min.css";

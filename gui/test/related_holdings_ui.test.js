@@ -2,7 +2,7 @@ import React from "react";
 import Enzyme, { mount } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 import { Provider } from "react-redux";
-import configureStore from "../app/reducers/configure_store";
+import configureStore from "../app/reducers/docstore_gui_store";
 import RelatedHoldingsExplorer from "../app/components/related_holdings";
 import { pullFailed } from "../app/actions/related_holdings";
 import Loading from "../app/components/loading";

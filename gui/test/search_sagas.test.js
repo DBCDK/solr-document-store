@@ -1,15 +1,19 @@
-import configureStore from "../app/reducers/configure_store";
+import configureStore from "../app/reducers/docstore_gui_store";
 import { takeLatest, call, put, select } from "redux-saga/effects";
-import { watchSearch, fetchBibliographicPost, getSearchParameter } from "../app/sagas/index";
+import {
+  watchSearch,
+  fetchBibliographicPost,
+  getSearchParameter
+} from "../app/sagas/index";
 import {
   SEARCH_BIB_RECORD_ID,
   searchBibRecord,
   searchSuccess
 } from "../app/actions/searching";
 import * as searchActions from "../app/actions/searching";
-import SagaTester from 'redux-saga-tester';
-import reducers from "../app/reducers";
-import ourSaga from '../app/sagas';
+import SagaTester from "redux-saga-tester";
+import reducers from "../app/reducers/docstore_gui_root_reducer";
+import ourSaga from "../app/sagas";
 
 import api from "../app/api/index";
 
@@ -32,14 +36,15 @@ describe("Search saga integration test", () => {
     sagaTester.start(ourSaga);
   });
   test("Successful request should end up in store", async () => {
-    fetch.mockResponse(JSON.stringify({
-          result: [
-            {
-              bibliographicRecordId: "4321"
-            }
-          ]
-        }
-    ));
+    fetch.mockResponse(
+      JSON.stringify({
+        result: [
+          {
+            bibliographicRecordId: "4321"
+          }
+        ]
+      })
+    );
     sagaTester.dispatch(searchBibRecord("4321"));
     // Will await all promises to complete, which includes saga, could fail if timers are involved
     await sagaTester.waitFor(searchActions.SEARCH_SUCCESS);

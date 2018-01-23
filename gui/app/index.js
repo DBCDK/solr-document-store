@@ -7,7 +7,7 @@ import { AppContainer } from "react-hot-loader";
 import SolrDocstoreGUI from "./components/solr-docstore-gui";
 // Redux related
 import { Provider } from "react-redux";
-import configureStore from "./reducers/configure_store";
+import configureStore from "./reducers/docstore_gui_store";
 
 // Webpack will bundle styling
 import "bootstrap/dist/css/bootstrap.min.css";

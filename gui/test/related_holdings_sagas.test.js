@@ -1,9 +1,9 @@
-import configureStore from "../app/reducers/configure_store";
+import configureStore from "../app/reducers/docstore_gui_store";
 import { selectBibRecord } from "../app/actions/global";
 import * as relatedHoldingsActions from "../app/actions/related_holdings";
-import SagaTester from 'redux-saga-tester';
-import reducers from "../app/reducers";
-import ourSaga from '../app/sagas';
+import SagaTester from "redux-saga-tester";
+import reducers from "../app/reducers/docstore_gui_root_reducer";
+import ourSaga from "../app/sagas";
 
 describe("Search saga integration test", () => {
   let store;
@@ -15,21 +15,24 @@ describe("Search saga integration test", () => {
     sagaTester.start(ourSaga);
   });
   test("Successful request should end up in store", async () => {
-    fetch.mockResponse(JSON.stringify({
+    fetch.mockResponse(
+      JSON.stringify({
         result: [
           {
             bibliographicRecordId: "4321"
           }
         ]
-      }
-    ));
+      })
+    );
     sagaTester.dispatch(
       selectBibRecord({
         bibliographicRecordId: "4321",
         agencyId: "1234"
       })
     );
-    await sagaTester.waitFor(relatedHoldingsActions.PULL_RELATED_HOLDINGS_SUCCESS);
+    await sagaTester.waitFor(
+      relatedHoldingsActions.PULL_RELATED_HOLDINGS_SUCCESS
+    );
     expect(sagaTester.getState().relatedHoldings.relatedHoldings[0]).toEqual({
       bibliographicRecordId: "4321"
     });
@@ -42,7 +45,9 @@ describe("Search saga integration test", () => {
         agencyId: "1234"
       })
     );
-    await sagaTester.waitFor(relatedHoldingsActions.PULL_RELATED_HOLDINGS_FAILED);
+    await sagaTester.waitFor(
+      relatedHoldingsActions.PULL_RELATED_HOLDINGS_FAILED
+    );
     expect(sagaTester.getState().relatedHoldings.errorMessage).toEqual(
       "We had an error"
     );
