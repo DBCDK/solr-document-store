@@ -55,15 +55,15 @@ public class HoldingsToBibliographicBean {
             List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
             for (HoldingsToBibliographicEntity h2b : recalcCandidates){
 
-                LibraryConfig.LibraryType libraryType = getFromCache(map, h2b.holdingsAgencyId);
+                LibraryConfig.LibraryType libraryType = getFromCache(map, h2b.getHoldingsAgencyId());
                 switch (libraryType){
                     case NonFBS:
                         break;
                     case FBS:
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, COMMON_AGENCY));
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, h2b.getBibliographicAgencyId(), COMMON_AGENCY));
                         break;
                     case FBSSchool:
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.holdingsAgencyId, h2b.holdingsBibliographicRecordId, newRecordId, h2b.bibliographicAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY));
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, h2b.getBibliographicAgencyId(), SCHOOL_COMMON_AGENCY, COMMON_AGENCY));
                         break;
                 }
             }
@@ -137,9 +137,9 @@ public class HoldingsToBibliographicBean {
         Set<AgencyItemKey> affectedKeys = EnqueueAdapter.makeSet();
 
         if ((foundEntity!=null) && !foundEntity.equals(expectedState)){
-            affectedKeys.add( EnqueueAdapter.makeKey(foundEntity.bibliographicAgencyId,foundEntity.bibliographicRecordId) );
+            affectedKeys.add( EnqueueAdapter.makeKey(foundEntity.getBibliographicAgencyId(), foundEntity.getBibliographicRecordId()) );
         }
-        affectedKeys.add( EnqueueAdapter.makeKey(expectedState.bibliographicAgencyId, expectedState.bibliographicRecordId) );
+        affectedKeys.add( EnqueueAdapter.makeKey(expectedState.getBibliographicAgencyId(), expectedState.getBibliographicRecordId()) );
         entityManager.merge(expectedState);
         return affectedKeys;
     }

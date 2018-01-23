@@ -16,12 +16,12 @@ public class HoldingsToBibliographicEntity implements Serializable {
     private static final long serialVersionUID = -6441410794836406593L;
 
     @Id
-    public int holdingsAgencyId;
+    private int holdingsAgencyId;
     @Id
-    public String holdingsBibliographicRecordId;
+    private String holdingsBibliographicRecordId;
 
-    public String bibliographicRecordId;
-    public int bibliographicAgencyId;
+    private String bibliographicRecordId;
+    private int bibliographicAgencyId;
 
     public HoldingsToBibliographicEntity() {
     }
@@ -60,11 +60,43 @@ public class HoldingsToBibliographicEntity implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(holdingsAgencyId, holdingsBibliographicRecordId, bibliographicRecordId, bibliographicAgencyId);
     }
 
     public HoldingsToBibliographicKey asKey() {
         return new HoldingsToBibliographicKey(holdingsAgencyId,holdingsBibliographicRecordId);
     }
+
+    public int getHoldingsAgencyId() {
+        return holdingsAgencyId;
+    }
+
+    public void setHoldingsAgencyId(int holdingsAgencyId) {
+        this.holdingsAgencyId = holdingsAgencyId;
+    }
+
+    public String getHoldingsBibliographicRecordId() {
+        return holdingsBibliographicRecordId;
+    }
+
+    public void setHoldingsBibliographicRecordId(String holdingsBibliographicRecordId) {
+        this.holdingsBibliographicRecordId = holdingsBibliographicRecordId;
+    }
+
+    public String getBibliographicRecordId() {
+        return bibliographicRecordId;
+    }
+
+    public void setBibliographicRecordId(String bibliographicRecordId) {
+        this.bibliographicRecordId = bibliographicRecordId;
+    }
+
+    public int getBibliographicAgencyId() {
+        return bibliographicAgencyId;
+    }
+
+    public void setBibliographicAgencyId(int bibliographicAgencyId) {
+        this.bibliographicAgencyId = bibliographicAgencyId;
+    }
+
 }

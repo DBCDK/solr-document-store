@@ -42,7 +42,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             affectedIs(affectedKeys,
                     EnqueueAdapter.makeKey(agencyId,bibliographicRecordId));
             assertNotNull(abc);
-            assertEquals(132, abc.bibliographicAgencyId);
+            assertEquals(132, abc.getBibliographicAgencyId());
         });
     }
 
@@ -57,7 +57,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity h2BRecord = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(h2BRecord);
-            assertEquals(132, h2BRecord.bibliographicAgencyId);
+            assertEquals(132, h2BRecord.getBibliographicAgencyId());
         });
     }
 
@@ -87,7 +87,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
-            assertEquals(LibraryConfig.COMMON_AGENCY, e.bibliographicAgencyId);
+            assertEquals(LibraryConfig.COMMON_AGENCY, e.getBibliographicAgencyId());
         });
     }
 
@@ -102,7 +102,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
-            assertEquals(LibraryConfig.SCHOOL_COMMON_AGENCY, e.bibliographicAgencyId);
+            assertEquals(LibraryConfig.SCHOOL_COMMON_AGENCY, e.getBibliographicAgencyId());
         });
     }
 
@@ -135,8 +135,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
                     bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
                     HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
                     assertNotNull(e);
-                    assertEquals(agencyId,e.bibliographicAgencyId);
-                    assertEquals(newRecordId,e.bibliographicRecordId);
+                    assertEquals(agencyId, e.getBibliographicAgencyId());
+                    assertEquals(newRecordId, e.getBibliographicRecordId());
                 }
         );
     }
@@ -155,8 +155,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
-            assertEquals(LibraryConfig.COMMON_AGENCY, e.bibliographicAgencyId);
-            assertEquals(newRecordId, e.bibliographicRecordId);
+            assertEquals(LibraryConfig.COMMON_AGENCY, e.getBibliographicAgencyId());
+            assertEquals(newRecordId, e.getBibliographicRecordId());
         });
     }
 
@@ -215,8 +215,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int bibliographicAgencyId,
             String bibliographicRecordId){
         HoldingsToBibliographicEntity e = fetchH2BRecord(holdingsAgencyId, holdingsBibliographicRecordId);
-        assertEquals(e.toString(),bibliographicAgencyId, e.bibliographicAgencyId);
-        assertEquals(e.toString(),bibliographicRecordId, e.bibliographicRecordId);
+        assertEquals(e.toString(),bibliographicAgencyId, e.getBibliographicAgencyId());
+        assertEquals(e.toString(),bibliographicRecordId, e.getBibliographicRecordId());
     }
 
     @Test
@@ -234,8 +234,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
-            assertEquals(agencyId, e.bibliographicAgencyId);
-            assertEquals(bibliographicRecordId, e.bibliographicRecordId);
+            assertEquals(agencyId, e.getBibliographicAgencyId());
+            assertEquals(bibliographicRecordId, e.getBibliographicRecordId());
         });
     }
 

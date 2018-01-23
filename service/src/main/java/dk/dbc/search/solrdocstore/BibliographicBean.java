@@ -113,9 +113,7 @@ public class BibliographicBean {
                         h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
                     Set<AgencyItemKey> reattachedKeys =
-                            h2bBean.tryToAttachToBibliographicRecord(
-                                relatedHolding.holdingsAgencyId,
-                                relatedHolding.holdingsBibliographicRecordId);
+                            h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId());
                     affectedKeys.addAll(reattachedKeys);
                 }
             } else {
