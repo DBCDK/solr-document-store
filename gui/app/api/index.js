@@ -48,5 +48,15 @@ export default {
   },
   fetchQueueRules() {
     return fetch("api/queue-rules").then(parse);
+  },
+  createQueueRule(queueRule) {
+    return fetch("api/create-queue-rule", {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(queueRule)
+    }).then(parse);
   }
 };

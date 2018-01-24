@@ -11,7 +11,7 @@ const ListQueueRules = ({ queueRules }) => {
       </thead>
       <tbody>
         {queueRules.map(rule => (
-          <tr>
+          <tr key={rule.queue}>
             <th scope="row">{rule.queue}</th>
           </tr>
         ))}
