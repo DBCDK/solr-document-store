@@ -45,5 +45,8 @@ export default {
         "/" +
         bibliographicAgencyId
     ).then(parse);
+  },
+  fetchQueueRules() {
+    return fetch("api/queue-rules").then(parse);
   }
 };

@@ -17,7 +17,7 @@ export default function queues(state = produceInitialState(), action = {}) {
       return update(state, {
         initiallyLoadedQueueRules: { $set: true },
         loadingQueueRules: { $set: false },
-        queueRules: { $set: action.queueRules }
+        queueRules: { $set: action.queueRules.result }
       });
     default:
       return state;
