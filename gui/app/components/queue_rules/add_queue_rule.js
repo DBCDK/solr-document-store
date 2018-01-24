@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { createQueueRule } from "../actions/queues";
+import { createQueueRule } from "../../actions/queues";
 
 class AddQueueRule extends React.PureComponent {
   constructor(props) {
