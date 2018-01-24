@@ -105,6 +105,17 @@ public abstract class AsyncJob {
     }
 
     /**
+     * Log pattern pre message
+     * <p>
+     * Set to "" if no timing and level is required
+     *
+     * @return default log pattern
+     */
+    public String getLogPattern() {
+        return "%d{HH:mm:ss:SSS}|%-5level|";
+    }
+
+    /**
      * Set up logging for this class
      *
      * @throws IOException in case of file errors
@@ -125,7 +136,7 @@ public abstract class AsyncJob {
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{HH:mm:ss:SSS}|%-5level|%msg%n%rEx");
+        encoder.setPattern(getLogPattern() + "%msg%n%rEx");
         encoder.init(write);// Not really sure why this is nessecary appender.setEncoder should do that
         encoder.start();
 
