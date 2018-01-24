@@ -3,14 +3,15 @@ import {
   CREATE_QUEUE_RULE_FAILED,
   CREATE_QUEUE_RULE_SUCCESS,
   PULL_QUEUE_RULES,
+  PULL_QUEUE_RULES_FAILURE,
   PULL_QUEUE_RULES_SUCCESS
 } from "../actions/queues";
 import update from "immutability-helper";
 
 export const produceInitialState = () => ({
-  initiallyLoadedQueueRules: false,
   loadingQueueRules: false,
   queueRules: [],
+  queueRulesErrorMessage: "",
   addQueueRulePending: false,
   addQueueRuleErrorMessage: ""
 });
@@ -23,9 +24,13 @@ export default function queues(state = produceInitialState(), action = {}) {
       });
     case PULL_QUEUE_RULES_SUCCESS:
       return update(state, {
-        initiallyLoadedQueueRules: { $set: true },
         loadingQueueRules: { $set: false },
         queueRules: { $set: action.queueRules.result }
+      });
+    case PULL_QUEUE_RULES_FAILURE:
+      return update(state, {
+        queueRulesErrorMessage: { $set: action.message },
+        loadingQueueRules: { $set: false }
       });
     case CREATE_QUEUE_RULE:
       return update(state, {
