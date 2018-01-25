@@ -34,8 +34,9 @@ export const createQueueRuleSuccess = queueRule => ({
   queueRule
 });
 
-export const createQueueRuleFailed = () => ({
-  type: CREATE_QUEUE_RULE_FAILED
+export const createQueueRuleFailed = exception => ({
+  type: CREATE_QUEUE_RULE_FAILED,
+  message: exception.message
 });
 
 export const deleteQueueRule = queueRule => ({
