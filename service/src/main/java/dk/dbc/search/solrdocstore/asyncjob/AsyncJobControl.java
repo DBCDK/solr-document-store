@@ -116,7 +116,7 @@ public class AsyncJobControl {
     @Produces({MediaType.TEXT_PLAIN})
     @Path("tail/{id}")
     public Response tail(@PathParam("id") @NotNull String id) {
-        return tail(id, 8);
+        return tail(id, 8 /* 8k */);
     }
 
     /**

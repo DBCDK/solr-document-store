@@ -96,11 +96,10 @@ public class AsyncJobRunner {
     public String start(AsyncJob job) {
         prune();
         UUID id;
+        AsyncJobHandle wrapper = new AsyncJobHandle(job);
         do {
             id = UUID.randomUUID();
-        } while (jobs.containsKey(id));
-        AsyncJobHandle wrapper = new AsyncJobHandle(job);
-        jobs.put(id, wrapper);
+        } while (jobs.computeIfAbsent(id, s -> wrapper) != wrapper);
         mes.execute(wrapper);
         return id.toString();
     }

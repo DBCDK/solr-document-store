@@ -126,6 +126,12 @@ public class AsyncJobHandle implements Runnable {
         }
     }
 
+    /**
+     * Stream the las n bytes of data from the log (starting after a newline)
+     *
+     * @param size number of bytes wanted
+     * @return content stream
+     */
     public StreamingOutput tail(int size) {
         return (output) -> {
             byte[] bytes = new byte[size];
