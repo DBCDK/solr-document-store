@@ -38,13 +38,13 @@ public class EnqueueSupplierBean {
     @Inject
     QueueRulesDaemon daemon;
 
-    public EnqeueService<AgencyItemKey> getManifestationEnqueueService() {
+    public EnqueueService<AgencyItemKey> getManifestationEnqueueService() {
         // EclipseLink specific
         Connection connection = entityManager.unwrap(java.sql.Connection.class);
-        return new EnqeueService<>(connection, daemon.getManifestationQueues(),
-                                   (key, commitWithin) ->
-                                   new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
-                                                commitWithin));
+        return new EnqueueService<>(connection, daemon.getManifestationQueues(),
+                                    (key, commitWithin) ->
+                                    new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
+                                                 commitWithin));
     }
 
 }

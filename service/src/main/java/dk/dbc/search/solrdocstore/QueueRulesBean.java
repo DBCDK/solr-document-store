@@ -87,7 +87,7 @@ public class QueueRulesBean {
 
     private void enqueueManifestations(Connection connection, ResultSet resultSet, String queue) throws SQLException {
         connection.setAutoCommit(false);
-        EnqeueService<AgencyItemKey> enqueueService = getManifestationEnqueueService(connection, queue);
+        EnqueueService<AgencyItemKey> enqueueService = getManifestationEnqueueService(connection, queue);
         long row = 0;
         while (resultSet.next()) {
             int i = 0;
@@ -103,11 +103,11 @@ public class QueueRulesBean {
         }
     }
 
-    private EnqeueService<AgencyItemKey> getManifestationEnqueueService(Connection connection, String queue) {
-        return new EnqeueService<>(connection, Arrays.asList(queue),
-                                   (key, commitWithin) ->
-                                   new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
-                                                commitWithin));
+    private EnqueueService<AgencyItemKey> getManifestationEnqueueService(Connection connection, String queue) {
+        return new EnqueueService<>(connection, Arrays.asList(queue),
+                                    (key, commitWithin) ->
+                                    new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
+                                                 commitWithin));
     }
 
 }

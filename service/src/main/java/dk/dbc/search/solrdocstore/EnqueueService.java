@@ -32,15 +32,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author DBC {@literal <dbc.dk>}
  */
-public class EnqeueService<T> {
+public class EnqueueService<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(EnqeueService.class);
+    private static final Logger log = LoggerFactory.getLogger(EnqueueService.class);
 
     private final BiFunction<T, Integer, QueueJob> jobCreator;
     private final Collection<String> queueNames;
     private final PreparedQueueSupplier queueSupplier;
 
-    public EnqeueService(Connection connection, Collection<String> queueNames, BiFunction<T, Integer, QueueJob> jobCreator) {
+    public EnqueueService(Connection connection, Collection<String> queueNames, BiFunction<T, Integer, QueueJob> jobCreator) {
         this.jobCreator = jobCreator;
         this.queueNames = queueNames;
         this.queueSupplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
