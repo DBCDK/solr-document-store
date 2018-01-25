@@ -68,7 +68,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             bean.entityManager = em;
 
             clearQueue(em);
-            EnqeueService<AgencyItemKey> enqeueService = bean.getManifestationEnqueueService();
+            EnqueueService<AgencyItemKey> enqeueService = bean.getManifestationEnqueueService();
 
             try {
                 System.out.println("* no commitWithin");
