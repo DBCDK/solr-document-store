@@ -56,7 +56,7 @@ public abstract class AsyncJob {
      * @param isCanceled method to check if job has been canceled
      * @throws Exception in case oof an error
      */
-    abstract void run(Supplier<Boolean> isCanceled) throws Exception;
+    public abstract void run(Supplier<Boolean> isCanceled) throws Exception;
 
     /**
      * Named job
