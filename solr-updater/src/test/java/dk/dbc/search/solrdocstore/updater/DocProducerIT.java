@@ -41,6 +41,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ import static org.junit.Assert.*;
  *
  * @author DBC {@literal <dbc.dk>}
  */
+@Ignore
 public class DocProducerIT {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducerIT.class);
