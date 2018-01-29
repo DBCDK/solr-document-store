@@ -136,71 +136,6 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat("Daemon still knows about bar", daemon.getManifestationQueues(), containsInAnyOrder("bar"));
     }
 
-    @Test
-    public void enqueueAll() throws Exception {
-        System.out.println("enqueueAll");
-
-        clearQueue(dataSource);
-        env().getPersistenceContext().run(() -> {
-            for (int i = 0 ; i < 10 ; i++) {
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
-            }
-            BibliographicEntity entity = makeBiblEntity(700001, "dd");
-            entity.setDeleted(true);
-            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
-        });
-        clearQueue(dataSource);
-        bean.queueAllManifestations("foo");
-        queueIs(dataSource,
-                "foo,700000,a0", "foo,700000,a1", "foo,700000,a2",
-                "foo,700000,a3", "foo,700000,a4", "foo,700000,a5",
-                "foo,700000,a6", "foo,700000,a7", "foo,700000,a8",
-                "foo,700000,a9",
-                "foo,700000,b0", "foo,700000,b1", "foo,700000,b2",
-                "foo,700000,b3", "foo,700000,b4", "foo,700000,b5",
-                "foo,700000,b6", "foo,700000,b7", "foo,700000,b8",
-                "foo,700000,b9",
-                "foo,700000,c0", "foo,700000,c1", "foo,700000,c2",
-                "foo,700000,c3", "foo,700000,c4", "foo,700000,c5",
-                "foo,700000,c6", "foo,700000,c7", "foo,700000,c8",
-                "foo,700000,c9",
-                "foo,700001,dd");
-    }
-
-    @Test
-    public void enqueueNotDeleted() throws Exception {
-        System.out.println("enqueueNotDeleted");
-
-        clearQueue(dataSource);
-        env().getPersistenceContext().run(() -> {
-            for (int i = 0 ; i < 10 ; i++) {
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
-            }
-            BibliographicEntity entity = makeBiblEntity(700001, "dd");
-            entity.setDeleted(true);
-            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
-        });
-        clearQueue(dataSource);
-        bean.queueNotDeletedManifestations("foo");
-        queueIs(dataSource,
-                "foo,700000,a0", "foo,700000,a1", "foo,700000,a2",
-                "foo,700000,a3", "foo,700000,a4", "foo,700000,a5",
-                "foo,700000,a6", "foo,700000,a7", "foo,700000,a8",
-                "foo,700000,a9",
-                "foo,700000,b0", "foo,700000,b1", "foo,700000,b2",
-                "foo,700000,b3", "foo,700000,b4", "foo,700000,b5",
-                "foo,700000,b6", "foo,700000,b7", "foo,700000,b8",
-                "foo,700000,b9",
-                "foo,700000,c0", "foo,700000,c1", "foo,700000,c2",
-                "foo,700000,c3", "foo,700000,c4", "foo,700000,c5",
-                "foo,700000,c6", "foo,700000,c7", "foo,700000,c8",
-                "foo,700000,c9");
-    }
-
     public void waitForQueueCountIs(int count) throws InterruptedException {
         for (int i = 0 ; i < 1000 ; i++) {
             if (daemon.getManifestationQueues().size() == count) {
@@ -216,10 +151,6 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private List<QueueRuleEntity> getAllQueueRules() {
         return env().getPersistenceContext().run(bean::getAllQueueRules);
-    }
-
-    private BibliographicEntity makeBiblEntity(int agencyId, String bibliographicRecordId) {
-        return new BibliographicEntity(agencyId, bibliographicRecordId, "work:-1", "unit:-1", "v0.1", false, Collections.EMPTY_MAP, "IT");
     }
 
 }
