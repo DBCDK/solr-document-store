@@ -21,7 +21,6 @@ package dk.dbc.search.solrdocstore;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
@@ -32,7 +31,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static dk.dbc.search.solrdocstore.QueueTestUtil.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -79,8 +77,6 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         bibl = BeanFactoryUtil.createBibliographicBean(env());
         bean = new QueueRulesBean();
-        bean.commitEvery = 10;
-        bean.dataSource = datasource;
         bean.entityManager = em;
 
     }
