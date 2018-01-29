@@ -32,8 +32,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static dk.dbc.search.solrdocstore.LibraryConfig.LibraryType.NonFBS;
-import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 import static dk.dbc.search.solrdocstore.QueueTestUtil.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -79,26 +77,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         daemon.mes = Executors.newCachedThreadPool();
         daemon.init();
 
-        LibraryConfig libraryConfig = new LibraryConfig() {
-            @Override
-            public LibraryConfig.LibraryType getLibraryType(int agency) {
-                return NonFBS;
-            }
-
-            @Override
-            public LibraryConfig.RecordType getRecordType(int agency) {
-                return SingleRecord;
-            }
-
-        };
-        bibl = new BibliographicBean();
-        bibl.entityManager = em;
-        bibl.queue = BeanFactoryUtil.createEnqueueSupplier(env(),em);
-        bibl.h2bBean = new HoldingsToBibliographicBean();
-        bibl.h2bBean.entityManager = em;
-        bibl.h2bBean.libraryConfig = libraryConfig;
-        bibl.libraryConfig = libraryConfig;
-
+        bibl = BeanFactoryUtil.createBibliographicBean(env());
         bean = new QueueRulesBean();
         bean.commitEvery = 10;
         bean.dataSource = datasource;
