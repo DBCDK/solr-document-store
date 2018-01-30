@@ -29,7 +29,8 @@ public class DocStoreApplication extends Application {
         classes.add(StatusBean.class);
         classes.add(BibliographicBean.class);
         classes.add(HoldingsItemBean.class);
-        classes.add(FrontendAPIBean.class);
+        classes.add(BiliographicRecordAPIBean.class);
+        classes.add(QueueFrontendAPI.class);
         classes.add(DocumentRetrieveBean.class);
         classes.add(EvictAll.class);
         classes.add(AsyncJobControl.class);

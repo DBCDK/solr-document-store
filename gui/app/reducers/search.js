@@ -40,7 +40,7 @@ export default function search(state = produceInitialState(), action = {}) {
         searchErrorMessage: { $set: "" }
       });
     case SEARCH_FETCH_PAGE:
-      let canFetch = (state.searchPageCount !== -1);
+      let canFetch = state.searchPageCount !== -1;
       return update(state, {
         searchPending: { $set: canFetch },
         searchErrorMessage: { $set: "" }
