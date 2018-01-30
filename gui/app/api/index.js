@@ -58,5 +58,10 @@ export default {
       },
       body: JSON.stringify(queueRule)
     }).then(parse);
+  },
+  deleteQueueRule(queueID) {
+    return fetch("api/queue-rule/" + queueID, {
+      method: "DELETE"
+    }).then(parse);
   }
 };

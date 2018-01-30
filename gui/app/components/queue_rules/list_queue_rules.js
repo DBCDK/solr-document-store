@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import QueueRuleListItem from "./queue_rule_list_item";
 
 const ListQueueRules = ({ queueRules }) => {
   return (
@@ -10,10 +11,8 @@ const ListQueueRules = ({ queueRules }) => {
         </tr>
       </thead>
       <tbody>
-        {queueRules.map(rule => (
-          <tr key={rule.queue} className="queue-rule-row">
-            <th scope="row">{rule.queue}</th>
-          </tr>
+        {Array.from(queueRules.values()).map(rule => (
+          <QueueRuleListItem queueRule={rule} />
         ))}
       </tbody>
     </table>

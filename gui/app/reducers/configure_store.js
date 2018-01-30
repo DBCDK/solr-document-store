@@ -4,10 +4,11 @@ import createSagaMiddleware from "redux-saga";
 export default function config(
   rootReducer,
   rootSagas,
+  customMiddlewares,
   initialState = undefined
 ) {
   //const sagaMiddleware = createSagaMiddleware();
-  const sagaMiddleware = rootSagas.map(saga => ({
+  const sagaMiddlewares = rootSagas.map(saga => ({
     saga,
     middleware: createSagaMiddleware()
   }));
@@ -19,10 +20,13 @@ export default function config(
     rootReducer,
     initialState,
     composeEnhancers(
-      applyMiddleware(...sagaMiddleware.map(sm => sm.middleware))
+      applyMiddleware(
+        ...customMiddlewares,
+        ...sagaMiddlewares.map(sm => sm.middleware)
+      )
     )
   );
-  sagaMiddleware.forEach(sm => {
+  sagaMiddlewares.forEach(sm => {
     sm.middleware.run(sm.saga);
   });
   //sagaMiddleware.run(rootSaga);

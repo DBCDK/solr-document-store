@@ -76,8 +76,9 @@ describe("QueueRules interactions properly updates global state", () => {
     // Verify create happens
     await sagaTester.waitFor(queueActions.CREATE_QUEUE_RULE_SUCCESS, true);
     wrapper.update();
-    let desiredQueueRules = Array.from(queues);
-    desiredQueueRules.push(createdQueueRule);
+    //let desiredQueueRules = Array.from(queues);
+    let desiredQueueRules = new Set(queues);
+    desiredQueueRules.add(createdQueueRule);
     expect(sagaTester.getState().queues.queueRules).toEqual(desiredQueueRules);
     // Verify change is shown
     let rows = wrapper.find(".queue-rule-row");

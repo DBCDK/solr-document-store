@@ -16,7 +16,7 @@ describe("Queue saga integration test", () => {
     fetch.mockResponse(JSON.stringify({ result: queues, pages: 1 }));
     sagaTester.dispatch(queueActions.pullQueueRules());
     await sagaTester.waitFor(queueActions.PULL_QUEUE_RULES_SUCCESS, true);
-    expect(sagaTester.getState().queues.queueRules).toEqual(queues);
+    expect(sagaTester.getState().queues.queueRules).toEqual(new Set(queues));
   });
   test("Pulling queue rules fails", async () => {
     let errorMessage = "We had an error!";
@@ -38,8 +38,10 @@ describe("Queue saga integration test", () => {
     fetch.mockResponse(JSON.stringify(createdQueue));
     sagaTester.dispatch(queueActions.createQueueRule(queueName));
     await sagaTester.waitFor(queueActions.CREATE_QUEUE_RULE_SUCCESS, true);
-    let desiredQueues = Array.from(queues);
-    desiredQueues.push(createdQueue);
+    //let desiredQueues = Array.from(queues);
+    let desiredQueues = new Set(queues);
+    //desiredQueues.push(createdQueue);
+    desiredQueues.add(createdQueue);
     expect(sagaTester.getState().queues.queueRules).toEqual(desiredQueues);
   });
   test("Creating queue rule modified return value", async () => {
@@ -54,8 +56,10 @@ describe("Queue saga integration test", () => {
     fetch.mockResponse(JSON.stringify(createdQueue));
     sagaTester.dispatch(queueActions.createQueueRule(queueName));
     await sagaTester.waitFor(queueActions.CREATE_QUEUE_RULE_SUCCESS, true);
-    let desiredQueues = Array.from(queues);
-    desiredQueues.push(createdQueue);
+    //let desiredQueues = Array.from(queues);
+    let desiredQueues = new Set(queues);
+    desiredQueues.add(createdQueue);
+    //desiredQueues.push(createdQueue);
     expect(sagaTester.getState().queues.queueRules).toEqual(desiredQueues);
   });
   test("Creating queue rule failed", async () => {

@@ -87,7 +87,7 @@ describe("Queues reducer unit tests", () => {
   test("Should handle pull queue rule successful action", () => {
     let response = { result: queueRules, pages: 1 };
     let desiredState = produceInitialState();
-    desiredState.queueRules = queueRules;
+    desiredState.queueRules = new Set(queueRules);
     expect(
       queuesReducer(state, actions.pullQueueRulesSuccess(response))
     ).toEqual(desiredState);
@@ -116,8 +116,8 @@ describe("Queues reducer unit tests", () => {
     let desiredState = produceInitialState();
     let copiedQueues = queueRules.slice();
     copiedQueues.push(responseQueue);
-    desiredState.queueRules = copiedQueues;
-    state.queueRules = queueRules;
+    desiredState.queueRules = new Set(copiedQueues);
+    state.queueRules = new Set(queueRules);
     expect(
       queuesReducer(state, actions.createQueueRuleSuccess(responseQueue))
     ).toEqual(desiredState);
