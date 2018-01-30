@@ -10,7 +10,7 @@ function initWebsocket() {
     ws = new WebSocket("ws://localhost:8080/ws");
 
     ws.onopen = () => {
-      console.log("opening...");
+      console.log("Opening websocket to server...");
       //ws.send("hello server");
     };
 
