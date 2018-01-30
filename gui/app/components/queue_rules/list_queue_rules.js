@@ -12,7 +12,7 @@ const ListQueueRules = ({ queueRules }) => {
       </thead>
       <tbody>
         {Array.from(queueRules.values()).map(rule => (
-          <QueueRuleListItem queueRule={rule} />
+          <QueueRuleListItem key={rule.queue} queueRule={rule} />
         ))}
       </tbody>
     </table>
