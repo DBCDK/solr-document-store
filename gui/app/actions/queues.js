@@ -44,12 +44,10 @@ export const deleteQueueRule = queueRule => ({
   queueRule
 });
 
-export const deleteQueueRuleSuccess = queueRule => ({
-  type: DELETE_QUEUE_RULE_SUCCESS,
-  queueRule
+export const deleteQueueRuleSuccess = () => ({
+  type: DELETE_QUEUE_RULE_SUCCESS
 });
 
-export const deleteQueueRuleFailed = exception => ({
-  type: DELETE_QUEUE_RULE_FAILED,
-  message: exception.message
+export const deleteQueueRuleFailed = () => ({
+  type: DELETE_QUEUE_RULE_FAILED
 });

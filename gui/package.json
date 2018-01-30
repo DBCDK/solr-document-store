@@ -17,7 +17,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "build": "NODE_ENV=production webpack",
-    "dev-server": "NODE_ENV=development webpack-dev-server --host 0.0.0.0 --content-base development/",
+    "dev-server": "NODE_ENV=development webpack-dev-server --host 0.0.0.0",
     "test": "jest"
   },
   "devDependencies": {

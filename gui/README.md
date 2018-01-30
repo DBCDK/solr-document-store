@@ -23,7 +23,7 @@ The development server allows you to develop with hot reloading of react compone
 
 A `docker-compose` configuration has been made, which launches the service as well as database and webpack development server. By running `docker-compose up` inside the `gui` folder you are ready to develop the frontend with hot reloading, test database and service endpoints.
 
-To start development, simply visit `localhost:8090/dev.html` for the docstore tool, or `localhost:8090/dev-queue.html` for the queue tool.
+To start development, simply visit `localhost:8090/development/dev.html` for the docstore tool, or `localhost:8090/development/dev-queue.html` for the queue tool.
 
 Changes to the backend requires a manual compilation (ie. `mvn package` in root module) and relaunch of the docker images.
 

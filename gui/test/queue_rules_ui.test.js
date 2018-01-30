@@ -9,7 +9,6 @@ import SagaTester from "redux-saga-tester";
 import reducers from "../app/reducers/admin_queue_root_reducer";
 import ourSaga from "../app/sagas/admin_queue_sagas";
 import AddQueueRule from "../app/components/queue_rules/add_queue_rule";
-import QueueRuleListItem from "../app/components/queue_rules/queue_rule_list_item";
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -29,17 +28,16 @@ describe("QueueRules interactions properly updates global state", () => {
   let sagaTester;
   let wrapper;
   // Set up new Redux store for each test
-  beforeEach(async () => {
+  beforeEach(() => {
     store = configureStore();
     sagaTester = new SagaTester({ reducers });
     sagaTester.start(ourSaga);
     wrapper = produceWrapper(sagaTester.store);
-    // Setup initial data
+  });
+  test("Display loaded queue rules on successful pull", async () => {
     fetch.mockResponse(JSON.stringify({ result: queues, pages: 1 }));
     sagaTester.dispatch(queueActions.pullQueueRules());
     await sagaTester.waitFor(queueActions.PULL_QUEUE_RULES_SUCCESS, true);
-  });
-  test("Display loaded queue rules on successful pull", async () => {
     wrapper.update();
     let rows = wrapper.find(".queue-rule-row");
     expect(rows).toHaveProperty("length", 3);
@@ -53,6 +51,10 @@ describe("QueueRules interactions properly updates global state", () => {
     expect(wrapper.text()).toContain(errorMessage);
   });
   test("Display added queue rule", async () => {
+    // Setup initial data
+    fetch.mockResponse(JSON.stringify({ result: queues, pages: 1 }));
+    sagaTester.dispatch(queueActions.pullQueueRules());
+    await sagaTester.waitFor(queueActions.PULL_QUEUE_RULES_SUCCESS, true);
     // Input creation setup
     let getAddQueueRuleComponent = () => wrapper.find(AddQueueRule);
     let toggleButton = wrapper.find("button");
@@ -74,10 +76,8 @@ describe("QueueRules interactions properly updates global state", () => {
     // Verify create happens
     await sagaTester.waitFor(queueActions.CREATE_QUEUE_RULE_SUCCESS, true);
     wrapper.update();
-    //let desiredQueueRules = Array.from(queues);
-    let desiredQueueRules = new Map();
-    queues.forEach(q => desiredQueueRules.set(q.queue, q));
-    desiredQueueRules.set(createdQueueRule.queue, createdQueueRule);
+    let desiredQueueRules = Array.from(queues);
+    desiredQueueRules.push(createdQueueRule);
     expect(sagaTester.getState().queues.queueRules).toEqual(desiredQueueRules);
     // Verify change is shown
     let rows = wrapper.find(".queue-rule-row");
@@ -101,53 +101,5 @@ describe("QueueRules interactions properly updates global state", () => {
       "length",
       0
     );
-  });
-  test("Clicking trash-can icon removes corresponding queue", async () => {
-    wrapper.update();
-    let getQueueRuleListItem = () => wrapper.find(QueueRuleListItem);
-    let items = getQueueRuleListItem();
-    expect(items).toHaveProperty("length", 3);
-    // Picking middle element
-    let item = items.at(1);
-    let deleteLogo = item.find("i");
-    // Executing the delete by clicking delete icon
-    fetch.mockResponse(JSON.stringify({ queue: "q2" }));
-    deleteLogo.simulate("click");
-    await sagaTester.waitFor(queueActions.DELETE_QUEUE_RULE_SUCCESS, true);
-    wrapper.update();
-    expect(
-      getQueueRuleListItem().filterWhere(e => e.html() !== null)
-    ).toHaveProperty("length", 2);
-    let desiredQueueRules = new Map();
-    queues.forEach(q => desiredQueueRules.set(q.queue, q));
-    desiredQueueRules.delete("q2");
-    expect(sagaTester.getState().queues.queueRules).toEqual(desiredQueueRules);
-  });
-  test("Pending deletion disables deletion by clicking delete icon", async () => {
-    wrapper.update();
-    let getQueueRuleListItem = () => wrapper.find(QueueRuleListItem);
-    let items = getQueueRuleListItem();
-    let item1 = items.at(1);
-    let item2 = items.at(2);
-    let deleteLogo1 = item1.find("i");
-    let deleteLogo2 = item2.find("i");
-    fetch.mockResponses(
-      [JSON.stringify({ queue: "q2" })],
-      [JSON.stringify({ queue: "q3" })]
-    );
-    deleteLogo1.simulate("click");
-    // Should be disabled
-    deleteLogo2.simulate("click");
-    await sagaTester.waitFor(queueActions.DELETE_QUEUE_RULE_SUCCESS, true);
-    wrapper.update();
-    // Still only one element deleted
-    expect(
-      getQueueRuleListItem().filterWhere(e => e.html() !== null)
-    ).toHaveProperty("length", 2);
-    let desiredQueueRules = new Map();
-    queues.forEach(q => desiredQueueRules.set(q.queue, q));
-    // Only first element we tried to delete succeeded
-    desiredQueueRules.delete("q2");
-    expect(sagaTester.getState().queues.queueRules).toEqual(desiredQueueRules);
   });
 });

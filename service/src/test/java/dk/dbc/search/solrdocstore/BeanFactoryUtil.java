@@ -19,6 +19,14 @@ public class BeanFactoryUtil {
                 if (agencyId <  400000) return LibraryType.FBSSchool;
                 return LibraryType.FBS;
             }
+
+            @Override
+            public LibraryConfig.RecordType getRecordType(int agencyId) {
+                if(agencyId == 870970) return RecordType.CommonRecord;
+                if(agencyId == 300000) return RecordType.CommonRecord;
+                return RecordType.SingleRecord;
+            }
+
         };
         bean.entityManager = em;
         bean.libraryConfig = config;

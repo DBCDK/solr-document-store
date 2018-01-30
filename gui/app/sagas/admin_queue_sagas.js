@@ -30,16 +30,6 @@ function* createQueueRules(action) {
   }
 }
 
-function* deleteQueueRules(action) {
-  try {
-    const queueRule = yield call(api.deleteQueueRule, action.queueRule.queue);
-    yield put(queueActions.deleteQueueRuleSuccess(queueRule));
-  } catch (e) {
-    console.log("We had an error deleting queue: " + e.message);
-    yield put(queueActions.deleteQueueRuleFailed(e));
-  }
-}
-
 export function* watchPullQueueRules() {
   yield takeLatest(queueActions.PULL_QUEUE_RULES, fetchQueueRules);
 }
@@ -48,14 +38,6 @@ export function* watchCreateQueueRule() {
   yield takeEvery(queueActions.CREATE_QUEUE_RULE, createQueueRules);
 }
 
-export function* watchDeleteQueueRule() {
-  yield takeEvery(queueActions.DELETE_QUEUE_RULE, deleteQueueRules);
-}
-
 export default function* root() {
-  yield all([
-    fork(watchPullQueueRules),
-    fork(watchCreateQueueRule),
-    fork(watchDeleteQueueRule)
-  ]);
+  yield all([fork(watchPullQueueRules), fork(watchCreateQueueRule)]);
 }
