@@ -27,7 +27,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -75,7 +77,7 @@ public class DocProducer {
 
     /**
      * Retrieve Document and process it
-     *
+     * <p>
      * Delete from solr, of not deleted then add too
      *
      * @param agencyId              agency of document
@@ -87,7 +89,9 @@ public class DocProducer {
      * @throws SolrServerException if a sending error occurs
      */
     public void deploy(int agencyId, String bibliographicRecordId, SolrClient client, Integer commitWithin) throws IOException, SolrServerException {
+        log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         JsonNode collection = get(agencyId, bibliographicRecordId);
+        log.trace("collection = {}", collection);
         boolean deleted = isDeleted(collection);
 
         SolrInputDocument doc = null;
@@ -98,12 +102,15 @@ public class DocProducer {
         // Deletye by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
         String query = "_root_:" + ClientUtils.escapeQueryChars(id);
+        log.debug("Delete by Query: {}", query);
         if (commitWithin == null || commitWithin <= 0) {
             client.deleteByQuery(query);
         } else {
             client.deleteByQuery(query, commitWithin);
         }
         if (doc != null) {
+            log.debug("Adding document");
+            log.trace("doc = {}", doc);
             if (commitWithin == null || commitWithin <= 0) {
                 client.add(doc);
             } else {
@@ -121,9 +128,8 @@ public class DocProducer {
      * @throws IOException In case of http errors
      */
     public JsonNode get(int agencyId, String bibliographicRecordId) throws IOException {
-        URI uri = uriTemplate.resolveTemplate("agencyId", agencyId)
-                .resolveTemplate("bibliographicRecordId", bibliographicRecordId)
-                .build();
+        URI uri = uriTemplate.buildFromMap(mapForUri(agencyId, bibliographicRecordId));
+        log.debug("Fetching: {}", uri);
         Response response = client.target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .get();
@@ -140,6 +146,20 @@ public class DocProducer {
             throw new IOException("Could read document " + uri + ": not of inputstream type");
         }
         return OBJECT_MAPPER.readTree((InputStream) entity);
+    }
+
+    /**
+     * Build a UriBuilder build map
+     *
+     * @param agencyId agency
+     * @param bibliographicRecordId record
+     * @return map
+     */
+    private static Map<String, String> mapForUri(int agencyId, String bibliographicRecordId) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("agencyId", String.valueOf(agencyId));
+        map.put("bibliographicRecordId", bibliographicRecordId);
+        return map;
     }
 
     /**
