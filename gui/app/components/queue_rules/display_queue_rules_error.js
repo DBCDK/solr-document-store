@@ -3,11 +3,13 @@ import { connect } from "react-redux";
 
 const DisplayQueueRuleError = ({
   queueRulesErrorMessage,
-  addQueueRuleErrorMessage
+  addQueueRuleErrorMessage,
+  deleteQueueRuleErrorMessage
 }) => {
   if (
     !queueRulesErrorMessage.length > 0 &&
-    !addQueueRuleErrorMessage.length > 0
+    !addQueueRuleErrorMessage.length > 0 &&
+    !deleteQueueRuleErrorMessage.length > 0
   ) {
     return null;
   }
@@ -15,13 +17,15 @@ const DisplayQueueRuleError = ({
     <div className="alert alert-danger" role="alert">
       {queueRulesErrorMessage}
       {addQueueRuleErrorMessage}
+      {deleteQueueRuleErrorMessage}
     </div>
   );
 };
 
 const mapStateToProps = state => ({
   queueRulesErrorMessage: state.queues.queueRulesErrorMessage,
-  addQueueRuleErrorMessage: state.queues.addQueueRuleErrorMessage
+  addQueueRuleErrorMessage: state.queues.addQueueRuleErrorMessage,
+  deleteQueueRuleErrorMessage: state.queues.deleteQueueRuleErrorMessage
 });
 
 export default connect(mapStateToProps)(DisplayQueueRuleError);

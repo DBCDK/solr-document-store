@@ -5,6 +5,7 @@ import { eventChannel } from "redux-saga";
 
 let ws = null;
 
+// Creating event channel that takes external/browser related "events" and translates them into redux actions
 function initWebsocket() {
   return eventChannel(emitter => {
     ws = new WebSocket("ws://localhost:8080/ws");
@@ -28,17 +29,6 @@ function initWebsocket() {
       }
       if (msg) {
         emitter(msg);
-        /*const { payload: book } = msg;
-
-        const channel = msg.channel;
-        switch (channel) {
-          case "ADD_BOOK":
-            return emitter({ type: ADD_BOOK, book });
-          case "REMOVE_BOOK":
-            return emitter({ type: REMOVE_BOOK, book });
-          default:
-          // nothing to do
-        }*/
       }
     };
 
@@ -49,6 +39,7 @@ function initWebsocket() {
   });
 }
 
+// Listens on the websocket action channel and dispatches them
 export default function* wsSagas() {
   const channel = yield call(initWebsocket);
 
@@ -60,6 +51,7 @@ export default function* wsSagas() {
 }
 
 // TODO consider if this is in an appropriate place?
+// Middleware that intercepts certain actions and send them through the websocket
 export const socketMiddleware = store => next => action => {
   const result = next(action);
   // Listen for certain actions, and send them via socket if appropriate
