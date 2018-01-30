@@ -26,24 +26,21 @@ export default {
       default:
         throw new Error("Invalid parameter");
     }
-    let queryParams = "?page=" + page + "&page_size=" + pageSize;
+    let queryParams = `?page=${page}&page_size=${pageSize}`;
     if (orderBy) {
-      queryParams += "&order_by=" + orderBy.id + "&desc=" + orderBy.desc;
+      queryParams += `&order_by=${orderBy.id}&desc=${orderBy.desc}`;
     }
     return fetch(
-      "api/bibliographic-records/" +
-        urlParam +
-        "/" +
-        encodeURIComponent(searchTerm) +
-        queryParams
+      `api/bibliographic-records/${urlParam}/${encodeURIComponent(
+        searchTerm
+      )}${queryParams}`
     ).then(parse);
   },
   pullRelatedHoldings(bibliographicRecordId, bibliographicAgencyId) {
     return fetch(
-      "api/related-holdings/" +
-        encodeURIComponent(bibliographicRecordId) +
-        "/" +
-        bibliographicAgencyId
+      `api/related-holdings/${encodeURIComponent(
+        bibliographicRecordId
+      )}/${bibliographicAgencyId}`
     ).then(parse);
   },
   fetchQueueRules() {
@@ -60,7 +57,7 @@ export default {
     }).then(parse);
   },
   deleteQueueRule(queueID) {
-    return fetch("api/queue-rule/" + queueID, {
+    return fetch(`api/queue-rule/${queueID}`, {
       method: "DELETE"
     }).then(parse);
   }

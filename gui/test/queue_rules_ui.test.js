@@ -133,7 +133,7 @@ describe("QueueRules interactions properly updates global state", () => {
     let deleteLogo2 = item2.find("i");
     fetch.mockResponses(
       [JSON.stringify({ queue: "q2" })],
-      [JSON.stringify({ queue: "q1" })]
+      [JSON.stringify({ queue: "q3" })]
     );
     deleteLogo1.simulate("click");
     // Should be disabled
