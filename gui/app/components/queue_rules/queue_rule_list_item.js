@@ -5,7 +5,7 @@ import { deleteQueueRule } from "../../actions/queues";
 const QueueRuleListItem = ({ queueRule, deleteQueue, disabled }) => {
   let tdClassName = disabled ? " table-secondary" : "";
   return (
-    <tr key={queueRule.queue} className={"queue-rule-row" + tdClassName}>
+    <tr className={"queue-rule-row" + tdClassName}>
       <td scope="row" valign="bottom">
         {queueRule.queue}
         <i

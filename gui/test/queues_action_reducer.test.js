@@ -55,6 +55,32 @@ describe("Queues action unit tests", () => {
       desiredAction
     );
   });
+  test("Delete queue rule action", () => {
+    let queueRule = { queue: "hello" };
+    let desiredAction = {
+      type: actions.DELETE_QUEUE_RULE,
+      queueRule
+    };
+    expect(actions.deleteQueueRule(queueRule)).toEqual(desiredAction);
+  });
+  test("Delete queue rule action succeeded", () => {
+    let queueRule = { queue: "hello" };
+    let desiredAction = {
+      type: actions.DELETE_QUEUE_RULE_SUCCESS,
+      queueRule
+    };
+    expect(actions.deleteQueueRuleSuccess(queueRule)).toEqual(desiredAction);
+  });
+  test("Delete queue rule action failed", () => {
+    let errorMessage = "I am confused...";
+    let desiredAction = {
+      type: actions.DELETE_QUEUE_RULE_FAILED,
+      message: errorMessage
+    };
+    expect(actions.deleteQueueRuleFailed(new Error(errorMessage))).toEqual(
+      desiredAction
+    );
+  });
 });
 
 describe("Queues reducer unit tests", () => {
@@ -133,6 +159,63 @@ describe("Queues reducer unit tests", () => {
       queuesReducer(
         state,
         actions.createQueueRuleFailed(new Error(errorMessage))
+      )
+    ).toEqual(desiredState);
+  });
+  test("Should handle delete queue rule", () => {
+    let deleteQueueName = "q1";
+    let deleteQueue = { queue: deleteQueueName };
+    // Setup
+    queueRules.forEach(q => state.queueRules.set(q.queue, q));
+    // Setup desired state, but without the deleted element
+    let desiredState = produceInitialState();
+    queueRules.forEach(q => desiredState.queueRules.set(q.queue, q));
+    desiredState.deletionQueueRulePending = true;
+    expect(queuesReducer(state, actions.deleteQueueRule(deleteQueue))).toEqual(
+      desiredState
+    );
+  });
+  test("Should handle delete queue rule succeeded", () => {
+    let deleteQueueName = "q1";
+    let deleteQueue = { queue: deleteQueueName };
+    // Setup
+    queueRules.forEach(q => state.queueRules.set(q.queue, q));
+    // Setup desired state, but without the deleted element
+    let desiredState = produceInitialState();
+    queueRules.forEach(q => desiredState.queueRules.set(q.queue, q));
+    desiredState.queueRules.delete(deleteQueueName);
+    expect(
+      queuesReducer(state, actions.deleteQueueRuleSuccess(deleteQueue))
+    ).toEqual(desiredState);
+  });
+  test("Should handle delete of non-existing queue", () => {
+    let deleteQueueName = "non-existing";
+    let deleteQueue = { queue: deleteQueueName };
+    // Setup
+    queueRules.forEach(q => state.queueRules.set(q.queue, q));
+    // Setup desired state, but without the deleted element
+    let desiredState = produceInitialState();
+    queueRules.forEach(q => desiredState.queueRules.set(q.queue, q));
+    expect(
+      queuesReducer(state, actions.deleteQueueRuleSuccess(deleteQueue))
+    ).toEqual(desiredState);
+  });
+  test("Should handle delete of empty queue list", () => {
+    let deleteQueueName = "q1";
+    let deleteQueue = { queue: deleteQueueName };
+    let desiredState = produceInitialState();
+    expect(
+      queuesReducer(state, actions.deleteQueueRuleSuccess(deleteQueue))
+    ).toEqual(desiredState);
+  });
+  test("Should handle delete queue rule failed", () => {
+    let errorMessage = "We had an error";
+    let desiredState = produceInitialState();
+    desiredState.deleteQueueRuleErrorMessage = errorMessage;
+    expect(
+      queuesReducer(
+        state,
+        actions.deleteQueueRuleFailed(new Error(errorMessage))
       )
     ).toEqual(desiredState);
   });
