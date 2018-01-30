@@ -21,7 +21,6 @@ package dk.dbc.search.solrdocstore;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
@@ -32,9 +31,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static dk.dbc.search.solrdocstore.LibraryConfig.LibraryType.NonFBS;
-import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
-import static dk.dbc.search.solrdocstore.QueueTestUtil.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -79,29 +75,8 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         daemon.mes = Executors.newCachedThreadPool();
         daemon.init();
 
-        LibraryConfig libraryConfig = new LibraryConfig() {
-            @Override
-            public LibraryConfig.LibraryType getLibraryType(int agency) {
-                return NonFBS;
-            }
-
-            @Override
-            public LibraryConfig.RecordType getRecordType(int agency) {
-                return SingleRecord;
-            }
-
-        };
-        bibl = new BibliographicBean();
-        bibl.entityManager = em;
-        bibl.queue = BeanFactoryUtil.createEnqueueSupplier(env(),em);
-        bibl.h2bBean = new HoldingsToBibliographicBean();
-        bibl.h2bBean.entityManager = em;
-        bibl.h2bBean.libraryConfig = libraryConfig;
-        bibl.libraryConfig = libraryConfig;
-
+        bibl = BeanFactoryUtil.createBibliographicBean(env());
         bean = new QueueRulesBean();
-        bean.commitEvery = 10;
-        bean.dataSource = datasource;
         bean.entityManager = em;
 
     }
@@ -157,71 +132,6 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat("Daemon still knows about bar", daemon.getManifestationQueues(), containsInAnyOrder("bar"));
     }
 
-    @Test
-    public void enqueueAll() throws Exception {
-        System.out.println("enqueueAll");
-
-        clearQueue(dataSource);
-        env().getPersistenceContext().run(() -> {
-            for (int i = 0 ; i < 10 ; i++) {
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
-            }
-            BibliographicEntity entity = makeBiblEntity(700001, "dd");
-            entity.setDeleted(true);
-            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
-        });
-        clearQueue(dataSource);
-        bean.queueAllManifestations("foo");
-        queueIs(dataSource,
-                "foo,700000,a0", "foo,700000,a1", "foo,700000,a2",
-                "foo,700000,a3", "foo,700000,a4", "foo,700000,a5",
-                "foo,700000,a6", "foo,700000,a7", "foo,700000,a8",
-                "foo,700000,a9",
-                "foo,700000,b0", "foo,700000,b1", "foo,700000,b2",
-                "foo,700000,b3", "foo,700000,b4", "foo,700000,b5",
-                "foo,700000,b6", "foo,700000,b7", "foo,700000,b8",
-                "foo,700000,b9",
-                "foo,700000,c0", "foo,700000,c1", "foo,700000,c2",
-                "foo,700000,c3", "foo,700000,c4", "foo,700000,c5",
-                "foo,700000,c6", "foo,700000,c7", "foo,700000,c8",
-                "foo,700000,c9",
-                "foo,700001,dd");
-    }
-
-    @Test
-    public void enqueueNotDeleted() throws Exception {
-        System.out.println("enqueueNotDeleted");
-
-        clearQueue(dataSource);
-        env().getPersistenceContext().run(() -> {
-            for (int i = 0 ; i < 10 ; i++) {
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
-            }
-            BibliographicEntity entity = makeBiblEntity(700001, "dd");
-            entity.setDeleted(true);
-            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
-        });
-        clearQueue(dataSource);
-        bean.queueNotDeletedManifestations("foo");
-        queueIs(dataSource,
-                "foo,700000,a0", "foo,700000,a1", "foo,700000,a2",
-                "foo,700000,a3", "foo,700000,a4", "foo,700000,a5",
-                "foo,700000,a6", "foo,700000,a7", "foo,700000,a8",
-                "foo,700000,a9",
-                "foo,700000,b0", "foo,700000,b1", "foo,700000,b2",
-                "foo,700000,b3", "foo,700000,b4", "foo,700000,b5",
-                "foo,700000,b6", "foo,700000,b7", "foo,700000,b8",
-                "foo,700000,b9",
-                "foo,700000,c0", "foo,700000,c1", "foo,700000,c2",
-                "foo,700000,c3", "foo,700000,c4", "foo,700000,c5",
-                "foo,700000,c6", "foo,700000,c7", "foo,700000,c8",
-                "foo,700000,c9");
-    }
-
     public void waitForQueueCountIs(int count) throws InterruptedException {
         for (int i = 0 ; i < 1000 ; i++) {
             if (daemon.getManifestationQueues().size() == count) {
@@ -237,10 +147,6 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private List<QueueRuleEntity> getAllQueueRules() {
         return env().getPersistenceContext().run(bean::getAllQueueRules);
-    }
-
-    private BibliographicEntity makeBiblEntity(int agencyId, String bibliographicRecordId) {
-        return new BibliographicEntity(agencyId, bibliographicRecordId, "work:-1", "unit:-1", "v0.1", false, Collections.EMPTY_MAP, "IT");
     }
 
 }

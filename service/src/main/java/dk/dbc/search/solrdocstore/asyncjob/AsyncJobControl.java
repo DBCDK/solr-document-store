@@ -57,7 +57,7 @@ public class AsyncJobControl {
         String id = runner.start(new AsyncJob("testjob") {
 
             @Override
-            void run(Supplier<Boolean> isCanceled) throws Exception {
+            public void run(Supplier<Boolean> isCanceled) throws Exception {
                 for (int i = 0 ; i < count ; i++) {
                     if (isCanceled.get()) {
                         break;

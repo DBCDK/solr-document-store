@@ -25,7 +25,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.Lock;
@@ -51,8 +53,8 @@ public class AsyncJobRunner {
     @Inject
     Config config;
 
-    @Resource
-    ManagedExecutorService mes;
+    @Resource(type = ManagedExecutorService.class)
+    ExecutorService mes;
 
     private static final Logger log = LoggerFactory.getLogger(AsyncJobRunner.class);
 
