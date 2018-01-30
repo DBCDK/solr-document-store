@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
+import dk.dbc.search.solrdocstore.asyncjob.AsyncJobSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,9 @@ public class QueueFrontendAPI {
     @Inject
     EnqueueSupplierBean enqueueSupplierBean;
 
+    @Inject
+    AsyncJobSessionHandler sessionHandler;
+
     @GET
     @Path("queue-rules")
     @Produces({MediaType.APPLICATION_JSON})
@@ -51,6 +55,7 @@ public class QueueFrontendAPI {
         QueueRuleEntity queueRule = jsonbContext.unmarshall(jsonContent, QueueRuleEntity.class);
         log.info("Creating queue rule: {}",queueRule.getQueue());
         entityManager.persist(queueRule);
+        sessionHandler.addQueueRule(queueRule);
         return Response.ok(queueRule).build();
     }
 
