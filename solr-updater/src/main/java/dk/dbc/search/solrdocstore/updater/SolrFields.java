@@ -98,7 +98,6 @@ public class SolrFields {
      */
     String getUrl() {
         SolrClient client = SolrApi.makeSolrClient(config.getSolrUrl());
-        System.out.println("client.getClass().getCanonicalName() = " + client.getClass().getCanonicalName());
         if (client instanceof HttpSolrClient) {
             return config.getSolrUrl();
         }
