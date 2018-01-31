@@ -26,17 +26,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.concurrent.TimeUnit;
 
 import static java.time.Instant.now;
 import static javax.ejb.LockType.READ;
@@ -53,8 +53,7 @@ public class AsyncJobRunner {
     @Inject
     Config config;
 
-    @Resource(type = ManagedExecutorService.class)
-    ExecutorService mes;
+    private ExecutorService mes;
 
     private static final Logger log = LoggerFactory.getLogger(AsyncJobRunner.class);
 
@@ -62,6 +61,12 @@ public class AsyncJobRunner {
 
     public AsyncJobRunner() {
         this.jobs = new ConcurrentSkipListMap<>();
+
+    }
+
+    @PostConstruct
+    public void init() {
+        mes = Executors.newCachedThreadPool();
     }
 
     /**
@@ -80,6 +85,13 @@ public class AsyncJobRunner {
                 log.info("Removing log for job: {}", handle.getJob().getName());
                 handle.getJob().removeLog();
             }
+        }
+        try {
+            mes.shutdown();
+            mes.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException ex) {
+            log.error("Error waiting for Executor Service to complete: {}", ex.getMessage());
+            log.debug("Error waiting for Executor Service to complete: ", ex);
         }
     }
 
@@ -102,6 +114,7 @@ public class AsyncJobRunner {
         do {
             id = UUID.randomUUID();
         } while (jobs.computeIfAbsent(id, s -> wrapper) != wrapper);
+        log.info("mes = {}", mes);
         mes.execute(wrapper);
         return id.toString();
     }

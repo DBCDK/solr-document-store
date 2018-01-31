@@ -135,7 +135,11 @@ public class AsyncJobControl {
         if (job == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok().entity(job.tail(1024 * size)).build();
+        if (job.isStarted()) {
+            return Response.ok().entity(job.tail(1024 * size)).build();
+        } else {
+            return Response.ok().entity("Not Started").build();
+        }
     }
 
     /**
@@ -152,7 +156,11 @@ public class AsyncJobControl {
         if (job == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok().entity(job.content()).build();
+        if (job.isStarted()) {
+            return Response.ok().entity(job.content()).build();
+        } else {
+            return Response.ok().entity("Not Started").build();
+        }
     }
 
     /**
