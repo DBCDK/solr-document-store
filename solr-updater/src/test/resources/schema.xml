@@ -16,6 +16,8 @@
     </types>
     <fields><!-- Required when updateLog is enabled-->
         <field name="_version_" type="long" indexed="true" stored="true"/><!-- -->
+        <field name="_root_" type="id" indexed="true" stored="true"/><!-- -->
+        <field name="t" type="id" indexed="true" stored="true"/><!-- -->
         <field name="alias" type="dbc-facet" indexed="true" stored="true" required="false"/>
         <field name="fedoraPid" type="id" indexed="true" stored="true" required="false"/>
         <field name="id" type="id" indexed="true" stored="true" required="false"/>

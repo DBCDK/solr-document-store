@@ -99,14 +99,19 @@ public class DocProducer {
             doc = inputDocument(collection);
         }
         String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
-        // Deletye by query:
+        // Delete by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
-        String query = "_root_:" + ClientUtils.escapeQueryChars(id);
+        // Converted to nested to delete subdocuments only, then delete owner by id
+        String query = "{!child of=\"t:m\"}id:" + ClientUtils.escapeQueryChars(id);
         log.debug("Delete by Query: {}", query);
         if (commitWithin == null || commitWithin <= 0) {
             client.deleteByQuery(query);
+            log.debug("Delete by id: {}", id);
+            client.deleteById(id);
         } else {
-            client.deleteByQuery(query, commitWithin);
+            client.deleteByQuery(query);
+            log.debug("Delete by id: {}", id);
+            client.deleteById(id, commitWithin);
         }
         if (doc != null) {
             log.debug("Adding document");
@@ -151,7 +156,7 @@ public class DocProducer {
     /**
      * Build a UriBuilder build map
      *
-     * @param agencyId agency
+     * @param agencyId              agency
      * @param bibliographicRecordId record
      * @return map
      */
@@ -224,7 +229,7 @@ public class DocProducer {
             JsonNode indexKeyList = find(record, "indexKeys");
             int i = 0;
             for (JsonNode indexKeys : indexKeyList) {
-                setField(indexKeys, "id" + "#" + i++, id);
+                setField(indexKeys, "id", id + "#" + i++);
                 setField(indexKeys, "t", "h"); // Holdings type
                 addField(indexKeys, "parentDocId", linkId);
                 SolrInputDocument nested = newDocumentFromIndexKeys(indexKeys);
@@ -335,6 +340,8 @@ public class DocProducer {
                         values.add(valueIterator.next().asText(""));
                     }
                     doc.addField(name, values);
+                } else {
+                    log.trace("Unknown field: {}", name);
                 }
             }
         }
