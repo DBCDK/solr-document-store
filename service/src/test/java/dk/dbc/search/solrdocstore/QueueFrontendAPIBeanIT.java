@@ -2,11 +2,13 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
+import dk.dbc.search.solrdocstore.asyncjob.AsyncJobSessionHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
+import javax.persistence.RollbackException;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
         em = env().getEntityManager();
         bean = new QueueFrontendAPIBean();
         bean.entityManager = em;
+        bean.sessionHandler = new AsyncJobSessionHandler();
 
         // Setup records
         executeScriptResource("/queueFrontendIT.sql");
@@ -46,47 +49,43 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
                 );
         QueueRuleEntity createdQueueRule = (QueueRuleEntity) createQueueRuleResponse.getEntity();
         Assert.assertEquals(createQueueRule,createdQueueRule);
-        Response queueRulesReponse = bean.getQueueRules();
-        FrontendReturnListType<QueueRuleEntity> queueRules = (FrontendReturnListType<QueueRuleEntity>)
-                queueRulesReponse.getEntity();
-        List<QueueRuleEntity> queueRuleEntityList = queueRules.result;
         int expected = 5;
-        Assert.assertEquals(expected,queueRuleEntityList.size());
+        Assert.assertEquals(expected,getNumberOfQueues());
     }
 
     @Test(expected = RuntimeException.class)
     public void testCreateInvalidQueueRule(){
         String queueJson = "{not:\"proper\"}";
         Response createQueueRuleResponse = env().getPersistenceContext()
-                .run(() -> bean.createQueueRule(null,queueJson)
-                );
+                .run(() -> bean.createQueueRule(null,queueJson));
     }
 
     @Test
     public void testDeleteQueueRule() throws JSONBException {
         QueueRuleEntity deleteQueueRule = new QueueRuleEntity("queue2");
-        String queueJson = jsonbContext.marshall(deleteQueueRule);
         Response createQueueRuleResponse = env().getPersistenceContext()
-                .run(() -> bean.createQueueRule(null,queueJson)
-                );
-        QueueRuleEntity createdQueueRule = (QueueRuleEntity) createQueueRuleResponse.getEntity();
-        Assert.assertEquals(deleteQueueRule,createdQueueRule);
-        Response queueRulesReponse = bean.getQueueRules();
-        FrontendReturnListType<QueueRuleEntity> queueRules = (FrontendReturnListType<QueueRuleEntity>)
-                queueRulesReponse.getEntity();
-        List<QueueRuleEntity> queueRuleEntityList = queueRules.result;
-        int expected = 5;
-        Assert.assertEquals(expected,queueRuleEntityList.size());
+                .run(() -> bean.deleteQueueRule("queue2"));
+        QueueRuleEntity deletedQueueRule = (QueueRuleEntity) createQueueRuleResponse.getEntity();
+        Assert.assertEquals(deleteQueueRule,deletedQueueRule);
+        int expected = 3;
+        Assert.assertEquals(expected,getNumberOfQueues());
 
     }
 
     @Test
     public void testDeleteNonExistingQueueRule(){
-
+        try {
+            Response createQueueRuleResponse = env().getPersistenceContext()
+                    .run(() -> bean.deleteQueueRule("non-existing"));
+        } catch (RollbackException e){
+            int expected = 4;
+            Assert.assertEquals(expected,getNumberOfQueues());
+            return;
+        }
+        Assert.fail("This should fail and not change the number of queues...");
     }
 
-    @Test
-    public void testDeleteInvalidQueueRule(){
-
+    public int getNumberOfQueues(){
+        return ((Number)em.createQuery("SELECT COUNT(q) FROM QueueRuleEntity q").getSingleResult()).intValue();
     }
 }
