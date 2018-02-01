@@ -14,6 +14,13 @@ pipeline {
         timestamps()
     }
     stages {
+        stage("pre-build") {
+            steps {
+                sh """
+                    env | sort
+		"""
+            }
+        }
         stage("build") {
             steps {
                 // Fail Early..
