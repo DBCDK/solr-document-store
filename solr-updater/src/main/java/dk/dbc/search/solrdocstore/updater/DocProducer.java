@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,7 +30,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -39,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
@@ -62,8 +66,27 @@ public class DocProducer {
     @Inject
     SolrFields solrFields;
 
+    @Inject
+    Timer fetchTimer;
+
+    @Inject
+    Timer selectByRootTimer;
+
+    @Inject
+    Timer deleteByIdTimer;
+
+    @Inject
+    Timer addDocumentTimer;
+
     private Client client;
     private UriBuilder uriTemplate;
+
+    private static final Timer UNITTESTING_TIMER = new Timer();
+
+    public DocProducer() {
+        // Create timers for unit testing
+        fetchTimer = deleteByIdTimer = selectByRootTimer = addDocumentTimer = UNITTESTING_TIMER;
+    }
 
     @PostConstruct
     public void init() {
@@ -99,28 +122,42 @@ public class DocProducer {
             doc = inputDocument(collection);
         }
         String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
-        // Delete by query:
-        // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
-        // Converted to nested to delete subdocuments only, then delete owner by id
-        String query = "{!child of=\"t:m\"}id:" + ClientUtils.escapeQueryChars(id);
-        log.debug("Delete by Query: {}", query);
-        if (commitWithin == null || commitWithin <= 0) {
-            client.deleteByQuery(query);
-            log.debug("Delete by id: {}", id);
-            client.deleteById(id);
-        } else {
-            client.deleteByQuery(query);
-            log.debug("Delete by id: {}", id);
-            client.deleteById(id, commitWithin);
+
+        List<String> ids = documentsIdsByRoot(id, client);
+
+        try (Timer.Context time = deleteByIdTimer.time()) {
+            if (commitWithin == null || commitWithin <= 0) {
+                client.deleteById(ids);
+            } else {
+                client.deleteById(ids, commitWithin);
+            }
         }
+        log.debug("Ids deleted: {}", ids);
         if (doc != null) {
             log.debug("Adding document");
             log.trace("doc = {}", doc);
-            if (commitWithin == null || commitWithin <= 0) {
-                client.add(doc);
-            } else {
-                client.add(doc, commitWithin);
+            try (Timer.Context time = addDocumentTimer.time()) {
+                if (commitWithin == null || commitWithin <= 0) {
+                    client.add(doc);
+                } else {
+                    client.add(doc, commitWithin);
+                }
             }
+        }
+    }
+
+    private List<String> documentsIdsByRoot(String id, SolrClient client1) throws IOException, SolrServerException {
+        // Delete by query:
+        // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
+        // Converted to nested to delete subdocuments only, then delete owner by id
+        String query = "_root_:" + ClientUtils.escapeQueryChars(id);
+        log.debug("Delete by Query: {}", query);
+        SolrQuery req = new SolrQuery(query);
+        req.setFields("id");
+        req.setRows(10000);
+        req.setStart(1);
+        try (final Timer.Context time = selectByRootTimer.time()) {
+            return client1.query(req).getResults().stream().map(d -> String.valueOf(d.getFirstValue("id"))).collect(Collectors.toList());
         }
     }
 
@@ -135,10 +172,12 @@ public class DocProducer {
     public JsonNode get(int agencyId, String bibliographicRecordId) throws IOException {
         URI uri = uriTemplate.buildFromMap(mapForUri(agencyId, bibliographicRecordId));
         log.debug("Fetching: {}", uri);
-        Response response = client.target(uri)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .get();
-
+        Response response;
+        try (Timer.Context time = fetchTimer.time()) {
+            response = client.target(uri)
+                    .request(MediaType.APPLICATION_JSON_TYPE)
+                    .get();
+        }
         Response.StatusType status = response.getStatusInfo();
         if (status.getStatusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Could not access document " + uri + ": " + status);
