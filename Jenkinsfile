@@ -80,8 +80,11 @@ pipeline {
 
                             def imageName = "${projectArtifactId}-${version}".toLowerCase()
                             def imageLabel = env.BUILD_NUMBER
-                            if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
-                                println("Using branch_name ${BRANCH_NAME}")
+                            if ( ! (env.CHANGE_BRANCH == '' ) ) {
+                                imageLabel = env.CHANGE_BRANCH
+                            }
+                            if ( ! (imageLabel ==~ /master|trunk/) ) {
+                                println("Using branch_name ${imageLabel}")
                                 imageLabel = BRANCH_NAME.split(/\//)[-1]
                                 imageLabel = imageLabel.toLowerCase()
                             } else {
