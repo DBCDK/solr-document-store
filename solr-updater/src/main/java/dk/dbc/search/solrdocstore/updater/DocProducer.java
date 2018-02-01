@@ -59,6 +59,7 @@ public class DocProducer {
     private static final Logger log = LoggerFactory.getLogger(DocProducer.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final int MAX_ROWS_OF_SHARDED_SOLR = 10000;
 
     @Inject
     Config config;
@@ -151,10 +152,10 @@ public class DocProducer {
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
         // Converted to nested to delete subdocuments only, then delete owner by id
         String query = "_root_:" + ClientUtils.escapeQueryChars(id);
-        log.debug("Delete by Query: {}", query);
+        log.debug("Delete by Query - Select: {}", query);
         SolrQuery req = new SolrQuery(query);
         req.setFields("id");
-        req.setRows(10000);
+        req.setRows(MAX_ROWS_OF_SHARDED_SOLR);
         req.setStart(1);
         try (final Timer.Context time = selectByRootTimer.time()) {
             return client1.query(req).getResults().stream().map(d -> String.valueOf(d.getFirstValue("id"))).collect(Collectors.toList());
