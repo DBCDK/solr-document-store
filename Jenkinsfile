@@ -16,17 +16,20 @@ pipeline {
     stages {
         stage("pre-build") {
             steps {
-	        def branchName
-                if (! env.BRANCH_NAME) {
-                    currentBuild.rawBuild.result = Result.ABORTED
-                    throw new hudson.AbortException('Job Started from non MultiBranch Build')
-		}
-		if (! env.CHANGE_NAME) {
-		    branchName = env.BRANCH_NAME
-		} else {
-		    branchName = env.CHANGE_NAME
+	    	script {
+	            def branchName
+                    if (! env.BRANCH_NAME) {
+                        currentBuild.rawBuild.result = Result.ABORTED
+                        throw new hudson.AbortException('Job Started from non MultiBranch Build')
+		    }
+		    if (! env.CHANGE_NAME) {
+		        branchName = env.BRANCH_NAME
+		    } else {
+		        branchName = env.CHANGE_NAME
+		    }
 		}
                 sh """
+		   echo ${branchName}
                     env | sort
 		"""
             }
