@@ -81,6 +81,7 @@ pipeline {
                                 imageLabel = imageLabel.toLowerCase()
                             } else {
                                 println(" Using Master branch ${BRANCH_NAME}")
+                                imageLabel = env.BUILD_NUMBER
                             }
 
                             println("In ${dirName} build ${projectArtifactId} as ${imageName}:$imageLabel")
