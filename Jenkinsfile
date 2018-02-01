@@ -58,11 +58,9 @@ pipeline {
                     def allDockerFiles = findFiles glob: '**/Dockerfile'
                     def dockerFiles = allDockerFiles.findAll { f -> f.path.endsWith("src/main/docker/Dockerfile") }
                     def version = readMavenPom().version
-                    
 
                     for (def f : dockerFiles) {
                         def dirName = f.path.take(f.path.length() - 11)
-
 
                         dir(dirName) {
                             modulePom = readMavenPom file: '../../../pom.xml'
@@ -72,10 +70,14 @@ pipeline {
                             }
 
                             def imageName = "${projectArtifactId}-${version}".toLowerCase()
-                            def imageLabel = env.BUILD_NUMBER
-                            if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
-                                println("Using branch_name ${BRANCH_NAME}")
-                                imageLabel = BRANCH_NAME.split(/\//)[-1]
+                            if (! env.CHANGE_BRANCH) {
+                                imageLabel = env.BRANCH_NAME
+                            } else {
+                                imageLabel = env.CHANGE_BRANCH
+                            }
+                            if ( ! (imageLabel ==~ /master|trunk/) ) {
+                                println("Using branch_name ${imageLabel}")
+                                imageLabel = imageLabel.split(/\//)[-1]
                                 imageLabel = imageLabel.toLowerCase()
                             } else {
                                 println(" Using Master branch ${BRANCH_NAME}")
