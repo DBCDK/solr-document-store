@@ -3,6 +3,13 @@
     <head>
         <title>solr-doc-store-updater</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style type="text/css">
+            .tiny {
+                font-size: smaller;
+            }
+            
+        </style>
+               
         <script type="text/javascript">
             var openLink = function(group) {
                 var url = "";
@@ -28,5 +35,7 @@
         Test:
         <div>api/doctest/format/<input type="number" placeholder="agencyId">/<input type="text" placeholder="bibliographicRecordId"> <input type="button" value="TEST" onclick="openLink(this.parentNode)"></div>
         <div>api/doctest/deploy/<input type="number" placeholder="agencyId">/<input type="text" placeholder="bibliographicRecordId">?commitWithin=<input type="number" placeholder="ms"> <input type="button" value="TEST" onclick="openLink(this.parent)"></div>
+        <hr>
+        <div class="tiny"><a href="/jolokia/read/metrics:name=dk.dbc.search.*/*?mimeType=application/json">metrics-worker</a> <a href="/jolokia/read/metrics:name=dk.dbc.pgqueue.*/*?mimeType=application/json">metrics-queue</a></div>
     </body>
 </html>
