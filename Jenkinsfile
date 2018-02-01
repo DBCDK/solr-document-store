@@ -73,7 +73,7 @@ pipeline {
         stage('Docker') {
             steps {
                 script {
-                    def allDockerFiles = findFiles glob: '**/Dockerfile'
+                    def allDockerFiles = findFiles glob: '** /Dockerfile'
                     def dockerFiles = allDockerFiles.findAll { f -> f.path.endsWith("src/main/docker/Dockerfile") }
                     def version = readMavenPom().version
                     
