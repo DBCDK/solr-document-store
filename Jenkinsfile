@@ -49,7 +49,7 @@ pipeline {
                     mvn -B clean
                     mvn -B verify pmd:pmd javadoc:aggregate                   
                 """
-                //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
+                //junit "** /target/surefire-reports/TEST-*.xml,** /target/failsafe-reports/TEST-*.xml"
             }
         }
 
