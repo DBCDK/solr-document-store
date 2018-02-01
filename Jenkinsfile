@@ -5,6 +5,8 @@ pipeline {
     }
     environment {
         MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+	script {
+	}
     }
     triggers {
         pollSCM("H/3 * * * *")
