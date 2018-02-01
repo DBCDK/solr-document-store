@@ -58,6 +58,9 @@ public class Worker {
     @Inject
     DocProducer docProducer;
 
+    @Inject
+    Metrics metricRegistry;
+
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
 
@@ -73,6 +76,7 @@ public class Worker {
                 .idleRescanEvery(config.getIdleRescanEvery())
                 .maxTries(config.getMaxTries())
                 .maxQueryTime(config.getMaxQueryTime())
+                .metricRegistry(metricRegistry.getMetrics())
                 .build(QueueJob.STORAGE_ABSTRACTION,
                        config.getThreads(),
                        this::makeWorker);
