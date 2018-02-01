@@ -14,7 +14,7 @@ pipeline {
         timestamps()
     }
     stages {
-        stage("build") {
+	stage("build") {
             steps {
                 // Fail Early..
                 script {
@@ -72,10 +72,14 @@ pipeline {
                             }
 
                             def imageName = "${projectArtifactId}-${version}".toLowerCase()
-                            def imageLabel = env.BUILD_NUMBER
-                            if ( ! (env.BRANCH_NAME ==~ /master|trunk/) ) {
-                                println("Using branch_name ${BRANCH_NAME}")
-                                imageLabel = BRANCH_NAME.split(/\//)[-1]
+		    	    if (! env.CHANGE_BRANCH) {
+		                imageLabel = env.BRANCH_NAME
+		    	    } else {
+		                imageLabel = env.CHANGE_BRANCH
+		    	    }
+                            if ( ! (imageLabel ==~ /master|trunk/) ) {
+                                println("Using branch_name ${imageLabel}")
+                                imageLabel = imageLabel.split(/\//)[-1]
                                 imageLabel = imageLabel.toLowerCase()
                             } else {
                                 println(" Using Master branch ${BRANCH_NAME}")
@@ -97,7 +101,6 @@ pipeline {
                     }
                 }
             }
-
         }
     }
 
