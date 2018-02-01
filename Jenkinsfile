@@ -79,7 +79,7 @@ pipeline {
 		    	    }
                             if ( ! (imageLabel ==~ /master|trunk/) ) {
                                 println("Using branch_name ${imageLabel}")
-                                imageLabel = BRANCH_NAME.split(/\//)[-1]
+                                imageLabel = imageLabel.split(/\//)[-1]
                                 imageLabel = imageLabel.toLowerCase()
                             } else {
                                 println(" Using Master branch ${BRANCH_NAME}")
