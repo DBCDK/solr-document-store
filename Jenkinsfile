@@ -5,8 +5,6 @@ pipeline {
     }
     environment {
         MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-	script {
-	}
     }
     triggers {
         pollSCM("H/3 * * * *")
@@ -16,27 +14,6 @@ pipeline {
         timestamps()
     }
     stages {
-        stage("pre-build") {
-            steps {
-	    	script {
-	            def branchName
-                    if (! env.BRANCH_NAME) {
-                        currentBuild.rawBuild.result = Result.ABORTED
-                        throw new hudson.AbortException('Job Started from non MultiBranch Build')
-		    }
-		    if (! env.CHANGE_BRANCH) {
-		        branchName = env.BRANCH_NAME
-		    } else {
-		        branchName = env.CHANGE_BRANCH
-		    }
-                sh """
-		   echo ${branchName}
-                    env | sort
-		"""
-		}
-            }
-        }
-/*
 	stage("build") {
             steps {
                 // Fail Early..
@@ -54,7 +31,7 @@ pipeline {
                     mvn -B clean
                     mvn -B verify pmd:pmd javadoc:aggregate                   
                 """
-                //junit "** /target/surefire-reports/TEST-*.xml,** /target/failsafe-reports/TEST-*.xml"
+                //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
             }
         }
 
@@ -78,7 +55,7 @@ pipeline {
         stage('Docker') {
             steps {
                 script {
-                    def allDockerFiles = findFiles glob: '** /Dockerfile'
+                    def allDockerFiles = findFiles glob: '**/Dockerfile'
                     def dockerFiles = allDockerFiles.findAll { f -> f.path.endsWith("src/main/docker/Dockerfile") }
                     def version = readMavenPom().version
                     
@@ -95,10 +72,11 @@ pipeline {
                             }
 
                             def imageName = "${projectArtifactId}-${version}".toLowerCase()
-                            def imageLabel = env.BUILD_NUMBER
-                            if ( ! (env.CHANGE_BRANCH == '' ) ) {
-                                imageLabel = env.CHANGE_BRANCH
-                            }
+		    	    if (! env.CHANGE_BRANCH) {
+		                imageLabel = env.BRANCH_NAME
+		    	    } else {
+		                imageLabel = env.CHANGE_BRANCH
+		    	    }
                             if ( ! (imageLabel ==~ /master|trunk/) ) {
                                 println("Using branch_name ${imageLabel}")
                                 imageLabel = BRANCH_NAME.split(/\//)[-1]
@@ -124,7 +102,6 @@ pipeline {
                 }
             }
         }
-*/
     }
 
 }
