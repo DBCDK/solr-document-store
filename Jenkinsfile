@@ -22,10 +22,10 @@ pipeline {
                         currentBuild.rawBuild.result = Result.ABORTED
                         throw new hudson.AbortException('Job Started from non MultiBranch Build')
 		    }
-		    if (! env.CHANGE_NAME) {
+		    if (! env.CHANGE_BRANCH) {
 		        branchName = env.BRANCH_NAME
 		    } else {
-		        branchName = env.CHANGE_NAME
+		        branchName = env.CHANGE_BRANCH
 		    }
                 sh """
 		   echo ${branchName}
