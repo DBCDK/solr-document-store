@@ -27,11 +27,11 @@ pipeline {
 		    } else {
 		        branchName = env.CHANGE_NAME
 		    }
-		}
                 sh """
 		   echo ${branchName}
                     env | sort
 		"""
+		}
             }
         }
 /*
