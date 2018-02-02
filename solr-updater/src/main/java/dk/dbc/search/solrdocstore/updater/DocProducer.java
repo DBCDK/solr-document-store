@@ -231,6 +231,8 @@ public class DocProducer {
         String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
         String linkId = id(find(collection, "bibliographicRecord"), "link");
 
+        filterOutDecommissioned(collection);
+
         JsonNode indexKeys = find(collection, "bibliographicRecord", "indexKeys");
         setField(indexKeys, "id", id);
         setField(indexKeys, "t", "m"); // Manifestation type
@@ -240,6 +242,38 @@ public class DocProducer {
         addNestedHoldingsDocuments(doc, collection, linkId);
 
         return doc;
+    }
+
+    private void filterOutDecommissioned(JsonNode collection) {
+        JsonNode records = find(collection, "holdingsItemRecords");
+        if (records == null) {
+            return;
+        }
+
+        for (Iterator<JsonNode> i1 = records.elements() ; i1.hasNext() ;) {
+            boolean keepRecord = false;
+            JsonNode record = i1.next();
+            for (Iterator<JsonNode> i2 = find(record, "indexKeys").elements() ; i2.hasNext() ;) {
+                boolean keepHoldingsDocument = false;
+                JsonNode holdingsRecord = i2.next();
+                for (Iterator<JsonNode> i3 = holdingsRecord.withArray("holdingsitem.status").elements() ; i3.hasNext() ;) {
+                    String status = i3.next().asText("");
+                    if (status.equalsIgnoreCase("decommissioned")) {
+                        i3.remove();
+                    } else {
+                        keepHoldingsDocument = true;
+                    }
+                }
+                if (keepHoldingsDocument) {
+                    keepRecord = true;
+                } else {
+                    i2.remove();
+                }
+            }
+            if (!keepRecord) {
+                i1.remove();
+            }
+        }
     }
 
     /**
