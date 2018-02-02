@@ -5,8 +5,6 @@ import ch.qos.logback.core.AppenderBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.EJB;
-import javax.inject.Inject;
 import java.util.UUID;
 
 public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {

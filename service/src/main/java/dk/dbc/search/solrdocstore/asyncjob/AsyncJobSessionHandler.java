@@ -46,6 +46,7 @@ public class AsyncJobSessionHandler {
     private final Set<Session> sessions = new HashSet<>();
     // Maps UUID of an asynchronous job to all its frontend session subscribers
     private final Map<UUID, List<Session>> subscribers = new HashMap<>();
+    private final JsonProvider provider = JsonProvider.provider();
 
     @Inject
     AsyncJobRunner runner;
@@ -106,6 +107,41 @@ public class AsyncJobSessionHandler {
                 obj.putPOJO(fieldName, fieldValue);
             }
         });
+    }
+
+    public void addAsyncJob(UUID uuid,String name){
+        JsonObject jobStartedAction = provider.createObjectBuilder()
+                .add("type",JOB_STARTED_FRONTEND_TYPE)
+                .add("uuid",uuid.toString())
+                .add("name",name)
+                .build();
+        broadcast(jobStartedAction);
+    }
+
+    public void finishAsyncJob(UUID uuid){
+        broadcast(buildUUIDAction(JOB_FINISHED_FRONTEND_TYPE,uuid));
+    }
+
+    public void register(UUID uuid,String name){
+        subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
+        addAsyncJob(uuid,name);
+    }
+
+    public void unregister(UUID uuid){
+        List<Session> sessions = subscribers.remove(uuid);
+        finishAsyncJob(uuid);
+        sessions.forEach(session -> sendToSession(session,buildUUIDAction(UNSUBSCRIBE_FRONTEND_TYPE,uuid)));
+    }
+
+    public void appendLog(UUID uuid,String message){
+        // If this job has not been appended to yet, we create it
+        List<Session> sessions = subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
+        JsonObject action = provider.createObjectBuilder()
+                .add("type",APPEND_LOG_FRONTEND_TYPE)
+                .add("uuid",uuid.toString())
+                .add("logLine",message)
+                .build();
+        sessions.forEach((session)-> sendToSession(session,action));
     }
 
     public void broadcast(String message){
