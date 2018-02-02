@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 public class AsyncJobHandle implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncJobHandle.class);
+    private AsyncJobWesocketAppender wesocketAppender = null;
 
     private Instant startedAt;
     private final AsyncJob job;
@@ -55,7 +56,7 @@ public class AsyncJobHandle implements Runnable {
     @Override
     public void run() {
         try {
-            job.initLog();
+            job.initLog(wesocketAppender);
             startedAt = Instant.now();
             thread = Thread.currentThread();
             job.run(this::isCanceled);
@@ -74,6 +75,10 @@ public class AsyncJobHandle implements Runnable {
             completedAt = Instant.now();
             job.stopLog();
         }
+    }
+
+    public void setWebsocketAppender(AsyncJobWesocketAppender appender){
+        this.wesocketAppender = appender;
     }
 
     public AsyncJob getJob() {

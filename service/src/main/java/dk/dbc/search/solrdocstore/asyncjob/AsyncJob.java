@@ -31,6 +31,8 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.websocket.Session;
+
 /**
  *
  * @author DBC {@literal <dbc.dk>}
@@ -45,6 +47,7 @@ public abstract class AsyncJob {
     private FileOutputStream write;
     private RandomAccessFile read;
     private OutputStreamAppender appender;
+    private AsyncJobWesocketAppender wsAppender;
 
     //! This log instance logs to special
     //! Pass this along
@@ -118,10 +121,13 @@ public abstract class AsyncJob {
     /**
      * Set up logging for this class
      *
+     * @param wesocketAppender Optional websocket appender to notify with log.
+     * If undesired, null can safely be passed instead
      * @throws IOException in case of file errors
      */
-    final void initLog() throws IOException {
-        this.id = UUID.randomUUID().toString();
+    final void initLog(AsyncJobWesocketAppender wesocketAppender) throws IOException {
+        UUID uuid = UUID.randomUUID();
+        this.id = uuid.toString();
         this.file = File.createTempFile("/tmp/async-", ".log");
         this.write = new FileOutputStream(file);
         this.read = new RandomAccessFile(file, "r");
@@ -143,6 +149,14 @@ public abstract class AsyncJob {
         appender.setEncoder(encoder);
         appender.start();
         log.addAppender(appender);
+        if(wesocketAppender != null){
+            // Setup notifier using websocket to push updates to frontend
+            //this.wsAppender = new AsyncJobWesocketAppender(uuid,name,sessionHandler);
+            this.wsAppender = wesocketAppender;
+            wsAppender.setContext(log.getLoggerContext());
+            wsAppender.start();
+            log.addAppender(wsAppender);
+        }
     }
 
     /**
@@ -151,6 +165,11 @@ public abstract class AsyncJob {
     final void stopLog() {
         if (appender != null) {
             log.detachAppender(appender);
+        }
+        if(wsAppender != null){
+            log.detachAppender(wsAppender);
+            // Also unregisters and unsubscribes clients, will cause memory leak if not called
+            wsAppender.stop();
         }
         try {
             if (write != null) {

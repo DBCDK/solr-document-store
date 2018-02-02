@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -31,7 +32,13 @@ import java.util.UUID;
  * asynchronous job, and facilitates sending these log messages to the appropriate subscribers.
  * */
 @Singleton
+@Startup
 public class AsyncJobSessionHandler {
+    private static final String SUBSCRIBE_FRONTEND_TYPE = "Subscribing";
+    private static final String UNSUBSCRIBE_FRONTEND_TYPE = "Unsubscribing";
+    private static final String APPEND_LOG_FRONTEND_TYPE = "Appending log";
+    private static final String JOB_STARTED_FRONTEND_TYPE = "Job started";
+    private static final String JOB_FINISHED_FRONTEND_TYPE = "Job finished";
     private static final Logger log = LoggerFactory.getLogger(AsyncJobWebSocketServer.class);
     private static final ObjectMapper O = new ObjectMapper();
 
@@ -73,10 +80,13 @@ public class AsyncJobSessionHandler {
         } else {
             subscribers.put(uuid, Collections.singletonList(session));
         }
+        sendToSession(session, buildUUIDAction(SUBSCRIBE_FRONTEND_TYPE,uuid));
     }
 
     public void unsubscribe(Session session, String id){
-        subscribers.get(UUID.fromString(id)).remove(session);
+        UUID uuid = UUID.fromString(id);
+        subscribers.get(uuid).remove(session);
+        sendToSession(session, buildUUIDAction(UNSUBSCRIBE_FRONTEND_TYPE,uuid));
     }
 
     public void broadcastAction(String type, Map<String, Object> fields){
@@ -104,7 +114,7 @@ public class AsyncJobSessionHandler {
                 session.getBasicRemote().sendText(message);
             } catch (IOException e) {
                 removeSession(session);
-                log.warn("Unexpected closing when brodcasting to session: {}", session.getRequestURI());
+                log.warn("Unexpected closing when broadcasting to session: {}", session.getRequestURI());
             }
         });
     }
@@ -119,5 +129,16 @@ public class AsyncJobSessionHandler {
             removeSession(session);
             log.warn("Unexpected closing when messaging session: {}", session.getRequestURI());
         }
+    }
+
+    private JsonObject buildSingleArgAction(String type,String argName,String arg){
+        return provider.createObjectBuilder()
+                .add("type",type)
+                .add(argName,arg)
+                .build();
+    }
+
+    private JsonObject buildUUIDAction(String type,UUID uuid){
+        return buildSingleArgAction(type,"uuid",uuid.toString());
     }
 }

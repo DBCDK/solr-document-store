@@ -2,6 +2,11 @@
  * Websocket saga for admin queue, to listen for updates on async job events on the server */
 import { call, take, put } from "redux-saga/effects";
 import { eventChannel } from "redux-saga";
+import {
+  REQUEST_SUBSCRIBE,
+  REQUEST_UNSUBSCRIBE,
+  websocketError
+} from "../actions/async_job";
 
 let ws = null;
 
@@ -13,11 +18,13 @@ function initWebsocket() {
     ws.onopen = () => {
       console.log("Opening websocket to server...");
       //ws.send("hello server");
+      // TODO emit some "we are connected" action
     };
 
     ws.onerror = error => {
       console.log("WebSocket error " + error);
       console.dir(error);
+      emitter(websocketError(error));
     };
 
     ws.onmessage = e => {
@@ -55,7 +62,7 @@ export default function* wsSagas() {
 export const socketMiddleware = store => next => action => {
   const result = next(action);
   // Listen for certain actions, and send them via socket if appropriate
-  let listenableActions = ["Subscribe", "Unsubscribe"];
+  let listenableActions = [REQUEST_SUBSCRIBE, REQUEST_UNSUBSCRIBE];
   if (listenableActions.indexOf(action.type) > -1) {
     ws.send(JSON.stringify(action));
   }

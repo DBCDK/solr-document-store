@@ -53,6 +53,9 @@ public class AsyncJobRunner {
     @Inject
     Config config;
 
+    @Inject
+    AsyncJobSessionHandler sessionHandler;
+
     private ExecutorService mes;
 
     private static final Logger log = LoggerFactory.getLogger(AsyncJobRunner.class);
@@ -113,7 +116,11 @@ public class AsyncJobRunner {
         AsyncJobHandle wrapper = new AsyncJobHandle(job);
         do {
             id = UUID.randomUUID();
-        } while (jobs.computeIfAbsent(id, s -> wrapper) != wrapper);
+        } while (jobs.computeIfAbsent(id, s -> {
+            AsyncJobWesocketAppender wa = new AsyncJobWesocketAppender(s,job.getName(),sessionHandler);
+            wrapper.setWebsocketAppender(wa);
+            return wrapper;
+        }) != wrapper);
         log.info("mes = {}", mes);
         mes.execute(wrapper);
         return id.toString();
