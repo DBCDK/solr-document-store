@@ -117,6 +117,7 @@ public class DocProducer {
         JsonNode collection = get(agencyId, bibliographicRecordId);
         log.trace("collection = {}", collection);
         boolean deleted = isDeleted(collection);
+        log.trace("deleted = {}", deleted);
 
         SolrInputDocument doc = null;
         if (!deleted) {
@@ -126,13 +127,16 @@ public class DocProducer {
 
         List<String> ids = documentsIdsByRoot(id, client);
 
-        try (Timer.Context time = deleteByIdTimer.time()) {
-            if (commitWithin == null || commitWithin <= 0) {
-                client.deleteById(ids);
-            } else {
-                client.deleteById(ids, commitWithin);
+        if (!ids.isEmpty()) {
+            try (Timer.Context time = deleteByIdTimer.time()) {
+                if (commitWithin == null || commitWithin <= 0) {
+                    client.deleteById(ids);
+                } else {
+                    client.deleteById(ids, commitWithin);
+                }
             }
         }
+
         log.debug("Ids deleted: {}", ids);
         if (doc != null) {
             log.debug("Adding document");
