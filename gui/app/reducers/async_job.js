@@ -15,6 +15,8 @@ import {
 } from "../actions/async_job";
 import update from "immutability-helper";
 
+export const MAX_LOG_SIZE = 5;
+
 export const produceInitialState = () => ({
   subscribePending: false,
   unsubscribePending: false,
@@ -67,9 +69,14 @@ export default function asyncJobReducer(
         runningJobs: { $set: jobs }
       });
     case APPEND_LOG:
+      // TODO check log is not to long, else use $unshift
       let log = update(state.logs.get(action.uuid) || [], {
         $push: [action.logLine]
       });
+      // Ensures log does not get to long
+      if (log.length > MAX_LOG_SIZE) {
+        log.shift();
+      }
       return update(state, { logs: { $add: [[action.uuid, log]] } });
     case REQUEST_FULL_LOG:
       return update(state, {
