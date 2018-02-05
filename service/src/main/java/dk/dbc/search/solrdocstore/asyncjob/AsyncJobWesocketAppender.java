@@ -10,10 +10,12 @@ import java.util.UUID;
 public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
     private static final Logger log = LoggerFactory.getLogger(AsyncJobHandle.class);
     private final UUID uuid;
+    private final String name;
     private final AsyncJobSessionHandler sessionHandler;
 
     public AsyncJobWesocketAppender(UUID uuid,String name,AsyncJobSessionHandler sessionHandler) {
         this.uuid = uuid;
+        this.name = name;
         this.sessionHandler = sessionHandler;
         sessionHandler.register(uuid,name);
     }
@@ -21,12 +23,12 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
     @Override
     protected void append(ILoggingEvent eventObject) {
         log.info("We are websocket appending: {}",eventObject);
-        sessionHandler.appendLog(uuid,eventObject.getFormattedMessage());
+        sessionHandler.appendLog(uuid,eventObject.getMessage());
     }
 
     @Override
     public void stop(){
-        sessionHandler.unregister(uuid);
+        sessionHandler.unregister(uuid,name);
         super.stop();
     }
 }

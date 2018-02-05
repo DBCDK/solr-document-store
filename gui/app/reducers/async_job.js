@@ -88,10 +88,10 @@ export default function asyncJobReducer(
       // TODO if we are subscribed to the finished job, unsubscribe automatically,
       // or do something that makes the UI consistent. We will also receive an
       // unsubscribe action shortly after, but this should not change anything in the store.
-      let name = state.runningJobs.get(action.uuid);
+      //let name = state.runningJobs.get(action.uuid);
       return update(state, {
         runningJobs: { $remove: [action.uuid] },
-        finishedJobs: { $push: [{ uuid: action.uuid, name }] }
+        finishedJobs: { $push: [{ uuid: action.uuid, name: action.name }] }
       });
     case WEBSOCKET_ERROR:
       // TODO reset all loaders? We don't know if message was sent if we reconnect

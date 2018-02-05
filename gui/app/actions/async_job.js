@@ -63,9 +63,10 @@ export const jobStarted = (uuid, name) => ({
   name
 });
 
-export const jobFinished = uuid => ({
+export const jobFinished = (uuid, name) => ({
   type: JOB_FINISHED,
-  uuid
+  uuid,
+  name
 });
 
 export const websocketError = exception => ({

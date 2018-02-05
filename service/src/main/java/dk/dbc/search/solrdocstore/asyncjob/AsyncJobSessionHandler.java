@@ -118,8 +118,13 @@ public class AsyncJobSessionHandler {
         broadcast(jobStartedAction);
     }
 
-    public void finishAsyncJob(UUID uuid){
-        broadcast(buildUUIDAction(JOB_FINISHED_FRONTEND_TYPE,uuid));
+    public void finishAsyncJob(UUID uuid,String name){
+        JsonObject obj = provider.createObjectBuilder()
+                .add("type",JOB_FINISHED_FRONTEND_TYPE)
+                .add("uuid",uuid.toString())
+                .add("name",name)
+                .build();
+        broadcast(obj);
     }
 
     public void register(UUID uuid,String name){
@@ -127,9 +132,9 @@ public class AsyncJobSessionHandler {
         addAsyncJob(uuid,name);
     }
 
-    public void unregister(UUID uuid){
+    public void unregister(UUID uuid,String name){
         List<Session> sessions = subscribers.remove(uuid);
-        finishAsyncJob(uuid);
+        finishAsyncJob(uuid,name);
         sessions.forEach(session -> sendToSession(session,buildUUIDAction(UNSUBSCRIBE_FRONTEND_TYPE,uuid)));
     }
 
