@@ -90,9 +90,9 @@ public class AsyncJobControl {
     }
 
     /**
-     * List current jobs
+     * List current jobs with all meta data
      *
-     * @return map of uuid to job name
+     * @return list of StatusResponse's
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

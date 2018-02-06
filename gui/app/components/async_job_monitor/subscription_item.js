@@ -8,10 +8,9 @@ class SubscriptionItem extends React.Component {
   render() {
     let { uuid, name, log } = this.props;
     if (this.textLog) {
-      let isScrolledToBottom =
+      this.isScrolledToBottom =
         this.textLog.scrollHeight - this.textLog.clientHeight <=
         this.textLog.scrollTop + 1;
-      this.isScrolledToBottom = isScrolledToBottom;
     }
     return (
       <div>
