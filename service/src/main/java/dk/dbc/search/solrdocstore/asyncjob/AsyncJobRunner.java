@@ -21,9 +21,7 @@ package dk.dbc.search.solrdocstore.asyncjob;
 import dk.dbc.search.solrdocstore.Config;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -98,10 +96,14 @@ public class AsyncJobRunner {
         }
     }
 
-    public Map<String, String> jobs() {
+    public Map<String, String> jobsMap() {
         return jobs.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().toString(),
                                           e -> e.getValue().getJob().getName()));
+    }
+
+    public List<Map.Entry<UUID,AsyncJobHandle>> jobs(){
+        return new ArrayList<>(jobs.entrySet());
     }
 
     /**
