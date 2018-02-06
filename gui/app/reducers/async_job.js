@@ -15,7 +15,7 @@ import {
 } from "../actions/async_job";
 import update from "immutability-helper";
 
-export const MAX_LOG_SIZE = 5;
+export const MAX_LOG_SIZE = 50;
 
 export const produceInitialState = () => ({
   subscribePending: false,

@@ -2,7 +2,13 @@ import React from "react";
 import EmptyJobListPlaceholder from "./empty_job_list_placeholder";
 
 const listFinishedJob = job => (
-  <div key={"fin-job-" + job.uuid}>{`${job.uuid} - ${job.name}`}</div>
+  <div className="border-bottom" key={"fin-job-" + job.uuid}>
+    <a
+      href={"/api/async-job/log/" + job.uuid}
+      target="_blank"
+      style={{ cursor: "pointer" }}
+    >{`${job.uuid} - ${job.name}`}</a>
+  </div>
 );
 
 const FinishedJobsPresenter = ({ jobs }) => {
