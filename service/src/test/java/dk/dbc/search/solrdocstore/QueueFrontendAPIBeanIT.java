@@ -25,6 +25,9 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
         bean = new QueueFrontendAPIBean();
         bean.entityManager = em;
         bean.sessionHandler = new AsyncJobSessionHandler();
+        QueueRulesBean q = new QueueRulesBean();
+        q.entityManager = em;
+        bean.queueRulesBean = q;
 
         // Setup records
         executeScriptResource("/queueFrontendIT.sql");
@@ -63,9 +66,9 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void testDeleteQueueRule() throws JSONBException {
         QueueRuleEntity deleteQueueRule = new QueueRuleEntity("queue2");
-        Response createQueueRuleResponse = env().getPersistenceContext()
+        Response deleteQueueRuleResponse = env().getPersistenceContext()
                 .run(() -> bean.deleteQueueRule("queue2"));
-        QueueRuleEntity deletedQueueRule = (QueueRuleEntity) createQueueRuleResponse.getEntity();
+        QueueRuleEntity deletedQueueRule = (QueueRuleEntity) deleteQueueRuleResponse.getEntity();
         Assert.assertEquals(deleteQueueRule,deletedQueueRule);
         int expected = 3;
         Assert.assertEquals(expected,getNumberOfQueues());

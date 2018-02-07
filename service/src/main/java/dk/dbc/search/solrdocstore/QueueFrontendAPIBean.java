@@ -33,7 +33,7 @@ public class QueueFrontendAPIBean {
     EntityManager entityManager;
 
     @Inject
-    EnqueueSupplierBean enqueueSupplierBean;
+    QueueRulesBean queueRulesBean;
 
     @Inject
     AsyncJobSessionHandler sessionHandler;
@@ -43,8 +43,7 @@ public class QueueFrontendAPIBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getQueueRules(){
         log.info("Queue rules listed, probably by queue tool frontend");
-        TypedQuery<QueueRuleEntity> query = entityManager.createQuery("SELECT q FROM QueueRuleEntity q",QueueRuleEntity.class);
-        return Response.ok(new FrontendReturnListType<>(query.getResultList(), 1)).build();
+        return Response.ok(new FrontendReturnListType<>(queueRulesBean.getAllQueueRules(), 1)).build();
     }
 
     @POST
@@ -54,7 +53,7 @@ public class QueueFrontendAPIBean {
     public Response createQueueRule(@Context UriInfo uriInfo, String jsonContent) throws JSONBException {
         QueueRuleEntity queueRule = jsonbContext.unmarshall(jsonContent, QueueRuleEntity.class);
         log.info("Creating queue rule: {}",queueRule.getQueue());
-        entityManager.persist(queueRule);
+        queueRulesBean.setQueueRule(queueRule);
         sessionHandler.addQueueRule(queueRule);
         return Response.ok(queueRule).build();
     }
@@ -64,7 +63,8 @@ public class QueueFrontendAPIBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response deleteQueueRule(@PathParam("queueID") String queueID){
         QueueRuleEntity queue = entityManager.find(QueueRuleEntity.class,queueID);
-        entityManager.remove(queue);
+        log.info("Deleting queue rule: {}",queue.getQueue());
+        queueRulesBean.delQueueRule(queue);
         return Response.ok(queue).build();
     }
 }
