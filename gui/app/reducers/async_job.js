@@ -28,7 +28,8 @@ export const produceInitialState = () => ({
   asyncJobsPending: false,
   fullLogPending: false,
   fullLog: "",
-  websocketErrorMessage: "",
+  websocketError: false,
+  //websocketErrorMessage: "",
   asyncJobErrorMessage: "",
   // Has type: Map<UUID,List<String>>, ie. the log lines of each of the jobs we are subscribed to
   logs: new Map()
@@ -53,7 +54,6 @@ export default function asyncJobReducer(
         unsubscribePending: { $set: true }
       });
     case UNSUBSCRIBE:
-      // TODO clear log for this uuid?
       return update(state, {
         unsubscribePending: { $set: false },
         subscriptions: { $remove: [action.uuid] }
@@ -101,9 +101,11 @@ export default function asyncJobReducer(
         finishedJobs: { $push: [{ uuid: action.uuid, name: action.name }] }
       });
     case WEBSOCKET_ERROR:
-      // TODO reset all loaders? We don't know if message was sent if we reconnect
       return update(state, {
-        websocketErrorMessage: { $set: action.message }
+        websocketError: { $set: true },
+        unsubscribePending: { $set: false },
+        subscribePending: { $set: true }
+        //websocketErrorMessage: { $set: action.message }
       });
     // TODO figure out if we can do it on uuid level
     case ASYNC_JOB_ERROR:

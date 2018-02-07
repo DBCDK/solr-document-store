@@ -22,7 +22,6 @@ function initWebsocket() {
     };
 
     ws.onerror = error => {
-      console.log("WebSocket error " + error);
       console.dir(error);
       emitter(websocketError(error));
     };
@@ -39,9 +38,14 @@ function initWebsocket() {
       }
     };
 
+    ws.onclose = e => {
+      console.log(e);
+    };
+
     // unsubscribe function
     return () => {
       console.log("Socket off");
+      ws.close();
     };
   });
 }
@@ -52,7 +56,7 @@ export default function* wsSagas() {
 
   while (true) {
     const action = yield take(channel);
-    console.dir(action);
+    //console.dir(action);
     yield put(action);
   }
 }

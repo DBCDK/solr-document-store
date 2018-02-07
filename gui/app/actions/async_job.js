@@ -69,9 +69,10 @@ export const jobFinished = (uuid, name) => ({
   name
 });
 
-export const websocketError = exception => ({
-  type: WEBSOCKET_ERROR,
-  message: exception.message
+//export const websocketError = exception => ({
+export const websocketError = () => ({
+  type: WEBSOCKET_ERROR
+  //message: exception.message
 });
 
 // TODO figure out if we can do it on uuid level
