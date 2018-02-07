@@ -64,7 +64,7 @@ export default function asyncJobReducer(
       });
     case RECEIVED_ASYNC_JOB_LIST:
       let jobs = new Map();
-      action.jobList.forEach(j => jobs.set(j.uuid, j.name));
+      action.jobList.forEach(j => jobs.set(j.runnerUUID, j.name));
       return update(state, {
         runningJobs: { $set: jobs }
       });
@@ -104,7 +104,7 @@ export default function asyncJobReducer(
       return update(state, {
         websocketError: { $set: true },
         unsubscribePending: { $set: false },
-        subscribePending: { $set: true }
+        subscribePending: { $set: false }
         //websocketErrorMessage: { $set: action.message }
       });
     // TODO figure out if we can do it on uuid level

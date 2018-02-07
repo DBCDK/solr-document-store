@@ -61,6 +61,10 @@ export default {
       method: "DELETE"
     }).then(parse);
   },
-  fetchAsyncJobList() {},
-  fetchFullLog(uuid) {}
+  fetchAsyncJobList() {
+    return fetch("api/jobs-status").then(parse);
+  },
+  fetchFullLog(uuid) {
+    return fetch(`api/log/${uuid}`).then(res => res.body);
+  }
 };

@@ -25,7 +25,7 @@ function* fetchQueueRules(action) {
 function* fetchAsyncJobList(action) {
   try {
     const response = yield call(api.fetchAsyncJobList);
-    yield put(asyncJobsActions.receivedAsyncJobList(response.result));
+    yield put(asyncJobsActions.receivedAsyncJobList(response));
   } catch (e) {
     yield put(asyncJobsActions.asyncJobError(e));
   }

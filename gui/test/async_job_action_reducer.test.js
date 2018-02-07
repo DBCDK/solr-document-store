@@ -103,8 +103,8 @@ describe("Queues action unit tests", () => {
   test("Websocket error action", () => {
     let desiredMessage = "Websocket closed down unexpectedly";
     let desiredAction = {
-      type: actions.WEBSOCKET_ERROR,
-      message: desiredMessage
+      type: actions.WEBSOCKET_ERROR
+      //message: desiredMessage
     };
     expect(actions.websocketError(new Error(desiredMessage))).toEqual(
       desiredAction
@@ -185,12 +185,12 @@ describe("Async job reducer unit test", () => {
   test("Should handle received async job list action", () => {
     let desiredState = produceInitialState();
     let receivedJobs = [
-      { uuid: "uuid1", name: "name1" },
-      { uuid: "uuid2", name: "name2" },
-      { uuid: "uuid3", name: "name3" }
+      { runnerUUID: "uuid1", name: "name1" },
+      { runnerUUID: "uuid2", name: "name2" },
+      { runnerUUID: "uuid3", name: "name3" }
     ];
     let desiredRunningJobs = new Map();
-    receivedJobs.forEach(j => desiredRunningJobs.set(j.uuid, j.name));
+    receivedJobs.forEach(j => desiredRunningJobs.set(j.runnerUUID, j.name));
     desiredState.runningJobs = desiredRunningJobs;
     expect(
       asyncJobReducer(state, actions.receivedAsyncJobList(receivedJobs))
@@ -258,12 +258,16 @@ describe("Async job reducer unit test", () => {
     ).toEqual(desiredState);
   });
   test("Should handle websocket error action", () => {
-    let desiredMessage = "Something went wrong with the websocket...";
+    //let desiredMessage = "Something went wrong with the websocket...";
+    // Ensure these are unset
+    state.subscribePending = true;
+    state.unsubscribePending = true;
     let desiredState = produceInitialState();
-    desiredState.websocketErrorMessage = desiredMessage;
-    expect(
-      asyncJobReducer(state, actions.websocketError(new Error(desiredMessage)))
-    ).toEqual(desiredState);
+    desiredState.websocketError = true;
+    //desiredState.websocketErrorMessage = desiredMessage;
+    expect(asyncJobReducer(state, actions.websocketError())).toEqual(
+      desiredState
+    );
   });
   test("Should handle async job error action", () => {
     // Ensure loading is unset if error occurs
