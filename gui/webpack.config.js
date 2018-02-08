@@ -112,6 +112,13 @@ module.exports = {
         pathRewrite: {
           "^/development/api": "/api"
         }
+      },
+      "/api": {
+        target: {
+          host: process.env.IS_DOCKERIZED ? "docstore-service" : "localhost",
+          protocol: "http:",
+          port: 8080
+        }
       }
     }
   }

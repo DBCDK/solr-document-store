@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.asyncjob.AsyncJobControl;
+import dk.dbc.search.solrdocstore.asyncjob.AsyncJobWebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +31,11 @@ public class DocStoreApplication extends Application {
         classes.add(BibliographicBean.class);
         classes.add(HoldingsItemBean.class);
         classes.add(BiliographicRecordAPIBean.class);
-        classes.add(QueueFrontendAPI.class);
+        classes.add(QueueFrontendAPIBean.class);
         classes.add(DocumentRetrieveBean.class);
         classes.add(EvictAll.class);
         classes.add(AsyncJobControl.class);
+        classes.add(AsyncJobWebSocketServer.class);
 
         for (Class<?> clazz : classes) {
             log.info("Registered {} resource", clazz.getName());

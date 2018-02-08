@@ -28,7 +28,9 @@ public class QueueRuleEntity implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        return queue == null ? obj == null : queue.equals(obj);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        return queue == null ? obj == null : queue.equals(((QueueRuleEntity)obj).getQueue());
     }
 
     @Override

@@ -17,7 +17,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "build": "NODE_ENV=production webpack",
-    "dev-server": "NODE_ENV=development webpack-dev-server --host 0.0.0.0",
+    "dev-server": "NODE_ENV=development webpack-dev-server --host 0.0.0.0 --content-base development/",
     "test": "jest"
   },
   "devDependencies": {
@@ -35,6 +35,7 @@
     "jest": "^21.2.1",
     "jest-cli": "^21.2.1",
     "jest-fetch-mock": "^1.4.0",
+    "mock-socket": "^7.1.0",
     "prettier": "1.9.2",
     "redux-saga-tester": "^1.0.378",
     "style-loader": "^0.13.1",

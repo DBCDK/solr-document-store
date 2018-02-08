@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
+import dk.dbc.search.solrdocstore.asyncjob.AsyncJobSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,20 +10,22 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.HashMap;
 
 @Stateless
 @Path("")
-public class QueueFrontendAPI {
+public class QueueFrontendAPIBean {
     private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
     private final JSONBContext jsonbContext = new JSONBContext();
 
@@ -30,15 +33,17 @@ public class QueueFrontendAPI {
     EntityManager entityManager;
 
     @Inject
-    EnqueueSupplierBean enqueueSupplierBean;
+    QueueRulesBean queueRulesBean;
+
+    @Inject
+    AsyncJobSessionHandler sessionHandler;
 
     @GET
     @Path("queue-rules")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getQueueRules(){
         log.info("Queue rules listed, probably by queue tool frontend");
-        TypedQuery<QueueRuleEntity> query = entityManager.createQuery("SELECT q FROM QueueRuleEntity q",QueueRuleEntity.class);
-        return Response.ok(new FrontendReturnListType<>(query.getResultList(), 1)).build();
+        return Response.ok(new FrontendReturnListType<>(queueRulesBean.getAllQueueRules(), 1)).build();
     }
 
     @POST
@@ -48,7 +53,23 @@ public class QueueFrontendAPI {
     public Response createQueueRule(@Context UriInfo uriInfo, String jsonContent) throws JSONBException {
         QueueRuleEntity queueRule = jsonbContext.unmarshall(jsonContent, QueueRuleEntity.class);
         log.info("Creating queue rule: {}",queueRule.getQueue());
-        entityManager.persist(queueRule);
+        queueRulesBean.setQueueRule(queueRule);
+        HashMap<String,Object> fields = new HashMap<>();
+        fields.put("queueRule",queueRule);
+        sessionHandler.broadcastAction("Creating queue rule succeeded!",fields);
         return Response.ok(queueRule).build();
+    }
+
+    @DELETE
+    @Path("queue-rule/{queueID}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response deleteQueueRule(@PathParam("queueID") String queueID){
+        QueueRuleEntity queue = entityManager.find(QueueRuleEntity.class,queueID);
+        if (queue != null){
+            log.info("Deleting queue rule: {}",queue.getQueue());
+            queueRulesBean.delQueueRule(queue);
+            return Response.ok(queue).build();
+        }
+        return Response.status(404).build();
     }
 }
