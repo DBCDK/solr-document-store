@@ -13,22 +13,22 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
     private final String name;
     private final AsyncJobSessionHandler sessionHandler;
 
-    public AsyncJobWesocketAppender(UUID uuid,String name,AsyncJobSessionHandler sessionHandler) {
+    public AsyncJobWesocketAppender(UUID uuid, String name, AsyncJobSessionHandler sessionHandler) {
         this.uuid = uuid;
         this.name = name;
         this.sessionHandler = sessionHandler;
-        sessionHandler.register(uuid,name);
+        sessionHandler.register(uuid, name);
     }
 
     @Override
     protected void append(ILoggingEvent eventObject) {
-        log.info("We are websocket appending: {}",eventObject);
-        sessionHandler.appendLog(uuid,eventObject.getMessage());
+        log.info("We are websocket appending: {}", eventObject);
+        sessionHandler.appendLog(uuid, eventObject.getMessage());
     }
 
     @Override
     public void stop(){
-        sessionHandler.unregister(uuid,name);
+        sessionHandler.unregister(uuid, name);
         super.stop();
     }
 }

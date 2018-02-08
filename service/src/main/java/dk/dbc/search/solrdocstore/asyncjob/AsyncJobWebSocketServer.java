@@ -50,10 +50,10 @@ public class AsyncJobWebSocketServer {
             String uuid = jsonMessage.getString("uuid");
             switch (jsonMessage.getString("type")){
                 case "Requesting subscription":
-                    sessionHandler.subscribe(session,uuid);
+                    sessionHandler.subscribe(session, uuid);
                     break;
                 case "Requesting unsubscription":
-                    sessionHandler.unsubscribe(session,uuid);
+                    sessionHandler.unsubscribe(session, uuid);
                     break;
             }
         }

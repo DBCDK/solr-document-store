@@ -3,18 +3,14 @@ package dk.dbc.search.solrdocstore.asyncjob;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import dk.dbc.search.solrdocstore.QueueRuleEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.spi.JsonProvider;
 import javax.websocket.Session;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +35,7 @@ public class AsyncJobSessionHandler {
     private static final String APPEND_LOG_FRONTEND_TYPE = "Appending log";
     private static final String JOB_STARTED_FRONTEND_TYPE = "Job started";
     private static final String JOB_FINISHED_FRONTEND_TYPE = "Job finished";
+    public static final String QUEUE_RULE_ADDED_FRONTEND_TYPE = "Creating queue rule succeeded!";
     private static final Logger log = LoggerFactory.getLogger(AsyncJobWebSocketServer.class);
     private static final ObjectMapper O = new ObjectMapper();
 
@@ -46,10 +43,6 @@ public class AsyncJobSessionHandler {
     private final Set<Session> sessions = new HashSet<>();
     // Maps UUID of an asynchronous job to all its frontend session subscribers
     private final Map<UUID, List<Session>> subscribers = new HashMap<>();
-    private final JsonProvider provider = JsonProvider.provider();
-
-    @Inject
-    AsyncJobRunner runner;
 
     public void addSession(Session session){
         sessions.add(session);
@@ -60,19 +53,6 @@ public class AsyncJobSessionHandler {
         subscribers.forEach((uuid, sessionList)-> sessionList.remove(session));
     }
 
-    public void jobs(Session session){
-        JsonProvider provider = JsonProvider.provider();
-        JsonArrayBuilder result = provider.createArrayBuilder();
-        for (String job : runner.jobs().keySet()){
-            result.add(job);
-        }
-        JsonObject json = provider.createObjectBuilder()
-                .add("result", result)
-                .add("pages", 1)
-                .build();
-        sendToSession(session, json);
-    }
-
     public void subscribe(Session session, String id){
         UUID uuid = UUID.fromString(id);
         List <Session> sessions = subscribers.get(uuid);
@@ -81,16 +61,26 @@ public class AsyncJobSessionHandler {
         } else {
             subscribers.put(uuid, Collections.singletonList(session));
         }
-        sendToSession(session, buildUUIDAction(SUBSCRIBE_FRONTEND_TYPE,uuid));
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("uuid", uuid.toString());
+        ObjectNode subscribeAction = buildAction(SUBSCRIBE_FRONTEND_TYPE, fields);
+        sendToSession(session, subscribeAction);
     }
 
     public void unsubscribe(Session session, String id){
         UUID uuid = UUID.fromString(id);
         subscribers.get(uuid).remove(session);
-        sendToSession(session, buildUUIDAction(UNSUBSCRIBE_FRONTEND_TYPE,uuid));
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("uuid", id);
+        ObjectNode unsubscribeAction = buildAction(UNSUBSCRIBE_FRONTEND_TYPE, fields);
+        sendToSession(session, unsubscribeAction);
     }
 
     public void broadcastAction(String type, Map<String, Object> fields){
+        broadcast(buildAction(type, fields));
+    }
+
+    public ObjectNode buildAction(String type, Map<String, Object> fields){
         ObjectNode obj = O.createObjectNode();
         obj.put("type", type);
         fields.forEach((fieldName, fieldValue) -> {
@@ -98,7 +88,7 @@ public class AsyncJobSessionHandler {
             if(fieldValueClass == String.class){
                 obj.put(fieldName, (String) fieldValue);
             } else if(fieldValueClass == Boolean.class) {
-               obj.put(fieldName, (Boolean) fieldValue);
+                obj.put(fieldName, (Boolean) fieldValue);
             } else if(fieldValueClass == Integer.class){
                 obj.put(fieldName, (Integer) fieldValue);
             } else if(fieldValueClass == Float.class) {
@@ -107,49 +97,46 @@ public class AsyncJobSessionHandler {
                 obj.putPOJO(fieldName, fieldValue);
             }
         });
+        return obj;
     }
 
-    public void addAsyncJob(UUID uuid,String name){
-        JsonObject jobStartedAction = provider.createObjectBuilder()
-                .add("type",JOB_STARTED_FRONTEND_TYPE)
-                .add("uuid",uuid.toString())
-                .add("name",name)
-                .build();
-        broadcast(jobStartedAction);
-    }
-
-    public void finishAsyncJob(UUID uuid,String name){
-        JsonObject obj = provider.createObjectBuilder()
-                .add("type",JOB_FINISHED_FRONTEND_TYPE)
-                .add("uuid",uuid.toString())
-                .add("name",name)
-                .build();
-        broadcast(obj);
-    }
-
-    public void register(UUID uuid,String name){
+    public void register(UUID uuid, String name){
         subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
-        addAsyncJob(uuid,name);
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("uuid", uuid.toString());
+        fields.put("name", name);
+        broadcastAction(JOB_STARTED_FRONTEND_TYPE, fields);
     }
 
-    public void unregister(UUID uuid,String name){
+    public void unregister(UUID uuid, String name){
         List<Session> sessions = subscribers.remove(uuid);
-        finishAsyncJob(uuid,name);
-        sessions.forEach(session -> sendToSession(session,buildUUIDAction(UNSUBSCRIBE_FRONTEND_TYPE,uuid)));
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("uuid", uuid.toString());
+        fields.put("name", name);
+        broadcastAction(JOB_FINISHED_FRONTEND_TYPE, fields);
+        HashMap<String, Object> fieldsUnsubscribe = new HashMap<>();
+        fieldsUnsubscribe.put("uuid", uuid.toString());
+        ObjectNode unsubscribeAction = buildAction(UNSUBSCRIBE_FRONTEND_TYPE, fieldsUnsubscribe);
+        sessions.forEach(session -> sendToSession(session, unsubscribeAction));
     }
 
-    public void appendLog(UUID uuid,String message){
-        // If this job has not been appended to yet, we create it
+    /**
+     * Sends a log message to all sessions subscribed to the job with the
+     * corresponding UUID argument
+     * */
+    public void appendLog(UUID uuid, String message){
+        // If this job has not been messaged yet, we create it
         List<Session> sessions = subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
-        JsonObject action = provider.createObjectBuilder()
-                .add("type",APPEND_LOG_FRONTEND_TYPE)
-                .add("uuid",uuid.toString())
-                .add("logLine",message)
-                .build();
-        sessions.forEach((session)-> sendToSession(session,action));
+        // Building log message
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("uuid", uuid.toString());
+        fields.put("logLine", message);
+        ObjectNode action = buildAction(APPEND_LOG_FRONTEND_TYPE, fields);
+        // Sending log message to subscribers
+        sessions.forEach((session)-> sendToSession(session, action));
     }
 
-    public void broadcast(String message){
+    private void broadcast(String message){
         sessions.forEach(session -> {
             try {
                 session.getBasicRemote().sendText(message);
@@ -159,27 +146,21 @@ public class AsyncJobSessionHandler {
             }
         });
     }
-    public void broadcast(JsonObject message){
-        broadcast(message.toString());
+
+    private void broadcast(ObjectNode message){
+        try {
+            broadcast(O.writeValueAsString(message));
+        } catch (JsonProcessingException e) {
+            log.error("Could not parse {}, received exception: {}", message, e);
+        }
     }
 
-    private void sendToSession(Session session, JsonObject message){
+    private void sendToSession(Session session, ObjectNode message){
         try {
-            session.getBasicRemote().sendText(message.toString());
+            session.getBasicRemote().sendText(O.writeValueAsString(message));
         } catch (IOException ex) {
             removeSession(session);
             log.warn("Unexpected closing when messaging session: {}", session.getRequestURI());
         }
-    }
-
-    private JsonObject buildSingleArgAction(String type,String argName,String arg){
-        return provider.createObjectBuilder()
-                .add("type",type)
-                .add(argName,arg)
-                .build();
-    }
-
-    private JsonObject buildUUIDAction(String type,UUID uuid){
-        return buildSingleArgAction(type,"uuid",uuid.toString());
     }
 }
