@@ -36,6 +36,7 @@ public class AsyncJobRunnerFactory {
                 return 1L;
             }
         };
+        runner.sessionHandler = new AsyncJobSessionHandler();
         runner.init();
         return runner;
     }
