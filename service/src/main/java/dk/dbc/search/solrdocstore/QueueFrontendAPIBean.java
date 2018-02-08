@@ -10,7 +10,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.HashMap;
 
 @Stateless
 @Path("")
@@ -54,7 +54,9 @@ public class QueueFrontendAPIBean {
         QueueRuleEntity queueRule = jsonbContext.unmarshall(jsonContent, QueueRuleEntity.class);
         log.info("Creating queue rule: {}",queueRule.getQueue());
         queueRulesBean.setQueueRule(queueRule);
-        sessionHandler.addQueueRule(queueRule);
+        HashMap<String,Object> fields = new HashMap<>();
+        fields.put("queueRule",queueRule);
+        sessionHandler.broadcastAction("Creating queue rule succeeded!",fields);
         return Response.ok(queueRule).build();
     }
 
@@ -63,8 +65,11 @@ public class QueueFrontendAPIBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response deleteQueueRule(@PathParam("queueID") String queueID){
         QueueRuleEntity queue = entityManager.find(QueueRuleEntity.class,queueID);
-        log.info("Deleting queue rule: {}",queue.getQueue());
-        queueRulesBean.delQueueRule(queue);
-        return Response.ok(queue).build();
+        if (queue != null){
+            log.info("Deleting queue rule: {}",queue.getQueue());
+            queueRulesBean.delQueueRule(queue);
+            return Response.ok(queue).build();
+        }
+        return Response.status(404).build();
     }
 }

@@ -22,15 +22,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Maintains session with frontend clients. Communicates changes to queues and asynchronous jobs.
+ * It broadcast specific actions to all sessions, to keep frontend data up to date. These are:
+ *  - QueueRule creation and deletion
+ *  - Any asynchronous job start and finish
+ * It keeps track of "subscribers", which are session who wish to receive log messages from a specific
+ * asynchronous job, and facilitates sending these log messages to the appropriate subscribers.
+ * */
 @Singleton
 public class AsyncJobSessionHandler {
     private static final Logger log = LoggerFactory.getLogger(AsyncJobWebSocketServer.class);
     private static final ObjectMapper O = new ObjectMapper();
+
+    // All active sessions
+    private final Set<Session> sessions = new HashSet<>();
+    // Maps UUID of an asynchronous job to all its frontend session subscribers
+    private final Map<UUID, List<Session>> subscribers = new HashMap<>();
+
     @Inject
     AsyncJobRunner runner;
-    private final Set<Session> sessions = new HashSet<>();
-    private final Set<AsyncJob> jobs = new HashSet<>();
-    private final Map<UUID,List<Session>> subscribers = new HashMap<>();
 
     public void addSession(Session session){
         sessions.add(session);
@@ -38,7 +49,7 @@ public class AsyncJobSessionHandler {
 
     public void removeSession(Session session){
         sessions.remove(session);
-        subscribers.forEach((uuid,sessionList)-> sessionList.remove(session));
+        subscribers.forEach((uuid, sessionList)-> sessionList.remove(session));
     }
 
     public void jobs(Session session){
@@ -48,10 +59,10 @@ public class AsyncJobSessionHandler {
             result.add(job);
         }
         JsonObject json = provider.createObjectBuilder()
-                .add("result",result)
-                .add("pages",1)
+                .add("result", result)
+                .add("pages", 1)
                 .build();
-        sendToSession(session,json);
+        sendToSession(session, json);
     }
 
     public void subscribe(Session session, String id){
@@ -68,15 +79,23 @@ public class AsyncJobSessionHandler {
         subscribers.get(UUID.fromString(id)).remove(session);
     }
 
-    public void addQueueRule(QueueRuleEntity queueRuleEntity) {
+    public void broadcastAction(String type, Map<String, Object> fields){
         ObjectNode obj = O.createObjectNode();
-        obj.put("type","Creating queue rule succeeded!");
-        obj.putPOJO("queueRule",queueRuleEntity);
-        try {
-            broadcast(O.writeValueAsString(obj));
-        } catch (JsonProcessingException e) {
-            log.error("Unable to parse queue for some reason...",e);
-        }
+        obj.put("type", type);
+        fields.forEach((fieldName, fieldValue) -> {
+            Class fieldValueClass = fieldValue.getClass();
+            if(fieldValueClass == String.class){
+                obj.put(fieldName, (String) fieldValue);
+            } else if(fieldValueClass == Boolean.class) {
+               obj.put(fieldName, (Boolean) fieldValue);
+            } else if(fieldValueClass == Integer.class){
+                obj.put(fieldName, (Integer) fieldValue);
+            } else if(fieldValueClass == Float.class) {
+                obj.put(fieldName, (Float) fieldValue);
+            } else {
+                obj.putPOJO(fieldName, fieldValue);
+            }
+        });
     }
 
     public void broadcast(String message){
@@ -85,7 +104,7 @@ public class AsyncJobSessionHandler {
                 session.getBasicRemote().sendText(message);
             } catch (IOException e) {
                 removeSession(session);
-                log.warn("Unexpected closing when brodcasting to session: {}",session.getRequestURI());
+                log.warn("Unexpected closing when brodcasting to session: {}", session.getRequestURI());
             }
         });
     }
@@ -98,7 +117,7 @@ public class AsyncJobSessionHandler {
             session.getBasicRemote().sendText(message.toString());
         } catch (IOException ex) {
             removeSession(session);
-            log.warn("Unexpected closing when messaging session: {}",session.getRequestURI());
+            log.warn("Unexpected closing when messaging session: {}", session.getRequestURI());
         }
     }
 }

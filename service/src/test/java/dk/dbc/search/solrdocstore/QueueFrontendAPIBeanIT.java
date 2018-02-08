@@ -40,7 +40,7 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
                 queueRulesReponse.getEntity();
         List<QueueRuleEntity> queueRuleEntityList = queueRules.result;
         int expected = 4;
-        Assert.assertEquals(expected,queueRuleEntityList.size());
+        Assert.assertEquals(expected, queueRuleEntityList.size());
     }
 
     @Test
@@ -51,16 +51,16 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.createQueueRule(null,queueJson)
                 );
         QueueRuleEntity createdQueueRule = (QueueRuleEntity) createQueueRuleResponse.getEntity();
-        Assert.assertEquals(createQueueRule,createdQueueRule);
+        Assert.assertEquals(createQueueRule, createdQueueRule);
         int expected = 5;
-        Assert.assertEquals(expected,getNumberOfQueues());
+        Assert.assertEquals(expected, getNumberOfQueues());
     }
 
     @Test(expected = RuntimeException.class)
     public void testCreateInvalidQueueRule(){
         String queueJson = "{not:\"proper\"}";
         Response createQueueRuleResponse = env().getPersistenceContext()
-                .run(() -> bean.createQueueRule(null,queueJson));
+                .run(() -> bean.createQueueRule(null, queueJson));
     }
 
     @Test
@@ -69,23 +69,19 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
         Response deleteQueueRuleResponse = env().getPersistenceContext()
                 .run(() -> bean.deleteQueueRule("queue2"));
         QueueRuleEntity deletedQueueRule = (QueueRuleEntity) deleteQueueRuleResponse.getEntity();
-        Assert.assertEquals(deleteQueueRule,deletedQueueRule);
+        Assert.assertEquals(deleteQueueRule, deletedQueueRule);
         int expected = 3;
-        Assert.assertEquals(expected,getNumberOfQueues());
+        Assert.assertEquals(expected, getNumberOfQueues());
 
     }
 
     @Test
     public void testDeleteNonExistingQueueRule(){
-        try {
-            Response createQueueRuleResponse = env().getPersistenceContext()
-                    .run(() -> bean.deleteQueueRule("non-existing"));
-        } catch (RollbackException e){
-            int expected = 4;
-            Assert.assertEquals(expected,getNumberOfQueues());
-            return;
-        }
-        Assert.fail("This should fail and not change the number of queues...");
+        Response createQueueRuleResponse = env().getPersistenceContext()
+                .run(() -> bean.deleteQueueRule("non-existing"));
+        Assert.assertEquals(createQueueRuleResponse.getStatus(), 404);
+        int expected = 4;
+        Assert.assertEquals(expected, getNumberOfQueues());
     }
 
     public int getNumberOfQueues(){

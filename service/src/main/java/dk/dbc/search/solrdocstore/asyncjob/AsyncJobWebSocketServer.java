@@ -16,10 +16,14 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.io.StringReader;
 
+/**
+ * Class managing websocket connections, mainly parses and delegates to the session handler
+ * */
 @Singleton
 @ServerEndpoint("/ws")
 public class AsyncJobWebSocketServer {
     private static final Logger log = LoggerFactory.getLogger(AsyncJobWebSocketServer.class);
+
     @Inject
     AsyncJobSessionHandler sessionHandler;
 
@@ -35,12 +39,12 @@ public class AsyncJobWebSocketServer {
 
     @OnError
     public void error(Throwable error){
-        log.error("Web socket error:",error);
+        log.error("Web socket error:", error);
     }
 
     @OnMessage
     public void message(String message, Session session) {
-        log.info("Recieved message: {}",message);
+        log.info("Recieved message: {}", message);
         try (JsonReader reader = Json.createReader(new StringReader(message))) {
             JsonObject jsonMessage = reader.readObject();
 
