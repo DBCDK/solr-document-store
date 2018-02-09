@@ -26,7 +26,6 @@ class SearchField extends React.Component {
     const { pendingSearch, searchParameter } = this.props;
     return (
       <div className="py-4" style={{ textAlign: "center" }}>
-        <h1 id="h1-div-headline">Solr-document-store Søgeværktøj</h1>
         <div className="input-group margin-bottom-sm">
           <span className="input-group-addon">
             <i className="fa fa-search fa-fw" aria-hidden="true" />
