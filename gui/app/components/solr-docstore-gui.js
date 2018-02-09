@@ -55,7 +55,7 @@ class SolrDocstoreGUI extends React.PureComponent {
   render() {
     let ActiveTab = this.activeTabComponent();
     return (
-      <div className="container-full">
+      <div className="container-full p-5">
         <div className="row">
           <div className="col-6">
             <div style={{ top: "1px", position: "sticky" }}>

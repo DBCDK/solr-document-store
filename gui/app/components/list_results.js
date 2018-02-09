@@ -24,10 +24,6 @@ const columns = [
     Header: "Deleted",
     accessor: "deleted",
     Cell: props => "" + props.value
-  },
-  {
-    Header: "Tracking ID",
-    accessor: "trackingId"
   }
 ];
 
