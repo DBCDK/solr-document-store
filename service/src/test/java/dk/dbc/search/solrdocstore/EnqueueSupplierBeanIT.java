@@ -131,6 +131,15 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             // No need to keep the old updates.
             clearQueue(em);
 
+            // Updated to potentially the same
+            addBibliographic(nonfbsAgency, id);
+            queueIs(em,
+                    queueItem(nonfbsAgency, id)
+            );
+
+            // No need to keep the old updates.
+            clearQueue(em);
+
             deleteBibliographic(fbsOwnEntryToDelete);
             queueIs(em,
                     queueItem(nonfbsAgency, id)
