@@ -81,8 +81,9 @@ describe("RelatedHoldingsExplorer properly displays based on global state", () =
     const wrapper = produceWrapper(store);
     let text = wrapper.text();
     expect(text).toContain(agencyId);
-    expect(text).toContain(trackingId);
-    expect(text).toContain(producerVersion);
-    expect(text).toContain(commitWithin);
+    // These are no longer shown, as they are not important to users
+    //expect(text).toContain(trackingId);
+    //expect(text).toContain(producerVersion);
+    //expect(text).toContain(commitWithin);
   });
 });

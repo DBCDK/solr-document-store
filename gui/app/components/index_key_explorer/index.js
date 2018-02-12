@@ -5,7 +5,8 @@ const IndexKeyExplorer = ({
   item,
   HeaderComponentClass,
   ParentElementComponentClass,
-  ElementComponentClass
+  ElementComponentClass,
+  defaultExpansion = false
 }) => {
   return Object.keys(item)
     .sort()
@@ -20,6 +21,7 @@ const IndexKeyExplorer = ({
             ElementComponentClass={ElementComponentClass}
             name={key}
             children={item[key]}
+            defaultExpansion={defaultExpansion}
           />
         )
     );

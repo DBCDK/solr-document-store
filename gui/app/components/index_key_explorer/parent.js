@@ -4,7 +4,7 @@ class Parent extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      expanded: false
+      expanded: props.defaultExpansion
     };
     this.onExpandToggled = this.onExpandToggled.bind(this);
   }
@@ -46,5 +46,9 @@ class Parent extends React.PureComponent {
     });
   }
 }
+
+Parent.defaultProps = {
+  defaultExpansion: false
+};
 
 export default Parent;
