@@ -21,6 +21,12 @@ const BibliographicExplorer = ({ item, applyFilter, clearFilter }) => (
       <button className="btn btn-primary mx-2 my-4" onClick={clearFilter}>
         Clear filters
       </button>
+      <abbr title="Marker med fluebenet hvilke felter du udelukkende vil se, og tryk 'Apply filter' ">
+        <i
+          className="fa fa-question-circle mx-2 my-4 fa-2x"
+          aria-hidden="true"
+        />
+      </abbr>
     </div>
   </div>
 );
