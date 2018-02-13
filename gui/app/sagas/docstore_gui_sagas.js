@@ -2,7 +2,7 @@ import { call, fork, takeLatest, select, put, all } from "redux-saga/effects";
 import * as searchActions from "../actions/searching";
 import * as globalActions from "../actions/global";
 import * as relatedHoldingsActions from "../actions/related_holdings";
-import api from "../api";
+import api, { SEARCH_BIB_ID, SEARCH_REPO_ID } from "../api";
 
 export const getSearchParameter = state => state.search.searchParameter;
 
@@ -22,7 +22,11 @@ function* fetchBibPost(searchTerm, apiArgs) {
 }
 
 export function* fetchBibliographicPost(action) {
-  const parameter = yield select(getSearchParameter);
+  // Test to see if colon is in the search term, because then it is a repository ID we must search for
+  // instead of a bibliographic record ID
+  let parameter = /:/.test(action.searchTerm) ? SEARCH_REPO_ID : SEARCH_BIB_ID;
+  // We have to put parameter in store, so the paged fetch request can know what to search for
+  yield put(searchActions.selectSearchParameter(parameter));
   yield fetchBibPost(action.searchTerm, { parameter: parameter });
 }
 
