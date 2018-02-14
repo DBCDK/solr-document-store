@@ -16,12 +16,12 @@ const BibliographicExplorer = ({ item, applyFilter, clearFilter }) => (
     />
     <div className="d-flex justify-content-center">
       <button className="btn btn-primary mx-2 my-4" onClick={applyFilter}>
-        Apply filter
+        Anvend filter
       </button>
       <button className="btn btn-primary mx-2 my-4" onClick={clearFilter}>
-        Clear filters
+        Ryd filter
       </button>
-      <abbr title="Marker med fluebenet hvilke felter du udelukkende vil se, og tryk 'Apply filter' ">
+      <abbr title="Marker med fluebenet hvilke felter du udelukkende vil se, og tryk 'Anvend filter' ">
         <i
           className="fa fa-question-circle mx-2 my-4 fa-2x"
           aria-hidden="true"

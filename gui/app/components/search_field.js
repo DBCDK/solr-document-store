@@ -28,7 +28,7 @@ class SearchField extends React.Component {
           </div>
           <input
             className="form-control"
-            placeholder="Indtast søge parameter"
+            placeholder="Indtast bibliographic record ID eller repository ID"
             type="text"
             value={this.state.search}
             onKeyPress={this.onKeyPressed}
