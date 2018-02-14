@@ -64,6 +64,40 @@ export function* pullRelatedHoldings(action) {
   }
 }
 
+export function* initialRetrieveBibItem(action) {
+  let bibliographicRecordId = action.bibliographicRecordId;
+  let bibliographicAgencyId = action.bibliographicAgencyId;
+  // TODO first put searchBibItem, then fetch, then put searchBibItemSuccess and then selectBibRecord the item
+  try {
+    yield put(
+      searchActions.searchBibItem(bibliographicRecordId, bibliographicAgencyId)
+    );
+    let bibItem = yield call(
+      api.fetchSpecificBibliographicPost,
+      bibliographicRecordId,
+      bibliographicAgencyId
+    );
+    yield put(searchActions.searchBibItemSuccess(bibItem));
+    yield put(globalActions.selectBibRecord(bibItem));
+  } catch (e) {
+    yield put(searchActions.searchBibItemFailed(e));
+  }
+}
+
+// Keeps URL up to date, so page can be linked
+export function* modifyUrl(action) {
+  window.history.replaceState(
+    "string",
+    "Selected record",
+    `${window.location.pathname}?key=${encodeURIComponent(
+      JSON.stringify({
+        bibliographicRecordId: action.item.bibliographicRecordId,
+        bibliographicAgencyId: action.item.agencyId
+      })
+    )}`
+  );
+}
+
 export function* watchSearch() {
   yield takeLatest(searchActions.SEARCH_BIB_RECORD_ID, fetchBibliographicPost);
 }
@@ -79,10 +113,23 @@ export function* watchPullRelatedHoldings() {
   yield takeLatest(globalActions.SELECT_BIB_RECORD, pullRelatedHoldings);
 }
 
+export function* watchInitialRetrieveBibItem() {
+  yield takeLatest(
+    searchActions.INITIAL_RETRIEVE_BIB_ITEM,
+    initialRetrieveBibItem
+  );
+}
+
+export function* watchSelectBibRecord() {
+  yield takeLatest(globalActions.SELECT_BIB_RECORD, modifyUrl);
+}
+
 export default function* root() {
   yield all([
     fork(watchSearch),
     fork(watchPullRelatedHoldings),
-    fork(watchFetchPage)
+    fork(watchFetchPage),
+    fork(watchInitialRetrieveBibItem),
+    fork(watchSelectBibRecord)
   ]);
 }

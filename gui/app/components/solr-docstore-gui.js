@@ -4,6 +4,8 @@ import ListResults from "./list_results";
 import DisplayError from "./display_error";
 import BibliographicExplorer from "./bibliographic_explorer";
 import RelatedHoldingsExplorer from "./related_holdings";
+import { connect } from "react-redux";
+import { initialRetrieveBibItem } from "../actions/searching";
 
 const BIBLIOGRAPHIC_EXPLORER = 0;
 const RELATED_HOLDINGS_EXPLORER = 1;
@@ -31,6 +33,23 @@ class SolrDocstoreGUI extends React.PureComponent {
       .then(res => res.json())
       .then(json => this.setState({ systemName: json.systemName }))
       .catch(e => {});
+    // Figuring out af someone is using a link to a specific item
+    let params = new URLSearchParams(window.location.search);
+    let key = params.get("key");
+    if (key) {
+      try {
+        let bibKey = JSON.parse(key);
+        if (bibKey.bibliographicRecordId && bibKey.bibliographicAgencyId) {
+          console.log("Let get this show on a roll!");
+          this.props.preSelectBibItem(
+            bibKey.bibliographicRecordId,
+            bibKey.bibliographicAgencyId
+          );
+        }
+      } catch (e) {
+        console.log("Invalid key in URL");
+      }
+    }
   }
 
   activeTabComponent() {
@@ -117,4 +136,11 @@ class SolrDocstoreGUI extends React.PureComponent {
   }
 }
 
-export default SolrDocstoreGUI;
+const mapStateToProps = state => ({});
+
+const mapDispatchToProps = dispatch => ({
+  preSelectBibItem: (bibId, agencyId) =>
+    dispatch(initialRetrieveBibItem(bibId, agencyId))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SolrDocstoreGUI);
