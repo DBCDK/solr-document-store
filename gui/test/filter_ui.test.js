@@ -56,44 +56,6 @@ describe("SearchField interactions properly updates global state", () => {
     sagaTester.start(ourSaga);
     wrapper = produceWrapper(sagaTester.store);
   });
-  test("Number of elements in explorer match number of keys", () => {
-    let parents = wrapper.find(FilterHeader);
-    let parentElements = wrapper.find(FilterParentElement);
-    expect(
-      parents.filterWhere(parent => parent.html() !== null)
-    ).toHaveProperty("length", 3);
-    expect(
-      parentElements.filterWhere(parentElement => parentElement.html() !== null)
-    ).toHaveProperty("length", 2);
-  });
-  test("Explorer displays key names", () => {
-    let parents = wrapper.find(FilterHeader);
-    let parentElements = wrapper.find(FilterParentElement);
-    let parentText = parents.reduce(
-      (value, node, index) => (value += node.text()),
-      ""
-    );
-    expect(parentText).toContain("scanterm");
-    expect(parentText).toContain("dkcclterm");
-    expect(parentText).toContain("term");
-    let parentElementText = parentElements.reduce(
-      (value, node, index) => (value += node.text()),
-      ""
-    );
-    expect(parentElementText).toContain("original_format");
-    expect(parentElementText).toContain("id");
-  });
-  test("ParentElements display data, without expansion needed", () => {
-    let parentElements = wrapper.find(FilterParentElement);
-    let parentElementText = parentElements.reduce(
-      (value, node, index) => (value += node.text()),
-      ""
-    );
-    expect(parentElementText).toContain("basis");
-    expect(parentElementText).toContain(
-      "00759635/32!870970-basis:00759635-300751-katalog"
-    );
-  });
   test("Only filtered elements are displayed, excluding ParentElement's", () => {
     // Setting up filter
     sagaTester.dispatch(
@@ -161,5 +123,4 @@ describe("SearchField interactions properly updates global state", () => {
     ).toHaveProperty("length", 3);
   });
   // TODO test filtering of individual elements in parents
-  // TODO test expand/implode feature
 });

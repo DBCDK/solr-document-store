@@ -21,7 +21,8 @@ const Header = ({
 }) => {
   if (isWhiteListed) {
     let classNameExpanded =
-      "fa fa-lg px-2 py-2 fa-caret-" + (expanded ? "down" : "up");
+      "fa fa-lg px-2 py-2 expand-button-header fa-caret-" +
+      (expanded ? "down" : "up");
     let whiteList = onWhiteList(setWhiteListPending, name, children);
     return (
       <div key={name} className="bg-light border d-flex">
