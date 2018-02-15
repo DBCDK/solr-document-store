@@ -4,7 +4,10 @@ import {
   SEARCH_BIB_RECORD_ID,
   SEARCH_SELECT_PARAMETER,
   SEARCH_FETCH_PAGE,
-  SEARCH_PAGE_SIZE
+  SEARCH_PAGE_SIZE,
+  SEARCH_BIB_ITEM,
+  SEARCH_BIB_ITEM_FAILED,
+  SEARCH_BIB_ITEM_SUCCESS
 } from "../actions/searching";
 import update from "immutability-helper";
 import { SEARCH_BIB_ID } from "../api";
@@ -52,6 +55,23 @@ export default function search(state = produceInitialState(), action = {}) {
     case SEARCH_SELECT_PARAMETER:
       return update(state, {
         searchParameter: { $set: action.parameter }
+      });
+    case SEARCH_BIB_ITEM:
+      return update(state, {
+        searchPending: { $set: true },
+        searchErrorMessage: { $set: "" }
+      });
+    case SEARCH_BIB_ITEM_SUCCESS:
+      return update(state, {
+        searchPending: { $set: false },
+        searchResults: { $set: [action.bibItem] },
+        searchPageCount: { $set: 1 },
+        searchErrorMessage: { $set: "" }
+      });
+    case SEARCH_BIB_ITEM_FAILED:
+      return update(state, {
+        searchPending: { $set: false },
+        searchErrorMessage: { $set: action.message }
       });
     default:
       return state;

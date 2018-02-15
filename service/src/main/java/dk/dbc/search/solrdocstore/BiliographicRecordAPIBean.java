@@ -109,6 +109,20 @@ public class BiliographicRecordAPIBean {
         return Response.ok(new FrontendReturnListType<>(res,pageCount(count,pageSize)),MediaType.APPLICATION_JSON).build();
     }
 
+    @GET
+    @Path("bibliographic-record/{bibliographicRecordId}/{bibliographicAgencyId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getBibliographicRecord(
+            @PathParam("bibliographicRecordId") String bibliographicRecordId,
+            @PathParam("bibliographicAgencyId") String bibliographicAgencyId){
+        AgencyItemKey key = new AgencyItemKey(Integer.parseInt(bibliographicAgencyId),bibliographicRecordId);
+        BibliographicEntity result = entityManager.find(BibliographicEntity.class,key);
+        if(result == null){
+            return Response.status(404).build();
+        }
+        return Response.ok(entityManager.find(BibliographicEntity.class,key)).build();
+    }
+
     /**
      * Returns a json object with a result field, which is a list of json HoldingsItemEntity mapped via the
      * holdingsToBibliographic table.

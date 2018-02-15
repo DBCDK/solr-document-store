@@ -53,8 +53,6 @@ describe("Related holdings reducer unit tests", () => {
     };
     let desiredState = produceInitialState();
     desiredState.loading = true;
-    desiredState.selectedBibRecordId = item.bibliographicRecordId;
-    desiredState.selectedBibAgencyId = item.agencyId;
     expect(relatedHoldingsReducer(state, selectBibRecord(item))).toEqual(
       desiredState
     );
@@ -94,40 +92,6 @@ describe("Reducer negative testing, ignoring invalid actions", () => {
   let state;
   beforeEach(() => {
     state = produceInitialState();
-  });
-  test("Invalid input with select bib record action", () => {
-    // Test no item in action
-    let noItemAction = {
-      type: SELECT_BIB_RECORD
-    };
-    expect(relatedHoldingsReducer(state, noItemAction)).toEqual(state);
-    // Test no bibliographicRecordId in action
-    let noBibIdAction = {
-      type: SELECT_BIB_RECORD,
-      item: {
-        agencyId: "1234"
-      }
-    };
-    expect(relatedHoldingsReducer(state, noBibIdAction)).toEqual(state);
-
-    // Test no bibliographicAgencyId in action
-    let noAgencyIdAction = {
-      type: SELECT_BIB_RECORD,
-      item: {
-        bibliographicRecordId: "4321"
-      }
-    };
-    expect(relatedHoldingsReducer(state, noAgencyIdAction)).toEqual(state);
-
-    // Test item is there, but no bibliographicRecordId OR bibliographicAgencyId
-    let neitherIdsAction = {
-      type: SELECT_BIB_RECORD,
-      item: {
-        producerVersion: "ag:19",
-        deleted: true
-      }
-    };
-    expect(relatedHoldingsReducer(state, neitherIdsAction)).toEqual(state);
   });
   test("Invalid input with pull success", () => {
     state.loading = true;

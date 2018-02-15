@@ -3,10 +3,6 @@ export const SEARCH_REPO_ID = "searchRepoId";
 
 let parse = res => {
   if (res.status === 200) return res.json();
-  else if (res.status === 400)
-    throw new Error(
-      "Input error, server failed to URL decode bibliographicRecordId"
-    );
   else throw new Error("Error with http status code: " + res.status);
 };
 
@@ -34,6 +30,11 @@ export default {
       `api/bibliographic-records/${urlParam}/${encodeURIComponent(
         searchTerm
       )}${queryParams}`
+    ).then(parse);
+  },
+  fetchSpecificBibliographicPost(bibliographicRecordId, bibliographicAgencyId) {
+    return fetch(
+      `api/bibliographic-record/${bibliographicRecordId}/${bibliographicAgencyId}`
     ).then(parse);
   },
   pullRelatedHoldings(bibliographicRecordId, bibliographicAgencyId) {

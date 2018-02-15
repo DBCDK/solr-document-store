@@ -24,10 +24,6 @@ const columns = [
     Header: "Deleted",
     accessor: "deleted",
     Cell: props => "" + props.value
-  },
-  {
-    Header: "Tracking ID",
-    accessor: "trackingId"
   }
 ];
 
@@ -43,7 +39,9 @@ class ListResults extends React.PureComponent {
       pages,
       selectItem,
       fetchPage,
-      setPageSize
+      setPageSize,
+      selectedBib,
+      selectedAgency
     } = this.props;
     return (
       <ReactTable
@@ -52,7 +50,7 @@ class ListResults extends React.PureComponent {
         columns={columns}
         data={results}
         getTrProps={(state, rowInfo, column) => {
-          return {
+          let props = {
             onClick: (e, handleOriginal) => {
               selectItem(results[rowInfo.index]);
               if (handleOriginal) {
@@ -60,6 +58,14 @@ class ListResults extends React.PureComponent {
               }
             }
           };
+          // If current row is selected, works because props for this component is changed whenever something is selected
+          if (
+            rowInfo &&
+            rowInfo.original.bibliographicRecordId === selectedBib &&
+            rowInfo.original.agencyId === selectedAgency
+          )
+            props.style = { background: "#d9d9d9" };
+          return props;
         }}
         //sortable={false}
         multiSort={false}
@@ -83,7 +89,9 @@ class ListResults extends React.PureComponent {
 const mapStateToProps = state => ({
   loading: state.search.searchPending,
   results: state.search.searchResults,
-  pages: state.search.searchPageCount
+  pages: state.search.searchPageCount,
+  selectedBib: state.global.selectedBibRecordId,
+  selectedAgency: state.global.selectedBibAgencyId
 });
 
 const mapDispatchToProps = dispatch => ({

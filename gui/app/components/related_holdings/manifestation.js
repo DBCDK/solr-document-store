@@ -9,7 +9,7 @@ class Manifestation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      expanded: true
+      expanded: false
     };
   }
 
@@ -21,19 +21,24 @@ class Manifestation extends React.Component {
       : {};
     let { itemId, status } = displayItem.holdingsitem;
     let classNameExpanded =
-      "fa fa-lg px-2 py-2 fa-caret-" + (this.state.expanded ? "down" : "up");
+      "fa fa-lg px-3 py-2 fa-caret-" + (this.state.expanded ? "down" : "up");
     return (
-      <div>
+      <div className="border">
         <div
-          className="d-flex justify-content-around bg-light border"
+          className="d-flex justify-content-center border"
+          style={{ background: "#d9d9d9" }}
           onClick={() => this.setState({ expanded: !this.state.expanded })}
         >
-          <p>
-            <b>Item ID:</b> {itemId}
-          </p>
-          <p>
-            <b>Status:</b> {status}
-          </p>
+          <div className="pl-3" style={{ flex: "1" }}>
+            <p>
+              <b>Item ID:</b> {itemId}
+            </p>
+          </div>
+          <div style={{ flex: "1" }}>
+            <p>
+              <b>Status:</b> {status}
+            </p>
+          </div>
           <i
             className={classNameExpanded}
             onClick={this.onExpandToggled}
@@ -41,12 +46,13 @@ class Manifestation extends React.Component {
           />
         </div>
         {this.state.expanded ? (
-          <div className="p-4">
+          <div className="px-4">
             <IndexKeyExplorer
               HeaderComponentClass={ManifestationHeader}
               ParentElementComponentClass={ManifestationParentElement}
               ElementComponentClass={ManifestationElement}
               item={converter(item)}
+              defaultExpansion={true}
             />
           </div>
         ) : null}

@@ -45,14 +45,7 @@ class Element extends React.PureComponent {
       return (
         <div>
           <div className="pl-4 d-flex">
-            <div
-              className="mr-auto"
-              style={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis"
-              }}
-            >
+            <div className="mr-auto">
               <strong>{name}</strong> : {firstElem}
             </div>
             {moreElems}

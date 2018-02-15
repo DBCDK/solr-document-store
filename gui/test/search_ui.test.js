@@ -29,24 +29,6 @@ describe("SearchField interactions properly updates global state", () => {
     sagaTester.start(ourSaga);
     wrapper = produceWrapper(sagaTester.store);
   });
-  test("Set search parameter when button is pressed", async () => {
-    let getBibButton = () =>
-      wrapper.findWhere(button => button.hasClass("btn-select-search-bib-id"));
-    let getRepoButton = () =>
-      wrapper.findWhere(button => button.hasClass("btn-select-search-repo-id"));
-    let repoButton = getRepoButton();
-    repoButton.simulate("click");
-    // Reassignment needed for updated wrapper and state
-    repoButton = getRepoButton();
-    let bibButton = getBibButton();
-    expect(repoButton.hasClass("active")).toEqual(true);
-    expect(bibButton.hasClass("active")).toEqual(false);
-    bibButton.simulate("click");
-    repoButton = getRepoButton();
-    bibButton = getBibButton();
-    expect(repoButton.hasClass("active")).toEqual(false);
-    expect(bibButton.hasClass("active")).toEqual(true);
-  });
   test("Typing and pressing search button should set the search term in global state", () => {
     fetch.mockResponse(JSON.stringify({ result: [] }));
     let getSearchInputField = () => wrapper.find("input");
@@ -100,10 +82,6 @@ describe("SearchField interactions properly updates global state", () => {
     fetch.mockResponseOnce(JSON.stringify({ result: [result2] }));
     // Simulating typing searchTerm and pressing search button
     let searchInputField = wrapper.find("input");
-    let bibButton = wrapper.findWhere(button =>
-      button.hasClass("btn-select-search-bib-id")
-    );
-    bibButton.simulate("click");
     searchInputField.simulate("change", { target: { value: "4321" } });
     let searchButton = wrapper
       .find("button")
@@ -113,12 +91,7 @@ describe("SearchField interactions properly updates global state", () => {
     // Wait for api call to succeed and store to be updated
     await sagaTester.waitFor(searchActions.SEARCH_SUCCESS);
     expect(sagaTester.getState().search.searchResults).toEqual([result1]);
-
-    // Test repo search with same search term
-    let repoButton = wrapper.findWhere(button =>
-      button.hasClass("btn-select-search-repo-id")
-    );
-    repoButton.simulate("click");
+    // Searching again with different result, simulate underlying change
     searchButton.simulate("click");
     // Second argument futureOnly=true since it is the second time we listen for it,
     // and therefore we want to wait for the future one

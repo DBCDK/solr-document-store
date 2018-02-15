@@ -9,9 +9,7 @@ import update from "immutability-helper";
 export const produceInitialState = () => ({
   loading: false,
   relatedHoldings: [],
-  errorMessage: "",
-  selectedBibRecordId: null,
-  selectedBibAgencyId: null
+  errorMessage: ""
 });
 
 export default function relatedHoldings(
@@ -25,22 +23,9 @@ export default function relatedHoldings(
         !!action.item &&
         action.item.bibliographicRecordId !== undefined &&
         action.item.agencyId !== undefined;
-      action.item = action.item
-        ? action.item
-        : {
-            bibliographicRecordId: null,
-            agencyId: null
-          };
-      let actionBibId = action.item.bibliographicRecordId;
-      let actionAgencyId = action.item.agencyId;
-      // If values are undefined, set to null instead
-      let bibRecordId = validAction && actionBibId ? actionBibId : null;
-      let agencyId = validAction && actionAgencyId ? actionAgencyId : null;
       return update(state, {
         loading: { $set: validAction },
-        errorMessage: { $set: "" },
-        selectedBibRecordId: { $set: bibRecordId },
-        selectedBibAgencyId: { $set: agencyId }
+        errorMessage: { $set: "" }
       });
     case PULL_RELATED_HOLDINGS_SUCCESS:
       // Handling invalid actions

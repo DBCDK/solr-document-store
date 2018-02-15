@@ -4,6 +4,10 @@ This module encompases two Single Page Application written in react to explore t
 
 The project is built using webpack.
 
+## Browser requirements
+
+The page uses the `history` API which is specified as part of HTML5. Using this page effectively therefore requires a browser supporting HTML5.
+
 ## Build
 
 The project is automatically built and tested when building the module thanks to `maven-frontend-plugin`.

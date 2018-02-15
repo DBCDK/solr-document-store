@@ -25,12 +25,15 @@ public class Config {
 
     private String oaURL;
     private long jobPruneMinutes;
+    private String systemName;
 
     @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-service");
         oaURL = getValue(props, "openAgencyUrl", "OPEN_AGENCY_URL", null, "No URL found for Open Agency");
         jobPruneMinutes = getValue(props, "jobPruneMinutes", "JOB_PRUNE_MINUTES", "60", null, Long::parseUnsignedLong);
+        // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
+        systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret",null);
     }
 
     public String getOaURL() {
@@ -39,6 +42,10 @@ public class Config {
 
     public long getJobPruneMinutes() {
         return jobPruneMinutes;
+    }
+
+    public String getSystemName() {
+        return systemName;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
