@@ -67,7 +67,6 @@ public class WorkerIT {
 
     private static String solrPort;
     private static String solrUrl;
-    private static Solr solr;
 
     private static Client client;
 
@@ -139,17 +138,11 @@ public class WorkerIT {
 
     private static void initSolr() throws RuntimeException {
         try {
-            solrPort = System.getProperty("solr.port", "18081");
-            solr = new Solr(solrPort, DocProducerIT.class.getResource("/solr"), tempSolr);
+            solrPort = "8983";
             solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        solr.stop();
     }
 
     @Before

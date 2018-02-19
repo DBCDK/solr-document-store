@@ -21,5 +21,15 @@
         "holdings": [
             "h-300101-23645564.json"
         ]
+    },
+    "test2-part1": {
+        "bibliographic": [
+            "b-300010-23645564.json"
+        ]
+    },
+    "test2-part2": {
+        "bibliographic": [
+            "b-300010-23645564_deleted.json"
+        ]
     }
 }

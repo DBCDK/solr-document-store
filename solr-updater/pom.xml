@@ -115,13 +115,6 @@
             <version>42.1.4</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-core</artifactId>
-            <version>7.1.0</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
