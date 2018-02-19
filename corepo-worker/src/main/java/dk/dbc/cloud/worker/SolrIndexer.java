@@ -142,7 +142,14 @@ public class SolrIndexer {
     @Lock(LockType.READ)
     public String unitFor(String pid) throws RepositoryException {
         try (IRepositoryDAO dao = daoProvider.getRepository()) {
-            ISysRelationsStream relations = dao.getSysRelationsStream(dao.createIdentifier(pid));
+            IRepositoryIdentifier id = dao.createIdentifier(pid);
+            if(!dao.hasObject(id)) {
+                throw new IllegalStateException("Doesn't have pid: " + pid);
+            }
+            if(dao.getObjectState(id) == IRepositoryDAO.State.DELETED) {
+                return null;
+            }
+            ISysRelationsStream relations = dao.getSysRelationsStream(id);
             IRepositoryIdentifier unit = relations.getUnitFor();
             return unit.toString();
         }
@@ -150,6 +157,9 @@ public class SolrIndexer {
 
     @Lock(LockType.READ)
     public String workFor(String unit) throws RepositoryException {
+        if (unit == null) {
+            return null;
+        }
         try (IRepositoryDAO dao = daoProvider.getRepository()) {
             ISysRelationsStream relations = dao.getSysRelationsStream(dao.createIdentifier(unit));
             IRepositoryIdentifier work = relations.getWorkFor();

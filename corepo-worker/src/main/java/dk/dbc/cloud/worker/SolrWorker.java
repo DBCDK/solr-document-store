@@ -210,8 +210,12 @@ public class SolrWorker implements MessageListener {
         record.put("bibliographicRecordId", bibliographicRecordId);
         record.put("agencyId", agencyId);
         record.put("deleted", deleted);
-        record.put("unit", unit);
-        record.put("work", work);
+        if (unit != null) {
+            record.put("unit", unit);
+        }
+        if (work != null) {
+            record.put("work", work);
+        }
         record.put("producerVersion", javascriptWrapper.getVersion());
         record.put("trackingId", trackingId);
         if (commitWithin > 0) {
