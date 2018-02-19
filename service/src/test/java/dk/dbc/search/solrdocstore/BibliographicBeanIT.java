@@ -135,6 +135,25 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         ));
     }
 
+    @Test
+    public void updateExistingBibliographicPostToDeleted() throws JSONBException {
+        BibliographicEntity b = new BibliographicEntity(600100,"properUpdate","work:update","unit:update","prod:update",false,new HashMap<>(),"track:update");
+        String updatedB = jsonbContext.marshall(b);
+
+        Response r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, updatedB)
+                );
+        assertThat(r.getStatus(), is(200));
+
+        BibliographicEntity d = new BibliographicEntity(600100,"properUpdate",null,null,"prod:update",true,new HashMap<>(),"track:update");
+        String updatedD = jsonbContext.marshall(d);
+
+        Response rd = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, updatedD)
+                );
+        assertThat(rd.getStatus(), is(200));
+    }
+
     /**
      * If a bibliographic post (all types) goes from deleted: false -> true, that bibliographic holdings are properly updated
      * @throws JSONBException
@@ -381,6 +400,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         Assert.assertTrue("One superceded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
         Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
     }
+
+
+
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
         BibliographicEntity b = new BibliographicEntity(agencyId,bibliographicRecordId,"work:update","unit:update","prod:update",deleted,new HashMap<>(),"track:update");
