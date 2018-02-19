@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,14 @@ public class DocProducer {
         req.setRows(MAX_ROWS_OF_SHARDED_SOLR);
         req.setStart(1);
         try (final Timer.Context time = selectByRootTimer.time()) {
-            return client1.query(req).getResults().stream().map(d -> String.valueOf(d.getFirstValue("id"))).collect(Collectors.toList());
+            ArrayList<String> list = new ArrayList<>();
+            client1.query(req).getResults().stream()
+                    .map(d -> String.valueOf(d.getFirstValue("id")))
+                    .forEach(list::add);
+            if (list.isEmpty()) {
+                list.add(id);
+            }
+            return list;
         }
     }
 
