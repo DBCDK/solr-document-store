@@ -29,11 +29,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -164,12 +162,10 @@ public class DocProducer {
         req.setStart(1);
         try (final Timer.Context time = selectByRootTimer.time()) {
             ArrayList<String> list = new ArrayList<>();
+            list.add(id);
             client1.query(req).getResults().stream()
                     .map(d -> String.valueOf(d.getFirstValue("id")))
                     .forEach(list::add);
-            if (list.isEmpty()) {
-                list.add(id);
-            }
             return list;
         }
     }
