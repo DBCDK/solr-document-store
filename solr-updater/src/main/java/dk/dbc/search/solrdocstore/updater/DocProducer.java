@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -138,8 +139,17 @@ public class DocProducer {
 
         log.debug("Ids deleted: {}", ids);
         if (doc != null) {
-            log.debug("Adding document");
-            log.trace("doc = {}", doc);
+            if (log.isDebugEnabled()) {
+                List<SolrInputDocument> children = doc.getChildDocuments();
+                if (children == null) {
+                    log.debug("Adding document {}", doc.getFieldValue("id"));
+                } else {
+                    log.debug("Adding document {}{}", doc.getFieldValue("id"),
+                              children.stream().map(d -> ", " + d.getFieldValue("id"))
+                                      .collect(Collectors.joining()));
+                }
+                log.trace("doc = {}", doc);
+            }
             try (Timer.Context time = addDocumentTimer.time()) {
                 if (commitWithin == null || commitWithin <= 0) {
                     client.add(doc);
@@ -154,12 +164,12 @@ public class DocProducer {
         // Delete by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
         // Converted to nested to delete subdocuments only, then delete owner by id
-        String query = "_root_:" + ClientUtils.escapeQueryChars(id);
+        String query = "{!child of=\"t:m\"}id:" + ClientUtils.escapeQueryChars(id);
         log.debug("Delete by Query - Select: {}", query);
         SolrQuery req = new SolrQuery(query);
         req.setFields("id");
         req.setRows(MAX_ROWS_OF_SHARDED_SOLR);
-        req.setStart(1);
+        req.setStart(0);
         try (final Timer.Context time = selectByRootTimer.time()) {
             ArrayList<String> list = new ArrayList<>();
             list.add(id);
