@@ -248,12 +248,16 @@ public class DocProducer {
         filterOutDecommissioned(collection);
 
         JsonNode indexKeys = find(collection, "bibliographicRecord", "indexKeys");
+        String repositoryId = getField(indexKeys, "rec.repositoryId");
+        if(repositoryId == null)
+            throw new IllegalStateException("Cannot get rec.repositoryId from document");
+
         setField(indexKeys, "id", id);
         setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
         addRecHoldingsAgencyId(indexKeys, collection);
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
-        addNestedHoldingsDocuments(doc, collection, linkId);
+        addNestedHoldingsDocuments(doc, collection, linkId, repositoryId);
 
         return doc;
     }
@@ -313,14 +317,16 @@ public class DocProducer {
      * @param doc        root solr document
      * @param collection document containing holdings
      * @param linkId     id for linking foe solr join searches
+     * @param repositoryId id of record used by
      */
-    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode collection, String linkId) {
+    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode collection, String linkId, String repositoryId) {
         JsonNode records = find(collection, "holdingsItemRecords");
         for (JsonNode record : records) {
             String id = shardId(record, "holdings");
             JsonNode indexKeyList = find(record, "indexKeys");
             int i = 0;
             for (JsonNode indexKeys : indexKeyList) {
+                setField(indexKeys, "rec.repositoryId", repositoryId);
                 setField(indexKeys, "id", id + "#" + i++);
                 setField(indexKeys, "t", "h"); // Holdings type
                 addField(indexKeys, "parentDocId", linkId);
@@ -396,6 +402,25 @@ public class DocProducer {
             idNode = ( (ObjectNode) indexKeys ).putArray(name);
         }
         ( (ArrayNode) idNode ).add(value);
+    }
+
+    /**
+     * Get first value in an indexKeys node
+     *
+     * @param indexKeys target node
+     * @param name      name of key
+     * @throws IllegalStateException if indexKeys isn't an json object node
+     */
+    private String getField(JsonNode indexKeys, String name) {
+        if (!indexKeys.isObject()) {
+            log.debug("Cannot set " + name + " in non Object Document: " + indexKeys);
+            throw new IllegalStateException("Cannot add " + name + " to non Object Document");
+        }
+
+        JsonNode array = ( (ObjectNode) indexKeys ).get(name);
+        if(array == null || !array.isArray() || array.size() == 0)
+            return null;
+        return array.get(0).asText();
     }
 
     /**

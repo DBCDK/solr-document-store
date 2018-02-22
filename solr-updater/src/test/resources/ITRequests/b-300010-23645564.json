@@ -7,6 +7,7 @@
     "producerVersion": "MyProducer#1",
     "trackingId": "woot",
     "indexKeys": {
+        "rec.repositoryId": ["300010-katalog:23645564"],
         "rec.bibliographicRecordId": ["23645564"],
         "dkcclterm.po": ["Haruki", "Murakami"],
         "display.title": ["My Title 1"]

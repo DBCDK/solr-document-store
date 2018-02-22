@@ -7,6 +7,7 @@
         "producerVersion": "solr-indexer-cloud-worker-javascript:1.0-SNAPSHOT#116975",
         "deleted": false,
         "indexKeys": {
+            "rec.repositoryId": ["300101-katalog:23645564"],
             "dkcclterm.po": ["Haruki", "Murakami"],
             "unknown.field": ["Haruki", "Murakami"]
         },
