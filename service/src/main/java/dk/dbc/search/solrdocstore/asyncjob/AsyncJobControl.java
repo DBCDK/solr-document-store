@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -85,9 +86,23 @@ public class AsyncJobControl {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("jobs")
     public Response jobs() {
-        return Response.ok().entity(runner.jobs()).build();
+        return Response.ok().entity(runner.jobsMap()).build();
     }
 
+    /**
+     * List current jobs with all meta data
+     *
+     * @return list of StatusResponse's
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("jobs-status")
+    public Response jobsWithStatus() {
+        return Response.ok().entity(runner.jobs().stream()
+                .map(e -> new StatusResponse(e.getValue(),e.getKey().toString()))
+                .collect(Collectors.toList()))
+                .build();
+    }
     /**
      * Cancel a running job
      *
@@ -177,24 +192,25 @@ public class AsyncJobControl {
         if (job == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok().entity(new StatusResponse(job)).build();
+        return Response.ok().entity(new StatusResponse(job,id)).build();
     }
 
     @XmlRootElement
     public static class StatusResponse {
 
         public boolean running, started, canceled, completed;
-        public String startedAt, completedAt, name;
+        public String startedAt, completedAt, name, runnerUUID;
 
         public StatusResponse() {
         }
 
-        public StatusResponse(AsyncJobHandle job) {
+        public StatusResponse(AsyncJobHandle job,String uuid) {
             running = job.isRunning();
             started = job.isStarted();
             canceled = job.isCanceled();
             completed = job.isCompleted();
             name = job.getJob().getName();
+            this.runnerUUID = uuid;
             Instant startedAtTime = job.getStartedAt();
             if (startedAtTime == null) {
                 startedAt = null;

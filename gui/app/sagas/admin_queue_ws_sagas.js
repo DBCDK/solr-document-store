@@ -1,7 +1,14 @@
 /**
  * Websocket saga for admin queue, to listen for updates on async job events on the server */
 import { call, take, put } from "redux-saga/effects";
-import { eventChannel } from "redux-saga";
+import { eventChannel, buffers } from "redux-saga";
+import {
+  REQUEST_SUBSCRIBE,
+  REQUEST_UNSUBSCRIBE,
+  websocketError
+} from "../actions/async_job";
+
+export const WEBSOCKET_ACTION_BUFFER_SIZE = 100;
 
 let ws = null;
 
@@ -13,11 +20,12 @@ function initWebsocket() {
     ws.onopen = () => {
       console.log("Opening websocket to server...");
       //ws.send("hello server");
+      // TODO emit some "we are connected" action
     };
 
     ws.onerror = error => {
-      console.log("WebSocket error " + error);
-      console.dir(error);
+      //console.dir(error);
+      emitter(websocketError(error));
     };
 
     ws.onmessage = e => {
@@ -32,11 +40,16 @@ function initWebsocket() {
       }
     };
 
+    ws.onclose = e => {
+      console.log(e);
+    };
+
     // unsubscribe function
     return () => {
       console.log("Socket off");
+      ws.close();
     };
-  });
+  }, buffers.dropping(WEBSOCKET_ACTION_BUFFER_SIZE));
 }
 
 // Listens on the websocket action channel and dispatches them
@@ -45,7 +58,6 @@ export default function* wsSagas() {
 
   while (true) {
     const action = yield take(channel);
-    console.dir(action);
     yield put(action);
   }
 }
@@ -55,7 +67,7 @@ export default function* wsSagas() {
 export const socketMiddleware = store => next => action => {
   const result = next(action);
   // Listen for certain actions, and send them via socket if appropriate
-  let listenableActions = ["Subscribe", "Unsubscribe"];
+  let listenableActions = [REQUEST_SUBSCRIBE, REQUEST_UNSUBSCRIBE];
   if (listenableActions.indexOf(action.type) > -1) {
     ws.send(JSON.stringify(action));
   }

@@ -47,7 +47,15 @@ public class AsyncJobWebSocketServer {
         log.info("Recieved message: {}", message);
         try (JsonReader reader = Json.createReader(new StringReader(message))) {
             JsonObject jsonMessage = reader.readObject();
-
+            String uuid = jsonMessage.getString("uuid");
+            switch (jsonMessage.getString("type")){
+                case "Requesting subscription":
+                    sessionHandler.subscribe(session, uuid);
+                    break;
+                case "Requesting unsubscription":
+                    sessionHandler.unsubscribe(session, uuid);
+                    break;
+            }
         }
     }
 }

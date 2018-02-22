@@ -21,7 +21,9 @@ package dk.dbc.search.solrdocstore.asyncjob;
 import dk.dbc.search.solrdocstore.Config;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -52,6 +54,9 @@ public class AsyncJobRunner {
 
     @Inject
     Config config;
+
+    @Inject
+    AsyncJobSessionHandler sessionHandler;
 
     private ExecutorService mes;
 
@@ -95,10 +100,14 @@ public class AsyncJobRunner {
         }
     }
 
-    public Map<String, String> jobs() {
+    public Map<String, String> jobsMap() {
         return jobs.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().toString(),
                                           e -> e.getValue().getJob().getName()));
+    }
+
+    public List<Map.Entry<UUID,AsyncJobHandle>> jobs(){
+        return new ArrayList<>(jobs.entrySet());
     }
 
     /**
@@ -113,7 +122,11 @@ public class AsyncJobRunner {
         AsyncJobHandle wrapper = new AsyncJobHandle(job);
         do {
             id = UUID.randomUUID();
-        } while (jobs.computeIfAbsent(id, s -> wrapper) != wrapper);
+        } while (jobs.computeIfAbsent(id, s -> {
+            AsyncJobWesocketAppender wa = new AsyncJobWesocketAppender(s,job.getName(),sessionHandler);
+            wrapper.setWebsocketAppender(wa);
+            return wrapper;
+        }) != wrapper);
         log.info("mes = {}", mes);
         mes.execute(wrapper);
         return id.toString();

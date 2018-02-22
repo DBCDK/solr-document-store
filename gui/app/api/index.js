@@ -61,5 +61,11 @@ export default {
     return fetch(`api/queue-rule/${queueID}`, {
       method: "DELETE"
     }).then(parse);
+  },
+  fetchAsyncJobList() {
+    return fetch("api/jobs-status").then(parse);
+  },
+  fetchFullLog(uuid) {
+    return fetch(`api/log/${uuid}`).then(res => res.body);
   }
 };

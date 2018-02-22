@@ -52,11 +52,11 @@ public class QueueFrontendAPIBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response createQueueRule(@Context UriInfo uriInfo, String jsonContent) throws JSONBException {
         QueueRuleEntity queueRule = jsonbContext.unmarshall(jsonContent, QueueRuleEntity.class);
-        log.info("Creating queue rule: {}",queueRule.getQueue());
+        log.info("Creating queue rule: {}", queueRule.getQueue());
         queueRulesBean.setQueueRule(queueRule);
-        HashMap<String,Object> fields = new HashMap<>();
-        fields.put("queueRule",queueRule);
-        sessionHandler.broadcastAction("Creating queue rule succeeded!",fields);
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("queueRule", queueRule);
+        sessionHandler.broadcastAction(AsyncJobSessionHandler.QUEUE_RULE_ADDED_FRONTEND_TYPE, fields);
         return Response.ok(queueRule).build();
     }
 
@@ -64,9 +64,9 @@ public class QueueFrontendAPIBean {
     @Path("queue-rule/{queueID}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response deleteQueueRule(@PathParam("queueID") String queueID){
-        QueueRuleEntity queue = entityManager.find(QueueRuleEntity.class,queueID);
+        QueueRuleEntity queue = entityManager.find(QueueRuleEntity.class, queueID);
         if (queue != null){
-            log.info("Deleting queue rule: {}",queue.getQueue());
+            log.info("Deleting queue rule: {}", queue.getQueue());
             queueRulesBean.delQueueRule(queue);
             return Response.ok(queue).build();
         }
