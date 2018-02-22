@@ -25,19 +25,21 @@ class Manifestation extends React.Component {
     return (
       <div className="border">
         <div
-          className="d-flex justify-content-center border"
+          className="d-flex border pl-3"
           style={{ background: "#d9d9d9" }}
           onClick={() => this.setState({ expanded: !this.state.expanded })}
         >
-          <div className="pl-3" style={{ flex: "1" }}>
-            <p>
-              <b>Item ID:</b> {itemId}
-            </p>
-          </div>
-          <div style={{ flex: "1" }}>
-            <p>
-              <b>Status:</b> {status}
-            </p>
+          <div style={{ flex: 1 }}>
+            <div>
+              <p>
+                <b>Item IDs:</b> {itemId.join(", ")}
+              </p>
+            </div>
+            <div>
+              <p>
+                <b>Status:</b> {status}
+              </p>
+            </div>
           </div>
           <i
             className={classNameExpanded}
