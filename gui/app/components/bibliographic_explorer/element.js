@@ -35,7 +35,7 @@ class Element extends React.PureComponent {
         list.length > 1 ? (
           <i
             className={
-              "fa fa-lg py-2 pr-2 fa-" +
+              "fa fa-lg py-2 pr-2 expand-button-element fa-" +
               (this.state.listExpanded ? "compress" : "expand")
             }
             onClick={this.toggleListExpanded}

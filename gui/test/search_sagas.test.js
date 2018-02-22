@@ -132,6 +132,12 @@ describe("Search saga integration test", () => {
       selectedBibAgencyId: null
     });
   });
+  test("Fetch page with orderBy parameter works", async () => {
+    fetch.mockResponse(JSON.stringify(testSearchPagedResponse));
+    sagaTester.dispatch(searchActions.searchBibRecord("4321"));
+    await sagaTester.waitFor(searchActions.SEARCH_SUCCESS);
+    sagaTester.dispatch(searchActions.fetchPage(2, "deleted"));
+  });
   test("Initial search failed should error correctly", async () => {
     let errorMessage = "You are not allowed to do that!";
     fetch.mockReject(new Error(errorMessage));

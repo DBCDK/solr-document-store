@@ -19,8 +19,6 @@ export default {
       case SEARCH_REPO_ID:
         urlParam = "repository-id";
         break;
-      default:
-        throw new Error("Invalid parameter");
     }
     let queryParams = `?page=${page}&page_size=${pageSize}`;
     if (orderBy) {

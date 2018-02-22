@@ -17,7 +17,9 @@ class RelatedHoldingsItem extends React.PureComponent {
     return (
       <div className="d-flex flex-column p-4 border">
         <div className="d-flex flex-row text-center font-weight-bold">
-          <div className="h5 font-weight-bold">Holdings agency: {agencyId}</div>
+          <div className="h5 font-weight-bold">
+            Holdings item agency: {agencyId}
+          </div>
         </div>
         {(relatedHoldingItem.indexKeys || [])
           .sort((e1, e2) => {
