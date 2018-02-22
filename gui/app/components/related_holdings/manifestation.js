@@ -21,7 +21,8 @@ class Manifestation extends React.Component {
       : {};
     let { itemId, status } = displayItem.holdingsitem;
     let classNameExpanded =
-      "fa fa-lg px-3 py-2 fa-caret-" + (this.state.expanded ? "down" : "up");
+      "toggle-manifestation-keys fa fa-lg px-3 py-2 fa-caret-" +
+      (this.state.expanded ? "down" : "up");
     return (
       <div className="border">
         <div
