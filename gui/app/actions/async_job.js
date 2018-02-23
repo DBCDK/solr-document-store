@@ -57,16 +57,16 @@ export const receivedFullLog = log => ({
   log
 });
 
-export const jobStarted = (uuid, name) => ({
+export const jobStarted = (uuid, job) => ({
   type: JOB_STARTED,
   uuid,
-  name
+  job
 });
 
-export const jobFinished = (uuid, name) => ({
+export const jobFinished = (uuid, job) => ({
   type: JOB_FINISHED,
   uuid,
-  name
+  job
 });
 
 //export const websocketError = exception => ({

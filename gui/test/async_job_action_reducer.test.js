@@ -80,25 +80,37 @@ describe("Queues action unit tests", () => {
   });
   test("Job started action", () => {
     let desiredUUID = "1234-5678";
-    let desiredName = "very-important-job";
+    let desiredJob = {
+      started: true,
+      startedAt: "15:03:82-4124",
+      completed: false,
+      completedAt: null,
+      runnerUUID: "",
+      name: "testjob"
+    };
     let desiredAction = {
       type: actions.JOB_STARTED,
       uuid: desiredUUID,
-      name: desiredName
+      job: desiredJob
     };
-    expect(actions.jobStarted(desiredUUID, desiredName)).toEqual(desiredAction);
+    expect(actions.jobStarted(desiredUUID, desiredJob)).toEqual(desiredAction);
   });
   test("Job finished action", () => {
     let desiredUUID = "1234-5678";
-    let desiredName = "very-important-job";
+    let desiredJob = {
+      started: true,
+      startedAt: "12:03:82-4124",
+      completed: false,
+      completedAt: null,
+      runnerUUID: "",
+      name: "testjob"
+    };
     let desiredAction = {
       type: actions.JOB_FINISHED,
       uuid: desiredUUID,
-      name: desiredName
+      job: desiredJob
     };
-    expect(actions.jobFinished(desiredUUID, desiredName)).toEqual(
-      desiredAction
-    );
+    expect(actions.jobFinished(desiredUUID, desiredJob)).toEqual(desiredAction);
   });
   test("Websocket error action", () => {
     let desiredMessage = "Websocket closed down unexpectedly";
@@ -248,13 +260,20 @@ describe("Async job reducer unit test", () => {
   });
   test("Should handle job finished action", () => {
     let desiredUUID = "d5j29035-fhg92";
-    let desiredName = "test-jobb";
+    let desiredJob = {
+      started: true,
+      startedAt: "12:03:82-4124",
+      completed: false,
+      completedAt: null,
+      runnerUUID: "",
+      name: "testjob"
+    };
     // Make sure it is removed from running jobs
-    state.runningJobs.set(desiredUUID, desiredName);
+    state.runningJobs.set(desiredUUID, desiredJob);
     let desiredState = produceInitialState();
-    desiredState.finishedJobs.push({ uuid: desiredUUID, name: desiredName });
+    desiredState.finishedJobs.push({ uuid: desiredUUID, job: desiredJob });
     expect(
-      asyncJobReducer(state, actions.jobFinished(desiredUUID, desiredName))
+      asyncJobReducer(state, actions.jobFinished(desiredUUID, desiredJob))
     ).toEqual(desiredState);
   });
   test("Should handle websocket error action", () => {

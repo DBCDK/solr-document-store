@@ -89,7 +89,7 @@ export default function asyncJobReducer(
       });
     case JOB_STARTED:
       return update(state, {
-        runningJobs: { $add: [[action.uuid, action.name]] }
+        runningJobs: { $add: [[action.uuid, action.job]] }
       });
     case JOB_FINISHED:
       // TODO if we are subscribed to the finished job, unsubscribe automatically,
@@ -98,7 +98,8 @@ export default function asyncJobReducer(
       //let name = state.runningJobs.get(action.uuid);
       return update(state, {
         runningJobs: { $remove: [action.uuid] },
-        finishedJobs: { $push: [{ uuid: action.uuid, name: action.name }] }
+        subscriptions: { $remove: [action.uuid] },
+        finishedJobs: { $push: [{ uuid: action.uuid, job: action.job }] }
       });
     case WEBSOCKET_ERROR:
       return update(state, {

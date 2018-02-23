@@ -1,13 +1,13 @@
 import React from "react";
 import EmptyJobListPlaceholder from "./empty_job_list_placeholder";
 
-const listFinishedJob = job => (
-  <div className="border-bottom" key={"fin-job-" + job.uuid}>
+const listFinishedJob = finishedJobEntry => (
+  <div className="border-bottom" key={"fin-job-" + finishedJobEntry.uuid}>
     <a
-      href={"/api/async-job/log/" + job.uuid}
+      href={"/api/async-job/log/" + finishedJobEntry.uuid}
       target="_blank"
       style={{ cursor: "pointer" }}
-    >{`${job.uuid} - ${job.name}`}</a>
+    >{`${finishedJobEntry.uuid} - ${finishedJobEntry.job.name}`}</a>
   </div>
 );
 

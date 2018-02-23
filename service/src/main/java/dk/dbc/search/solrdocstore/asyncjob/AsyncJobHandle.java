@@ -56,9 +56,9 @@ public class AsyncJobHandle implements Runnable {
     @Override
     public void run() {
         try {
-            job.initLog(wesocketAppender);
             startedAt = Instant.now();
             thread = Thread.currentThread();
+            job.initLog(wesocketAppender);
             job.run(this::isCanceled);
             thread = null;
         } catch (Exception ex) {
@@ -113,6 +113,8 @@ public class AsyncJobHandle implements Runnable {
         if (isRunning() && thread != null) {
             thread.interrupt();
         }
+        // Clean up for garbage collection, since the appender points to the handle as well.
+        wesocketAppender = null;
         this.canceled = true;
     }
 

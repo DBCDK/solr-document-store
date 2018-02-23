@@ -169,6 +169,7 @@ public abstract class AsyncJob {
             log.detachAppender(wsAppender);
             // Also unregisters and unsubscribes clients, will cause memory leak if not called
             wsAppender.stop();
+            wsAppender = null;
         }
         try {
             if (write != null) {

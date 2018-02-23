@@ -3,12 +3,12 @@ import { connect } from "react-redux";
 import { requestSubscribe } from "../../actions/async_job";
 import EmptyJobListPlaceholder from "./empty_job_list_placeholder";
 
-const listExtraJob = (job, subscribe) => (
+const listExtraJob = (exJobEntry, subscribe) => (
   <div
-    key={"ex-job-" + job.uuid}
-    onClick={() => subscribe(job.uuid)}
+    key={"ex-job-" + exJobEntry.uuid}
+    onClick={() => subscribe(exJobEntry.uuid)}
     style={{ cursor: "pointer" }}
-  >{`${job.uuid} - ${job.name}`}</div>
+  >{`${exJobEntry.uuid} - ${exJobEntry.job.name}`}</div>
 );
 
 const ExtraordinaryRunningJobPresenter = ({ jobs, subscribe }) => {

@@ -151,41 +151,55 @@ describe("Async job saga integration test", () => {
   });
   test("Job starts and finish", async done => {
     let startedUUID = "23582368923682368";
-    let startedName = "testjob10";
+    let startedJob = {
+      started: true,
+      startedAt: "12:03:82-4124",
+      completed: false,
+      completedAt: null,
+      runnerUUID: "",
+      name: "testjob"
+    };
     mockServer.on("connection", server => {
       mockServer.send(
-        JSON.stringify(asyncJobActions.jobStarted(startedUUID, startedName))
+        JSON.stringify(asyncJobActions.jobStarted(startedUUID, startedJob))
       );
     });
     await sagaTester.waitFor(asyncJobActions.JOB_STARTED, true);
     expect(sagaTester.getState().asyncJob.runningJobs.get(startedUUID)).toEqual(
-      startedName
+      startedJob
     );
     mockServer.send(
-      JSON.stringify(asyncJobActions.jobFinished(startedUUID, startedName))
+      JSON.stringify(asyncJobActions.jobFinished(startedUUID, startedJob))
     );
     await sagaTester.waitFor(asyncJobActions.JOB_FINISHED);
     expect(sagaTester.getState().asyncJob.runningJobs.get(startedUUID)).toEqual(
       undefined
     );
     expect(sagaTester.getState().asyncJob.finishedJobs).toEqual([
-      { uuid: startedUUID, name: startedName }
+      { uuid: startedUUID, job: startedJob }
     ]);
     mockServer.stop(done);
   });
   test("Job starts, is subscribed and finishes", async done => {
     let startedUUID = "23582368923682368";
-    let startedName = "testjob10";
+    let startedJob = {
+      started: true,
+      startedAt: "12:03:82-4124",
+      completed: false,
+      completedAt: null,
+      runnerUUID: "",
+      name: "testjob"
+    };
     mockServer.on("connection", server => {
       mockServer.send(
-        JSON.stringify(asyncJobActions.jobStarted(startedUUID, startedName))
+        JSON.stringify(asyncJobActions.jobStarted(startedUUID, startedJob))
       );
     });
     await sagaTester.waitFor(asyncJobActions.JOB_STARTED, true);
     mockServer.on("message", message => {
       mockServer.send(JSON.stringify(asyncJobActions.subscribe(startedUUID)));
       mockServer.send(
-        JSON.stringify(asyncJobActions.jobFinished(startedUUID, startedName))
+        JSON.stringify(asyncJobActions.jobFinished(startedUUID, startedJob))
       );
     });
     sagaTester.dispatch(asyncJobActions.requestSubscribe(startedUUID));
@@ -195,15 +209,22 @@ describe("Async job saga integration test", () => {
   });
   test("Job finishes without frontend knowing it started", async done => {
     let startedUUID = "23582368923682368";
-    let startedName = "testjob10";
+    let startedJob = {
+      started: true,
+      startedAt: "12:03:82-4124",
+      completed: false,
+      completedAt: null,
+      runnerUUID: "",
+      name: "testjob"
+    };
     mockServer.on("connection", server => {
       mockServer.send(
-        JSON.stringify(asyncJobActions.jobFinished(startedUUID, startedName))
+        JSON.stringify(asyncJobActions.jobFinished(startedUUID, startedJob))
       );
     });
     await sagaTester.waitFor(asyncJobActions.JOB_FINISHED, true);
     expect(sagaTester.getState().asyncJob.finishedJobs).toEqual([
-      { uuid: startedUUID, name: startedName }
+      { uuid: startedUUID, job: startedJob }
     ]);
     mockServer.stop(done);
   });

@@ -10,14 +10,19 @@ import java.util.UUID;
 public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
     private static final Logger log = LoggerFactory.getLogger(AsyncJobHandle.class);
     private final UUID uuid;
-    private final String name;
+    private final AsyncJobHandle job;
     private final AsyncJobSessionHandler sessionHandler;
 
-    public AsyncJobWesocketAppender(UUID uuid, String name, AsyncJobSessionHandler sessionHandler) {
+    public AsyncJobWesocketAppender(UUID uuid, AsyncJobHandle job, AsyncJobSessionHandler sessionHandler) {
         this.uuid = uuid;
-        this.name = name;
+        this.job = job;
         this.sessionHandler = sessionHandler;
-        sessionHandler.register(uuid, name);
+    }
+
+    @Override
+    public void start(){
+        super.start();
+        sessionHandler.register(uuid,job);
     }
 
     @Override
@@ -28,7 +33,7 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     public void stop(){
-        sessionHandler.unregister(uuid, name);
+        sessionHandler.unregister(uuid, job);
         super.stop();
     }
 }
