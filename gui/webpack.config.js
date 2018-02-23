@@ -119,6 +119,16 @@ module.exports = {
           protocol: "http:",
           port: 8080
         }
+      },
+      "/ws": {
+        target: {
+          host: process.env.IS_DOCKERIZED ? "docstore-service" : "localhost",
+          protocol: "ws:",
+          port: 8080
+        },
+        loglevel: "debug",
+        ws: true
+        //changeOrigin: true
       }
     }
   }

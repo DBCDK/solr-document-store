@@ -34,7 +34,7 @@ describe("Async job saga integration test", () => {
   let mockServer;
   // Set up new Redux store for each test
   beforeEach(async () => {
-    mockServer = new Server("ws://localhost:8080/ws");
+    mockServer = new Server("ws://test.domain/ws");
     sagaTester = new SagaTester({ reducers, middlewares: [socketMiddleware] });
     sagaTester.start(asyncJobWebsocketSaga);
     // Contains saga related to retrieving async job list, since it is a REST call

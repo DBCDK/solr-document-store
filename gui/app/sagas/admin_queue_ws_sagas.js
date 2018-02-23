@@ -15,7 +15,7 @@ let ws = null;
 // Creating event channel that takes external/browser related "events" and translates them into redux actions
 function initWebsocket() {
   return eventChannel(emitter => {
-    ws = new WebSocket("ws://localhost:8080/ws");
+    ws = new WebSocket(`ws://${window.location.host}/ws`);
 
     ws.onopen = () => {
       console.log("Opening websocket to server...");
