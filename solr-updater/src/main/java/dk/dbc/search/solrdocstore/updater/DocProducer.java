@@ -60,6 +60,7 @@ public class DocProducer {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final int MAX_ROWS_OF_SHARDED_SOLR = 10000;
+    private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
 
     @Inject
     Config config;
@@ -249,8 +250,9 @@ public class DocProducer {
 
         JsonNode indexKeys = find(collection, "bibliographicRecord", "indexKeys");
         String repositoryId = getField(indexKeys, "rec.repositoryId");
-        if(repositoryId == null)
+        if (repositoryId == null) {
             throw new IllegalStateException("Cannot get rec.repositoryId from document");
+        }
 
         setField(indexKeys, "id", id);
         setField(indexKeys, "t", "m"); // Manifestation type
@@ -294,6 +296,21 @@ public class DocProducer {
         }
     }
 
+    static void trimIndexFieldsLength(ObjectNode indexKeys, int maxLength) {
+        for (Iterator<Map.Entry<String, JsonNode>> entries = indexKeys.fields() ; entries.hasNext() ;) {
+            Map.Entry<String, JsonNode> entry = entries.next();
+            JsonNode oldValue = entry.getValue();
+            ArrayNode newValue = indexKeys.putArray(entry.getKey());
+            for (Iterator<JsonNode> texts = oldValue.iterator() ; texts.hasNext() ;) {
+                String text = texts.next().asText();
+                if (text.length() > maxLength) {
+                    text = text.substring(0, maxLength);
+                }
+                newValue.add(text);
+            }
+        }
+    }
+
     /**
      * Find all holdings agencies and record them
      *
@@ -314,9 +331,9 @@ public class DocProducer {
     /**
      * Append all holdings as nested document
      *
-     * @param doc        root solr document
-     * @param collection document containing holdings
-     * @param linkId     id for linking foe solr join searches
+     * @param doc          root solr document
+     * @param collection   document containing holdings
+     * @param linkId       id for linking foe solr join searches
      * @param repositoryId id of record used by
      */
     private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode collection, String linkId, String repositoryId) {
@@ -418,8 +435,9 @@ public class DocProducer {
         }
 
         JsonNode array = ( (ObjectNode) indexKeys ).get(name);
-        if(array == null || !array.isArray() || array.size() == 0)
+        if (array == null || !array.isArray() || array.size() == 0) {
             return null;
+        }
         return array.get(0).asText();
     }
 
@@ -446,6 +464,9 @@ public class DocProducer {
      * @return new document
      */
     private SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
+        if (indexKeys.isObject()) {
+            trimIndexFieldsLength((ObjectNode) indexKeys, MAX_SOLR_FIELD_VALUE_SIZE);
+        }
         SolrInputDocument doc = new SolrInputDocument();
         if (indexKeys.isObject()) {
             for (Iterator<String> nameIterator = indexKeys.fieldNames() ; nameIterator.hasNext() ;) {
