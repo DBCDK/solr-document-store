@@ -25,19 +25,11 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -53,7 +45,6 @@ import static org.junit.Assert.*;
  *
  * @author DBC {@literal <dbc.dk>}
  */
-@Ignore
 public class WorkerIT {
 
     private static final Logger log = LoggerFactory.getLogger(WorkerIT.class);
@@ -79,16 +70,16 @@ public class WorkerIT {
     @BeforeClass
     public static void setUpClass() throws Exception {
 
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        solrPort = System.getProperty("solr.port", "8983");
+        solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
 
         pg = new PostgresITDataSource("solrdocstore");
         dataSource = pg.getDataSource();
-
-        List<Future> inits = Arrays.asList(
-                executor.submit(() -> initPayara()),
-                executor.submit(() -> initSolr()));
+        DatabaseMigrator.migrate(dataSource);
 
         client = ClientBuilder.newClient();
+
+        initPayara();
 
         config = new Config("queues=test",
                             "solrDocStoreUrl=NONE",
@@ -110,39 +101,16 @@ public class WorkerIT {
             }
         };
 
-        inits.stream().forEach((f) -> {
-            try {
-                f.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        executor.shutdown();
-        executor.awaitTermination(5, TimeUnit.SECONDS);
-        DatabaseMigrator.migrate(dataSource);
     }
 
-    private static void initPayara() throws RuntimeException {
-        try {
-            payaraPort = System.getProperty("glassfish.port", "18080");
-            solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
-            payara = Payara.getInstance(payaraPort)
-                    .cmd("set-log-level dk.dbc=FINE")
-                    .withDataSource("jdbc/solr-doc-store", pg.getUrl())
-                    .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
-                    .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private static void initSolr() throws RuntimeException {
-        try {
-            solrPort = "8983";
-            solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+    private static void initPayara() throws Exception {
+        payaraPort = System.getProperty("glassfish.port", "18080");
+        solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
+        payara = Payara.getInstance(payaraPort)
+                .cmd("set-log-level dk.dbc=FINE")
+                .withDataSource("jdbc/solr-doc-store", pg.getUrl())
+                .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
+                .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
     }
 
     @Before
@@ -171,6 +139,7 @@ public class WorkerIT {
         worker.docProducer.solrFields.config = config;
         worker.docProducer.solrFields.init();
         worker.docProducer.init();
+        worker.metricRegistry = new Metrics();
         worker.init();
     }
 

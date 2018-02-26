@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- Default log configuration used until proper logging is initialized by hive -->
+
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <appender name="solrlog" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${test.resources}/solr/solr.log"/>
+        <param name="MaxFileSize" value="100000KB"/>
+        <param name="MaxBackupIndex" value="10"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS},%p,%c,%t,%C{1},%M %m%n"/>
+        </layout>
+    </appender>
+  
+    <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS},%p,%c,%t,%C{1},%M %m%n"/>
+        </layout>
+    </appender>
+
+    <root>
+        <level value="trace"/>
+        <appender-ref ref="solrlog"/>
+        <!--appender-ref ref="stdout"/-->
+    </root>
+
+</log4j:configuration>
+
