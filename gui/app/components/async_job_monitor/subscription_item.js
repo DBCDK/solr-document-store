@@ -13,13 +13,14 @@ class SubscriptionItem extends React.Component {
         this.textLog.scrollTop + 1;
     }
     return (
-      <div>
+      <div className="border">
         <h4>
           {name} - {uuid}
         </h4>
         <div
+          className="border"
           ref={textLog => (this.textLog = textLog)}
-          style={{ width: "48vw", height: "30vh", overflow: "auto" }}
+          style={{ height: "30vh", overflow: "auto" }}
         >
           {(log || []).map((l, i) => (
             <div key={"ll-" + uuid + "-" + i}>{l}</div>
