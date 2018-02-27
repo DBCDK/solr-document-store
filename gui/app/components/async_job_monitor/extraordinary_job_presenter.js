@@ -4,14 +4,6 @@ import { requestSubscribe } from "../../actions/async_job";
 import EmptyJobListPlaceholder from "./empty_job_list_placeholder";
 import DisplayJob from "./display_job";
 
-const listExtraJob = (exJobEntry, subscribe) => (
-  <div
-    key={"ex-job-" + exJobEntry.uuid}
-    onClick={() => subscribe(exJobEntry.uuid)}
-    style={{ cursor: "pointer" }}
-  >{`${exJobEntry.uuid} - ${exJobEntry.job.name}`}</div>
-);
-
 const ExtraordinaryRunningJobPresenter = ({ jobs, subscribe }) => {
   return jobs.length > 0 ? (
     [

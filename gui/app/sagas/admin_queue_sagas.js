@@ -24,7 +24,6 @@ function* fetchQueueRules(action) {
 //TODO Response is different than {result: [...], pages: n}, DO SOMETHING
 function* fetchAsyncJobList(action) {
   try {
-    console.log("plz...½");
     const response = yield call(api.fetchAsyncJobList);
     yield put(asyncJobsActions.receivedAsyncJobList(response));
   } catch (e) {
