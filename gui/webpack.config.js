@@ -27,6 +27,8 @@ var plugins = [
       process.env.NODE_ENV || "development"
     )
   }),
+  // Only includes desired locales in moment.js, I assume en (united states) is default included. We further include Danish
+  new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /da/),
   extract
 ];
 
