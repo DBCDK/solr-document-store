@@ -1,4 +1,5 @@
 import React from "react";
+import SubscriptionButton from "./subscription_button";
 
 class SubscriptionItem extends React.Component {
   constructor(props) {
@@ -14,9 +15,12 @@ class SubscriptionItem extends React.Component {
     }
     return (
       <div className="border">
-        <h4>
-          {name} - {uuid}
-        </h4>
+        <div className="d-flex">
+          <h4 style={{ flex: "1" }}>
+            {name} - {uuid}
+          </h4>
+          <SubscriptionButton uuid={uuid} />
+        </div>
         <div
           className="border"
           ref={textLog => (this.textLog = textLog)}
