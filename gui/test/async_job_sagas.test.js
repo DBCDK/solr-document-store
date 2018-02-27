@@ -98,11 +98,16 @@ describe("Async job saga integration test", () => {
     await sagaTester.waitFor(asyncJobActions.RECEIVED_ASYNC_JOB_LIST, true);
     expect(
       Array.from(sagaTester.getState().asyncJob.runningJobs.values())
-    ).toEqual(asyncJobList.map(j => j.name));
+    ).toEqual(asyncJobList.filter(j => !j.cancelled && !j.completed));
+    expect(sagaTester.getState().asyncJob.finishedJobs).toEqual(
+      asyncJobList
+        .filter(j => j.cancelled || j.completed)
+        .map(j => ({ uuid: j.runnerUUID, job: j }))
+    );
     mockServer.stop(done);
   });
   test("Getting async job list fails", async done => {
-    let errorMessage = "SOme error occurred";
+    let errorMessage = "Some error occurred";
     fetch.mockReject(new Error(errorMessage));
     sagaTester.dispatch(asyncJobActions.requestAsyncJobList());
     await sagaTester.waitFor(asyncJobActions.ASYNC_JOB_ERROR, true);

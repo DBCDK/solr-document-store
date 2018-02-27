@@ -27,7 +27,6 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent eventObject) {
-        log.info("We are websocket appending: {}", eventObject);
         sessionHandler.appendLog(uuid, eventObject.getMessage());
     }
 

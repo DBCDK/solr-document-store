@@ -197,12 +197,27 @@ describe("Async job reducer unit test", () => {
   test("Should handle received async job list action", () => {
     let desiredState = produceInitialState();
     let receivedJobs = [
-      { runnerUUID: "uuid1", name: "name1" },
-      { runnerUUID: "uuid2", name: "name2" },
-      { runnerUUID: "uuid3", name: "name3" }
+      {
+        runnerUUID: "uuid1",
+        startedAt: "12-03-1882 11:09:45Z",
+        started: true,
+        completed: false
+      },
+      {
+        runnerUUID: "uuid2",
+        startedAt: "12-03-1882 11:09:45Z",
+        started: true,
+        completed: false
+      },
+      {
+        runnerUUID: "uuid3",
+        startedAt: "12-03-1882 11:09:45Z",
+        started: true,
+        completed: false
+      }
     ];
     let desiredRunningJobs = new Map();
-    receivedJobs.forEach(j => desiredRunningJobs.set(j.runnerUUID, j.name));
+    receivedJobs.forEach(j => desiredRunningJobs.set(j.runnerUUID, j));
     desiredState.runningJobs = desiredRunningJobs;
     expect(
       asyncJobReducer(state, actions.receivedAsyncJobList(receivedJobs))
