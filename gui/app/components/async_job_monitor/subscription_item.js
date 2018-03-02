@@ -1,4 +1,5 @@
 import React from "react";
+import SubscriptionButton from "./subscription_button";
 
 class SubscriptionItem extends React.Component {
   constructor(props) {
@@ -13,13 +14,17 @@ class SubscriptionItem extends React.Component {
         this.textLog.scrollTop + 1;
     }
     return (
-      <div>
-        <h4>
-          {name} - {uuid}
-        </h4>
+      <div className="border">
+        <div className="d-flex">
+          <h4 style={{ flex: "1" }}>
+            {name} - {uuid}
+          </h4>
+          <SubscriptionButton uuid={uuid} />
+        </div>
         <div
+          className="border"
           ref={textLog => (this.textLog = textLog)}
-          style={{ width: "48vw", height: "30vh", overflow: "auto" }}
+          style={{ height: "30vh", overflow: "auto" }}
         >
           {(log || []).map((l, i) => (
             <div key={"ll-" + uuid + "-" + i}>{l}</div>

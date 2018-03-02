@@ -5,14 +5,20 @@ import AsyncJobMonitor from "./async_job_monitor";
 class QueueAdminGUI extends React.PureComponent {
   render() {
     return (
-      <div className="container-full">
-        <div className="row">
-          <div className="col-6">
-            <h1>Queue admin tool</h1>
-            <QueueRules />
-          </div>
-          <div className="col-6">
-            <AsyncJobMonitor />
+      <div>
+        <nav className="navbar navbar-expand-lg navbar-light bg-dark">
+          <h3 className="navbar-brand text-light">
+            solr-document-store Kø-værktøj
+          </h3>
+        </nav>
+        <div className="container-full p-5">
+          <div className="row">
+            <div className="col-6">
+              <QueueRules />
+            </div>
+            <div className="col-6">
+              <AsyncJobMonitor />
+            </div>
           </div>
         </div>
       </div>

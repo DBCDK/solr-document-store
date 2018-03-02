@@ -32,10 +32,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   subscriptions: stateProps.subscriptions,
   extraordinaryRunningJobs: Array.from(stateProps.runningJobs.entries())
     .filter(rj => !stateProps.subscriptions.has(rj[0]))
-    .map(rj => ({ uuid: rj[0], name: rj[1] })),
+    .map(rj => ({ uuid: rj[0], job: rj[1] })),
   subscribedJobs: Array.from(stateProps.subscriptions.keys()).map(uuid => ({
     uuid,
-    name: stateProps.runningJobs.get(uuid),
+    name: (stateProps.runningJobs.get(uuid) || {}).name,
     log: stateProps.logs.get(uuid)
   })),
   finishedJobs: stateProps.finishedJobs

@@ -64,12 +64,17 @@ export default function asyncJobReducer(
       });
     case RECEIVED_ASYNC_JOB_LIST:
       let jobs = new Map();
-      action.jobList.forEach(j => jobs.set(j.runnerUUID, j.name));
+      let finishedJobs = [];
+      action.jobList.forEach(j => {
+        if (j.cancelled || j.completed)
+          finishedJobs.push({ uuid: j.runnerUUID, job: j });
+        else jobs.set(j.runnerUUID, j);
+      });
       return update(state, {
-        runningJobs: { $set: jobs }
+        runningJobs: { $set: jobs },
+        finishedJobs: { $push: finishedJobs }
       });
     case APPEND_LOG:
-      // TODO check log is not to long, else use $unshift
       let log = update(state.logs.get(action.uuid) || [], {
         $push: [action.logLine]
       });
@@ -89,16 +94,13 @@ export default function asyncJobReducer(
       });
     case JOB_STARTED:
       return update(state, {
-        runningJobs: { $add: [[action.uuid, action.name]] }
+        runningJobs: { $add: [[action.uuid, action.job]] }
       });
     case JOB_FINISHED:
-      // TODO if we are subscribed to the finished job, unsubscribe automatically,
-      // or do something that makes the UI consistent. We will also receive an
-      // unsubscribe action shortly after, but this should not change anything in the store.
-      //let name = state.runningJobs.get(action.uuid);
       return update(state, {
         runningJobs: { $remove: [action.uuid] },
-        finishedJobs: { $push: [{ uuid: action.uuid, name: action.name }] }
+        subscriptions: { $remove: [action.uuid] },
+        finishedJobs: { $push: [{ uuid: action.uuid, job: action.job }] }
       });
     case WEBSOCKET_ERROR:
       return update(state, {

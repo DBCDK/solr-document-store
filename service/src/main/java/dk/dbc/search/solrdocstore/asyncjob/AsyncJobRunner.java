@@ -123,7 +123,7 @@ public class AsyncJobRunner {
         do {
             id = UUID.randomUUID();
         } while (jobs.computeIfAbsent(id, s -> {
-            AsyncJobWesocketAppender wa = new AsyncJobWesocketAppender(s,job.getName(),sessionHandler);
+            AsyncJobWesocketAppender wa = new AsyncJobWesocketAppender(s, wrapper, sessionHandler);
             wrapper.setWebsocketAppender(wa);
             return wrapper;
         }) != wrapper);

@@ -27,6 +27,8 @@ var plugins = [
       process.env.NODE_ENV || "development"
     )
   }),
+  // Only includes desired locales in moment.js, I assume en (united states) is default included. We further include Danish
+  new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /da/),
   extract
 ];
 
@@ -119,6 +121,16 @@ module.exports = {
           protocol: "http:",
           port: 8080
         }
+      },
+      "/ws": {
+        target: {
+          host: process.env.IS_DOCKERIZED ? "docstore-service" : "localhost",
+          protocol: "ws:",
+          port: 8080
+        },
+        loglevel: "debug",
+        ws: true
+        //changeOrigin: true
       }
     }
   }

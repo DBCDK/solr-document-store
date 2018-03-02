@@ -100,24 +100,24 @@ public class AsyncJobSessionHandler {
         return obj;
     }
 
-    public void register(UUID uuid, String name){
+    public void register(UUID uuid, AsyncJobHandle job){
         subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
         HashMap<String, Object> fields = new HashMap<>();
         fields.put("uuid", uuid.toString());
-        fields.put("name", name);
+        fields.put("job", new AsyncJobControl.StatusResponse(job, uuid.toString()));
         broadcastAction(JOB_STARTED_FRONTEND_TYPE, fields);
     }
 
-    public void unregister(UUID uuid, String name){
+    public void unregister(UUID uuid, AsyncJobHandle job){
         List<Session> sessions = subscribers.remove(uuid);
-        HashMap<String, Object> fields = new HashMap<>();
-        fields.put("uuid", uuid.toString());
-        fields.put("name", name);
-        broadcastAction(JOB_FINISHED_FRONTEND_TYPE, fields);
         HashMap<String, Object> fieldsUnsubscribe = new HashMap<>();
         fieldsUnsubscribe.put("uuid", uuid.toString());
         ObjectNode unsubscribeAction = buildAction(UNSUBSCRIBE_FRONTEND_TYPE, fieldsUnsubscribe);
         sessions.forEach(session -> sendToSession(session, unsubscribeAction));
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("uuid", uuid.toString());
+        fields.put("job", new AsyncJobControl.StatusResponse(job, uuid.toString()));
+        broadcastAction(JOB_FINISHED_FRONTEND_TYPE, fields);
     }
 
     /**
