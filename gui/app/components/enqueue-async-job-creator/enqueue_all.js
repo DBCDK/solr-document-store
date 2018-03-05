@@ -49,6 +49,10 @@ class EnqueueAllAsyncJob extends React.Component {
   enqueueAll(e) {
     let { queueInput, includeDeleted } = this.state;
     this.props.enqueueAll(queueInput, includeDeleted);
+    this.setState({
+      queueInput: "",
+      includeDeleted: false
+    });
   }
 
   toggleDeleteIncluded(e) {

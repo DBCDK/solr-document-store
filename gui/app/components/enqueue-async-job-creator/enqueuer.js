@@ -41,6 +41,10 @@ class EnqueueAsyncJob extends React.PureComponent {
   enqueue() {
     let { patternInput, consumerInput } = this.state;
     this.props.enqueue(patternInput, consumerInput, this.props.path);
+    this.setState({
+      patternInput: "",
+      consumerInput: ""
+    });
   }
 }
 
