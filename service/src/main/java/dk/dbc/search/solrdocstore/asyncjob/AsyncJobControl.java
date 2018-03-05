@@ -26,10 +26,7 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -107,8 +104,9 @@ public class AsyncJobControl {
      * */
     @GET
     @Produces({MediaType.TEXT_PLAIN})
-    @Path("list-errors/{pattern}{consumer : (/consumer)?}")
-    public Response listErrors(@PathParam("pattern") String pattern,@PathParam("consumer") String consumer){
+    @Path("list-errors/{pattern}")
+    public Response listErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
+        log.info("Pattern: {} - Consumer: {}",pattern,consumer);
         String id = queueAsyncJob.runQueueErrorListJobs(consumer,pattern);
         return Response.ok(id).build();
     }
@@ -122,8 +120,8 @@ public class AsyncJobControl {
      * */
     @GET
     @Produces({MediaType.TEXT_PLAIN})
-    @Path("delete-errors/{pattern}{consumer : (/consumer)?}")
-    public Response deleteErrors(@PathParam("pattern") String pattern,@PathParam("consumer") String consumer){
+    @Path("delete-errors/{pattern}")
+    public Response deleteErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
         String id = queueAsyncJob.runQueueErrorDeleteJobs(consumer,pattern);
         return Response.ok(id).build();
     }
@@ -137,8 +135,8 @@ public class AsyncJobControl {
      * */
     @GET
     @Produces({MediaType.TEXT_PLAIN})
-    @Path("requeue-errors/{pattern}{consumer : (/consumer)?}")
-    public Response requeueErrors(@PathParam("pattern") String pattern,@PathParam("consumer") String consumer){
+    @Path("requeue-errors/{pattern}")
+    public Response requeueErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
         String id = queueAsyncJob.runQueueErrorRequeueJobs(consumer,pattern);
         return Response.ok(id).build();
     }

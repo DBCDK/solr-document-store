@@ -66,9 +66,15 @@ export default {
   fetchFullLog(uuid) {
     return fetch(`api/log/${uuid}`).then(res => res.body);
   },
-  enqueueJob(path, param1, param2) {
+  enqueueAllJob(queue, includeDeleted) {
     return fetch(
-      `api/async-job/${path}/${param1}` + (param2 ? "/" + param2 : "")
+      `api/async-job/queue-all/${encodeURI(queue)}/${includeDeleted}`
+    );
+  },
+  errorActionWithPattern(path, pattern, consumer) {
+    return fetch(
+      `api/async-job/${path}/${encodeURI(pattern)}` +
+        (consumer ? "?consumer=" + encodeURIComponent(consumer) : "")
     );
   }
 };

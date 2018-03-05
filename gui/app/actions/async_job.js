@@ -11,7 +11,9 @@ export const JOB_STARTED = "Job started";
 export const JOB_FINISHED = "Job finished";
 export const WEBSOCKET_ERROR = "Websocket connection error";
 export const ASYNC_JOB_ERROR = "Async job had an error";
-export const ENQUEUE_JOB = "Enqueuing job";
+export const ENQUEUE_ALL_JOB = "Enqueuing all elements on queue";
+export const ASYNC_JOB_ERROR_WITH_PATTERN =
+  "Queueing elements following pattern";
 
 export const requestSubscribe = uuid => ({
   type: REQUEST_SUBSCRIBE,
@@ -82,9 +84,15 @@ export const asyncJobError = exception => ({
   message: exception.message
 });
 
-export const enqueueJob = (param1, param2, path) => ({
-  type: ENQUEUE_JOB,
-  param1,
-  param2,
-  path
+export const enqueueAllJob = (queue, includeDeleted) => ({
+  type: ENQUEUE_ALL_JOB,
+  queue,
+  includeDeleted
+});
+
+export const queueErrorsWithPattern = (path, pattern, consumer) => ({
+  type: ASYNC_JOB_ERROR_WITH_PATTERN,
+  path,
+  pattern,
+  consumer
 });

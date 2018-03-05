@@ -1,53 +1,54 @@
 import React from "react";
 import { connect } from "react-redux";
-import { enqueueJob } from "../../actions/async_job";
+import { queueErrorsWithPattern } from "../../actions/async_job";
 
 class EnqueueAsyncJob extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      parameter1input: "",
-      parameter2input: ""
+      patternInput: "",
+      consumerInput: ""
     };
     this.enqueue = this.enqueue.bind(this);
   }
 
   render() {
-    let { name, parameter1, parameter2, path } = this.props;
+    let { name, placeholder, consumer, path } = this.props;
     return (
       <div className="p-2">
         <h5>{name}</h5>
         <input
-          placeholder={parameter1}
-          value={this.state.parameter1input}
-          onChange={e => this.setState({ parameter1input: e.target.value })}
+          placeholder={placeholder}
+          value={this.state.patternInput}
+          onChange={e => this.setState({ patternInput: e.target.value })}
         />
         <input
-          placeholder={parameter2}
-          value={this.state.parameter2input}
-          onChange={e => this.setState({ parameter2input: e.target.value })}
+          placeholder={consumer}
+          value={this.state.consumerInput}
+          onChange={e => this.setState({ consumerInput: e.target.value })}
         />
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary ml-3"
           onClick={this.enqueue}
         >
-          Kør
+          Start job
         </button>
       </div>
     );
   }
 
   enqueue() {
-    let { parameter1input, parameter2input } = this.state;
-    this.props.enqueue(parameter1input, parameter2input, this.props.path);
+    let { patternInput, consumerInput } = this.state;
+    this.props.enqueue(patternInput, consumerInput, this.props.path);
   }
 }
 
 const mapStateToProps = state => ({});
 
 const mapDispatchToProps = dispatch => ({
-  enqueue: (param1, param2, path) => dispatch(enqueueJob(param1, param2, path))
+  enqueue: (queue, consumer, path) =>
+    dispatch(queueErrorsWithPattern(path, queue, consumer))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(EnqueueAsyncJob);
