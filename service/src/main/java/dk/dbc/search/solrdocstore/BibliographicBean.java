@@ -229,26 +229,6 @@ public class BibliographicBean {
         return h2bBean.attachToAgency(h2b);
     }
 
-//    private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
-//        TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
-//        query.setParameter("agency", agency);
-//        query.setParameter("bibId", recordId);
-//
-//        if (query.getSingleResult() > 0) {
-//            addHoldingsToBibliographic(agency, recordId, agency);
-//            return EnqueueAdapter.setOfOne(agency,recordId);
-//        }
-//        return Collections.emptySet();
-//    }
-//
-//    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
-//        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-//                holdingsAgency, recordId,agency
-//        );
-//        return h2bBean.attachToAgency(h2b);
-//
-//    }
-
     private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
         if (supercededs == null) {
             return Collections.emptySet();
