@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import dk.dbc.search.solrdocstore.openagency.libraryrules.LibraryRulesProxy;
 
 import javax.ejb.Stateless;
@@ -13,10 +14,10 @@ public class AgencyLibraryTypeBean {
     @Inject
     LibraryRulesProxy proxy;
 
-
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    @Timed
     public LibraryConfig.LibraryType fetchAndCacheLibraryType(int agency){
         LibraryConfig.LibraryType returnValue;
         AgencyLibraryTypeEntity cachedValue = findByAgency(agency);
