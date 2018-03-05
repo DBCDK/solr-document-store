@@ -86,7 +86,11 @@ public class BibliographicBean {
 
     }
 
-    private void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin) {
+     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
+        addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
+    }
+
+     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
         Set<AgencyItemKey> affectedKeys = new HashSet<>();
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
