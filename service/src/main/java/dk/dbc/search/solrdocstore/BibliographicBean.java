@@ -175,26 +175,76 @@ public class BibliographicBean {
         return affectedKeys;
     }
 
-    private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
-        TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
-        query.setParameter("agency", agency);
-        query.setParameter("bibId", recordId);
+        private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
+        if (libraryConfig.getLibraryType(agency) == LibraryConfig.LibraryType.NonFBS) {
+            TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
+            query.setParameter("agency", agency);
+            query.setParameter("bibId", recordId);
 
-        if (query.getSingleResult() > 0) {
-            addHoldingsToBibliographic(agency, recordId, agency);
-            return EnqueueAdapter.setOfOne(agency,recordId);
+            if (query.getSingleResult() > 0) {
+                addHoldingsToBibliographic(agency, recordId, agency);
+                return EnqueueAdapter.setOfOne(agency, recordId);
+            }
+        } else {
+            HashSet<AgencyItemKey> ret = new HashSet<>();
+            TypedQuery<String> superceeded = entityManager.createQuery(
+                    "SELECT b.deadBibliographicRecordId FROM BibliographicToBibliographicEntity b" +
+                    " WHERE b.liveBibliographicRecordId = :bibId", String.class);
+            superceeded.setParameter("bibId", recordId);
+            List<String> superceddedIds = superceeded.getResultList();
+            System.out.println("superceddedIds = " + superceddedIds);
+            TypedQuery<String> query = entityManager.createQuery(
+                    "SELECT h.bibliographicRecordId FROM HoldingsItemEntity h" +
+                    " WHERE h.agencyId = :agency AND (" +
+                    "  h.bibliographicRecordId = :bibId OR" +
+                    "  h.bibliographicRecordId IN :superceeded" +
+                    "  )", String.class);
+            query.setParameter("agency", agency);
+            query.setParameter("bibId", recordId);
+            query.setParameter("superceeded", superceddedIds);
+            List<String> holdingsItems = query.getResultList();
+            System.out.println("holdingsItems = " + holdingsItems);
+            if(holdingsItems.size() >= 2) {
+                log.info("Strange: {}:{} has multiple holdings ({}) pointing to it (002/b2b issue?)", agency, recordId, holdingsItems);
+            }
+            for (String holdingsItem : holdingsItems) {
+                ret.addAll(addHoldingsToBibliographic(agency, holdingsItem, agency, recordId));
+            }
+            return ret;
         }
         return Collections.emptySet();
     }
 
     private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
-        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-                holdingsAgency, recordId,agency
-        );
-        return h2bBean.attachToAgency(h2b);
-
+        return addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId);
     }
 
+    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency, String bibliographicRecordId) {
+        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
+                holdingsAgency, recordId, agency, bibliographicRecordId
+        );
+        return h2bBean.attachToAgency(h2b);
+    }
+
+//    private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
+//        TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
+//        query.setParameter("agency", agency);
+//        query.setParameter("bibId", recordId);
+//
+//        if (query.getSingleResult() > 0) {
+//            addHoldingsToBibliographic(agency, recordId, agency);
+//            return EnqueueAdapter.setOfOne(agency,recordId);
+//        }
+//        return Collections.emptySet();
+//    }
+//
+//    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
+//        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
+//                holdingsAgency, recordId,agency
+//        );
+//        return h2bBean.attachToAgency(h2b);
+//
+//    }
 
     private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
         if (supercededs == null) {
