@@ -401,7 +401,72 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
     }
 
+    @Test
+    public void newRecordWhereSuperceedsIsAlreadySet() throws Exception {
 
+        Response r;
+        String a870970 = makeBibliographicRequestJson(
+                870970, e -> {
+            e.setBibliographicRecordId("a");
+        });
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, a870970));
+        assertThat(r.getStatus(), is(200));
+
+        // Setup holding pointint to 870970:a
+        env().getPersistenceContext()
+                .run(() -> {
+                    em.persist(new HoldingsItemEntity(700000, "a", "V1", Collections.EMPTY_LIST, "T#1"));
+                });
+        env().getPersistenceContext()
+                .run(() -> {
+                    em.persist(new HoldingsToBibliographicEntity(700000, "a", 870970));
+                });
+
+        String b870970 = makeBibliographicRequestJson(
+                870970, e -> {
+            e.setBibliographicRecordId("b");
+            e.setSuperceds(Arrays.asList("a"));
+        });
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, b870970));
+        assertThat(r.getStatus(), is(200));
+
+        // Not really nessecary
+        String a870970d = makeBibliographicRequestJson(
+                870970, e -> {
+            e.setDeleted(true);
+            e.setBibliographicRecordId("a");
+        });
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, a870970d));
+        assertThat(r.getStatus(), is(200));
+
+
+        HoldingsToBibliographicEntity h2bBefore = env().getPersistenceContext()
+                .run(() -> {
+                    return em.find(HoldingsToBibliographicEntity.class,
+                                   new HoldingsToBibliographicKey(700000, "a"));
+                });
+
+        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 870970, "b"), h2bBefore);
+
+        String b70000 = makeBibliographicRequestJson(
+                700000, e -> {
+            e.setBibliographicRecordId("b");
+        });
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, b70000));
+        assertThat(r.getStatus(), is(200));
+
+        HoldingsToBibliographicEntity h2bAfter = env().getPersistenceContext()
+                .run(() -> {
+                    return em.find(HoldingsToBibliographicEntity.class,
+                                   new HoldingsToBibliographicKey(700000, "a"));
+                });
+
+        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b"), h2bAfter);
+    }
 
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
