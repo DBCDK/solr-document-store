@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ public class BibliographicBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
@@ -85,11 +87,11 @@ public class BibliographicBean {
 
     }
 
-    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
+     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
         addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
     }
 
-    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
+     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
         Set<AgencyItemKey> affectedKeys = new HashSet<>();
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
@@ -226,26 +228,6 @@ public class BibliographicBean {
         );
         return h2bBean.attachToAgency(h2b);
     }
-
-//    private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
-//        TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
-//        query.setParameter("agency", agency);
-//        query.setParameter("bibId", recordId);
-//
-//        if (query.getSingleResult() > 0) {
-//            addHoldingsToBibliographic(agency, recordId, agency);
-//            return EnqueueAdapter.setOfOne(agency,recordId);
-//        }
-//        return Collections.emptySet();
-//    }
-//
-//    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
-//        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-//                holdingsAgency, recordId,agency
-//        );
-//        return h2bBean.attachToAgency(h2b);
-//
-//    }
 
     private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
         if (supercededs == null) {

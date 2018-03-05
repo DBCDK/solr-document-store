@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ public class BiliographicRecordAPIBean {
     @GET
     @Path("bibliographic-records/bibliographic-record-id/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response getBibliographicKeys(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
             @DefaultValue("1") @QueryParam("page") int page,
@@ -74,6 +76,7 @@ public class BiliographicRecordAPIBean {
     @GET
     @Path("bibliographic-records/repository-id/{repositoryId}")
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response getBibliographicKeysByRepositoryId(
             @PathParam("repositoryId") String repositoryID,
             @DefaultValue("1") @QueryParam("page") int page,
@@ -112,6 +115,7 @@ public class BiliographicRecordAPIBean {
     @GET
     @Path("bibliographic-record/{bibliographicRecordId}/{bibliographicAgencyId}")
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response getBibliographicRecord(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
             @PathParam("bibliographicAgencyId") String bibliographicAgencyId){
@@ -133,6 +137,7 @@ public class BiliographicRecordAPIBean {
     @GET
     @Path("related-holdings/{bibliographicRecordId}/{bibliographicAgencyId}")
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response getRelatedHoldings(@PathParam("bibliographicRecordId") String bibliographicRecordId,
                                        @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
         log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",

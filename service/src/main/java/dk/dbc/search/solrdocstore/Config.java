@@ -26,6 +26,7 @@ public class Config {
     private String oaURL;
     private long jobPruneMinutes;
     private String systemName;
+    private String jmxDomain;
 
     @PostConstruct
     public void loadProperties() {
@@ -33,7 +34,8 @@ public class Config {
         oaURL = getValue(props, "openAgencyUrl", "OPEN_AGENCY_URL", null, "No URL found for Open Agency");
         jobPruneMinutes = getValue(props, "jobPruneMinutes", "JOB_PRUNE_MINUTES", "60", null, Long::parseUnsignedLong);
         // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
-        systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret",null);
+        systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
+        jmxDomain = getValue(props, "jmxDomain", "JMX_DOMAIN", "metrics", null);
     }
 
     public String getOaURL() {
@@ -47,6 +49,11 @@ public class Config {
     public String getSystemName() {
         return systemName;
     }
+
+    public String getJmxDomain() {
+        return jmxDomain;
+    }
+
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
         String value = props.getProperty(propertyName);
