@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -187,23 +188,23 @@ public class BibliographicBean {
             }
         } else {
             HashSet<AgencyItemKey> ret = new HashSet<>();
+
             TypedQuery<String> superceeded = entityManager.createQuery(
                     "SELECT b.deadBibliographicRecordId FROM BibliographicToBibliographicEntity b" +
                     " WHERE b.liveBibliographicRecordId = :bibId", String.class);
             superceeded.setParameter("bibId", recordId);
-            List<String> superceddedIds = superceeded.getResultList();
-            System.out.println("superceddedIds = " + superceddedIds);
+            List<String> allIds = new ArrayList<String>(superceeded.getResultList());
+            allIds.add(recordId);
+
             TypedQuery<String> query = entityManager.createQuery(
                     "SELECT h.bibliographicRecordId FROM HoldingsItemEntity h" +
-                    " WHERE h.agencyId = :agency AND (" +
-                    "  h.bibliographicRecordId = :bibId OR" +
-                    "  h.bibliographicRecordId IN :superceeded" +
-                    "  )", String.class);
+                    " WHERE h.agencyId = :agency" +
+                    " AND h.bibliographicRecordId IN :allIds",
+                    String.class);
             query.setParameter("agency", agency);
-            query.setParameter("bibId", recordId);
-            query.setParameter("superceeded", superceddedIds);
+            query.setParameter("allIds", allIds);
             List<String> holdingsItems = query.getResultList();
-            System.out.println("holdingsItems = " + holdingsItems);
+
             if(holdingsItems.size() >= 2) {
                 log.info("Strange: {}:{} has multiple holdings ({}) pointing to it (002/b2b issue?)", agency, recordId, holdingsItems);
             }
