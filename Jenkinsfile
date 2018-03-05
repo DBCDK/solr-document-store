@@ -99,9 +99,19 @@ pipeline {
                         }
                     }
                 }
-            }
 
+                stage("upload") {
+                    steps {
+                        script {
+                            if (env.BRANCH_NAME ==~ /master|trunk/) {
+                                sh """
+                                    mvn -Dmaven.repo.local=\$WORKSPACE/.repo jar:jar deploy:deploy -pl !solr-doc-store-service,!solr-doc-store-corepo-sorker,!solr-doc-store-updater
+                                """
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-
 }
