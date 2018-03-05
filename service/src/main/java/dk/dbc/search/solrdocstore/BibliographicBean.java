@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,7 @@ public class BibliographicBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
@@ -84,11 +86,7 @@ public class BibliographicBean {
 
     }
 
-    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
-        addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
-    }
-
-    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
+    private void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin) {
         Set<AgencyItemKey> affectedKeys = new HashSet<>();
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());

@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -53,6 +54,7 @@ public class DocumentRetrieveBean {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ bibliographicRecordId : .*}")
+    @Timed
     public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
