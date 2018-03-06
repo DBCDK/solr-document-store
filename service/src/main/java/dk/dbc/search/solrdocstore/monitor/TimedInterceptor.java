@@ -28,7 +28,6 @@ public class TimedInterceptor {
 
     @AroundInvoke
     public Object timer(InvocationContext ic) throws Exception {
-        log.debug("ic = {}", ic);
         Method method = ic.getMethod();
         Timer timer = TIMERS.computeIfAbsent(method, this::makeTimer);
         try (Timer.Context time = timer.time()) {
@@ -36,13 +35,14 @@ public class TimedInterceptor {
         }
     }
 
-    private Timer makeTimer(Method m) {
-        String methodName = m.getName();
-        Timed timed = m.getAnnotation(Timed.class);
+    private Timer makeTimer(Method method) {
+        log.debug("method = {}", method);
+        String methodName = method.getName();
+        Timed timed = method.getAnnotation(Timed.class);
         if (timed != null && !timed.value().isEmpty()) {
             methodName = timed.value();
         }
-        String name = MetricRegistry.name(m.getDeclaringClass(), methodName);
+        String name = MetricRegistry.name(method.getDeclaringClass(), methodName);
         return metrics.getRegistry().timer(name);
     }
 

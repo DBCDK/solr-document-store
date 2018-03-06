@@ -8,6 +8,8 @@ import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,6 +18,8 @@ import javax.interceptor.InvocationContext;
 @Metered
 @Interceptor
 public class MeteredInterceptor {
+
+    private static final Logger log = LoggerFactory.getLogger(MeteredInterceptor.class);
 
     private static final ConcurrentHashMap<Method, Meter> METERS = new ConcurrentHashMap<>();
 
@@ -31,6 +35,7 @@ public class MeteredInterceptor {
     }
 
     private Meter makeMeter(Method method) {
+        log.debug("method = {}", method);
         String methodName = method.getName();
         Metered metered = method.getAnnotation(Metered.class);
         if (metered != null && !metered.value().isEmpty()) {
