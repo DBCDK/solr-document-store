@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara-micro
+FROM docker.dbc.dk/payara-micro:LogAsJson
 
 ENV APPLICATION_NAME=SolrDocStore \
     MAX_POOL_SIZE=30
