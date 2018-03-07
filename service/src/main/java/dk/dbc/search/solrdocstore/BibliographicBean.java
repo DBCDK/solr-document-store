@@ -21,6 +21,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import org.eclipse.persistence.exceptions.JPQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,15 +66,23 @@ public class BibliographicBean {
     /**
      * Query bibliographic posts with the indexKey field set. This is necessary for the API, as the Jackson parser does
      * not use the getter, thereby not using the lazy load.
-     * @param bibliographicRecordId
-     * @return All bibliographic posts matching the record id
+     * @param bibliographicRecordId bibliographic record id we match with
+     * @param orderBy which column we order by
+     * @param desc ascending or descending
+     * @return Query of bibliographic entities joined with bibliographic to bibliographic table, so the supersede id is
+     * included
      */
-    public TypedQuery<BibliographicEntity> getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId,String orderBy,boolean desc) {
+    public Query getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId,String orderBy,boolean desc) {
         String direction = (desc) ? "DESC" : "ASC";
-        TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
-                "WHERE b.bibliographicRecordId = :bibId ORDER BY b."+orderBy+" "+direction,BibliographicEntity.class)
-                .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("bibPostWithIndexKeys"));
-        return query.setParameter("bibId",bibliographicRecordId);
+        if (!BibliographicEntity.sortableColumns.contains(orderBy)){
+            throw new JPQLException("Invalid order by parameter");
+        }
+        Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
+                "FROM bibliographicsolrkeys b " +
+                "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
+                "WHERE b.bibliographicrecordid=?1 " +
+                "ORDER BY b."+orderBy.toLowerCase()+" "+direction,"BibliographicEntityWithSupersedeId");
+        return frontendQuery.setParameter(1,bibliographicRecordId);
 
     }
 
