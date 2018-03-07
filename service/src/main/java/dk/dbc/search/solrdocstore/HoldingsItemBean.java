@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ public class HoldingsItemBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @Timed
     public Response setHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);

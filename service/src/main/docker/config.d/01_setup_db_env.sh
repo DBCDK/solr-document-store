@@ -1,2 +1,2 @@
-add_jdbc_resource_from_url "jdbc/solr-doc-store" ${DOCSTORE_POSTGRES_URL}
-add_jdbc_resource_from_url "jdbc/solr-doc-store-nt" ${DOCSTORE_POSTGRES_URL} 'non-transactional-connections="true"'
+add_jdbc_resource_from_url "jdbc/solr-doc-store" ${DOCSTORE_POSTGRES_URL} max-pool-size=${MAX_POOL_SIZE}
+add_jdbc_resource_from_url "jdbc/solr-doc-store-nt" ${DOCSTORE_POSTGRES_URL} extra='non-transactional-connections="true"' max-pool-size=3 steady-pool-size=0

@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.openagency.libraryrules;
 
 import dk.dbc.search.solrdocstore.LibraryConfig;
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -13,6 +14,7 @@ public class LibraryRulesProxy implements Serializable{
 
     private static String SCHOOLLIBRARY="Skolebibliotek";
 
+    @Timed
     public LibraryConfig.LibraryType fetchLibraryTypeFor(int agency){
 
         LibraryRules libraryRules = oaclient.fetchLibraryRuleFor(agency);

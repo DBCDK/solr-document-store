@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -76,6 +77,14 @@ public class DocProducerTest {
         }
         System.out.println("OK");
 //        fail("OK");
+    }
+
+    @Test
+    public void trimTexts() throws Exception {
+        JsonNode tree = OBJECT_MAPPER.readTree("{'a':['123','1234567890'],'b':['1234567890','567']}".replaceAll("'", "\""));
+        DocProducer.trimIndexFieldsLength((ObjectNode) tree, 5);
+        String text = OBJECT_MAPPER.writeValueAsString(tree);
+        assertEquals("{'a':['123','12345'],'b':['12345','567']}".replaceAll("'", "\""), text);
     }
 
 }

@@ -23,11 +23,11 @@
     </properties>
 
     <modules>
-        <module>service</module>
-        <module>gui</module>
-        <module>corepo-worker</module>
-    <module>solr-updater</module>
         <module>queue</module>
+        <module>gui</module>
+        <module>service</module>
+        <module>corepo-worker</module>
+        <module>solr-updater</module>
     </modules>
 
     <groupId>dk.dbc</groupId>

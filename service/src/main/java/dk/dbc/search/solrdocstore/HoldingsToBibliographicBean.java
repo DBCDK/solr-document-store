@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class HoldingsToBibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    @Timed
     public Set<AgencyItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
         LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
@@ -45,6 +47,7 @@ public class HoldingsToBibliographicBean {
     }
 
 
+    @Timed
     public Set<AgencyItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
         Map<Integer,LibraryConfig.LibraryType> map = new HashMap<>();
         Set<AgencyItemKey> keysUpdated = EnqueueAdapter.makeSet();
@@ -74,6 +77,7 @@ public class HoldingsToBibliographicBean {
         return t;
     }
 
+    @Timed
     public List<HoldingsToBibliographicEntity> getRelatedHoldingsToBibliographic(int bibliographicAgencyId, String bibliographicRecordId){
         return entityManager.createQuery(
                 "SELECT h FROM HoldingsToBibliographicEntity h WHERE " +

@@ -53,7 +53,7 @@ import static org.junit.Assert.*;
  *
  * @author DBC {@literal <dbc.dk>}
  */
-@Ignore
+//@Ignore
 public class DocProducerIT {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducerIT.class);
@@ -79,73 +79,30 @@ public class DocProducerIT {
     @BeforeClass
     public static void setUpClass() throws Exception {
 
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        solrPort = System.getProperty("solr.port", "8983");
+        solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
 
         pg = new PostgresITDataSource("solrdocstore");
         dataSource = pg.getDataSource();
 
-        List<Future> inits = Arrays.asList(
-                executor.submit(() -> initPayara()),
-                executor.submit(() -> initSolr()));
-
         client = ClientBuilder.newClient();
 
+        initPayara();
+
         config = new Config("queues=test",
-                            "solrDocStoreUrl=NONE",
-                            "solrUrl=NONE") {
-            // values are not ready at object construnction time
-            @Override
-            public String getSolrDocStoreUrl() {
-                System.out.println("solrDocStoreUrl = " + solrDocStoreUrl);
-                return solrDocStoreUrl;
-            }
+                            "solrDocStoreUrl=" + solrDocStoreUrl,
+                            "solrUrl=" + solrUrl);
 
-            @Override
-            public String getSolrUrl() {
-                System.out.println("solrUrl = " + solrUrl);
-                return solrUrl;
-            }
-        };
-
-        inits.stream().forEach((f) -> {
-            try {
-                f.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        executor.shutdown();
-        executor.awaitTermination(5, TimeUnit.SECONDS);
     }
 
-    private static void initPayara() throws RuntimeException {
-        try {
-            payaraPort = System.getProperty("glassfish.port", "18080");
-            solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
-            payara = Payara.getInstance(payaraPort)
-                    .cmd("set-log-level dk.dbc=FINE")
-                    .withDataSource("jdbc/solr-doc-store", pg.getUrl())
-                    .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
-                    .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private static void initSolr() throws RuntimeException {
-        try {
-            solrPort = System.getProperty("solr.port", "8983");
-            solrPort = "8983";
-//            solr = new Solr(solrPort, DocProducerIT.class.getResource("/solr"), tempSolr);
-            solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-//        solr.stop();
+    private static void initPayara() throws Exception {
+        payaraPort = System.getProperty("glassfish.port", "18080");
+        solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
+        payara = Payara.getInstance(payaraPort)
+                .cmd("set-log-level dk.dbc=FINE")
+                .withDataSource("jdbc/solr-doc-store", pg.getUrl())
+                .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
+                .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
     }
 
     @Before

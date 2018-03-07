@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.ActivationConfigProperty;
@@ -68,15 +70,19 @@ import org.slf4j.LoggerFactory;
 
 @MessageDriven(
         activationConfig = {
-            @ActivationConfigProperty(propertyName = "endpointExceptionRedeliveryAttempts", propertyValue = "5"),
-            @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-            @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue"),
+            @ActivationConfigProperty(propertyName = "endpointExceptionRedeliveryAttempts", propertyValue = "5")
+            ,
+            @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue")
+            ,
+            @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/pidQueue")
+            ,
             @ActivationConfigProperty(propertyName = "connectionFactoryLookup", propertyValue = "jms/indexerConnectionFactory")
         })
 public class SolrWorker implements MessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(SolrWorker.class);
 
+    private static final Pattern ID_PATTERN = Pattern.compile("^\\d+-\\w+:(.*)-(\\d+)-\\w+$");
     private static final ObjectMapper O = new ObjectMapper();
 
     @EJB
@@ -200,13 +206,13 @@ public class SolrWorker implements MessageListener {
      *                   bibliographicrecordid)
      */
     private void makeMetadata(ObjectNode record, String id, boolean deleted, String unit, String work, String trackingId, Set<String> superceds) {
-        String idAfterColon = id.substring(id.indexOf(':') + 1);
-        String[] idPart = idAfterColon.split("-");
-        if (idPart.length != 3) {
-            throw new RuntimeException("invalid id: " + id);
+        Matcher matcher = ID_PATTERN.matcher(id);
+        if(!matcher.matches()) {
+                throw new RuntimeException("invalid id: " + id);
         }
-        String bibliographicRecordId = idPart[0];
-        String agencyId = idPart[1];
+
+        String bibliographicRecordId = matcher.group(1);
+        String agencyId = matcher.group(2);
         record.put("bibliographicRecordId", bibliographicRecordId);
         record.put("agencyId", agencyId);
         record.put("deleted", deleted);
