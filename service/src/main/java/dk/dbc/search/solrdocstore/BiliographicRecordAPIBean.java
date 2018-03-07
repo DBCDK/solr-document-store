@@ -125,13 +125,15 @@ public class BiliographicRecordAPIBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getBibliographicRecord(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
-            @PathParam("bibliographicAgencyId") String bibliographicAgencyId){
-        AgencyItemKey key = new AgencyItemKey(Integer.parseInt(bibliographicAgencyId),bibliographicRecordId);
-        BibliographicEntity result = entityManager.find(BibliographicEntity.class,key);
-        if(result == null){
-            return Response.status(404).build();
-        }
-        return Response.ok(entityManager.find(BibliographicEntity.class,key)).build();
+            @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
+        Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
+                "FROM bibliographicsolrkeys b " +
+                "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
+                "WHERE (b.bibliographicrecordid=?1 AND b.agencyid=?2)","BibliographicEntityWithSupersedeId")
+                .setParameter(1,bibliographicRecordId)
+                .setParameter(2,bibliographicAgencyId);
+        Object[] record = (Object[])frontendQuery.getSingleResult();
+        return Response.ok(new BibliographicFrontendEntity((BibliographicEntity)record[0],(String)record[1])).build();
     }
 
     /**

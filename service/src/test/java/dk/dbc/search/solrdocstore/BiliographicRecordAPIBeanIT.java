@@ -85,11 +85,12 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
 
     @Test
     public void testGetBibliographicRecord(){
-       Response result = bean.getBibliographicRecord("page-order", "103862");
-       BibliographicEntity res = (BibliographicEntity)result.getEntity();
+       Response result = bean.getBibliographicRecord("page-order", 103862);
+       BibliographicFrontendEntity res = (BibliographicFrontendEntity)result.getEntity();
        Map<String,List<String>> map = new HashMap<>();
        map.put("rec.repositoryId", Collections.singletonList("p-o"));
-       Assert.assertEquals(res,new BibliographicEntity(103862,"page-order","work:2","unit:6","producer:3",false,map,"track:8"));
+       BibliographicEntity b = new BibliographicEntity(103862,"page-order","work:2","unit:6","producer:3",false,map,"track:8");
+       Assert.assertEquals(res,new BibliographicFrontendEntity(b,"0639423"));
     }
 
     @Test
