@@ -61,6 +61,31 @@ function* deleteQueueRules(action) {
   }
 }
 
+function* enqueueAllJob(action) {
+  try {
+    const uuid = yield call(
+      api.enqueueAllJob,
+      action.queue,
+      action.includeDeleted
+    );
+  } catch (e) {
+    yield put(asyncJobsActions.asyncJobError(e));
+  }
+}
+
+function* errorsWithPattern(action) {
+  try {
+    const uuid = yield call(
+      api.errorActionWithPattern,
+      action.path,
+      action.pattern,
+      action.consumer
+    );
+  } catch (e) {
+    yield put(asyncJobsActions.asyncJobError(e));
+  }
+}
+
 export function* watchPullQueueRules() {
   yield takeLatest(queueActions.PULL_QUEUE_RULES, fetchQueueRules);
 }
@@ -81,12 +106,25 @@ export function* watchRequestFullLog() {
   yield takeEvery(asyncJobsActions.REQUEST_FULL_LOG, fetchFullLog);
 }
 
+export function* watchEnqueueAllJob() {
+  yield takeEvery(asyncJobsActions.ENQUEUE_ALL_JOB, enqueueAllJob);
+}
+
+export function* watchErrorsWithPattern() {
+  yield takeEvery(
+    asyncJobsActions.ASYNC_JOB_ERROR_WITH_PATTERN,
+    errorsWithPattern
+  );
+}
+
 export default function* root() {
   yield all([
     fork(watchPullQueueRules),
     fork(watchCreateQueueRule),
     fork(watchDeleteQueueRule),
     fork(watchRequestAsyncJobs),
-    fork(watchRequestFullLog)
+    fork(watchRequestFullLog),
+    fork(watchEnqueueAllJob),
+    fork(watchErrorsWithPattern)
   ]);
 }

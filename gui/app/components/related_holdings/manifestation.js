@@ -38,7 +38,7 @@ class Manifestation extends React.Component {
             </div>
             <div>
               <p>
-                <b>Status:</b> {status}
+                <b>Status:</b> {status.join(", ")}
               </p>
             </div>
           </div>

@@ -26,13 +26,13 @@ import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import dk.dbc.search.solrdocstore.QueueAsyncJob;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +48,9 @@ public class AsyncJobControl {
 
     @Inject
     AsyncJobRunner runner;
+
+    @Inject
+    QueueAsyncJob queueAsyncJob;
 
     @GET
     @Produces({MediaType.TEXT_PLAIN})
@@ -74,6 +77,67 @@ public class AsyncJobControl {
             }
 
         });
+        return Response.ok(id).build();
+    }
+
+    /**
+     * Run the "queue everything" async job
+     *
+     * @param queue      Name of consumer
+     * @param deletedTo even the deleted
+     * @return HTTP response with the UUID of the job
+     * */
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    @Path("queue-all/{queue}/{deletedTo}")
+    public Response queueAll(@PathParam("queue") String queue,@PathParam("deletedTo") boolean deletedTo){
+        String id = queueAsyncJob.runQueueAllManifestationsFor(queue,deletedTo);
+        return Response.ok(id).build();
+    }
+
+    /**
+     * Run the "list errors" async job
+     *
+     * @param consumer consumer that failed (can be null or empty string)
+     * @param pattern  diag pattern with * and ?
+     * @return HTTP response with the UUID of the job
+     * */
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    @Path("list-errors/{pattern}")
+    public Response listErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
+        log.info("Pattern: {} - Consumer: {}",pattern,consumer);
+        String id = queueAsyncJob.runQueueErrorListJobs(consumer,pattern);
+        return Response.ok(id).build();
+    }
+
+    /**
+     * Run the "delete errors" async job
+     *
+     * @param consumer consumer that failed (can be null or empty string)
+     * @param pattern  diag pattern with * and ?
+     * @return HTTP response with the UUID of the job
+     * */
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    @Path("delete-errors/{pattern}")
+    public Response deleteErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
+        String id = queueAsyncJob.runQueueErrorDeleteJobs(consumer,pattern);
+        return Response.ok(id).build();
+    }
+
+    /**
+     * Run the "requeue errors" async job
+     *
+     * @param consumer consumer that failed (can be null or empty string)
+     * @param pattern  diag pattern with * and ?
+     * @return HTTP response with the UUID of the job
+     * */
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    @Path("requeue-errors/{pattern}")
+    public Response requeueErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
+        String id = queueAsyncJob.runQueueErrorRequeueJobs(consumer,pattern);
         return Response.ok(id).build();
     }
 

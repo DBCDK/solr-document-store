@@ -1,6 +1,7 @@
 import React from "react";
 import QueueRules from "./queue_rules";
 import AsyncJobMonitor from "./async_job_monitor";
+import EnqueueAsyncJobCreator from "./enqueue-async-job-creator";
 
 class QueueAdminGUI extends React.PureComponent {
   render() {
@@ -15,6 +16,7 @@ class QueueAdminGUI extends React.PureComponent {
           <div className="row">
             <div className="col-6">
               <QueueRules />
+              <EnqueueAsyncJobCreator />
             </div>
             <div className="col-6">
               <AsyncJobMonitor />

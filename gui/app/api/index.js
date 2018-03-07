@@ -1,7 +1,7 @@
 export const SEARCH_BIB_ID = "searchBibId";
 export const SEARCH_REPO_ID = "searchRepoId";
 
-let parse = res => {
+const parse = res => {
   if (res.status === 200) return res.json();
   else throw new Error("Error with http status code: " + res.status);
 };
@@ -65,5 +65,16 @@ export default {
   },
   fetchFullLog(uuid) {
     return fetch(`api/log/${uuid}`).then(res => res.body);
+  },
+  enqueueAllJob(queue, includeDeleted) {
+    return fetch(
+      `api/async-job/queue-all/${encodeURI(queue)}/${includeDeleted}`
+    );
+  },
+  errorActionWithPattern(path, pattern, consumer) {
+    return fetch(
+      `api/async-job/${path}/${encodeURI(pattern)}` +
+        (consumer ? "?consumer=" + encodeURIComponent(consumer) : "")
+    );
   }
 };

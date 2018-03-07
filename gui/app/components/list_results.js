@@ -24,6 +24,10 @@ const columns = [
     Header: "Deleted",
     accessor: "deleted",
     Cell: props => "" + props.value
+  },
+  {
+    Header: "Supersede ID",
+    accessor: "supersedeId"
   }
 ];
 

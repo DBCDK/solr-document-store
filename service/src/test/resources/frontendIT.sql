@@ -15,3 +15,5 @@ VALUES (706244, 'page-order', TRUE, '{"rec.repositoryId": ["p-o"]}' :: JSONB, 'p
 INSERT INTO bibliographicSolrKeys (AGENCYID, BIBLIOGRAPHICRECORDID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
 VALUES (808077, 'page-order', FALSE, '{"rec.repositoryId": ["p-o"]}' :: JSONB, 'producer:8', 'track:1', 'unit:7', 'work:7');
 
+INSERT INTO bibliographictobibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGRAPHICRECORDID)
+VALUES ('page-order','0639423');

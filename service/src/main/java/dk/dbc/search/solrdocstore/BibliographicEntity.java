@@ -2,12 +2,15 @@ package dk.dbc.search.solrdocstore;
 
 import java.io.Serializable;
 import javax.persistence.Basic;
+import javax.persistence.ColumnResult;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +24,9 @@ import static javax.persistence.FetchType.LAZY;
 @Entity
 @Table(name = "bibliographicSolrKeys")
 @NamedEntityGraph(name = "bibPostWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
+@SqlResultSetMapping(name="BibliographicEntityWithSupersedeId",entities = {
+        @EntityResult(entityClass = BibliographicEntity.class),
+},columns = {@ColumnResult(name="supersede_id")})
 @IdClass(AgencyItemKey.class)
 public class BibliographicEntity implements Serializable {
     public static final List<String> sortableColumns = Arrays.asList("agencyId","bibliographicRecordId","producerVersion","deleted","trackingId");
