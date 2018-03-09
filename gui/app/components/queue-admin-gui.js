@@ -11,6 +11,9 @@ class QueueAdminGUI extends React.PureComponent {
           <h3 className="navbar-brand text-light">
             solr-document-store Kø-værktøj
           </h3>
+          <a className="nav-link text-light" href="/">
+            Søge værktøj
+          </a>
         </nav>
         <div className="container-full p-5">
           <div className="row">

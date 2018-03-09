@@ -90,6 +90,9 @@ class SolrDocstoreGUI extends React.PureComponent {
             solr-document-store Søgeværktøj
           </h3>
           <h4 className="text-light mx-4">{this.state.systemName}</h4>
+          <a className="nav-link text-light" href="/queue-admin.html">
+            Kø administrator
+          </a>
         </nav>
         <div className="container-full p-5">
           <div className="row">
