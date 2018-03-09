@@ -27,7 +27,7 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent eventObject) {
-        sessionHandler.appendLog(uuid, eventObject.getMessage());
+        sessionHandler.appendLog(uuid, eventObject.getFormattedMessage());
     }
 
     @Override
