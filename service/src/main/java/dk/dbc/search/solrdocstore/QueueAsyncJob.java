@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.function.Supplier;
 import javax.annotation.Resource;
 import javax.ejb.Lock;
@@ -206,11 +207,14 @@ public class QueueAsyncJob {
                     boolean shouldCommit = false;
                     int counter = 0;
 
-                    EnqueueService<QueueJob> enqueueService = enqueueService(connection, consumer);
+                    HashMap<String, EnqueueService<QueueJob>> enqueueServices = new HashMap<>();
                     try (ResultSet resultSet = stmt.executeQuery()) {
                         while (!isCanceled.get() && resultSet.next()) {
                             ErrorEntry err = new ErrorEntry(resultSet);
                             log.info("{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
+                            EnqueueService<QueueJob> enqueueService =
+                                    enqueueServices.computeIfAbsent(err.getJobConsumer(),
+                                                                    c -> enqueueService(connection, c));
                             enqueueService.enqueue(err.toQueueJob());
                             shouldCommit = true;
                             del.setObject(1, err.getCtid());
@@ -230,7 +234,7 @@ public class QueueAsyncJob {
         };
     }
 
-    public  static class ErrorEntry {
+    public static class ErrorEntry {
 
         private final int agencyId;
         private final String bibliographicRecordId;
@@ -286,10 +290,10 @@ public class QueueAsyncJob {
     }
 
     private static PreparedStatement makeErrorQuery(Connection connection, String consumer, String like) throws SQLException {
-        StringBuilder query = new StringBuilder("SELECT agencyId, bibliographicRecordId, queued, failedat, consumer, diag , ctid FROM queue_error WHERE diag LIKE %");
-        boolean hasConsumer = consumer == null || consumer.isEmpty();
-        if (!hasConsumer) {
-            query.append(" AND consumer = %s");
+        StringBuilder query = new StringBuilder("SELECT agencyId, bibliographicRecordId, queued, failedat, consumer, diag , ctid FROM queue_error WHERE diag LIKE ?");
+        boolean hasConsumer = !( consumer == null || consumer.isEmpty() );
+        if (hasConsumer) {
+            query.append(" AND consumer = ?");
         }
         query.append(" ORDER BY queued");
         PreparedStatement stmt = connection.prepareStatement(query.toString());
