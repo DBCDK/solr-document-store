@@ -38,7 +38,7 @@ public class OpenAgencyClient implements Serializable {
         try {
             String URI = config.getOaURL() + "/?action=libraryRules&outputType=json&agencyId=";
             client = ClientBuilder.newClient();
-            WebTarget target = client.target(URI + agency);
+            WebTarget target = client.target(URI + String.format("%06d", agency));
             return target.request(MediaType.APPLICATION_JSON).get(String.class);
         } catch (Exception e) {
             throw new LibraryRuleException("Failed to connect to Open Agency", e);
