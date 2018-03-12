@@ -38,6 +38,15 @@ public class JSONParserTest {
     }
 
     @Test
+    public void testParseRealInputWithoutAgencyType(){
+        LibraryRules result = JSONParser.getLibraryRules(correctInputWithoutAgencyType);
+        Assert.assertNotNull(result);
+        Assert.assertEquals("",result.agencyType);
+        Assert.assertNotNull(result.canUseEnrichments);
+        Assert.assertTrue(result.canUseEnrichments);
+    }
+
+    @Test
     public void testParseTrucatedInput() {
         try {
             LibraryRules result = JSONParser.getLibraryRules(truncatedInput);
@@ -57,6 +66,52 @@ public class JSONParserTest {
                     "                }," +
                     "                \"agencyType\": {" +
                     "                    \"$\": \"Skolebibliotek\"," +
+                    "                    \"@\": \"oa\"" +
+                    "                }," +
+                    "                \"libraryRule\": [" +
+                    "                    {" +
+                    "                        \"name\": {" +
+                    "                            \"$\": \"create_enrichments\"," +
+                    "                            \"@\": \"oa\"" +
+                    "                        }," +
+                    "                        \"bool\": {" +
+                    "                            \"$\": \"1\"," +
+                    "                            \"@\": \"oa\"" +
+                    "                        }," +
+                    "                        \"@\": \"oa\"" +
+                    "                    }," +
+                    "                    {" +
+                    "                        \"name\": {" +
+                    "                            \"$\": \"use_enrichments\"," +
+                    "                            \"@\": \"oa\"" +
+                    "                        }," +
+                    "                        \"bool\": {" +
+                    "                            \"$\": \"1\"," +
+                    "                            \"@\": \"oa\"" +
+                    "                        }," +
+                    "                        \"@\": \"oa\"" +
+                    "                    }" +
+                    "                ]," +
+                    "                \"@\": \"oa\"" +
+                    "            }" +
+                    "        ]," +
+                    "        \"@\": \"oa\"" +
+                    "    }," +
+                    "    \"@namespaces\": {" +
+                    "        \"oa\": \"http://oss.dbc.dk/ns/openagency\"" +
+                    "    }" +
+                    "}";
+
+    String correctInputWithoutAgencyType =
+            "{" +
+                    "    \"libraryRulesResponse\": {" +
+                    "        \"libraryRules\": [" +
+                    "            {" +
+                    "                \"agencyId\": {" +
+                    "                    \"$\": \"133020\"," +
+                    "                    \"@\": \"oa\"" +
+                    "                }," +
+                    "                \"agencyType\": {" +
                     "                    \"@\": \"oa\"" +
                     "                }," +
                     "                \"libraryRule\": [" +
