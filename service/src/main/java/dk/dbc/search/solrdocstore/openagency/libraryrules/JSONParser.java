@@ -16,7 +16,7 @@ public class JSONParser {
         LibraryRules result = new LibraryRules();
         JsonNode productNode = parseJSON(jsonInput);
         JsonNode rootElement = getRootElement(productNode);
-        result.agencyType = getAsText(rootElement,"agencyType");
+        result.agencyType = getAsText(rootElement, "agencyType", "");
         result.canUseEnrichments = findUseEnrichments(rootElement);
         return result;
     }
@@ -45,6 +45,15 @@ public class JSONParser {
         throw new LibraryRuleException("Failed to find use_enrichments in libraryRule elements");
     }
 
+    protected static String getAsText(JsonNode e, String fieldName, String def) {
+        JsonNode jsonNode = e.get(fieldName);
+        if(jsonNode == null)
+            return def;
+        jsonNode = jsonNode.get("$");
+        if(jsonNode == null)
+            return def;
+        return jsonNode.asText(def);
+    }
     protected static String getAsText(JsonNode e, String fieldName) {
         JsonNode jsonNode = e.get(fieldName);
         failIfNull(jsonNode,fieldName);
