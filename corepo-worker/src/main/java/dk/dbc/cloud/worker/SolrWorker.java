@@ -214,7 +214,7 @@ public class SolrWorker implements MessageListener {
         String bibliographicRecordId = matcher.group(1);
         String agencyId = matcher.group(2);
         record.put("bibliographicRecordId", bibliographicRecordId);
-        record.put("agencyId", agencyId);
+        record.put("agencyId", Integer.parseInt(agencyId, 10));
         record.put("deleted", deleted);
         if (unit != null) {
             record.put("unit", unit);
