@@ -12,9 +12,13 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 public class OpenAgencyClient implements Serializable {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenAgencyClient.class);
 
     @Inject
     Config config;
@@ -36,9 +40,11 @@ public class OpenAgencyClient implements Serializable {
         Client client = null;
 
         try {
-            String URI = config.getOaURL() + "/?action=libraryRules&outputType=json&agencyId=";
+
+            String uri = String.format("%s/?action=libraryRules&outputType=json&agencyId=%06d", config.getOaURL(), agency);
+            log.debug("request uri = {}", uri);
             client = ClientBuilder.newClient();
-            WebTarget target = client.target(URI + String.format("%06d", agency));
+            WebTarget target = client.target(uri);
             return target.request(MediaType.APPLICATION_JSON).get(String.class);
         } catch (Exception e) {
             throw new LibraryRuleException("Failed to connect to Open Agency", e);
