@@ -3,5 +3,5 @@
     expression:
         ?:
             bibliographicRecordId: "23645564"
-            agencyId: "870970"
+            agencyId: 870970
             deleted: true

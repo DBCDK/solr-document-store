@@ -3,7 +3,7 @@
     expression:
         ?:
             bibliographicRecordId: "23645564"
-            agencyId: "870970"
+            agencyId: 870970
             deleted: false
             indexKeys:
                    id: "870970-basis:23645564-870970-basis"
