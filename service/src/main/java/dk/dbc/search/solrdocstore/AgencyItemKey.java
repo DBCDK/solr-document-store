@@ -20,16 +20,6 @@ public class AgencyItemKey implements Serializable {
         this.bibliographicRecordId = bibliographicRecordId;
     }
 
-    public AgencyItemKey withAgencyId(int agencyId) {
-        this.agencyId = agencyId;
-        return this;
-    }
-
-    public AgencyItemKey withBibliographicRecordId(String bibliographicRecordId) {
-        this.bibliographicRecordId = bibliographicRecordId;
-        return this;
-    }
-
     @Override
     public int hashCode() {
         int hash = 3;

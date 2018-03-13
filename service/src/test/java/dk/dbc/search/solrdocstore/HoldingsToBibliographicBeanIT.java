@@ -257,7 +257,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
                     new HoldingsToBibliographicKey(agencyId, bibliographicRecordId));
     }
     private void deleteBibRecord(int agencyId, String bibliographicRecordId){
-        BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyItemKey().withAgencyId(agencyId).withBibliographicRecordId(bibliographicRecordId));
+        BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
         e.setDeleted(true);
         em.merge(e);
     }

@@ -31,7 +31,7 @@ public class HoldingsItemEntityIT extends JpaSolrDocStoreIntegrationTester {
             em.persist(new HoldingsItemEntity(200, "1234", "v0.1", Arrays.asList(doc1, doc2), ""));
         });
 
-        Object key = new AgencyItemKey().withAgencyId(200).withBibliographicRecordId("1234");
+        Object key = new AgencyItemKey(200, "1234");
         HoldingsItemEntity be2 = em.find(HoldingsItemEntity.class, key);
 
         assertThat(be2.getAgencyId(), is(200));
@@ -44,7 +44,7 @@ public class HoldingsItemEntityIT extends JpaSolrDocStoreIntegrationTester {
         executeScriptResource("/entityTestData.sql");
         EntityManager em = env().getEntityManager();
 
-        AgencyItemKey key = new AgencyItemKey().withAgencyId(300).withBibliographicRecordId("4321");
+        AgencyItemKey key = new AgencyItemKey(300, "4321");
         HoldingsItemEntity be = env().getPersistenceContext().run(() -> em.find(HoldingsItemEntity.class, key));
 
         assertThat(be.getAgencyId(), is(300));
