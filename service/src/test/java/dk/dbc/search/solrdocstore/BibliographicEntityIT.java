@@ -24,7 +24,7 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
             em.persist(be);
         });
 
-        AgencyItemKey key = new AgencyItemKey().withAgencyId(200).withBibliographicRecordId("1234");
+        AgencyItemKey key = new AgencyItemKey(200, "1234");
         BibliographicEntity be2 = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicEntity.class, key));
 
@@ -37,7 +37,7 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         executeScriptResource("/entityTestData.sql");
         EntityManager em = env().getEntityManager();
 
-        AgencyItemKey key = new AgencyItemKey().withAgencyId(300).withBibliographicRecordId("4321");
+        AgencyItemKey key = new AgencyItemKey(300, "4321");
         BibliographicEntity be = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicEntity.class, key));
 
