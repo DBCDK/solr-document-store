@@ -53,7 +53,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     }
 
-    @Test
+    @Test(timeout = 1000L)
     public void testEnqueueManifestationAddsToQueueTable() throws Exception {
         System.out.println("testEnqueueManifestationAddsToQueueTable");
 
@@ -70,15 +70,16 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             bean.entityManager = em;
 
             clearQueue(em);
-            EnqueueService<AgencyItemKey> enqeueService = bean.getManifestationEnqueueService();
+            EnqueueService<AgencyClassifierItemKey> enqeueService = bean.getManifestationEnqueueService();
 
             try {
                 System.out.println("* no commitWithin");
-                enqeueService.enqueue(new AgencyItemKey(870970, "12345678"));
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "12345678"));
                 System.out.println("* commitWithin");
-                enqeueService.enqueue(new AgencyItemKey(870970, "87654321"), 100);
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "87654321"), 100);
                 System.out.println("* null commitWithin");
-                enqeueService.enqueue(new AgencyItemKey(870970, "abc"), null);
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "abc"), null);
+                System.out.println("* queueing done");
             } catch (SQLException ex) {
                 log.error("Exception: " + ex.getMessage());
                 log.debug("Exception:", ex);
@@ -103,6 +104,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void checkConfig(){
+        System.out.println("checkConfig");
         assertEquals(LibraryConfig.LibraryType.NonFBS, bibliographicBean.libraryConfig.getLibraryType(nonfbsAgency));
         assertEquals(LibraryConfig.LibraryType.FBS, bibliographicBean.libraryConfig.getLibraryType(fbsAgency));
         assertEquals(LibraryConfig.LibraryType.FBSSchool, bibliographicBean.libraryConfig.getLibraryType(schoolAgency));
@@ -111,6 +113,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void singleRecords(){
+        System.out.println("singleRecords");
         /*
          * Single records
          * --------------
@@ -153,6 +156,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void localAndCommonBibAndHoldings(){
+        System.out.println("localAndCommonBibAndHoldings");
         /*
          * Local bib and holdings
          * ----------------------
@@ -195,6 +199,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void commonAndSchoolRecords(){
+        System.out.println("commonAndSchoolRecords");
         /*
          * Common & School records
          * -----------------------
@@ -239,6 +244,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void holdingsUpdate() {
+        System.out.println("holdingsUpdate");
         /*
          * Add Bib( 870970 )
          * Add Holding ( FBS )
@@ -266,6 +272,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void superseeds(){
+        System.out.println("superseeds");
         /*
          * Superseeds
          * ----------

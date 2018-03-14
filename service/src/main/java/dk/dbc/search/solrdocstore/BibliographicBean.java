@@ -66,15 +66,15 @@ public class BibliographicBean {
     }
 
      void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
-        Set<AgencyItemKey> affectedKeys = new HashSet<>();
+        Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
-        affectedKeys.add( new AgencyItemKey(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId()));
+        affectedKeys.add( bibliographicEntity.asAgencyClassifierItemKey());
         if (dbbe == null) {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
-            Set<AgencyItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
+            Set<AgencyClassifierItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
             affectedKeys.addAll(updatedHoldings);
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
@@ -88,7 +88,7 @@ public class BibliographicBean {
                         h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
                         h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
-                    Set<AgencyItemKey> reattachedKeys =
+                    Set<AgencyClassifierItemKey> reattachedKeys =
                             h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId());
                     affectedKeys.addAll(reattachedKeys);
                 }
@@ -100,7 +100,7 @@ public class BibliographicBean {
 
         Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
         if (supersededRecordIds.size()>0){
-            Set<AgencyItemKey> recalculatedKeys =
+            Set<AgencyClassifierItemKey> recalculatedKeys =
                 h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(),supersededRecordIds);
             affectedKeys.addAll(recalculatedKeys);
         }
@@ -111,7 +111,7 @@ public class BibliographicBean {
     /*
      *
      */
-    private Set<AgencyItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
+    private Set<AgencyClassifierItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
         if (libraryConfig.getRecordType(agency) == SingleRecord) {
             return updateHoldingsSingleRecord(agency, recordId);
         } else {
@@ -119,9 +119,9 @@ public class BibliographicBean {
         }
     }
 
-    private Set<AgencyItemKey> updateHoldingsForCommonRecords(int agency, String recordId) {
+    private Set<AgencyClassifierItemKey> updateHoldingsForCommonRecords(int agency, String recordId) {
         TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
-        Set<AgencyItemKey> affectedKeys = new HashSet<>();
+        Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
         query.setParameter("bibId", recordId);
 
         TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
@@ -152,18 +152,17 @@ public class BibliographicBean {
         return affectedKeys;
     }
 
-        private Set<AgencyItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
+    private Set<AgencyClassifierItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
         if (libraryConfig.getLibraryType(agency) == LibraryConfig.LibraryType.NonFBS) {
             TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
             query.setParameter("agency", agency);
             query.setParameter("bibId", recordId);
 
             if (query.getSingleResult() > 0) {
-                addHoldingsToBibliographic(agency, recordId, agency);
-                return EnqueueAdapter.setOfOne(agency, recordId);
+                return addHoldingsToBibliographic(agency, recordId, agency);
             }
         } else {
-            HashSet<AgencyItemKey> ret = new HashSet<>();
+            HashSet<AgencyClassifierItemKey> ret = new HashSet<>();
 
             TypedQuery<String> superceeded = entityManager.createQuery(
                     "SELECT b.deadBibliographicRecordId FROM BibliographicToBibliographicEntity b" +
@@ -192,11 +191,11 @@ public class BibliographicBean {
         return Collections.emptySet();
     }
 
-    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
+    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
         return addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId);
     }
 
-    private Set<AgencyItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency, String bibliographicRecordId) {
+    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency, String bibliographicRecordId) {
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                 holdingsAgency, recordId, agency, bibliographicRecordId
         );

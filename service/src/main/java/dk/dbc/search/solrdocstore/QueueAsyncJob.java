@@ -62,8 +62,8 @@ public class QueueAsyncJob {
     public String runQueueAllManifestationsFor(String queue, boolean deletedToo) {
         return runner.start(queueAllManifestationsFor(queue, deletedToo));
     }
-    private static final String ALL_MANIFESTATIONS = "SELECT agencyId, bibliographicRecordId FROM bibliographicsolrkeys";
-    private static final String ALL_MANIFESTATIONS_NOT_DELETED = "SELECT agencyId, bibliographicRecordId FROM bibliographicsolrkeys WHERE NOT deleted";
+    private static final String ALL_MANIFESTATIONS = "SELECT agencyId, classifier, bibliographicRecordId FROM bibliographicsolrkeys";
+    private static final String ALL_MANIFESTATIONS_NOT_DELETED = "SELECT agencyId, classifier, bibliographicRecordId FROM bibliographicsolrkeys WHERE NOT deleted";
 
     AsyncJob queueAllManifestationsFor(String queue, boolean deletedToo) {
         return new AsyncJob("Queue-all-for-" + queue) {
@@ -82,8 +82,9 @@ public class QueueAsyncJob {
                         while (resultSet.next() && !isCanceled.get()) {
                             int i = 0;
                             int agencyId = resultSet.getInt(++i);
+                            String classifier = resultSet.getString(++i);
                             String bibliographicRecordId = resultSet.getString(++i);
-                            enqueueService.enqueue(new QueueJob(agencyId, bibliographicRecordId));
+                            enqueueService.enqueue(new QueueJob(agencyId, classifier, bibliographicRecordId));
                             shouldCommit = true;
                             if (++counter % 2500 == 0) {
                                 log.info("Committet: {}", counter);
@@ -237,6 +238,7 @@ public class QueueAsyncJob {
     public static class ErrorEntry {
 
         private final int agencyId;
+        private final String classifier;
         private final String bibliographicRecordId;
         private final Instant queued;
         private final Instant failedAt;
@@ -247,6 +249,7 @@ public class QueueAsyncJob {
         public ErrorEntry(ResultSet resultSet) throws SQLException {
             int i = 0;
             agencyId = resultSet.getInt(++i);
+            classifier = resultSet.getString(++i);
             bibliographicRecordId = resultSet.getString(++i);
             queued = resultSet.getTimestamp(++i).toInstant();
             failedAt = resultSet.getTimestamp(++i).toInstant();
@@ -257,6 +260,10 @@ public class QueueAsyncJob {
 
         public int getAgencyId() {
             return agencyId;
+        }
+
+        public String getClassifier() {
+            return classifier;
         }
 
         public String getBibliographicRecordId() {
@@ -284,13 +291,13 @@ public class QueueAsyncJob {
         }
 
         public QueueJob toQueueJob() {
-            return new QueueJob(agencyId, bibliographicRecordId);
+            return new QueueJob(agencyId, classifier, bibliographicRecordId);
         }
 
     }
 
     private static PreparedStatement makeErrorQuery(Connection connection, String consumer, String like) throws SQLException {
-        StringBuilder query = new StringBuilder("SELECT agencyId, bibliographicRecordId, queued, failedat, consumer, diag , ctid FROM queue_error WHERE diag LIKE ?");
+        StringBuilder query = new StringBuilder("SELECT agencyId, classifier, bibliographicRecordId, queued, failedat, consumer, diag , ctid FROM queue_error WHERE diag LIKE ?");
         boolean hasConsumer = !( consumer == null || consumer.isEmpty() );
         if (hasConsumer) {
             query.append(" AND consumer = ?");

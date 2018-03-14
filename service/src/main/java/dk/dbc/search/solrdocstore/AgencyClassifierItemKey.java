@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
@@ -86,5 +87,9 @@ public class AgencyClassifierItemKey implements Serializable {
 
     public void setBibliographicRecordId(String bibliographicRecordId) {
         this.bibliographicRecordId = bibliographicRecordId;
+    }
+
+    public QueueJob toQueueJob(Integer commitWithin) {
+        return new QueueJob(agencyId, classifier, bibliographicRecordId, commitWithin);
     }
 }
