@@ -21,7 +21,7 @@ public class DatabaseMigratorIT extends JpaSolrDocStoreIntegrationTester {
                 System.out.println("version = " + version);
             }
         }
-        assertEquals(4, version);
+        assertEquals(5, version);
     }
 
 }

@@ -35,7 +35,7 @@ public class BiliographicRecordAPIBean {
     private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
 
     @Inject
-    BibliographicBean bibliographicBean;
+    BibliographicRetrieveBean brBean;
 
     @Inject
     HoldingsItemBean holdingsItemBean;
@@ -69,13 +69,13 @@ public class BiliographicRecordAPIBean {
         if (!BibliographicEntity.sortableColumns.contains(orderBy)){
             return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
         }
-        Query frontendQuery = bibliographicBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId,orderBy,desc);
+        Query frontendQuery = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId,orderBy,desc);
         List<Object[]> resultList = frontendQuery.setFirstResult((page-1)*pageSize).setMaxResults(pageSize).getResultList();
         List<BibliographicFrontendEntity> bibliographicFrontendEntityList = resultList.stream().map((record) -> {
             BibliographicEntity b = (BibliographicEntity)record[0];
             return new BibliographicFrontendEntity(b,(String)record[1]);
         }).collect(Collectors.toList());
-        long countResult = bibliographicBean.getBibliographicEntityCountById(bibliographicRecordId);
+        long countResult = brBean.getBibliographicEntityCountById(bibliographicRecordId);
         return Response.ok(new FrontendReturnListType<>(bibliographicFrontendEntityList,pageCount(countResult,pageSize)), MediaType.APPLICATION_JSON).build();
     }
 

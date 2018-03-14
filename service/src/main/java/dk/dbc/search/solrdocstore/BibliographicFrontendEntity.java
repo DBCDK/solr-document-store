@@ -4,7 +4,7 @@ public class BibliographicFrontendEntity extends BibliographicEntity {
     private String supersedeId;
 
     BibliographicFrontendEntity(BibliographicEntity b,String liveId){
-        super(b.getAgencyId(),b.getBibliographicRecordId(),b.getWork(),b.getUnit(),b.getProducerVersion(),b.isDeleted(),b.getIndexKeys(),b.getTrackingId());
+        super(b.getAgencyId(),b.getClassifier(),b.getBibliographicRecordId(),b.getWork(),b.getUnit(),b.getProducerVersion(),b.isDeleted(),b.getIndexKeys(),b.getTrackingId());
         supersedeId = liveId;
     }
 

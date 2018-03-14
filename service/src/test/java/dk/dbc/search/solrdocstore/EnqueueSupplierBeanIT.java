@@ -47,8 +47,10 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void onTest(){
         bibliographicBean = BeanFactoryUtil.createBibliographicBean( env() );
-        holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(bibliographicBean.entityManager, bibliographicBean.queue, bibliographicBean.h2bBean);
-        em = bibliographicBean.entityManager;
+        holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(env());
+
+        em = env().getEntityManager();
+
     }
 
     @Test
@@ -313,7 +315,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
     private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin){
         List<String> superseedList = superseed.orElse(Collections.emptyList());
-        BibliographicEntity e = new BibliographicEntity(agency, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agency, "clazzifier", bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         bibliographicBean.addBibliographicKeys(e,superseedList, commitWithin);
         return e;
     }

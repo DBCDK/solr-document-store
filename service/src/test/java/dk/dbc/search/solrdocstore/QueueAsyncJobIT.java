@@ -152,7 +152,7 @@ public class QueueAsyncJobIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private BibliographicEntity makeBiblEntity(int agencyId, String bibliographicRecordId) {
-        return new BibliographicEntity(agencyId, bibliographicRecordId, "work:-1", "unit:-1", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        return new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "work:-1", "unit:-1", "v0.1", false, Collections.EMPTY_MAP, "IT");
     }
 
 }

@@ -27,7 +27,7 @@ import static javax.persistence.FetchType.LAZY;
 @SqlResultSetMapping(name="BibliographicEntityWithSupersedeId",entities = {
         @EntityResult(entityClass = BibliographicEntity.class),
 },columns = {@ColumnResult(name="supersede_id")})
-@IdClass(AgencyItemKey.class)
+@IdClass(AgencyClassifierItemKey.class)
 public class BibliographicEntity implements Serializable {
     public static final List<String> sortableColumns = Arrays.asList("agencyId","bibliographicRecordId","producerVersion","deleted","trackingId");
 
@@ -38,6 +38,9 @@ public class BibliographicEntity implements Serializable {
 
     @Id
     private int agencyId;
+
+    @Id
+    private String classifier;
 
     @Id
     private String bibliographicRecordId;
@@ -55,8 +58,9 @@ public class BibliographicEntity implements Serializable {
 
     private String trackingId;
 
-    BibliographicEntity(int agencyId, String bibliographicRecordId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
+    BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
+        this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
         this.work = work;
         this.unit = unit;
@@ -70,6 +74,7 @@ public class BibliographicEntity implements Serializable {
     public int hashCode() {
         int hash = 3;
         hash = 43 * hash + this.agencyId;
+        hash = 43 * hash + Objects.hashCode(this.classifier);
         hash = 43 * hash + Objects.hashCode(this.bibliographicRecordId);
         hash = 43 * hash + Objects.hashCode(this.work);
         hash = 43 * hash + Objects.hashCode(this.unit);
@@ -85,6 +90,7 @@ public class BibliographicEntity implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         BibliographicEntity that = (BibliographicEntity) o;
         return agencyId == that.agencyId &&
+                Objects.equals(classifier, that.classifier) &&
                 Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
                 Objects.equals(work, that.work) &&
                 Objects.equals(unit, that.unit) &&
@@ -102,7 +108,7 @@ public class BibliographicEntity implements Serializable {
         if (getClass().equals(BibliographicEntity.class)) {
             return this;
         }
-        return new BibliographicEntity(agencyId, bibliographicRecordId, work, unit, producerVersion, deleted, indexKeys, trackingId);
+        return new BibliographicEntity(agencyId, classifier, bibliographicRecordId, work, unit, producerVersion, deleted, indexKeys, trackingId);
 
     }
 
@@ -112,6 +118,14 @@ public class BibliographicEntity implements Serializable {
 
     public void setAgencyId(int agencyId) {
         this.agencyId = agencyId;
+    }
+
+    public String getClassifier() {
+        return classifier;
+    }
+
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
     }
 
     public String getBibliographicRecordId() {
@@ -168,5 +182,9 @@ public class BibliographicEntity implements Serializable {
 
     public void setIndexKeys(Map<String, List<String>> indexKeys) {
         this.indexKeys = indexKeys;
+    }
+
+    public AgencyClassifierItemKey asAgencyClassifierItemKey() {
+        return new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId);
     }
 }
