@@ -12,29 +12,29 @@ public class EnqueueAdapter {
 
     private static Logger log = LoggerFactory.getLogger(EnqueueAdapter.class);
 
-    public static void enqueueAll(EnqueueSupplierBean queue, Set<AgencyItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
-        for (AgencyItemKey k: agencyItemKeys) {
+    public static void enqueueAll(EnqueueSupplierBean queue, Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+        for (AgencyClassifierItemKey k : agencyItemKeys) {
             try {
-                queue.getManifestationEnqueueService().enqueue(k,commitWithin.orElse(null));
+                queue.getManifestationEnqueueService().enqueue(k, commitWithin.orElse(null));
             } catch (SQLException e) {
                 log.error("Error enqueuing item: " + k);
-                log.debug("Error enqueuing item: " + k,e);
+                log.debug("Error enqueuing item: " + k, e);
                 throw new PersistenceException(e);
             }
         }
     }
 
-    public static Set<AgencyItemKey> setOfOne(int agency, String recordId) {
-        HashSet<AgencyItemKey> s = new HashSet<>();
-        s.add( makeKey(agency,recordId));
+    public static Set<AgencyClassifierItemKey> setOfOne(int agency, String classifier, String recordId) {
+        HashSet<AgencyClassifierItemKey> s = new HashSet<>();
+        s.add(makeKey(agency, classifier, recordId));
         return s;
     }
 
-    public static AgencyItemKey makeKey(int agency, String bibliographicRecordId){
-        return new AgencyItemKey( agency, bibliographicRecordId );
+    public static AgencyClassifierItemKey makeKey(int agency, String classifier, String bibliographicRecordId) {
+        return new AgencyClassifierItemKey(agency, classifier, bibliographicRecordId);
     }
 
-    public static Set<AgencyItemKey> makeSet() {
+    public static Set<AgencyClassifierItemKey> makeSet() {
         return new HashSet<>();
     }
 }
