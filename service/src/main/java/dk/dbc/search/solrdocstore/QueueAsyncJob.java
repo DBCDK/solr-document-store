@@ -155,7 +155,7 @@ public class QueueAsyncJob {
 
     AsyncJob queueErrorDeleteJobs(String consumer, String pattern) {
         String like = makeLike(pattern);
-        return new AsyncJob("List-errors-matching-" + pattern) {
+        return new AsyncJob("Delete-errors-matching-" + pattern) {
             @Override
             public void run(Supplier<Boolean> isCanceled) throws Exception {
                 log.debug("Connectiong to database");
@@ -195,7 +195,7 @@ public class QueueAsyncJob {
 
     AsyncJob queueErrorRequeueJobs(String consumer, String pattern) {
         String like = makeLike(pattern);
-        return new AsyncJob("List-errors-matching-" + pattern) {
+        return new AsyncJob("Requeue-errors-matching-" + pattern) {
             @Override
             public void run(Supplier<Boolean> isCanceled) throws Exception {
                 log.debug("Connectiong to database");
