@@ -1,11 +1,14 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.ejb.Stateless;
@@ -32,6 +35,7 @@ import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
 public class BibliographicBean {
 
     private static final Logger log = LoggerFactory.getLogger(BibliographicBean.class);
+    private static final ObjectMapper O = new ObjectMapper();
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
@@ -56,17 +60,41 @@ public class BibliographicBean {
     @Timed
     public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
-        BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
-        return Response.ok().entity("{ \"ok\": true }").build();
+        try {
+            BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
+            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
+            return Response.ok().entity("{ \"ok\": true }").build();
+        } catch (RuntimeException ex) {
+            log.error("addBibliographicKeys error: {}", ex.getMessage());
+            log.debug("addBibliographicKeys error: ", ex);
+            String message = null;
+            Throwable tw = ex;
+            while(tw != null && message == null) {
+                message = tw.getMessage();
+                tw = tw.getCause();
+            }
+            ObjectNode err = O.createObjectNode();
+            err.put("ok", false);
+            err.put("message", message);
+            return Response.serverError().entity(O.writeValueAsString(err)).build();
+        }
     }
 
-     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
         addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
     }
 
      void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
+
+        if(bibliographicEntity.getClassifier() == null) {
+            Map<String, List<String>> keys = bibliographicEntity.getIndexKeys();
+            List<String> originalFormat = keys.get("original_format");
+            if(originalFormat == null || originalFormat.isEmpty()) {
+                throw new IllegalStateException("classifier is not set and cannot be inferred");
+            }
+            bibliographicEntity.setClassifier(originalFormat.get(0));
+        }
 
         log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
 
