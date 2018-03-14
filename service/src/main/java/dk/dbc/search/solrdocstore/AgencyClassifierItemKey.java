@@ -5,18 +5,20 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class AgencyItemKey implements Serializable {
+public class AgencyClassifierItemKey implements Serializable {
 
     private static final long serialVersionUID = -2054293971622143423L;
 
     private int agencyId;
+    private String classifier;
     private String bibliographicRecordId;
 
-    public AgencyItemKey() {
+    public AgencyClassifierItemKey() {
     }
 
-    public AgencyItemKey(int agencyId, String bibliographicRecordId) {
+    public AgencyClassifierItemKey(int agencyId, String classifier, String bibliographicRecordId) {
         this.agencyId = agencyId;
+        this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
     }
 
@@ -24,6 +26,7 @@ public class AgencyItemKey implements Serializable {
     public int hashCode() {
         int hash = 3;
         hash = 43 * hash + this.agencyId;
+        hash = 43 * hash + Objects.hashCode(this.classifier);
         hash = 43 * hash + Objects.hashCode(this.bibliographicRecordId);
         return hash;
     }
@@ -39,8 +42,11 @@ public class AgencyItemKey implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AgencyItemKey other = (AgencyItemKey) obj;
+        final AgencyClassifierItemKey other = (AgencyClassifierItemKey) obj;
         if (this.agencyId != other.agencyId) {
+            return false;
+        }
+        if (!Objects.equals(this.classifier, other.classifier)) {
             return false;
         }
         if (!Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId)) {
@@ -53,6 +59,7 @@ public class AgencyItemKey implements Serializable {
     public String toString() {
         return "AgencyItemKey{" +
                 "agencyId=" + agencyId +
+                "classifier=" + classifier +
                 ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
                 '}';
     }
@@ -63,6 +70,14 @@ public class AgencyItemKey implements Serializable {
 
     public void setAgencyId(int agencyId) {
         this.agencyId = agencyId;
+    }
+
+    public String getClassifier() {
+        return classifier;
+    }
+
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
     }
 
     public String getBibliographicRecordId() {

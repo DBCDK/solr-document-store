@@ -9,11 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -23,9 +21,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     @Before
     public void before(){
         em = env().getEntityManager();
-        bean = new HoldingsToBibliographicBean();
-        bean.entityManager = em;
-        bean.libraryConfig = new LibraryConfig();
+        bean = createHoldingsToBibliographicBean(env());
     }
 
     @Test
@@ -257,13 +253,13 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
                     new HoldingsToBibliographicKey(agencyId, bibliographicRecordId));
     }
     private void deleteBibRecord(int agencyId, String bibliographicRecordId){
-        BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
+        BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, "clazzifier", bibliographicRecordId));
         e.setDeleted(true);
         em.merge(e);
     }
 
     private void createBibRecord(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity e = new BibliographicEntity(agencyId, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         em.merge(e);
     }
 

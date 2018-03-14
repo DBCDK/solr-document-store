@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.monitor.Timed;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -51,6 +52,9 @@ public class DocumentRetrieveBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    @Inject
+    BibliographicRetrieveBean brBean;
+
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ bibliographicRecordId : .*}")
@@ -66,7 +70,8 @@ public class DocumentRetrieveBean {
     }
 
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(Integer agencyId, String bibliographicRecordId) throws Exception {
-        BibliographicEntity biblEntity = entityManager.find(BibliographicEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
+
+        BibliographicEntity biblEntity =brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
         if (biblEntity == null) {
             return null;
         }

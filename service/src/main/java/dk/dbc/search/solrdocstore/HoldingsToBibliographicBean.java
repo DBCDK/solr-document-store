@@ -26,6 +26,9 @@ public class HoldingsToBibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    @Inject
+    BibliographicRetrieveBean brBean;
+
     @Timed
     public Set<AgencyItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
@@ -129,8 +132,7 @@ public class HoldingsToBibliographicBean {
     }
 
     private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
-        AgencyItemKey k = new AgencyItemKey(agencyId, bibliographicRecordId);
-        BibliographicEntity e = entityManager.find(BibliographicEntity.class, k);
+        BibliographicEntity e = brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
         return ((e!=null)&&(!e.isDeleted()));
     }
 
