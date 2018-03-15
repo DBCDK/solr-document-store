@@ -114,18 +114,16 @@ public class DocProducer {
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    public void deploy(int agencyId, String bibliographicRecordId, Integer commitWithin) throws IOException, SolrServerException {
-        log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
-        JsonNode collection = get(agencyId, bibliographicRecordId);
-        log.trace("collection = {}", collection);
-        boolean deleted = isDeleted(collection);
+    public void deploy(JsonNode sourceDoc, Integer commitWithin) throws IOException, SolrServerException {
+        log.trace("collection = {}", sourceDoc);
+        boolean deleted = isDeleted(sourceDoc);
         log.trace("deleted = {}", deleted);
 
         SolrInputDocument doc = null;
         if (!deleted) {
-            doc = inputDocument(collection);
+            doc = inputDocument(sourceDoc);
         }
-        String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
+        String id = bibliographicShardId(sourceDoc);
 
         List<String> ids = documentsIdsByRoot(id, solrClient);
 
@@ -357,7 +355,18 @@ public class DocProducer {
     /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
-     * @param record Json node with agencyid/bibliographicrecordid
+     * @param sourceDoc  Json source document from solr-doc-store
+     * @return string of parts joined with '-'
+     */
+    public  String bibliographicShardId(JsonNode sourceDoc) {
+        System.out.println("sourceDoc = " + sourceDoc);
+        return shardId(find(sourceDoc, "bibliographicRecord"), "bibliographic");
+
+    }
+    /**
+     * Construct an id string with sharding info using bibliographicrecordid
+     *
+     * @param record  Json source document from solr-doc-store
      * @param type   id prefix
      * @return string of parts joined with '-'
      */

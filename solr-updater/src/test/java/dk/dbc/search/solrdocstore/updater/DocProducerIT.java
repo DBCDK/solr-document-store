@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import java.io.IOException;
 import java.sql.Connection;
@@ -169,7 +170,8 @@ public class DocProducerIT {
     }
 
     private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException {
-        docProducer.deploy(agencyId, "23645564", 0);
+        JsonNode sourceDoc = docProducer.get(agencyId, "23645564");
+        docProducer.deploy(sourceDoc, 0);
         docProducer.solrClient.commit(true, true);
         QueryResponse response1 = docProducer.solrClient.query(new SolrQuery("*:*"));
         System.out.println("response = " + response1);
