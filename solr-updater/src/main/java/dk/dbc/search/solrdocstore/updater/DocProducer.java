@@ -107,37 +107,15 @@ public class DocProducer {
      * <p>
      * Delete from solr, of not deleted then add too
      *
-     * @param agencyId              agency of document
-     * @param bibliographicRecordId record id of document
-     * @param commitWithin          optional - number of milliseconds before a
-     *                              commit should occur
+     * @param doc          The document to post to the solr (null if no
+     *                     documents)
+     * @param commitWithin optional - number of milliseconds before a
+     *                     commit should occur
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    public void deploy(JsonNode sourceDoc, Integer commitWithin) throws IOException, SolrServerException {
-        log.trace("collection = {}", sourceDoc);
-        boolean deleted = isDeleted(sourceDoc);
-        log.trace("deleted = {}", deleted);
+    public void deploy(SolrInputDocument doc, Integer commitWithin) throws IOException, SolrServerException {
 
-        SolrInputDocument doc = null;
-        if (!deleted) {
-            doc = inputDocument(sourceDoc);
-        }
-        String id = bibliographicShardId(sourceDoc);
-
-        List<String> ids = documentsIdsByRoot(id, solrClient);
-
-        if (!ids.isEmpty()) {
-            try (Timer.Context time = deleteByIdTimer.time()) {
-                if (commitWithin == null || commitWithin <= 0) {
-                    solrClient.deleteById(ids);
-                } else {
-                    solrClient.deleteById(ids, commitWithin);
-                }
-            }
-        }
-
-        log.debug("Ids deleted: {}", ids);
         if (doc != null) {
             if (log.isDebugEnabled()) {
                 List<SolrInputDocument> children = doc.getChildDocuments();
@@ -158,6 +136,47 @@ public class DocProducer {
                 }
             }
         }
+    }
+
+    /**
+     * Delete documents from solr, by searching all those with
+     * _root_:${biblShardId}
+     *
+     * @param bibliographicShardId the root id of the document to purge
+     * @param commitWithin         then to commit
+     * @throws IOException
+     * @throws SolrServerException
+     */
+    //! Todo: add another n sub documents pr holdingid if more has been addad before last commit, also take into account the known subdocument ids from sourceDoc
+    public void deleteSolrDocuments(String bibliographicShardId, Integer commitWithin) throws IOException, SolrServerException {
+        List<String> ids = documentsIdsByRoot(bibliographicShardId, solrClient);
+        if (!ids.isEmpty()) {
+            try (Timer.Context time = deleteByIdTimer.time()) {
+                if (commitWithin == null || commitWithin <= 0) {
+                    solrClient.deleteById(ids);
+                } else {
+                    solrClient.deleteById(ids, commitWithin);
+                }
+            }
+        }
+        log.debug("Ids deleted: {}", ids);
+    }
+
+    /**
+     * Create the solr document with only the known field, inlining holdingitems
+     * and synthesize fields
+     *
+     * @param sourceDoc
+     * @return null if deleted otherwise a expanded solr document
+     */
+    public SolrInputDocument createSolrDocument(JsonNode sourceDoc) {
+        boolean deleted = isDeleted(sourceDoc);
+        log.trace("deleted = {}", deleted);
+        SolrInputDocument doc = null;
+        if (!deleted) {
+            doc = inputDocument(sourceDoc);
+        }
+        return doc;
     }
 
     private List<String> documentsIdsByRoot(String id, SolrClient client1) throws IOException, SolrServerException {
@@ -188,7 +207,7 @@ public class DocProducer {
      * @return the document collection
      * @throws IOException In case of http errors
      */
-    public JsonNode get(int agencyId, String bibliographicRecordId) throws IOException {
+    public JsonNode fetchSourceDoc(int agencyId, String bibliographicRecordId) throws IOException {
         URI uri = uriTemplate.buildFromMap(mapForUri(agencyId, bibliographicRecordId));
         log.debug("Fetching: {}", uri);
         Response response;
@@ -208,7 +227,9 @@ public class DocProducer {
         if (!( entity instanceof InputStream )) {
             throw new IOException("Could read document " + uri + ": not of inputstream type");
         }
-        return OBJECT_MAPPER.readTree((InputStream) entity);
+        JsonNode sourceDoc = OBJECT_MAPPER.readTree((InputStream) entity);
+        log.trace("sourceDoc = {}", sourceDoc);
+        return sourceDoc;
     }
 
     /**
@@ -228,7 +249,7 @@ public class DocProducer {
     /**
      * Check if a document is deleted
      *
-     * @param collection from {@link #get(int, java.lang.String) }
+     * @param collection from {@link #fetchSourceDoc(int, java.lang.String) }
      * @return if it's deleted or not
      */
     public boolean isDeleted(JsonNode collection) {
@@ -355,18 +376,17 @@ public class DocProducer {
     /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
-     * @param sourceDoc  Json source document from solr-doc-store
+     * @param sourceDoc Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    public  String bibliographicShardId(JsonNode sourceDoc) {
-        System.out.println("sourceDoc = " + sourceDoc);
+    public String bibliographicShardId(JsonNode sourceDoc) {
         return shardId(find(sourceDoc, "bibliographicRecord"), "bibliographic");
-
     }
+
     /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
-     * @param record  Json source document from solr-doc-store
+     * @param record Json source document from solr-doc-store
      * @param type   id prefix
      * @return string of parts joined with '-'
      */

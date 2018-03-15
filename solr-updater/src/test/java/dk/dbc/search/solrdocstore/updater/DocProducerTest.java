@@ -46,7 +46,7 @@ public class DocProducerTest {
 
         DocProducer docProducer = new DocProducer() {
             @Override
-            public JsonNode get(int agencyId, String bibliographicRecordId) throws IOException {
+            public JsonNode fetchSourceDoc(int agencyId, String bibliographicRecordId) throws IOException {
                 String file = "DocProducerTest/" + agencyId + "-" + bibliographicRecordId + ".json";
                 try (InputStream stream = DocProducerTest.class.getClassLoader().getResourceAsStream(file)) {
                     return OBJECT_MAPPER.readTree(stream);
@@ -55,7 +55,7 @@ public class DocProducerTest {
         };
         docProducer.solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
 
-        JsonNode node = docProducer.get(300101, "23645564");
+        JsonNode node = docProducer.fetchSourceDoc(300101, "23645564");
 
         assertFalse(docProducer.isDeleted(node));
 

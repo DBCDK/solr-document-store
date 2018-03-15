@@ -23,6 +23,7 @@ import dk.dbc.pgqueue.consumer.FatalQueueError;
 import dk.dbc.pgqueue.consumer.JobConsumer;
 import dk.dbc.pgqueue.consumer.JobMetaData;
 import dk.dbc.pgqueue.consumer.NonFatalQueueError;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.pgqueue.consumer.QueueWorker;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,16 +92,22 @@ public class Worker {
     }
 
     public JobConsumer<QueueJob> makeWorker() {
-        return (Connection connection, QueueJob job, JobMetaData metaData) -> {
-            log.info("job = {}, metadata = {}", job, metaData);
-            try {
-                JsonNode sourceDoc = docProducer.get(job.getAgencyId(), job.getBibliographicRecordId());
+        return new JobConsumer<QueueJob>() {
+            @Override
+            public void accept(Connection connection, QueueJob job, JobMetaData metaData) throws FatalQueueError, NonFatalQueueError, PostponedNonFatalQueueError {
+                log.info("job = {}, metadata = {}", job, metaData);
+                try {
+                    JsonNode sourceDoc = docProducer.fetchSourceDoc(job.getAgencyId(), job.getBibliographicRecordId());
+                    SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
+                    String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
+                    docProducer.deleteSolrDocuments(bibliographicShardId, job.getCommitwithin());
 
-                docProducer.deploy(sourceDoc, job.getCommitwithin());
-            } catch (IOException ex) {
-                throw new NonFatalQueueError(ex);
-            } catch (SolrServerException ex) {
-                throw new FatalQueueError(ex);
+                    docProducer.deploy(solrDocument, job.getCommitwithin());
+                } catch (IOException ex) {
+                    throw new NonFatalQueueError(ex);
+                } catch (SolrServerException ex) {
+                    throw new FatalQueueError(ex);
+                }
             }
         };
     }
