@@ -35,7 +35,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.sql.DataSource;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,12 +89,10 @@ public class Worker {
     }
 
     public JobConsumer<QueueJob> makeWorker() {
-        SolrClient client = SolrApi.makeSolrClient(config.getSolrUrl());
         return (Connection connection, QueueJob job, JobMetaData metaData) -> {
-            log.debug("job = {}, metadata = {}", job, metaData);
-
+            log.info("job = {}, metadata = {}", job, metaData);
             try {
-                docProducer.deploy(job.getAgencyId(), job.getBibliographicRecordId(), client, job.getCommitwithin());
+                docProducer.deploy(job.getAgencyId(), job.getBibliographicRecordId(), job.getCommitwithin());
             } catch (IOException ex) {
                 throw new NonFatalQueueError(ex);
             } catch (SolrServerException ex) {
