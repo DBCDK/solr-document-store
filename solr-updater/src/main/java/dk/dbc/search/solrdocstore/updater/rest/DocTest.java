@@ -61,7 +61,7 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId) throws InterruptedException, ExecutionException, IOException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         try {
-            JsonNode node = docProducer.get(agencyId, bibliographicRecordId);
+            JsonNode node = docProducer.fetchSourceDoc(agencyId, bibliographicRecordId);
             boolean deleted = docProducer.isDeleted(node);
             if (deleted) {
                 return Response.ok(false).build();
@@ -85,8 +85,11 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            JsonNode sourceDoc = docProducer.get(agencyId, bibliographicRecordId);
-            docProducer.deploy(sourceDoc, commitWithin);
+            JsonNode sourceDoc = docProducer.fetchSourceDoc(agencyId, bibliographicRecordId);
+            SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
+            String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
+            docProducer.deleteSolrDocuments(bibliographicShardId, 0);
+            docProducer.deploy(doc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
         } catch (SolrServerException | IOException ex) {
             log.error("Exception: {}", ex.getMessage());

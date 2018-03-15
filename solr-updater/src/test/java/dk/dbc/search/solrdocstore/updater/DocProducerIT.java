@@ -31,6 +31,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrInputDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -170,8 +171,11 @@ public class DocProducerIT {
     }
 
     private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException {
-        JsonNode sourceDoc = docProducer.get(agencyId, "23645564");
-        docProducer.deploy(sourceDoc, 0);
+        JsonNode sourceDoc = docProducer.fetchSourceDoc(agencyId, "23645564");
+        SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
+        String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
+        docProducer.deleteSolrDocuments(bibliographicShardId, 0);
+        docProducer.deploy(doc, 0);
         docProducer.solrClient.commit(true, true);
         QueryResponse response1 = docProducer.solrClient.query(new SolrQuery("*:*"));
         System.out.println("response = " + response1);
