@@ -19,6 +19,7 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import dk.dbc.search.solrdocstore.updater.SolrApi;
@@ -56,12 +57,13 @@ public class DocTest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("format/{agencyId : \\d+}/{bibliographicRecordId : .*$}")
+    @Path("format/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
     public Response format(@PathParam("agencyId") int agencyId,
+                           @PathParam("classifier") String classifier,
                            @PathParam("bibliographicRecordId") String bibliographicRecordId) throws InterruptedException, ExecutionException, IOException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         try {
-            JsonNode node = docProducer.fetchSourceDoc(agencyId, bibliographicRecordId);
+            JsonNode node = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             boolean deleted = docProducer.isDeleted(node);
             if (deleted) {
                 return Response.ok(false).build();
@@ -80,12 +82,13 @@ public class DocTest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("deploy/{agencyId : \\d+}/{bibliographicRecordId : .*$}")
+    @Path("deploy/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
     public Response deploy(@PathParam("agencyId") int agencyId,
+                           @PathParam("classifier") String classifier,
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            JsonNode sourceDoc = docProducer.fetchSourceDoc(agencyId, bibliographicRecordId);
+            JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
             String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
             docProducer.deleteSolrDocuments(bibliographicShardId, 0);

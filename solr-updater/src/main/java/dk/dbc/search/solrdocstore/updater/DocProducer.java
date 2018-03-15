@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -207,8 +208,8 @@ public class DocProducer {
      * @return the document collection
      * @throws IOException In case of http errors
      */
-    public JsonNode fetchSourceDoc(int agencyId, String bibliographicRecordId) throws IOException {
-        URI uri = uriTemplate.buildFromMap(mapForUri(agencyId, bibliographicRecordId));
+    public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
+        URI uri = uriTemplate.buildFromMap(mapForUri(job));
         log.debug("Fetching: {}", uri);
         Response response;
         try (Timer.Context time = fetchTimer.time()) {
@@ -239,10 +240,11 @@ public class DocProducer {
      * @param bibliographicRecordId record
      * @return map
      */
-    private static Map<String, String> mapForUri(int agencyId, String bibliographicRecordId) {
+    private static Map<String, String> mapForUri(QueueJob job) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("agencyId", String.valueOf(agencyId));
-        map.put("bibliographicRecordId", bibliographicRecordId);
+        map.put("agencyId", String.valueOf(job.getAgencyId()));
+        map.put("classifier", job.getClassifier());
+        map.put("bibliographicRecordId", job.getBibliographicRecordId());
         return map;
     }
 
