@@ -82,6 +82,7 @@ public class DocProducer {
 
     private Client client;
     private UriBuilder uriTemplate;
+    SolrClient solrClient;
 
     private static final Timer UNITTESTING_TIMER = new Timer();
 
@@ -98,6 +99,7 @@ public class DocProducer {
         log.debug("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.uriTemplate = UriBuilder.fromUri(solrDocStoreUrl)
                 .path("api/retrieve/combined/{agencyId}/{bibliographicRecordId}");
+        this.solrClient = SolrApi.makeSolrClient(config.getSolrUrl());
     }
 
     /**
@@ -107,13 +109,12 @@ public class DocProducer {
      *
      * @param agencyId              agency of document
      * @param bibliographicRecordId record id of document
-     * @param client                Solr instance connection
      * @param commitWithin          optional - number of milliseconds before a
      *                              commit should occur
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    public void deploy(int agencyId, String bibliographicRecordId, SolrClient client, Integer commitWithin) throws IOException, SolrServerException {
+    public void deploy(int agencyId, String bibliographicRecordId, Integer commitWithin) throws IOException, SolrServerException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         JsonNode collection = get(agencyId, bibliographicRecordId);
         log.trace("collection = {}", collection);
@@ -126,14 +127,14 @@ public class DocProducer {
         }
         String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
 
-        List<String> ids = documentsIdsByRoot(id, client);
+        List<String> ids = documentsIdsByRoot(id, solrClient);
 
         if (!ids.isEmpty()) {
             try (Timer.Context time = deleteByIdTimer.time()) {
                 if (commitWithin == null || commitWithin <= 0) {
-                    client.deleteById(ids);
+                    solrClient.deleteById(ids);
                 } else {
-                    client.deleteById(ids, commitWithin);
+                    solrClient.deleteById(ids, commitWithin);
                 }
             }
         }
@@ -153,9 +154,9 @@ public class DocProducer {
             }
             try (Timer.Context time = addDocumentTimer.time()) {
                 if (commitWithin == null || commitWithin <= 0) {
-                    client.add(doc);
+                    solrClient.add(doc);
                 } else {
-                    client.add(doc, commitWithin);
+                    solrClient.add(doc, commitWithin);
                 }
             }
         }

@@ -52,17 +52,7 @@ public class DocTest {
     private static final Logger log = LoggerFactory.getLogger(DocTest.class);
 
     @Inject
-    Config config;
-
-    @Inject
     DocProducer docProducer;
-
-    SolrClient client;
-
-    @PostConstruct
-    public void init() {
-        client = SolrApi.makeSolrClient(config.getSolrUrl());
-    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -95,7 +85,7 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            docProducer.deploy(agencyId, bibliographicRecordId, client, commitWithin);
+            docProducer.deploy(agencyId, bibliographicRecordId, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
         } catch (SolrServerException | IOException ex) {
             log.error("Exception: {}", ex.getMessage());
