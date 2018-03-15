@@ -85,7 +85,8 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            docProducer.deploy(agencyId, bibliographicRecordId, commitWithin);
+            JsonNode sourceDoc = docProducer.get(agencyId, bibliographicRecordId);
+            docProducer.deploy(sourceDoc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
         } catch (SolrServerException | IOException ex) {
             log.error("Exception: {}", ex.getMessage());

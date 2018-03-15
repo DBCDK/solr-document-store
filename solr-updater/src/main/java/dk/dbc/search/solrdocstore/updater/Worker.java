@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
 import dk.dbc.pgqueue.consumer.JobConsumer;
 import dk.dbc.pgqueue.consumer.JobMetaData;
@@ -92,7 +93,9 @@ public class Worker {
         return (Connection connection, QueueJob job, JobMetaData metaData) -> {
             log.info("job = {}, metadata = {}", job, metaData);
             try {
-                docProducer.deploy(job.getAgencyId(), job.getBibliographicRecordId(), job.getCommitwithin());
+                JsonNode sourceDoc = docProducer.get(job.getAgencyId(), job.getBibliographicRecordId());
+
+                docProducer.deploy(sourceDoc, job.getCommitwithin());
             } catch (IOException ex) {
                 throw new NonFatalQueueError(ex);
             } catch (SolrServerException ex) {
