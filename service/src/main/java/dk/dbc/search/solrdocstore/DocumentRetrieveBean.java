@@ -32,6 +32,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -41,13 +43,15 @@ import javax.ws.rs.core.UriInfo;
 @Path("retrieve")
 public class DocumentRetrieveBean {
 
-    private static final String SELECT_HOLDINGS_ITEMS_JPA
-                                = "SELECT h FROM HoldingsToBibliographicEntity h2b" +
-                                  " INNER JOIN HoldingsItemEntity h" +
-                                  " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
-                                  " AND h2b.bibliographicAgencyId = :agencyId" +
-                                  " AND h2b.holdingsBibliographicRecordId = h.bibliographicRecordId" +
-                                  " AND h2b.holdingsAgencyId = h.agencyId";
+    private static final Logger log = LoggerFactory.getLogger(DocumentRetrieveBean.class);
+
+    private static final String SELECT_HOLDINGS_ITEMS_JPA =
+            "SELECT h FROM HoldingsToBibliographicEntity h2b" +
+            " INNER JOIN HoldingsItemEntity h" +
+            " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
+            " AND h2b.bibliographicAgencyId = :agencyId" +
+            " AND h2b.holdingsBibliographicRecordId = h.bibliographicRecordId" +
+            " AND h2b.holdingsAgencyId = h.agencyId";
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -59,9 +63,11 @@ public class DocumentRetrieveBean {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ bibliographicRecordId : .*}")
     @Timed
+    //! TODO Remove Deprecated
     public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
+        log.warn("Deprecated: missing classifier in retrieve/combined");
         DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, bibliographicRecordId);
         if (response == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
@@ -69,9 +75,43 @@ public class DocumentRetrieveBean {
         return Response.ok(response).build();
     }
 
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("combined/{ agencyId : \\d+}/{ classifier }/{ bibliographicRecordId : .*}")
+    @Timed
+    public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
+                                                 @PathParam("agencyId") Integer agencyId,
+                                                 @PathParam("classifier") String classifier,
+                                                 @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
+        DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId);
+        if (response == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
+        }
+        return Response.ok(response).build();
+    }
+
+    //! TODO Remove Deprecated
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(Integer agencyId, String bibliographicRecordId) throws Exception {
 
-        BibliographicEntity biblEntity =brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
+        BibliographicEntity biblEntity = brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
+        if (biblEntity == null) {
+            return null;
+        }
+
+        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
+
+        if (!biblEntity.isDeleted()) {
+            TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
+            query.setParameter("bibliographicRecordId", bibliographicRecordId);
+            query.setParameter("agencyId", agencyId);
+            response.holdingsItemRecords = query.getResultList();
+        }
+        return response;
+    }
+
+    public DocumentRetrieveResponse getDocumentWithHoldingsitems(Integer agencyId, String classifier, String bibliographicRecordId) throws Exception {
+
+        BibliographicEntity biblEntity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId));
         if (biblEntity == null) {
             return null;
         }

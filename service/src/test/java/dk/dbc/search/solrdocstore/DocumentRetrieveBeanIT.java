@@ -34,7 +34,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000));
         em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000));
         DocumentRetrieveResponse doc = env().getPersistenceContext()
-                .run(() -> bean.getDocumentWithHoldingsitems(300000, "12345678")
+                .run(() -> bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678")
                 );
 
         assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
