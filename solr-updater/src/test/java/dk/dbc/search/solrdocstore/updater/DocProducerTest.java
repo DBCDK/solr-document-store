@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore.updater;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -46,8 +47,8 @@ public class DocProducerTest {
 
         DocProducer docProducer = new DocProducer() {
             @Override
-            public JsonNode fetchSourceDoc(int agencyId, String bibliographicRecordId) throws IOException {
-                String file = "DocProducerTest/" + agencyId + "-" + bibliographicRecordId + ".json";
+            public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
+                String file = "DocProducerTest/" + job.getAgencyId() + "-" + job.getBibliographicRecordId() + ".json";
                 try (InputStream stream = DocProducerTest.class.getClassLoader().getResourceAsStream(file)) {
                     return OBJECT_MAPPER.readTree(stream);
                 }
@@ -55,7 +56,7 @@ public class DocProducerTest {
         };
         docProducer.solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
 
-        JsonNode node = docProducer.fetchSourceDoc(300101, "23645564");
+        JsonNode node = docProducer.fetchSourceDoc(new QueueJob(300101, "clazzifier", "23645564"));
 
         assertFalse(docProducer.isDeleted(node));
 
@@ -76,7 +77,6 @@ public class DocProducerTest {
             assertEquals(linkId, childDocument.getField("parentDocId").getValue().toString());
         }
         System.out.println("OK");
-//        fail("OK");
     }
 
     @Test

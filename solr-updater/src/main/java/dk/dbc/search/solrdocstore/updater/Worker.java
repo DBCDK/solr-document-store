@@ -97,7 +97,7 @@ public class Worker {
             public void accept(Connection connection, QueueJob job, JobMetaData metaData) throws FatalQueueError, NonFatalQueueError, PostponedNonFatalQueueError {
                 log.info("job = {}, metadata = {}", job, metaData);
                 try {
-                    JsonNode sourceDoc = docProducer.fetchSourceDoc(job.getAgencyId(), job.getBibliographicRecordId());
+                    JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
                     SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
                     String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
                     docProducer.deleteSolrDocuments(bibliographicShardId, job.getCommitwithin());
