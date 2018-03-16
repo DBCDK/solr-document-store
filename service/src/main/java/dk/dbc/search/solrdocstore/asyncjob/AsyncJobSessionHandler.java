@@ -120,10 +120,10 @@ public class AsyncJobSessionHandler {
         broadcastAction(JOB_FINISHED_FRONTEND_TYPE, fields);
     }
 
-    /**
+    /*
      * Sends a log message to all sessions subscribed to the job with the
      * corresponding UUID argument
-     * */
+     */
     public void appendLog(UUID uuid, String message){
         // If this job has not been messaged yet, we create it
         List<Session> sessions = subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
