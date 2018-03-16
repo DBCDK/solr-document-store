@@ -21,7 +21,7 @@ const IndexKeyExplorer = ({
       if (k1IsParentElement === k2IsParentElement) {
         return keySort(k1, k2);
       } else {
-        return k1IsParentElement < k2IsParentElement;
+        return k1IsParentElement < k2IsParentElement ? 1 : -1;
       }
     })
     .map(
