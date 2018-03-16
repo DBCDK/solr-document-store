@@ -305,6 +305,7 @@ public class SolrWorker implements MessageListener {
             MapMessage m = (MapMessage) message;
             long timeStamp = m.getJMSTimestamp();
             String pid = m.getString("pid");
+            log.info("Processing pid: {}" , pid);
             DBCTrackedLogContext.setTrackingId("SolrWorker:" + pid);
             int deliveryAttempts = message.getIntProperty("JMSXDeliveryCount");
 
