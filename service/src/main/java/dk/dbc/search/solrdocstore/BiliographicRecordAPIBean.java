@@ -13,10 +13,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Order;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -47,11 +43,9 @@ public class BiliographicRecordAPIBean {
         return (int)Math.ceil((double)resCount/pageSize);
     }
 
-    /**
+    /*
      * Returns a json object with a result field, which is a list of json BibliographicEntity that matches
      * holdingsBibliographicRecordId with the argument. Also includes the supersede id, if it exists.
-     * @param bibliographicRecordId path parameter, expects URI encoding
-     * @return Response
      */
     @GET
     @Path("bibliographic-records/bibliographic-record-id/{bibliographicRecordId}")
@@ -140,12 +134,9 @@ public class BiliographicRecordAPIBean {
         return Response.ok(new BibliographicFrontendEntity((BibliographicEntity)record[0],(String)record[1])).build();
     }
 
-    /**
+    /*
      * Returns a json object with a result field, which is a list of json HoldingsItemEntity mapped via the
      * holdingsToBibliographic table.
-     * @param bibliographicRecordId
-     * @param bibliographicAgencyId
-     * @return Response
      */
     @GET
     @Path("related-holdings/{bibliographicRecordId}/{bibliographicAgencyId}")

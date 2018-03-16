@@ -145,8 +145,8 @@ public class DocProducer {
      *
      * @param bibliographicShardId the root id of the document to purge
      * @param commitWithin         then to commit
-     * @throws IOException
-     * @throws SolrServerException
+     * @throws IOException         solr communication error
+     * @throws SolrServerException solr communication error
      */
     //! Todo: add another n sub documents pr holdingid if more has been addad before last commit, also take into account the known subdocument ids from sourceDoc
     public void deleteSolrDocuments(String bibliographicShardId, Integer commitWithin) throws IOException, SolrServerException {
@@ -167,7 +167,8 @@ public class DocProducer {
      * Create the solr document with only the known field, inlining holdingitems
      * and synthesize fields
      *
-     * @param sourceDoc
+     * @param sourceDoc the document from {@link  #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
+     *                  }
      * @return null if deleted otherwise a expanded solr document
      */
     public SolrInputDocument createSolrDocument(JsonNode sourceDoc) {
@@ -203,8 +204,7 @@ public class DocProducer {
     /**
      * Get a json document from the solr-doc-store
      *
-     * @param agencyId              agency for a document
-     * @param bibliographicRecordId recordid for document
+     * @param job What to fetch from solr-doc-store
      * @return the document collection
      * @throws IOException In case of http errors
      */
@@ -251,7 +251,7 @@ public class DocProducer {
     /**
      * Check if a document is deleted
      *
-     * @param collection from {@link #fetchSourceDoc(int, java.lang.String) }
+     * @param collection from {@link #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)  }
      * @return if it's deleted or not
      */
     public boolean isDeleted(JsonNode collection) {
