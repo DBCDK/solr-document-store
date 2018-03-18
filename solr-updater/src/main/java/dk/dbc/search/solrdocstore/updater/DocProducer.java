@@ -99,7 +99,7 @@ public class DocProducer {
         String solrDocStoreUrl = config.getSolrDocStoreUrl();
         log.debug("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.uriTemplate = UriBuilder.fromUri(solrDocStoreUrl)
-                .path("api/retrieve/combined/{agencyId}/{bibliographicRecordId}");
+                .path("api/retrieve/combined/{agencyId}/{classifier}/{bibliographicRecordId}");
         this.solrClient = SolrApi.makeSolrClient(config.getSolrUrl());
     }
 
