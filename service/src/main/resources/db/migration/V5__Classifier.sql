@@ -6,14 +6,11 @@ DECLARE
     agencyIdTmp NUMERIC(6);
     cnt NUMERIC(12);
     classifierTmp VARCHAR(16);
-    done BOOLEAN;
 BEGIN
     SELECT COUNT(*) = 0 INTO hasnt FROM information_schema.columns WHERE table_name = 'bibliographicsolrkeys' AND column_name = 'classifier';
     IF hasnt THEN
         ALTER TABLE bibliographicSolrKeys
           ADD COLUMN classifier VARCHAR(16);
-        CREATE INDEX bibliographicsolrkeys_classifier
-          ON bibliographicsolrkeys ( classifier );
 
         FOR agencyIdTmp, cnt IN SELECT agencyId, COUNT(*) FROM bibliographicSolrKeys GROUP BY agencyId ORDER BY agencyId LOOP
             RAISE NOTICE 'agency=%(%)', agencyIdTmp, cnt;
@@ -23,14 +20,15 @@ BEGIN
             END LOOP;
         END LOOP;
 
-       UPDATE bibliographicSolrKeys SET classifier='UNKNOWN'
+        UPDATE bibliographicSolrKeys SET classifier='UNKNOWN'
           WHERE classifier IS NULL;
+
+        ALTER TABLE bibliographicSolrKeys
+          ALTER COLUMN classifier SET NOT NULL;
+
     END IF;
 END
 $$;
-
-ALTER TABLE bibliographicSolrKeys
-  ALTER COLUMN classifier SET NOT NULL;
 
 ALTER TABLE bibliographicSolrKeys
   DROP CONSTRAINT bibliographicSolrKeys_pkey;

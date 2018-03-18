@@ -1,40 +1,19 @@
 #!/bin/bash -e
 
-rm -f ${2:-dbscript_}all.list
+rm -f ${2:-dbscript_}.list
 
 psql $1 -q -t -c 'SELECT agencyId, COUNT(*) AS c FROM bibliographicSolrKeys GROUP BY agencyId ORDER BY c DESC;' | (
 	IFS=' |'
 	while read a b; do
 		if [ x$a = x ]; then break; fi
-		sed -e '1,/^__DATA__/d' \
-			-e "s/@AGENCYID@/$a/g" \
-			$0 > "${2:-dbscript_}$a.sql"
-		echo "psql" "$1" "<${2:-dbscript_}$a.sql" >>"${2:-dbscript_}all.list"
+		echo "${0%.sh}.pl" "$1" "$a" ">${2:-log_}$a.log 2>&1" >>"${2:-dbscript_}.list"
 	done
 )
 
+echo "psql $1 -c "\""ALTER TABLE bibliographicSolrKeys ADD COLUMN classifier VARCHAR(16);"\"
 
-echo "time parallel -j16 <${2:-dbscript_}all.list"
+echo "time parallel -j16 <${2:-dbscript_}.list"
 echo "psql $1 -c "\""UPDATE bibliographicSolrKeys SET classifier='UNKNOWN' WHERE classifier IS NULL;"\"
+echo "psql $1 -c "\""ALTER TABLE bibliographicSolrKeys ALTER COLUMN classifier SET NOT NULL;"\"
 
 exit 0
-
-
-
-
-__DATA__
-BEGIN;
-DO
-$$
-DECLARE
-    cnt NUMERIC(12);
-    cls VARCHAR(16);
-    done BOOLEAN;
-BEGIN
-    FOR cls, cnt IN SELECT indexkeys#>>'{original_format,0}' AS cls, count(*) FROM bibliographicsolrkeys WHERE agencyid=@AGENCYID@ AND NOT deleted GROUP BY cls ORDER BY cls LOOP
-        RAISE NOTICE 'agency=%(%), classifier=%', @AGENCYID@, cnt, cls;
-        UPDATE bibliographicSolrKeys SET classifier=cls WHERE agencyId=@AGENCYID@ AND indexkeys#>>'{original_format,0}' = cls;
-    END LOOP;
-END
-$$;
-COMMIT;
