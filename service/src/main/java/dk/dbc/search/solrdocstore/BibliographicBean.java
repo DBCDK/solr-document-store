@@ -96,7 +96,7 @@ public class BibliographicBean {
             bibliographicEntity.setClassifier(originalFormat.get(0));
         }
 
-        log.info("AddBibliographicKeys called {}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
+        log.info("AddBibliographicKeys called {}-{}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
         affectedKeys.add( bibliographicEntity.asAgencyClassifierItemKey());
