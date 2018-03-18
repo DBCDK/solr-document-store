@@ -251,7 +251,8 @@ public class DocProducer {
     /**
      * Check if a document is deleted
      *
-     * @param collection from {@link #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)  }
+     * @param collection from {@link #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
+     *                   }
      * @return if it's deleted or not
      */
     public boolean isDeleted(JsonNode collection) {
@@ -265,8 +266,9 @@ public class DocProducer {
      * @return solr document
      */
     public SolrInputDocument inputDocument(JsonNode collection) {
-        String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
-        String linkId = id(find(collection, "bibliographicRecord"), "link");
+        JsonNode bibliogarphicRecord = find(collection, "bibliographicRecord");
+        String id = shardId(bibliogarphicRecord, bibliogarphicRecord, "bibliographic");
+        String linkId = id(bibliogarphicRecord, bibliogarphicRecord, "link");
 
         filterOutDecommissioned(collection);
 
@@ -354,14 +356,15 @@ public class DocProducer {
      * Append all holdings as nested document
      *
      * @param doc          root solr document
-     * @param collection   document containing holdings
+     * @param sourceDoc    document containing holdings
      * @param linkId       id for linking foe solr join searches
      * @param repositoryId id of record used by
      */
-    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode collection, String linkId, String repositoryId) {
-        JsonNode records = find(collection, "holdingsItemRecords");
+    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
+        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
-            String id = shardId(record, "holdings");
+            String id = shardId(bibliographicRecord, record, "holdings");
             JsonNode indexKeyList = find(record, "indexKeys");
             int i = 0;
             for (JsonNode indexKeys : indexKeyList) {
@@ -382,7 +385,8 @@ public class DocProducer {
      * @return string of parts joined with '-'
      */
     public String bibliographicShardId(JsonNode sourceDoc) {
-        return shardId(find(sourceDoc, "bibliographicRecord"), "bibliographic");
+        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
+        return shardId(bibliographicRecord, bibliographicRecord, "bibliographic");
     }
 
     /**
@@ -392,22 +396,27 @@ public class DocProducer {
      * @param type   id prefix
      * @return string of parts joined with '-'
      */
-    private String shardId(JsonNode record, String type) {
+    private String shardId(JsonNode bibliographicRecord, JsonNode record, String type) {
         String bibliographicRecordId = find(record, "bibliographicRecordId").asText();
-        return bibliographicRecordId + "/32!" + id(record, type);
+        return bibliographicRecordId + "/32!" + id(bibliographicRecord, record, type);
     }
 
     /**
      * Construct an id string
      *
-     * @param record Json node with agencyid/bibliographicrecordid
-     * @param type   id prefix
+     * @param bibliographicRecord The bibliographic record (containing
+     *                            classifier)
+     * @param record              Json node with agencyid/bibliographicrecordid
+     * @param type                id prefix
      * @return string of parts joined with '-'
      */
-    private String id(JsonNode record, String type) {
+    private String id(JsonNode bibliographicRecord, JsonNode record, String type) {
+        System.out.println("rootRecord = " + bibliographicRecord);
+        System.out.println("record = " + record);
         String bibliographicRecordId = find(record, "bibliographicRecordId").asText();
         String agencyId = find(record, "agencyId").asText();
-        return String.join("-", type, agencyId, bibliographicRecordId);
+        String classifier = find(bibliographicRecord, "classifier").asText();
+        return String.join("-", type, agencyId, classifier, bibliographicRecordId);
     }
 
     /**

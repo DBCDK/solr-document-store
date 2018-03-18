@@ -58,6 +58,8 @@ public class DocProducerTest {
 
         JsonNode node = docProducer.fetchSourceDoc(new QueueJob(300101, "clazzifier", "23645564"));
 
+        System.out.println("node = " + node);
+
         assertFalse(docProducer.isDeleted(node));
 
         SolrInputDocument document = docProducer.inputDocument(node);
