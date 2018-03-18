@@ -29,7 +29,9 @@ pipeline {
 
                 sh """
                     mvn -B clean
-                    mvn -B verify pmd:pmd javadoc:aggregate                   
+                    mvn -B install pmd:pmd javadoc:aggregate
+                    rm -rf ~/.m2/repositor/dk/dbc/solr-doc-store*
+
                 """
                 //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
             }
