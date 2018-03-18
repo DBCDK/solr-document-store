@@ -382,9 +382,7 @@ public class DocProducer {
      * @return string of parts joined with '-'
      */
     public String bibliographicShardId(JsonNode sourceDoc) {
-        System.out.println("sourceDoc = " + sourceDoc);
         return shardId(find(sourceDoc, "bibliographicRecord"), "bibliographic");
-
     }
 
     /**
