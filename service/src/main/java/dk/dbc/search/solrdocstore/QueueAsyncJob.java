@@ -134,7 +134,7 @@ public class QueueAsyncJob {
                     try (ResultSet resultSet = stmt.executeQuery()) {
                         while (!isCanceled.get() && resultSet.next()) {
                             ErrorEntry err = new ErrorEntry(resultSet);
-                            log.info("{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
+                            log.info("{}-{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getClassifier(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
                         }
                     }
                     log.info("========= MATCHES END ========");
@@ -170,7 +170,7 @@ public class QueueAsyncJob {
                     try (ResultSet resultSet = stmt.executeQuery()) {
                         while (!isCanceled.get() && resultSet.next()) {
                             ErrorEntry err = new ErrorEntry(resultSet);
-                            log.info("{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
+                            log.info("Remove: {}-{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getClassifier(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
                             del.setObject(1, err.getCtid());
                             if (del.executeUpdate() != 0) {
                                 shouldCommit = true;
@@ -212,7 +212,7 @@ public class QueueAsyncJob {
                     try (ResultSet resultSet = stmt.executeQuery()) {
                         while (!isCanceled.get() && resultSet.next()) {
                             ErrorEntry err = new ErrorEntry(resultSet);
-                            log.info("{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
+                            log.info("Requeue: {}-{}:{} | {}:{} | {} | {}", err.getAgencyId(), err.getClassifier(), err.getBibliographicRecordId(), err.getQueued(), err.getFailedAt(), err.getJobConsumer(), err.getDiag());
                             EnqueueService<QueueJob> enqueueService =
                                     enqueueServices.computeIfAbsent(err.getJobConsumer(),
                                                                     c -> enqueueService(connection, c));
