@@ -262,17 +262,16 @@ public class DocProducer {
     /**
      * Construct a solr input document from solr-doc-store content
      *
-     * @param collection docstore collection
+     * @param sourceDoc docstore collection
      * @return solr document
      */
-    public SolrInputDocument inputDocument(JsonNode collection) {
-        JsonNode bibliogarphicRecord = find(collection, "bibliographicRecord");
-        String id = shardId(bibliogarphicRecord, bibliogarphicRecord, "bibliographic");
-        String linkId = id(bibliogarphicRecord, bibliogarphicRecord, "link");
+    public SolrInputDocument inputDocument(JsonNode sourceDoc) {
+        String id = bibliographicShardId(sourceDoc);
+        String linkId = id + "-link";
 
-        filterOutDecommissioned(collection);
+        filterOutDecommissioned(sourceDoc);
 
-        JsonNode indexKeys = find(collection, "bibliographicRecord", "indexKeys");
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         String repositoryId = getField(indexKeys, "rec.repositoryId");
         if (repositoryId == null) {
             throw new IllegalStateException("Cannot get rec.repositoryId from document");
@@ -281,9 +280,9 @@ public class DocProducer {
         setField(indexKeys, "id", id);
         setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
-        addRecHoldingsAgencyId(indexKeys, collection);
+        addRecHoldingsAgencyId(indexKeys, sourceDoc);
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
-        addNestedHoldingsDocuments(doc, collection, linkId, repositoryId);
+        addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
 
         return doc;
     }
@@ -361,10 +360,11 @@ public class DocProducer {
      * @param repositoryId id of record used by
      */
     private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
-        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
-            String id = shardId(bibliographicRecord, record, "holdings");
+            String id = bibliographicShardId(sourceDoc) + "@" +
+                        find(record, "agencyId").asText() + "-" +
+                        find(record, "bibliographicRecordId").asText();
             JsonNode indexKeyList = find(record, "indexKeys");
             int i = 0;
             for (JsonNode indexKeys : indexKeyList) {
@@ -386,38 +386,22 @@ public class DocProducer {
      */
     public String bibliographicShardId(JsonNode sourceDoc) {
         JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
-        return shardId(bibliographicRecord, bibliographicRecord, "bibliographic");
+        return shardId(bibliographicRecord);
     }
 
     /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
-     * @param record Json source document from solr-doc-store
-     * @param type   id prefix
+     * @param bibliographicRecord Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    private String shardId(JsonNode bibliographicRecord, JsonNode record, String type) {
-        String bibliographicRecordId = find(record, "bibliographicRecordId").asText();
-        return bibliographicRecordId + "/32!" + id(bibliographicRecord, record, type);
+    private String shardId(JsonNode bibliographicRecord) {
+        String agencyId = find(bibliographicRecord, "agencyId").asText();
+        String classifier = find(bibliographicRecord, "classifier").asText();
+        String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
+        return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
     }
 
-    /**
-     * Construct an id string
-     *
-     * @param bibliographicRecord The bibliographic record (containing
-     *                            classifier)
-     * @param record              Json node with agencyid/bibliographicrecordid
-     * @param type                id prefix
-     * @return string of parts joined with '-'
-     */
-    private String id(JsonNode bibliographicRecord, JsonNode record, String type) {
-        System.out.println("rootRecord = " + bibliographicRecord);
-        System.out.println("record = " + record);
-        String bibliographicRecordId = find(record, "bibliographicRecordId").asText();
-        String agencyId = find(record, "agencyId").asText();
-        String classifier = find(bibliographicRecord, "classifier").asText();
-        return String.join("-", type, agencyId, classifier, bibliographicRecordId);
-    }
 
     /**
      * Find a node in a json structure
