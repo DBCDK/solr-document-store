@@ -87,16 +87,14 @@ public class BibliographicBean {
      void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
-        if(bibliographicEntity.getClassifier() == null) {
-            Map<String, List<String>> keys = bibliographicEntity.getIndexKeys();
-            List<String> originalFormat = keys.get("original_format");
-            if(originalFormat == null || originalFormat.isEmpty()) {
-                throw new IllegalStateException("classifier is not set and cannot be inferred");
-            }
-            bibliographicEntity.setClassifier(originalFormat.get(0));
-        }
+         if (bibliographicEntity.getClassifier() == null) {
+             throw new IllegalStateException("classifier is not set");
+         }
 
         log.info("AddBibliographicKeys called {}-{}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
+
+        // Todo Remove after migration to classifier
+        brBean.migrateBibliographicEntityToClassifier(bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
         affectedKeys.add( bibliographicEntity.asAgencyClassifierItemKey());
