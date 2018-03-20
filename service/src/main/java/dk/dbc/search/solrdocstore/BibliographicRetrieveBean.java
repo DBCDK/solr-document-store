@@ -43,7 +43,7 @@ public class BibliographicRetrieveBean {
     // Dodo Remove after migration to classifier
     @Timed
     public void migrateBibliographicEntityToClassifier(int agencyId, String bibliographicRecordId, String classifier) {
-        BibliographicEntity entity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, "", bibliographicRecordId), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+        BibliographicEntity entity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, "", bibliographicRecordId), LockModeType.PESSIMISTIC_WRITE);
         if (entity != null) {
             entityManager.remove(entity);
             entity.setClassifier(classifier);
