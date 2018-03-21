@@ -49,9 +49,11 @@ public class BibliographicRetrieveBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void migrateBibliographicEntityToClassifier() throws Exception {
         System.out.println("migrateBibliographicEntityToClassifier");
 
-        BibliographicEntity entity = env().getPersistenceContext().run(() -> {
-            BibliographicEntity bibliographicEntity = new BibliographicEntity(777777, "", "a", "w:1", "u:1", "V0", false, Collections.EMPTY_MAP, "T#1");
+        env().getPersistenceContext().run(() -> {
+            BibliographicEntity bibliographicEntity = new BibliographicEntity(777777, "UNKNOWN", "a", "w:1", "u:1", "V0", false, Collections.EMPTY_MAP, "T#1");
             em.persist(bibliographicEntity);
+        });
+        BibliographicEntity entity = env().getPersistenceContext().run(() -> {
             bean.migrateBibliographicEntityToClassifier(777777, "a", "clz");
             return em.find(BibliographicEntity.class, new AgencyClassifierItemKey(777777, "", "a"));
         });

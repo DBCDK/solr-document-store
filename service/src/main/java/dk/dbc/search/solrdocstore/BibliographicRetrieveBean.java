@@ -4,7 +4,6 @@ import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -43,9 +42,12 @@ public class BibliographicRetrieveBean {
     // Dodo Remove after migration to classifier
     @Timed
     public void migrateBibliographicEntityToClassifier(int agencyId, String bibliographicRecordId, String classifier) {
-        BibliographicEntity entity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, "", bibliographicRecordId));
+        BibliographicEntity entity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, "UNKNOWN", bibliographicRecordId));
         if (entity != null) {
             entityManager.remove(entity);
+            entity = new BibliographicEntity(agencyId, classifier, bibliographicRecordId,
+                                             entity.getWork(), entity.getUnit(), entity.getProducerVersion(),
+                                             entity.isDeleted(), entity.getIndexKeys(), entity.getTrackingId());
             entity.setClassifier(classifier);
             entityManager.persist(entity);
         }
