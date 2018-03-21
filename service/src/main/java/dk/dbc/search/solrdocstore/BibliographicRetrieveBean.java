@@ -43,6 +43,7 @@ public class BibliographicRetrieveBean {
     @Timed
     public void migrateBibliographicEntityToClassifier(int agencyId, String bibliographicRecordId, String classifier) {
         AgencyClassifierItemKey key = new AgencyClassifierItemKey(agencyId, "UNKNOWN", bibliographicRecordId);
+        log.debug("migrate key = {}", key);
         BibliographicEntity entity = entityManager.find(BibliographicEntity.class, key);
         if (entity != null) {
             entityManager.remove(entity);
