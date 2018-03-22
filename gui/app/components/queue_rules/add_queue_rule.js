@@ -41,7 +41,7 @@ class AddQueueRule extends React.PureComponent {
           disabled={this.props.addQueueRulePending}
           onClick={this.cancelEditor}
         >
-          Anullér
+          Annullér
         </button>
       ];
     } else {
@@ -52,7 +52,7 @@ class AddQueueRule extends React.PureComponent {
           disabled={this.props.addQueueRulePending}
           onClick={this.toggleQueueRuleEditor}
         >
-          Tilføj kø regel
+          Tilføj kø og regel
         </button>
       );
     }

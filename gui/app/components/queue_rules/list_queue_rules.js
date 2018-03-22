@@ -7,7 +7,7 @@ const ListQueueRules = ({ queueRules }) => {
     <table className="table">
       <thead className="thead-dark">
         <tr>
-          <th scope="col">Kø regler</th>
+          <th scope="col">Kø-liste</th>
         </tr>
       </thead>
       <tbody>
