@@ -37,6 +37,7 @@ BEGIN
           ADD CONSTRAINT bibliographicSolrKeys_pkey
           PRIMARY KEY (agencyId, classifier, bibliographicRecordId);
         -- SLOW - will time out on cluster health check
+        -- Only run by hand after service is up - blocks create index in V6__ 
         CREATE INDEX bibliographicsolrkeysjson
 --        CREATE INDEX CONCURRENTLY bibliographicsolrkeysjson
           ON bibliographicsolrkeys
