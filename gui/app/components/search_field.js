@@ -1,6 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
 import { searchBibRecord } from "../actions/searching";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  Input,
+  InputGroupText,
+  Button
+} from "reactstrap";
 
 class SearchField extends React.Component {
   constructor(props) {
@@ -20,30 +28,32 @@ class SearchField extends React.Component {
     const { pendingSearch } = this.props;
     return (
       <div className="py-4" style={{ textAlign: "center" }}>
-        <div className="input-group margin-bottom-sm">
-          <div className="input-group-prepend">
-            <span className="input-group-text">
+        <InputGroup>
+          <InputGroupAddon addonType="prepend">
+            <InputGroupText>
               <i className="fa fa-search fa-fw" aria-hidden="true" />
-            </span>
-          </div>
-          <input
-            className="form-control"
+            </InputGroupText>
+          </InputGroupAddon>
+          <Input
             placeholder="Indtast bibliographic record ID eller repository ID"
             type="text"
             value={this.state.search}
             onKeyPress={this.onKeyPressed}
             onChange={this.handleSearchTyped}
           />
-          <div className="input-group-append">
-            <button
-              className="btn btn-outline-primary search-btn"
-              disabled={pendingSearch}
-              onClick={this.searchSubmit}
-            >
-              {load}Søg
-            </button>
-          </div>
-        </div>
+          <InputGroupAddon addonType="append">
+            <InputGroupButton>
+              <Button
+                color="outline-primary"
+                className="search-btn"
+                disabled={pendingSearch}
+                onClick={this.searchSubmit}
+              >
+                {load}Søg
+              </Button>
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
       </div>
     );
   }

@@ -6,6 +6,16 @@ import BibliographicExplorer from "./bibliographic_explorer";
 import RelatedHoldingsExplorer from "./related_holdings";
 import { connect } from "react-redux";
 import { initialRetrieveBibItem } from "../actions/searching";
+import {
+  Nav,
+  NavItem,
+  NavLink,
+  TabContent,
+  TabPane,
+  Navbar,
+  NavbarBrand,
+  Collapse
+} from "reactstrap";
 
 const BIBLIOGRAPHIC_EXPLORER = 0;
 const RELATED_HOLDINGS_EXPLORER = 1;
@@ -52,17 +62,6 @@ class SolrDocstoreGUI extends React.PureComponent {
     }
   }
 
-  activeTabComponent() {
-    switch (this.state.activeItem) {
-      case BIBLIOGRAPHIC_EXPLORER:
-        return BibliographicExplorer;
-      case RELATED_HOLDINGS_EXPLORER:
-        return RelatedHoldingsExplorer;
-      default:
-        return BibliographicExplorer;
-    }
-  }
-
   activateTabWithKey(key) {
     this.setState({
       activeItem: key
@@ -82,18 +81,25 @@ class SolrDocstoreGUI extends React.PureComponent {
   }
 
   render() {
-    let ActiveTab = this.activeTabComponent();
     return (
       <div>
-        <nav className="navbar navbar-expand-lg navbar-light bg-dark">
-          <h3 className="navbar-brand text-light">
+        <Navbar color="dark" light expand="md">
+          <NavbarBrand href="/" className="text-light">
             solr-document-store Søgeværktøj
-          </h3>
-          <h4 className="text-light mx-4">{this.state.systemName}</h4>
-          <a className="nav-link text-light" href="/queue-admin.html">
-            Kø administrator
-          </a>
-        </nav>
+          </NavbarBrand>
+          <Collapse navbar>
+            <Nav className="mr-auto" navbar>
+              <NavItem>
+                <NavLink href="/queue-admin.html" className="text-light">
+                  Kø administrator
+                </NavLink>
+              </NavItem>
+              <NavItem className="text-light mx-4 my-2">
+                {this.state.systemName}
+              </NavItem>
+            </Nav>
+          </Collapse>
+        </Navbar>
         <div className="container-full p-5">
           <div className="row">
             <div className="col-6">
@@ -105,32 +111,33 @@ class SolrDocstoreGUI extends React.PureComponent {
             </div>
             <div className="col-6">
               <div className="py-4">
-                <ul className="nav nav-tabs">
-                  <li className="nav-item">
-                    <a
-                      className={
-                        "nav-link " + this.isActive(BIBLIOGRAPHIC_EXPLORER)
-                      }
-                      href="#"
+                <Nav tabs>
+                  <NavItem>
+                    <NavLink
+                      className={this.isActive(BIBLIOGRAPHIC_EXPLORER)}
                       onClick={this.activateIndexKeyExplorer}
                     >
                       Index keys
-                    </a>
-                  </li>
-                  <li className="nav-item">
-                    <a
-                      className={
-                        "nav-link " + this.isActive(RELATED_HOLDINGS_EXPLORER)
-                      }
-                      href="#"
+                    </NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink
+                      className={this.isActive(RELATED_HOLDINGS_EXPLORER)}
                       onClick={this.activateRelatedHoldingsExplorer}
                     >
                       Related holdings
-                    </a>
-                  </li>
-                </ul>
+                    </NavLink>
+                  </NavItem>
+                </Nav>
               </div>
-              <ActiveTab />
+              <TabContent activeTab={this.state.activeItem}>
+                <TabPane tabId={BIBLIOGRAPHIC_EXPLORER}>
+                  <BibliographicExplorer />
+                </TabPane>
+                <TabPane tabId={RELATED_HOLDINGS_EXPLORER}>
+                  <RelatedHoldingsExplorer />
+                </TabPane>
+              </TabContent>
             </div>
           </div>
         </div>
