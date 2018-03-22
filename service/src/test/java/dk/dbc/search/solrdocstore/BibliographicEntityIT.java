@@ -20,15 +20,16 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
             Map<String, List<String>> indexKeys = new HashMap<>();
             indexKeys.put("titel", Collections.singletonList("unix bogen"));
             indexKeys.put("id", Collections.singletonList("argle"));
-            BibliographicEntity be = new BibliographicEntity(200, "1234", "work:1", "unit:2", "1234", false, indexKeys, "");
+            BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "work:1", "unit:2", "1234", false, indexKeys, "");
             em.persist(be);
         });
 
-        AgencyItemKey key = new AgencyItemKey().withAgencyId(200).withBibliographicRecordId("1234");
+        AgencyClassifierItemKey key = new AgencyClassifierItemKey(200, "clazzifier", "1234");
         BibliographicEntity be2 = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicEntity.class, key));
 
         assertThat(be2.getAgencyId(), is(200));
+        assertThat(be2.getClassifier(), is("clazzifier"));
         assertThat(be2.getBibliographicRecordId(), is("1234"));
     }
 
@@ -37,14 +38,12 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         executeScriptResource("/entityTestData.sql");
         EntityManager em = env().getEntityManager();
 
-        AgencyItemKey key = new AgencyItemKey().withAgencyId(300).withBibliographicRecordId("4321");
+        AgencyClassifierItemKey key = new AgencyClassifierItemKey(300, "clazzifier", "4321");
         BibliographicEntity be = env().getPersistenceContext()
                 .run(() -> em.find(BibliographicEntity.class, key));
 
         assertThat(be.getAgencyId(), is(300));
-        assertThat(be.getBibliographicRecordId(), is("4321"));
-
-        assertThat(be.getAgencyId(), is(300));
+        assertThat(be.getClassifier(), is("clazzifier"));
         assertThat(be.getBibliographicRecordId(), is("4321"));
         assertThat(be.getWork(), is("work:3"));
         assertThat(be.getUnit(), is("unit:3"));

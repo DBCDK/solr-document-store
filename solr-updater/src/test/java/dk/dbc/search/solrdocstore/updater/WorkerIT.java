@@ -158,7 +158,7 @@ public class WorkerIT {
             PreparedQueueSupplier supplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
                     .preparedSupplier(connection);
 
-            supplier.enqueue("test", new QueueJob(300000, "23645564"));
+            supplier.enqueue("test", new QueueJob(300000, "clazzifier", "23645564"));
 
             int maxRuns = 2500 / 50;
             while (solrClient.query(new SolrQuery("*:*")).getResults().getNumFound() == 0) {

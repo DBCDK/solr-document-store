@@ -82,7 +82,7 @@ public class SolrWorker implements MessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(SolrWorker.class);
 
-    private static final Pattern ID_PATTERN = Pattern.compile("^\\d+-\\w+:(.*)-(\\d+)-\\w+$");
+    private static final Pattern ID_PATTERN = Pattern.compile("^\\d+-\\w+:(.*)-(\\d+)-(\\w+)$");
     private static final ObjectMapper O = new ObjectMapper();
 
     @EJB
@@ -208,13 +208,15 @@ public class SolrWorker implements MessageListener {
     private void makeMetadata(ObjectNode record, String id, boolean deleted, String unit, String work, String trackingId, Set<String> superceds) {
         Matcher matcher = ID_PATTERN.matcher(id);
         if(!matcher.matches()) {
-                throw new RuntimeException("invalid id: " + id);
+            throw new RuntimeException("invalid id: " + id);
         }
 
         String bibliographicRecordId = matcher.group(1);
         String agencyId = matcher.group(2);
-        record.put("bibliographicRecordId", bibliographicRecordId);
+        String classifier = matcher.group(3);
         record.put("agencyId", Integer.parseInt(agencyId, 10));
+        record.put("classifier", classifier);
+        record.put("bibliographicRecordId", bibliographicRecordId);
         record.put("deleted", deleted);
         if (unit != null) {
             record.put("unit", unit);

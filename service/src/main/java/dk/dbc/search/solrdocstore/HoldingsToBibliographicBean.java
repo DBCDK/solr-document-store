@@ -26,8 +26,11 @@ public class HoldingsToBibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    @Inject
+    BibliographicRetrieveBean brBean;
+
     @Timed
-    public Set<AgencyItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
+    public Set<AgencyClassifierItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
         LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
 
@@ -48,9 +51,9 @@ public class HoldingsToBibliographicBean {
 
 
     @Timed
-    public Set<AgencyItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
+    public Set<AgencyClassifierItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
         Map<Integer,LibraryConfig.LibraryType> map = new HashMap<>();
-        Set<AgencyItemKey> keysUpdated = EnqueueAdapter.makeSet();
+        Set<AgencyClassifierItemKey> keysUpdated = EnqueueAdapter.makeSet();
 
         for (String supersededRecordId : supersededRecordIds) {
             List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
@@ -105,10 +108,9 @@ public class HoldingsToBibliographicBean {
         }
     }
 
-    private Set<AgencyItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
+    private Set<AgencyClassifierItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
         for (int i=0; i<bibliographicAgencyPriorities.length;i++) {
-            Set<AgencyItemKey> keysUpdated;
-            keysUpdated =
+            Set<AgencyClassifierItemKey> keysUpdated =
                     attachIfExists(
                             bibliographicAgencyPriorities[i],
                             bibliographicRecordId,
@@ -120,7 +122,7 @@ public class HoldingsToBibliographicBean {
     }
 
 
-    private Set<AgencyItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
+    private Set<AgencyClassifierItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
         if (bibliographicEntityExists(bibliographicAgencyId,bibliographicRecordId)){
             HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
             return attachToAgency(expectedState);
@@ -129,19 +131,24 @@ public class HoldingsToBibliographicBean {
     }
 
     private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
-        AgencyItemKey k = new AgencyItemKey(agencyId, bibliographicRecordId);
-        BibliographicEntity e = entityManager.find(BibliographicEntity.class, k);
-        return ((e!=null)&&(!e.isDeleted()));
+        BibliographicEntity e = brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
+        return ( ( e != null ) && ( !e.isDeleted() ) );
     }
 
-    public Set<AgencyItemKey> attachToAgency(HoldingsToBibliographicEntity expectedState) {
+    public Set<AgencyClassifierItemKey> attachToAgency(HoldingsToBibliographicEntity expectedState) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
-        Set<AgencyItemKey> affectedKeys = EnqueueAdapter.makeSet();
+        Set<AgencyClassifierItemKey> affectedKeys = EnqueueAdapter.makeSet();
 
-        if ((foundEntity!=null) && !foundEntity.equals(expectedState)){
-            affectedKeys.add( EnqueueAdapter.makeKey(foundEntity.getBibliographicAgencyId(), foundEntity.getBibliographicRecordId()) );
+        if (( foundEntity != null ) && !foundEntity.equals(expectedState)) {
+            List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(foundEntity.getBibliographicAgencyId(), foundEntity.getBibliographicRecordId());
+            for (BibliographicEntity entityAffected : entitiesAffected) {
+                affectedKeys.add(entityAffected.asAgencyClassifierItemKey());
+            }
         }
-        affectedKeys.add( EnqueueAdapter.makeKey(expectedState.getBibliographicAgencyId(), expectedState.getBibliographicRecordId()) );
+        List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(expectedState.getBibliographicAgencyId(), expectedState.getBibliographicRecordId());
+        for (BibliographicEntity entityAffected : entitiesAffected) {
+            affectedKeys.add(entityAffected.asAgencyClassifierItemKey());
+        }
         entityManager.merge(expectedState);
         return affectedKeys;
     }

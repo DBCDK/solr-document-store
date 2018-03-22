@@ -19,6 +19,7 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import dk.dbc.search.solrdocstore.updater.SolrApi;
@@ -52,26 +53,17 @@ public class DocTest {
     private static final Logger log = LoggerFactory.getLogger(DocTest.class);
 
     @Inject
-    Config config;
-
-    @Inject
     DocProducer docProducer;
-
-    SolrClient client;
-
-    @PostConstruct
-    public void init() {
-        client = SolrApi.makeSolrClient(config.getSolrUrl());
-    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("format/{agencyId : \\d+}/{bibliographicRecordId : .*$}")
+    @Path("format/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
     public Response format(@PathParam("agencyId") int agencyId,
+                           @PathParam("classifier") String classifier,
                            @PathParam("bibliographicRecordId") String bibliographicRecordId) throws InterruptedException, ExecutionException, IOException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         try {
-            JsonNode node = docProducer.get(agencyId, bibliographicRecordId);
+            JsonNode node = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             boolean deleted = docProducer.isDeleted(node);
             if (deleted) {
                 return Response.ok(false).build();
@@ -90,12 +82,17 @@ public class DocTest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("deploy/{agencyId : \\d+}/{bibliographicRecordId : .*$}")
+    @Path("deploy/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
     public Response deploy(@PathParam("agencyId") int agencyId,
+                           @PathParam("classifier") String classifier,
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            docProducer.deploy(agencyId, bibliographicRecordId, client, commitWithin);
+            JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
+            SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
+            String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
+            docProducer.deleteSolrDocuments(bibliographicShardId, 0);
+            docProducer.deploy(doc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
         } catch (SolrServerException | IOException ex) {
             log.error("Exception: {}", ex.getMessage());

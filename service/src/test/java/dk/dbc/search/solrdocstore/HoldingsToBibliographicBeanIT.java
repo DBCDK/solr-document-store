@@ -9,11 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -23,9 +21,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     @Before
     public void before(){
         em = env().getEntityManager();
-        bean = new HoldingsToBibliographicBean();
-        bean.entityManager = em;
-        bean.libraryConfig = new LibraryConfig();
+        bean = createHoldingsToBibliographicBean(env());
     }
 
     @Test
@@ -37,10 +33,10 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.libraryConfig = mockToReturn(LibraryConfig.LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             createH2BRecord(agencyId, bibliographicRecordId, 132);
-            Set<AgencyItemKey> affectedKeys = bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            Set<AgencyClassifierItemKey> affectedKeys = bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity abc = fetchH2BRecord(agencyId, bibliographicRecordId);
             affectedIs(affectedKeys,
-                    EnqueueAdapter.makeKey(agencyId,bibliographicRecordId));
+                    EnqueueAdapter.makeKey(agencyId, "clazzifier" ,bibliographicRecordId));
             assertNotNull(abc);
             assertEquals(132, abc.getBibliographicAgencyId());
         });
@@ -194,15 +190,15 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createB2B(originalRecordId, superseedingRecordId);
             em.flush();
 
-            Set<AgencyItemKey> affectedKeys = bean.recalcAttachments(superseedingRecordId, new HashSet<>(Arrays.asList(new String[]{originalRecordId})));
+            Set<AgencyClassifierItemKey> affectedKeys = bean.recalcAttachments(superseedingRecordId, new HashSet<>(Arrays.asList(new String[]{originalRecordId})));
 
             affectedIs(affectedKeys,
-                    EnqueueAdapter.makeKey(LibraryConfig.COMMON_AGENCY, originalRecordId),
-                    EnqueueAdapter.makeKey(LibraryConfig.SCHOOL_COMMON_AGENCY, originalRecordId),
-                    EnqueueAdapter.makeKey(fbsAgencyWithLocalBib, originalRecordId),
-                    EnqueueAdapter.makeKey(LibraryConfig.COMMON_AGENCY, superseedingRecordId),
-                    EnqueueAdapter.makeKey(LibraryConfig.SCHOOL_COMMON_AGENCY, superseedingRecordId),
-                    EnqueueAdapter.makeKey(fbsAgencyWithLocalBib, superseedingRecordId)
+                    EnqueueAdapter.makeKey(LibraryConfig.COMMON_AGENCY, "clazzifier", originalRecordId),
+                    EnqueueAdapter.makeKey(LibraryConfig.SCHOOL_COMMON_AGENCY, "clazzifier", originalRecordId),
+                    EnqueueAdapter.makeKey(fbsAgencyWithLocalBib, "clazzifier", originalRecordId),
+                    EnqueueAdapter.makeKey(LibraryConfig.COMMON_AGENCY, "clazzifier", superseedingRecordId),
+                    EnqueueAdapter.makeKey(LibraryConfig.SCHOOL_COMMON_AGENCY, "clazzifier", superseedingRecordId),
+                    EnqueueAdapter.makeKey(fbsAgencyWithLocalBib, "clazzifier", superseedingRecordId)
                     );
             assertH2B(fbsAgencyWithoutLocalBib, originalRecordId, LibraryConfig.COMMON_AGENCY, superseedingRecordId);
             assertH2B(fbsSchoolAgency, originalRecordId, LibraryConfig.SCHOOL_COMMON_AGENCY, superseedingRecordId);
@@ -257,17 +253,17 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
                     new HoldingsToBibliographicKey(agencyId, bibliographicRecordId));
     }
     private void deleteBibRecord(int agencyId, String bibliographicRecordId){
-        BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyItemKey().withAgencyId(agencyId).withBibliographicRecordId(bibliographicRecordId));
+        BibliographicEntity e = em.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, "clazzifier", bibliographicRecordId));
         e.setDeleted(true);
         em.merge(e);
     }
 
     private void createBibRecord(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity e = new BibliographicEntity(agencyId, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         em.merge(e);
     }
 
-    private void affectedIs(Set<AgencyItemKey> affectedKeys, AgencyItemKey... keys) {
+    private void affectedIs(Set<AgencyClassifierItemKey> affectedKeys, AgencyClassifierItemKey... keys) {
         assertThat(affectedKeys, containsInAnyOrder(keys));
         assertEquals(keys.length,affectedKeys.size());
     }

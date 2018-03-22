@@ -1,0 +1,1 @@
+CREATE INDEX  bibliographicsolrkeys_bibliographicrecordid ON bibliographicsolrkeys(bibliographicrecordid);

@@ -74,8 +74,8 @@ public class QueueJobIT {
     public void testStoreRetrieve() throws Exception {
         System.out.println("store-retrieve");
 
-        QueueJob job1 = new QueueJob(888888, "12345678");
-        QueueJob job2 = new QueueJob(888888, "87654321", 1000);
+        QueueJob job1 = new QueueJob(888888, "clazzifier", "12345678");
+        QueueJob job2 = new QueueJob(888888, "clazzifier", "87654321", 1000);
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedQueueSupplier<QueueJob> supplier = QUEUE_SUPPLIER.preparedSupplier(connection);
