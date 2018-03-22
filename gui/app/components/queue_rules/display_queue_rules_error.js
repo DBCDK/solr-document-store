@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import { Alert } from "reactstrap";
 
 const DisplayQueueRuleError = ({
   queueRulesErrorMessage,
@@ -14,11 +15,11 @@ const DisplayQueueRuleError = ({
     return null;
   }
   return (
-    <div className="alert alert-danger" role="alert">
+    <Alert color="danger">
       {queueRulesErrorMessage}
       {addQueueRuleErrorMessage}
       {deleteQueueRuleErrorMessage}
-    </div>
+    </Alert>
   );
 };
 

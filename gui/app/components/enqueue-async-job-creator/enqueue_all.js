@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { enqueueAllJob } from "../../actions/async_job";
+import { Button } from "reactstrap";
 
 class EnqueueAllAsyncJob extends React.Component {
   constructor(props) {
@@ -35,13 +36,9 @@ class EnqueueAllAsyncJob extends React.Component {
             onClick={this.toggleDeleteIncluded}
           />
         </span>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={this.enqueueAll}
-        >
+        <Button color="primary" onClick={this.enqueueAll}>
           Start job
-        </button>
+        </Button>
       </div>
     );
   }

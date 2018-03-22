@@ -1,10 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
 import QueueRuleListItem from "./queue_rule_list_item";
+import { Table } from "reactstrap";
 
 const ListQueueRules = ({ queueRules }) => {
   return (
-    <table className="table">
+    <Table>
       <thead className="thead-dark">
         <tr>
           <th scope="col">Kø-liste</th>
@@ -15,7 +16,7 @@ const ListQueueRules = ({ queueRules }) => {
           <QueueRuleListItem key={rule.queue} queueRule={rule} />
         ))}
       </tbody>
-    </table>
+    </Table>
   );
 };
 

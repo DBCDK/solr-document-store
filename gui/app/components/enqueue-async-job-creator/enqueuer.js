@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { queueErrorsWithPattern } from "../../actions/async_job";
+import { Button } from "reactstrap";
 
 class EnqueueAsyncJob extends React.PureComponent {
   constructor(props) {
@@ -27,13 +28,9 @@ class EnqueueAsyncJob extends React.PureComponent {
           value={this.state.consumerInput}
           onChange={e => this.setState({ consumerInput: e.target.value })}
         />
-        <button
-          type="button"
-          className="btn btn-primary ml-3"
-          onClick={this.enqueue}
-        >
+        <Button color="primary" className="ml-3" onClick={this.enqueue}>
           Start job
-        </button>
+        </Button>
       </div>
     );
   }

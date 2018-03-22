@@ -2,6 +2,16 @@ import React from "react";
 import QueueRules from "./queue_rules";
 import AsyncJobMonitor from "./async_job_monitor";
 import EnqueueAsyncJobCreator from "./enqueue-async-job-creator";
+import {
+  Nav,
+  NavItem,
+  NavLink,
+  TabContent,
+  TabPane,
+  Navbar,
+  NavbarBrand,
+  Collapse
+} from "reactstrap";
 
 class QueueAdminGUI extends React.PureComponent {
   constructor(props) {
@@ -23,15 +33,23 @@ class QueueAdminGUI extends React.PureComponent {
   render() {
     return (
       <div>
-        <nav className="navbar navbar-expand-lg navbar-light bg-dark">
-          <h3 className="navbar-brand text-light">
+        <Navbar color="dark" light expand="md">
+          <NavbarBrand href="/queue-admin.html" className="text-light">
             solr-document-store Kø-værktøj
-          </h3>
-          <h4 className="text-light mx-4">{this.state.systemName}</h4>
-          <a className="nav-link text-light" href="/">
-            Søge værktøj
-          </a>
-        </nav>
+          </NavbarBrand>
+          <Collapse navbar>
+            <Nav className="mr-auto" navbar>
+              <NavItem>
+                <NavLink href="/" className="text-light">
+                  Søge værktøj
+                </NavLink>
+              </NavItem>
+              <NavItem className="text-light mx-4 my-2">
+                {this.state.systemName}
+              </NavItem>
+            </Nav>
+          </Collapse>
+        </Navbar>
         <div className="container-full p-5">
           <div className="row">
             <div className="col-6">
