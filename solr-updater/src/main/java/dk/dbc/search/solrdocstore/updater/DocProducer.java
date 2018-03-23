@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -82,6 +83,7 @@ public class DocProducer {
 
     private Client client;
     private UriBuilder uriTemplate;
+    SolrClient solrClient;
 
     private static final Timer UNITTESTING_TIMER = new Timer();
 
@@ -97,7 +99,8 @@ public class DocProducer {
         String solrDocStoreUrl = config.getSolrDocStoreUrl();
         log.debug("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.uriTemplate = UriBuilder.fromUri(solrDocStoreUrl)
-                .path("api/retrieve/combined/{agencyId}/{bibliographicRecordId}");
+                .path("api/retrieve/combined/{agencyId}/{classifier}/{bibliographicRecordId}");
+        this.solrClient = SolrApi.makeSolrClient(config.getSolrUrl());
     }
 
     /**
@@ -105,40 +108,15 @@ public class DocProducer {
      * <p>
      * Delete from solr, of not deleted then add too
      *
-     * @param agencyId              agency of document
-     * @param bibliographicRecordId record id of document
-     * @param client                Solr instance connection
-     * @param commitWithin          optional - number of milliseconds before a
-     *                              commit should occur
+     * @param doc          The document to post to the solr (null if no
+     *                     documents)
+     * @param commitWithin optional - number of milliseconds before a
+     *                     commit should occur
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    public void deploy(int agencyId, String bibliographicRecordId, SolrClient client, Integer commitWithin) throws IOException, SolrServerException {
-        log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
-        JsonNode collection = get(agencyId, bibliographicRecordId);
-        log.trace("collection = {}", collection);
-        boolean deleted = isDeleted(collection);
-        log.trace("deleted = {}", deleted);
+    public void deploy(SolrInputDocument doc, Integer commitWithin) throws IOException, SolrServerException {
 
-        SolrInputDocument doc = null;
-        if (!deleted) {
-            doc = inputDocument(collection);
-        }
-        String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
-
-        List<String> ids = documentsIdsByRoot(id, client);
-
-        if (!ids.isEmpty()) {
-            try (Timer.Context time = deleteByIdTimer.time()) {
-                if (commitWithin == null || commitWithin <= 0) {
-                    client.deleteById(ids);
-                } else {
-                    client.deleteById(ids, commitWithin);
-                }
-            }
-        }
-
-        log.debug("Ids deleted: {}", ids);
         if (doc != null) {
             if (log.isDebugEnabled()) {
                 List<SolrInputDocument> children = doc.getChildDocuments();
@@ -153,12 +131,54 @@ public class DocProducer {
             }
             try (Timer.Context time = addDocumentTimer.time()) {
                 if (commitWithin == null || commitWithin <= 0) {
-                    client.add(doc);
+                    solrClient.add(doc);
                 } else {
-                    client.add(doc, commitWithin);
+                    solrClient.add(doc, commitWithin);
                 }
             }
         }
+    }
+
+    /**
+     * Delete documents from solr, by searching all those with
+     * _root_:${biblShardId}
+     *
+     * @param bibliographicShardId the root id of the document to purge
+     * @param commitWithin         then to commit
+     * @throws IOException         solr communication error
+     * @throws SolrServerException solr communication error
+     */
+    //! Todo: add another n sub documents pr holdingid if more has been addad before last commit, also take into account the known subdocument ids from sourceDoc
+    public void deleteSolrDocuments(String bibliographicShardId, Integer commitWithin) throws IOException, SolrServerException {
+        List<String> ids = documentsIdsByRoot(bibliographicShardId, solrClient);
+        if (!ids.isEmpty()) {
+            try (Timer.Context time = deleteByIdTimer.time()) {
+                if (commitWithin == null || commitWithin <= 0) {
+                    solrClient.deleteById(ids);
+                } else {
+                    solrClient.deleteById(ids, commitWithin);
+                }
+            }
+        }
+        log.debug("Ids deleted: {}", ids);
+    }
+
+    /**
+     * Create the solr document with only the known field, inlining holdingitems
+     * and synthesize fields
+     *
+     * @param sourceDoc the document from {@link  #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
+     *                  }
+     * @return null if deleted otherwise a expanded solr document
+     */
+    public SolrInputDocument createSolrDocument(JsonNode sourceDoc) {
+        boolean deleted = isDeleted(sourceDoc);
+        log.trace("deleted = {}", deleted);
+        SolrInputDocument doc = null;
+        if (!deleted) {
+            doc = inputDocument(sourceDoc);
+        }
+        return doc;
     }
 
     private List<String> documentsIdsByRoot(String id, SolrClient client1) throws IOException, SolrServerException {
@@ -184,13 +204,12 @@ public class DocProducer {
     /**
      * Get a json document from the solr-doc-store
      *
-     * @param agencyId              agency for a document
-     * @param bibliographicRecordId recordid for document
+     * @param job What to fetch from solr-doc-store
      * @return the document collection
      * @throws IOException In case of http errors
      */
-    public JsonNode get(int agencyId, String bibliographicRecordId) throws IOException {
-        URI uri = uriTemplate.buildFromMap(mapForUri(agencyId, bibliographicRecordId));
+    public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
+        URI uri = uriTemplate.buildFromMap(mapForUri(job));
         log.debug("Fetching: {}", uri);
         Response response;
         try (Timer.Context time = fetchTimer.time()) {
@@ -209,7 +228,9 @@ public class DocProducer {
         if (!( entity instanceof InputStream )) {
             throw new IOException("Could read document " + uri + ": not of inputstream type");
         }
-        return OBJECT_MAPPER.readTree((InputStream) entity);
+        JsonNode sourceDoc = OBJECT_MAPPER.readTree((InputStream) entity);
+        log.trace("sourceDoc = {}", sourceDoc);
+        return sourceDoc;
     }
 
     /**
@@ -219,17 +240,19 @@ public class DocProducer {
      * @param bibliographicRecordId record
      * @return map
      */
-    private static Map<String, String> mapForUri(int agencyId, String bibliographicRecordId) {
+    private static Map<String, String> mapForUri(QueueJob job) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("agencyId", String.valueOf(agencyId));
-        map.put("bibliographicRecordId", bibliographicRecordId);
+        map.put("agencyId", String.valueOf(job.getAgencyId()));
+        map.put("classifier", job.getClassifier());
+        map.put("bibliographicRecordId", job.getBibliographicRecordId());
         return map;
     }
 
     /**
      * Check if a document is deleted
      *
-     * @param collection from {@link #get(int, java.lang.String) }
+     * @param collection from {@link #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
+     *                   }
      * @return if it's deleted or not
      */
     public boolean isDeleted(JsonNode collection) {
@@ -239,16 +262,16 @@ public class DocProducer {
     /**
      * Construct a solr input document from solr-doc-store content
      *
-     * @param collection docstore collection
+     * @param sourceDoc docstore collection
      * @return solr document
      */
-    public SolrInputDocument inputDocument(JsonNode collection) {
-        String id = shardId(find(collection, "bibliographicRecord"), "bibliographic");
-        String linkId = id(find(collection, "bibliographicRecord"), "link");
+    public SolrInputDocument inputDocument(JsonNode sourceDoc) {
+        String id = bibliographicShardId(sourceDoc);
+        String linkId = id + "-link";
 
-        filterOutDecommissioned(collection);
+        filterOutDecommissioned(sourceDoc);
 
-        JsonNode indexKeys = find(collection, "bibliographicRecord", "indexKeys");
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         String repositoryId = getField(indexKeys, "rec.repositoryId");
         if (repositoryId == null) {
             throw new IllegalStateException("Cannot get rec.repositoryId from document");
@@ -257,9 +280,9 @@ public class DocProducer {
         setField(indexKeys, "id", id);
         setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
-        addRecHoldingsAgencyId(indexKeys, collection);
+        addRecHoldingsAgencyId(indexKeys, sourceDoc);
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
-        addNestedHoldingsDocuments(doc, collection, linkId, repositoryId);
+        addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
 
         return doc;
     }
@@ -332,14 +355,16 @@ public class DocProducer {
      * Append all holdings as nested document
      *
      * @param doc          root solr document
-     * @param collection   document containing holdings
+     * @param sourceDoc    document containing holdings
      * @param linkId       id for linking foe solr join searches
      * @param repositoryId id of record used by
      */
-    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode collection, String linkId, String repositoryId) {
-        JsonNode records = find(collection, "holdingsItemRecords");
+    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
-            String id = shardId(record, "holdings");
+            String id = bibliographicShardId(sourceDoc) + "@" +
+                        find(record, "agencyId").asText() + "-" +
+                        find(record, "bibliographicRecordId").asText();
             JsonNode indexKeyList = find(record, "indexKeys");
             int i = 0;
             for (JsonNode indexKeys : indexKeyList) {
@@ -356,27 +381,27 @@ public class DocProducer {
     /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
-     * @param record Json node with agencyid/bibliographicrecordid
-     * @param type   id prefix
+     * @param sourceDoc Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    private String shardId(JsonNode record, String type) {
-        String bibliographicRecordId = find(record, "bibliographicRecordId").asText();
-        return bibliographicRecordId + "/32!" + id(record, type);
+    public String bibliographicShardId(JsonNode sourceDoc) {
+        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
+        return shardId(bibliographicRecord);
     }
 
     /**
-     * Construct an id string
+     * Construct an id string with sharding info using bibliographicrecordid
      *
-     * @param record Json node with agencyid/bibliographicrecordid
-     * @param type   id prefix
+     * @param bibliographicRecord Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    private String id(JsonNode record, String type) {
-        String bibliographicRecordId = find(record, "bibliographicRecordId").asText();
-        String agencyId = find(record, "agencyId").asText();
-        return String.join("-", type, agencyId, bibliographicRecordId);
+    private String shardId(JsonNode bibliographicRecord) {
+        String agencyId = find(bibliographicRecord, "agencyId").asText();
+        String classifier = find(bibliographicRecord, "classifier").asText();
+        String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
+        return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
     }
+
 
     /**
      * Find a node in a json structure

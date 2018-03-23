@@ -15,10 +15,11 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 
 public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
     int commonAgency = LibraryConfig.COMMON_AGENCY;
-    int[] holdingAgencies = { 133, 134, 135};
+    int[] holdingAgencies = { 133, 134, 135 };
 
     EntityManager em ;
     JSONBContext jsonbContext = new JSONBContext();
@@ -29,17 +30,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     public void before(){
         // Setup bean
         em = env().getEntityManager();
-        bean = new BiliographicRecordAPIBean();
-        bean.entityManager = em;
-
-        bean.bibliographicBean = new BibliographicBean();
-        bean.bibliographicBean.entityManager = em;
-
-        bean.holdingsItemBean = new HoldingsItemBean();
-        bean.holdingsItemBean.entityManager = em;
-        bean.holdingsItemBean.h2bBean = new HoldingsToBibliographicBean();
-        bean.holdingsItemBean.h2bBean.entityManager = em;
-
+        bean = createBiliographicRecordAPIBean(jpaTestEnvironment);
 
         // Setup records
         env().getPersistenceContext().run( () -> {
@@ -89,7 +80,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
        BibliographicFrontendEntity res = (BibliographicFrontendEntity)result.getEntity();
        Map<String,List<String>> map = new HashMap<>();
        map.put("rec.repositoryId", Collections.singletonList("p-o"));
-       BibliographicEntity b = new BibliographicEntity(103862,"page-order","work:2","unit:6","producer:3",false,map,"track:8");
+       BibliographicEntity b = new BibliographicEntity(103862, "clazzifier","page-order","work:2","unit:6","producer:3",false,map,"track:8");
        Assert.assertEquals(res,new BibliographicFrontendEntity(b,"0639423"));
     }
 
@@ -239,7 +230,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     }
 
     private BibliographicEntity createBibliographicEntity(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity b = new BibliographicEntity(agencyId, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         em.persist(b);
         return b;
     }

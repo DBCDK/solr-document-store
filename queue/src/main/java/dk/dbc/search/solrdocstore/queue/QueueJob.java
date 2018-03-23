@@ -32,23 +32,30 @@ import static java.sql.Types.*;
 public class QueueJob {
 
     private final int agencyId;
+    private final String classifier;
     private final String bibliographicRecordId;
     private final Integer commitWithin;
 
-    public QueueJob(int agencyId, String bibliographicRecordId) {
+    public QueueJob(int agencyId, String classifier, String bibliographicRecordId) {
         this.agencyId = agencyId;
+        this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
         this.commitWithin = null;
     }
 
-    public QueueJob(int agencyId, String bibliographicRecordId, Integer commitWithin) {
+    public QueueJob(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
         this.agencyId = agencyId;
+        this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
         this.commitWithin = commitWithin;
     }
 
     public int getAgencyId() {
         return agencyId;
+    }
+
+    public String getClassifier() {
+        return classifier;
     }
 
     public String getBibliographicRecordId() {
@@ -65,11 +72,11 @@ public class QueueJob {
 
     @Override
     public String toString() {
-        return "QueueJob{" + "agencyId=" + agencyId + ", bibliographicRecordId=" + bibliographicRecordId + ", commitWithin=" + commitWithin + '}';
+        return "QueueJob{" + "agencyId=" + agencyId + ", classifier=" + classifier + ", bibliographicRecordId=" + bibliographicRecordId + ", commitWithin=" + commitWithin + '}';
     }
 
     public static final QueueStorageAbstraction<QueueJob> STORAGE_ABSTRACTION = new QueueStorageAbstraction<QueueJob>() {
-        private final String[] COLUMNS = "agencyId,bibliographicRecordId,commitWithin".split(",");
+        private final String[] COLUMNS = "agencyId,classifier,bibliographicRecordId,commitWithin".split(",");
 
         @Override
         public String[] columnList() {
@@ -79,17 +86,19 @@ public class QueueJob {
         @Override
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
             int agencyId = resultSet.getInt(startColumn++);
+            String classifier = resultSet.getString(startColumn++);
             String bibliographicRecordId = resultSet.getString(startColumn++);
             Integer commitwithin = resultSet.getInt(startColumn++);
             if (resultSet.wasNull()) {
                 commitwithin = null;
             }
-            return new QueueJob(agencyId, bibliographicRecordId, commitwithin);
+            return new QueueJob(agencyId, classifier, bibliographicRecordId, commitwithin);
         }
 
         @Override
         public void saveJob(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
             stmt.setInt(startColumn++, job.getAgencyId());
+            stmt.setString(startColumn++, job.getClassifier());
             stmt.setString(startColumn++, job.getBibliographicRecordId());
             if (job.hasCommitWithin()) {
                 stmt.setInt(startColumn++, job.getCommitwithin());

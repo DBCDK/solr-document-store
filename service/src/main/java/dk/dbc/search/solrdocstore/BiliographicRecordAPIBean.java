@@ -13,10 +13,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Order;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,7 +31,7 @@ public class BiliographicRecordAPIBean {
     private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
 
     @Inject
-    BibliographicBean bibliographicBean;
+    BibliographicRetrieveBean brBean;
 
     @Inject
     HoldingsItemBean holdingsItemBean;
@@ -47,11 +43,9 @@ public class BiliographicRecordAPIBean {
         return (int)Math.ceil((double)resCount/pageSize);
     }
 
-    /**
+    /*
      * Returns a json object with a result field, which is a list of json BibliographicEntity that matches
      * holdingsBibliographicRecordId with the argument. Also includes the supersede id, if it exists.
-     * @param bibliographicRecordId path parameter, expects URI encoding
-     * @return Response
      */
     @GET
     @Path("bibliographic-records/bibliographic-record-id/{bibliographicRecordId}")
@@ -69,13 +63,13 @@ public class BiliographicRecordAPIBean {
         if (!BibliographicEntity.sortableColumns.contains(orderBy)){
             return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
         }
-        Query frontendQuery = bibliographicBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId,orderBy,desc);
+        Query frontendQuery = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId,orderBy,desc);
         List<Object[]> resultList = frontendQuery.setFirstResult((page-1)*pageSize).setMaxResults(pageSize).getResultList();
         List<BibliographicFrontendEntity> bibliographicFrontendEntityList = resultList.stream().map((record) -> {
             BibliographicEntity b = (BibliographicEntity)record[0];
             return new BibliographicFrontendEntity(b,(String)record[1]);
         }).collect(Collectors.toList());
-        long countResult = bibliographicBean.getBibliographicEntityCountById(bibliographicRecordId);
+        long countResult = brBean.getBibliographicEntityCountById(bibliographicRecordId);
         return Response.ok(new FrontendReturnListType<>(bibliographicFrontendEntityList,pageCount(countResult,pageSize)), MediaType.APPLICATION_JSON).build();
     }
 
@@ -140,12 +134,9 @@ public class BiliographicRecordAPIBean {
         return Response.ok(new BibliographicFrontendEntity((BibliographicEntity)record[0],(String)record[1])).build();
     }
 
-    /**
+    /*
      * Returns a json object with a result field, which is a list of json HoldingsItemEntity mapped via the
      * holdingsToBibliographic table.
-     * @param bibliographicRecordId
-     * @param bibliographicAgencyId
-     * @return Response
      */
     @GET
     @Path("related-holdings/{bibliographicRecordId}/{bibliographicAgencyId}")

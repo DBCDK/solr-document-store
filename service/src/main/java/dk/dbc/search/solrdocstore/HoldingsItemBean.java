@@ -55,7 +55,7 @@ public class HoldingsItemBean {
     public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin){
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
-        Set<AgencyItemKey> affectedKeys =
+        Set<AgencyClassifierItemKey> affectedKeys =
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
         EnqueueAdapter.enqueueAll(queue, affectedKeys,commitWithin);
     }

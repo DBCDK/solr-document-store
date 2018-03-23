@@ -18,18 +18,13 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -37,7 +32,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.junit.AfterClass;
+import org.apache.solr.common.SolrInputDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -135,54 +130,55 @@ public class DocProducerIT {
     @Ignore
     public void loadAndDelete() throws Exception {
         System.out.println("loadAndDelete");
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrClient, 3);
+        deployAndSearch(300000, docProducer, 3);
 
         // Merge is no implemented yet, so clear table to load new (deleted) record
         //! @todo remove clear, when merge and recalc h2b is done
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part2", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrClient, 0);
+        deployAndSearch(300000, docProducer, 0);
     }
 
     @Test
     @Ignore
     public void loadAndFewerHolding() throws Exception {
         System.out.println("loadAndFewerHolding");
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrClient, 3);
+        deployAndSearch(300000, docProducer, 3);
 
         pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part3", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrClient, 2);
+        deployAndSearch(300000, docProducer, 2);
     }
 
     @Test
     public void creatAndDeleteWithoutHoldings() throws Exception {
         System.out.println("creatAndDeleteWithoutHoldings");
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
 
         Requests.load("test2-part1", solrDocStoreUrl);
 
-        deployAndSearch(300010, docProducer, solrClient, 1);
+        deployAndSearch(300010, docProducer, 1);
 
         Requests.load("test2-part2", solrDocStoreUrl);
 
-        deployAndSearch(300010, docProducer, solrClient, 0);
+        deployAndSearch(300010, docProducer, 0);
     }
 
-    private void deployAndSearch(int agencyId, DocProducer docProducer, SolrClient solrClient, int expected) throws SolrServerException, IOException {
-        docProducer.deploy(agencyId, "23645564", solrClient, 0);
-        solrClient.commit(true, true);
-        QueryResponse response1 = solrClient.query(new SolrQuery("*:*"));
+    private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException {
+        JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, "clazzifier", "23645564"));
+        SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
+        String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
+        docProducer.deleteSolrDocuments(bibliographicShardId, 0);
+        docProducer.deploy(doc, 0);
+        docProducer.solrClient.commit(true, true);
+        QueryResponse response1 = docProducer.solrClient.query(new SolrQuery("*:*"));
         System.out.println("response = " + response1);
         assertEquals(expected, response1.getResults().getNumFound());
     }

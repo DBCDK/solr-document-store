@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -38,13 +37,11 @@ public class EnqueueSupplierBean {
     @Inject
     QueueRulesDaemon daemon;
 
-    public EnqueueService<AgencyItemKey> getManifestationEnqueueService() {
+    public EnqueueService<AgencyClassifierItemKey> getManifestationEnqueueService() {
         // EclipseLink specific
         Connection connection = entityManager.unwrap(java.sql.Connection.class);
         return new EnqueueService<>(connection, daemon.getManifestationQueues(),
-                                    (key, commitWithin) ->
-                                    new QueueJob(key.getAgencyId(), key.getBibliographicRecordId(),
-                                                 commitWithin));
+                                    (key, commitWithin) -> key.toQueueJob(commitWithin));
     }
 
 }
