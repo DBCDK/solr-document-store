@@ -39,6 +39,23 @@ public class BibliographicRetrieveBean {
         }
     }
 
+    // Dodo Remove after migration to classifier
+    @Timed
+    public void migrateBibliographicEntityToClassifier(int agencyId, String classifier, String bibliographicRecordId) {
+        AgencyClassifierItemKey key = new AgencyClassifierItemKey(agencyId, "UNKNOWN", bibliographicRecordId);
+        log.debug("migrate key = {}", key);
+        BibliographicEntity entity = entityManager.find(BibliographicEntity.class, key);
+        if (entity != null) {
+            entityManager.remove(entity);
+            log.info("Migrating {} to {}", key, classifier);
+            entity = new BibliographicEntity(agencyId, classifier, bibliographicRecordId,
+                                             entity.getWork(), entity.getUnit(), entity.getProducerVersion(),
+                                             entity.isDeleted(), entity.getIndexKeys(), entity.getTrackingId());
+            entity.setClassifier(classifier);
+            entityManager.persist(entity);
+        }
+    }
+
     @Timed
     public List<BibliographicEntity> getBibliographicEntities(int agencyId, String bibliographicRecordId) {
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
