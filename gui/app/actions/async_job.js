@@ -14,6 +14,11 @@ export const ASYNC_JOB_ERROR = "Async job had an error";
 export const ENQUEUE_ALL_JOB = "Enqueuing all elements on queue";
 export const ASYNC_JOB_ERROR_WITH_PATTERN =
   "Queueing elements following pattern";
+export const ASYNC_JOB_FINISHED_JOB_SORT = "Changing sort by in finished jobs";
+export const ASYNC_JOB_FINISHED_JOB_SORT_BY_STARTED =
+  "Changing sort by started in finished jobs";
+export const ASYNC_JOB_FINISHED_JOB_SORT_BY_EARLIEST =
+  "Changing sort by earliest in finished jobs";
 
 export const requestSubscribe = uuid => ({
   type: REQUEST_SUBSCRIBE,
@@ -95,4 +100,20 @@ export const queueErrorsWithPattern = (path, pattern, consumer) => ({
   path,
   pattern,
   consumer
+});
+
+export const sortByFinishedJobs = (sortByStarted, sortByEarliest) => ({
+  type: ASYNC_JOB_FINISHED_JOB_SORT,
+  sortByStarted,
+  sortByEarliest
+});
+
+export const sortByStartedFinishedJobs = sortByStarted => ({
+  type: ASYNC_JOB_FINISHED_JOB_SORT_BY_STARTED,
+  sortByStarted
+});
+
+export const sortByEarliestFinishedJobs = sortByEarliest => ({
+  type: ASYNC_JOB_FINISHED_JOB_SORT_BY_EARLIEST,
+  sortByEarliest
 });

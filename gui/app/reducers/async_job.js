@@ -11,7 +11,10 @@ import {
   RECEIVED_ASYNC_JOB_LIST,
   RECEIVED_FULL_LOG,
   WEBSOCKET_ERROR,
-  ASYNC_JOB_ERROR
+  ASYNC_JOB_ERROR,
+  ASYNC_JOB_FINISHED_JOB_SORT,
+  ASYNC_JOB_FINISHED_JOB_SORT_BY_STARTED,
+  ASYNC_JOB_FINISHED_JOB_SORT_BY_EARLIEST
 } from "../actions/async_job";
 import update from "immutability-helper";
 
@@ -32,7 +35,9 @@ export const produceInitialState = () => ({
   //websocketErrorMessage: "",
   asyncJobErrorMessage: "",
   // Has type: Map<UUID,List<String>>, ie. the log lines of each of the jobs we are subscribed to
-  logs: new Map()
+  logs: new Map(),
+  sortByStarted: true,
+  sortByEarliest: true
 });
 
 export default function asyncJobReducer(
@@ -114,6 +119,19 @@ export default function asyncJobReducer(
       return update(state, {
         asyncJobsPending: { $set: false },
         asyncJobErrorMessage: { $set: action.message }
+      });
+    case ASYNC_JOB_FINISHED_JOB_SORT:
+      return update(state, {
+        sortByStarted: { $set: action.sortByStarted },
+        sortByEarliest: { $set: action.sortByEarliest }
+      });
+    case ASYNC_JOB_FINISHED_JOB_SORT_BY_STARTED:
+      return update(state, {
+        sortByStarted: { $set: action.sortByStarted }
+      });
+    case ASYNC_JOB_FINISHED_JOB_SORT_BY_EARLIEST:
+      return update(state, {
+        sortByEarliest: { $set: action.sortByEarliest }
       });
     default:
       return state;
