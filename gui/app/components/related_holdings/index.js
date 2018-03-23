@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import Loading from "../loading";
 import RelatedHoldingsItem from "./related_holdings_item";
+import { Alert } from "reactstrap";
 
 class RelatedHoldingsExplorer extends React.PureComponent {
   constructor(props) {
@@ -13,9 +14,7 @@ class RelatedHoldingsExplorer extends React.PureComponent {
     if (loading) {
       return <Loading message="Retrieving related holdings" />;
     } else if (this.props.errorMessage.length > 0) {
-      return (
-        <div className="alert alert-danger">{this.props.errorMessage}</div>
-      );
+      return <Alert color="danger">{this.props.errorMessage}</Alert>;
     } else if (relatedHoldings.length === 0) {
       return <div>Nothing to show here</div>;
     } else {
