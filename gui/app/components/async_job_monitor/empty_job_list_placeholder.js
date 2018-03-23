@@ -1,7 +1,8 @@
 import React from "react";
+import { Alert } from "reactstrap";
 
 const EmptyJobListPlaceholder = ({ type }) => {
-  return <div className="alert alert-dark">Ingen {type} i øjeblikket</div>;
+  return <Alert color="dark">Ingen {type} i øjeblikket</Alert>;
 };
 
 export default EmptyJobListPlaceholder;

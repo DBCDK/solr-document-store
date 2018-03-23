@@ -18,8 +18,8 @@ const sorter = (sortByStarted, sortByEarliest) => (j1, j2) => {
   let jobDate1 = moment(sortByStarted ? j1.job.startedAt : j1.job.completedAt);
   let jobDate2 = moment(sortByStarted ? j2.job.startedAt : j2.job.completedAt);
   return sortByEarliest
-    ? jobDate1 > jobDate2 ? 1 : jobDate1 < jobDate2 ? -1 : 0
-    : jobDate1 < jobDate2 ? 1 : jobDate1 > jobDate2 ? -1 : 0;
+    ? jobDate1 < jobDate2 ? 1 : jobDate1 > jobDate2 ? -1 : 0
+    : jobDate1 > jobDate2 ? 1 : jobDate1 < jobDate2 ? -1 : 0;
 };
 
 class FinishedJobsPresenter extends React.Component {
@@ -87,20 +87,20 @@ class FinishedJobsPresenter extends React.Component {
             toggle={this.toggleEarliest}
           >
             <DropdownToggle caret>
-              Sorter efter: {sortByEarliest ? "Tidligste" : "Seneste"}
+              Sorter efter: {sortByEarliest ? "Yngste først" : "Ældste først"}
             </DropdownToggle>
             <DropdownMenu>
               <DropdownItem
                 active={sortByEarliest}
                 onClick={() => toggleSortByEarliest(true)}
               >
-                Tidligste
+                Yngste først
               </DropdownItem>
               <DropdownItem
                 active={!sortByEarliest}
                 onClick={() => toggleSortByEarliest(false)}
               >
-                Seneste
+                Ældste først
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
