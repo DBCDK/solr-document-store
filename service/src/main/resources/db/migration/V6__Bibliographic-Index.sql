@@ -1,1 +1,1 @@
-CREATE INDEX  bibliographicsolrkeys_bibliographicrecordid ON bibliographicsolrkeys(bibliographicrecordid);
+CREATE INDEX IF NOT EXISTS bibliographicsolrkeys_bibliographicrecordid ON bibliographicsolrkeys(bibliographicrecordid);
