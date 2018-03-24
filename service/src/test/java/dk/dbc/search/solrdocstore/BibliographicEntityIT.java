@@ -20,7 +20,7 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
             Map<String, List<String>> indexKeys = new HashMap<>();
             indexKeys.put("titel", Collections.singletonList("unix bogen"));
             indexKeys.put("id", Collections.singletonList("argle"));
-            BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "work:1", "unit:2", "1234", false, indexKeys, "");
+            BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1", "work:1", "unit:2", "1234", false, indexKeys, "");
             em.persist(be);
         });
 

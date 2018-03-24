@@ -82,7 +82,7 @@ public class SolrWorker implements MessageListener {
 
     private static final Logger log = LoggerFactory.getLogger(SolrWorker.class);
 
-    private static final Pattern ID_PATTERN = Pattern.compile("^\\d+-\\w+:(.*)-(\\d+)-(\\w+)$");
+    private static final Pattern ID_PATTERN = Pattern.compile("^(\\d+-\\w+:(.*))-(\\d+)-(\\w+)$");
     private static final ObjectMapper O = new ObjectMapper();
 
     @EJB
@@ -211,12 +211,14 @@ public class SolrWorker implements MessageListener {
             throw new RuntimeException("invalid id: " + id);
         }
 
-        String bibliographicRecordId = matcher.group(1);
-        String agencyId = matcher.group(2);
-        String classifier = matcher.group(3);
+        String repositoryId = matcher.group(1);
+        String bibliographicRecordId = matcher.group(2);
+        String agencyId = matcher.group(3);
+        String classifier = matcher.group(4);
         record.put("agencyId", Integer.parseInt(agencyId, 10));
         record.put("classifier", classifier);
         record.put("bibliographicRecordId", bibliographicRecordId);
+        record.put("repositoryId", repositoryId);
         record.put("deleted", deleted);
         if (unit != null) {
             record.put("unit", unit);

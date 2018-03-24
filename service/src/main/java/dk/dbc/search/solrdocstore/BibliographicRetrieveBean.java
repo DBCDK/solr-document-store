@@ -49,8 +49,10 @@ public class BibliographicRetrieveBean {
             entityManager.remove(entity);
             log.info("Migrating {} to {}", key, classifier);
             entity = new BibliographicEntity(agencyId, classifier, bibliographicRecordId,
-                                             entity.getWork(), entity.getUnit(), entity.getProducerVersion(),
-                                             entity.isDeleted(), entity.getIndexKeys(), entity.getTrackingId());
+                                             entity.getRepositoryId(), entity.getWork(),
+                                             entity.getUnit(), entity.getProducerVersion(),
+                                             entity.isDeleted(), entity.getIndexKeys(),
+                                             entity.getTrackingId());
             entity.setClassifier(classifier);
             entityManager.persist(entity);
         }

@@ -14,8 +14,8 @@ public class BibliographicEntityRequest extends BibliographicEntity {
     public BibliographicEntityRequest() {
     }
 
-    public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId, List<String> superceds, Integer commitWithin) {
-        super(agencyId, classifier, bibliographicRecordId, work, unit, producerVersion, deleted, indexKeys, trackingId);
+    public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId, List<String> superceds, Integer commitWithin) {
+        super(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, producerVersion, deleted, indexKeys, trackingId);
         this.superceds = superceds;
         this.commitWithin = commitWithin;
     }

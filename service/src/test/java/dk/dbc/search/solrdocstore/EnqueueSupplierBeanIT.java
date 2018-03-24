@@ -347,7 +347,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
     private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin){
         List<String> superseedList = superseed.orElse(Collections.emptyList());
-        BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         bibliographicBean.addBibliographicKeys(e,superseedList, commitWithin);
         return e;
     }

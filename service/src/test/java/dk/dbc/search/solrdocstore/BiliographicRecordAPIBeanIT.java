@@ -80,7 +80,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
        BibliographicFrontendEntity res = (BibliographicFrontendEntity)result.getEntity();
        Map<String,List<String>> map = new HashMap<>();
        map.put("rec.repositoryId", Collections.singletonList("p-o"));
-       BibliographicEntity b = new BibliographicEntity(103862, "clazzifier","page-order","work:2","unit:6","producer:3",false,map,"track:8");
+       BibliographicEntity b = new BibliographicEntity(103862, "clazzifier","page-order","p-o","work:2","unit:6","producer:3",false,map,"track:8");
        Assert.assertEquals(res,new BibliographicFrontendEntity(b,"0639423"));
     }
 
@@ -230,7 +230,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     }
 
     private BibliographicEntity createBibliographicEntity(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         em.persist(b);
         return b;
     }

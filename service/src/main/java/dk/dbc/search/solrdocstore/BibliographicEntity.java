@@ -45,6 +45,7 @@ public class BibliographicEntity implements Serializable {
     @Id
     private String bibliographicRecordId;
 
+    private String repositoryId;
     private String work;
     private String unit;
     private String producerVersion;
@@ -58,10 +59,11 @@ public class BibliographicEntity implements Serializable {
 
     private String trackingId;
 
-    BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
+    BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
+        this.repositoryId = repositoryId;
         this.work = work;
         this.unit = unit;
         this.producerVersion = producerVersion;
@@ -76,6 +78,7 @@ public class BibliographicEntity implements Serializable {
         hash = 43 * hash + this.agencyId;
         hash = 43 * hash + Objects.hashCode(this.classifier);
         hash = 43 * hash + Objects.hashCode(this.bibliographicRecordId);
+        hash = 43 * hash + Objects.hashCode(this.repositoryId);
         hash = 43 * hash + Objects.hashCode(this.work);
         hash = 43 * hash + Objects.hashCode(this.unit);
         hash = 43 * hash + Objects.hashCode(this.producerVersion);
@@ -92,6 +95,7 @@ public class BibliographicEntity implements Serializable {
         return agencyId == that.agencyId &&
                 Objects.equals(classifier, that.classifier) &&
                 Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+                Objects.equals(repositoryId, that.repositoryId) &&
                 Objects.equals(work, that.work) &&
                 Objects.equals(unit, that.unit) &&
                 Objects.equals(producerVersion, that.producerVersion) &&
@@ -108,7 +112,7 @@ public class BibliographicEntity implements Serializable {
         if (getClass().equals(BibliographicEntity.class)) {
             return this;
         }
-        return new BibliographicEntity(agencyId, classifier, bibliographicRecordId, work, unit, producerVersion, deleted, indexKeys, trackingId);
+        return new BibliographicEntity(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, producerVersion, deleted, indexKeys, trackingId);
 
     }
 
@@ -134,6 +138,14 @@ public class BibliographicEntity implements Serializable {
 
     public void setBibliographicRecordId(String bibliographicRecordId) {
         this.bibliographicRecordId = bibliographicRecordId;
+    }
+
+    public String getRepositoryId() {
+        return repositoryId;
+    }
+
+    public void setRepositoryId(String repositoryId) {
+        this.repositoryId = repositoryId;
     }
 
     public String getWork() {
