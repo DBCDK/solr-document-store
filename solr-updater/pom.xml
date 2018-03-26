@@ -316,7 +316,7 @@
                         </goals>
                         <configuration>
                             <!--<detail>true</detail>-->
-                            <dumpOnStart>true</dumpOnStart>
+                            <!--<dumpOnStart>true</dumpOnStart>-->
                             <war>${project.build.directory}/solr/solr-7.2.1/server/solr-webapp/webapp</war>
                             <webApp>
                                 <contextPath>/solr</contextPath>

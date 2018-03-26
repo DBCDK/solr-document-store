@@ -3,6 +3,7 @@
         "agencyId": 300101,
         "classifier": "clazzifier",
         "bibliographicRecordId": "23645564",
+        "repositoryId": "300101-katalog:23645564",
         "deleted": false,
         "work": "work:754877",
         "unit": "unit:893270",

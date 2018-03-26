@@ -91,18 +91,12 @@ public class BiliographicRecordAPIBean {
             return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
         }
 
-        // Escaping quotes to avoid parameter injections
-        ObjectNode obj = O.createObjectNode();
-        ArrayNode arr = obj.putArray("rec.repositoryId");
-        arr.add(repositoryID);
-        String param = O.writeValueAsString(obj);
-
         String direction = (desc) ? "DESC" : "ASC";
         Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
                 "FROM bibliographicsolrkeys b " +
                 "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
-                "WHERE b.indexkeys @> ?::jsonb ORDER BY b."+orderBy+" "+direction,"BibliographicEntityWithSupersedeId")
-                .setParameter(1,param)
+                "WHERE b.repositoryId = ? ORDER BY b."+orderBy+" "+direction,"BibliographicEntityWithSupersedeId")
+                .setParameter(1,repositoryID)
                 .setParameter(2,orderBy)
                 .setFirstResult((page-1)*pageSize)
                 .setMaxResults(pageSize);
@@ -111,8 +105,8 @@ public class BiliographicRecordAPIBean {
             return new BibliographicFrontendEntity(b,(String)record[1]);
         }).collect(Collectors.toList());
         Query queryTotal = entityManager.createNativeQuery
-                ("SELECT COUNT(b.bibliographicRecordId) FROM bibliographicsolrkeys b WHERE b.indexKeys @> ?::jsonb")
-                .setParameter(1,param);
+                ("SELECT COUNT(b.bibliographicRecordId) FROM bibliographicsolrkeys b WHERE b.repositoryId = ?")
+                .setParameter(1,repositoryID);
         long count = (long)queryTotal.getSingleResult();
         return Response.ok(new FrontendReturnListType<>(res,pageCount(count,pageSize)),MediaType.APPLICATION_JSON).build();
     }
