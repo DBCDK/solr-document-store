@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.pgqueue.consumer.NonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +46,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
@@ -131,9 +133,15 @@ public class DocProducer {
             }
             try (Timer.Context time = addDocumentTimer.time()) {
                 if (commitWithin == null || commitWithin <= 0) {
-                    solrClient.add(doc);
+                    UpdateResponse resp = solrClient.add(doc);
+                    if (resp.getStatus() != 0) {
+                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
+                    }
                 } else {
-                    solrClient.add(doc, commitWithin);
+                    UpdateResponse resp = solrClient.add(doc, commitWithin);
+                    if (resp.getStatus() != 0) {
+                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
+                    }
                 }
             }
         }
@@ -154,9 +162,15 @@ public class DocProducer {
         if (!ids.isEmpty()) {
             try (Timer.Context time = deleteByIdTimer.time()) {
                 if (commitWithin == null || commitWithin <= 0) {
-                    solrClient.deleteById(ids);
+                    UpdateResponse resp = solrClient.deleteById(ids);
+                    if (resp.getStatus() != 0) {
+                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
+                    }
                 } else {
-                    solrClient.deleteById(ids, commitWithin);
+                    UpdateResponse resp = solrClient.deleteById(ids, commitWithin);
+                    if (resp.getStatus() != 0) {
+                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
+                    }
                 }
             }
         }
@@ -401,7 +415,6 @@ public class DocProducer {
         String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
         return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
     }
-
 
     /**
      * Find a node in a json structure
