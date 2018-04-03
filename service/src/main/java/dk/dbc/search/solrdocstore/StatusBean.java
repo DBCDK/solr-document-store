@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.search.solrdocstore.monitor.Timed;
@@ -67,9 +68,20 @@ public class StatusBean {
         synchronized (QUEUE_STATUS_SYNC) {
             if (queueStatus != null && queueStatusExpiresAtEpochMs > System.currentTimeMillis()) {
                 queueStatus.put("cached", Boolean.TRUE);
+                queueStatus.put("max-age", maxAge);
+                queueStatus.put("ok", Boolean.TRUE);
+                for (JsonNode node : queueStatus) {
+                    if (node.isObject() && node.has("age")) {
+                        int age = node.get("age").asInt();
+                        if (age > maxAge) {
+                            queueStatus.put("ok", Boolean.FALSE);
+                        }
+                    }
+                }
             } else {
                 queueStatus = O.createObjectNode();
                 queueStatus.put("cached", Boolean.FALSE);
+                queueStatus.put("max-age", maxAge);
                 queueStatus.put("ok", Boolean.TRUE);
                 try (Connection connection = dataSource.getConnection() ;
                      Statement stmt = connection.createStatement() ;
