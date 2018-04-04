@@ -100,11 +100,11 @@ public class StatusBean {
                     QUEUE_STATUS.set("diag", diag.get());
                     QUEUE_STATUS.put("expires", Instant.now().plusSeconds(60).toString());
                 }
-                JsonNode queue = QUEUE_STATUS.get("queue");
                 QUEUE_STATUS.put("max-age", maxAge);
+                JsonNode queue = QUEUE_STATUS.get("queue");
                 if (queue.isObject()) {
                     QUEUE_STATUS.put("ok", Boolean.TRUE);
-                    for (JsonNode node : QUEUE_STATUS) {
+                    for (JsonNode node : queue) {
                         if (node.isObject() && node.has("age")) {
                             int age = node.get("age").asInt();
                             if (age > maxAge) {
