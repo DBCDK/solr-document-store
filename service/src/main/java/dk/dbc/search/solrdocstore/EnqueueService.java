@@ -54,7 +54,7 @@ public class EnqueueService<T> {
     public void enqueue(T t, Integer commitWithin) throws SQLException {
         QueueJob job = jobCreator.apply(t, commitWithin);
         for (String queueName : queueNames) {
-            log.trace("enqueue to: {}", queueName);
+            log.trace("enqueue {} to: {}", job, queueName);
             queueSupplier.enqueue(queueName, job);
         }
     }
