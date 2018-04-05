@@ -374,7 +374,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void supercedsAdd() throws Exception {
 
         String json = makeBibliographicRequestJson(
-               888000,
+               870970,
                e -> {
            e.setSuperceds(Arrays.asList("a", "b"));
        });
