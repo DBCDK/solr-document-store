@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.ejb.Stateless;
@@ -30,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
+import static dk.dbc.search.solrdocstore.LibraryConfig.*;
+
 @Stateless
 @Path("bibliographic")
 public class BibliographicBean {
@@ -124,12 +125,14 @@ public class BibliographicBean {
             }
         }
 
-        Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
-        if (supersededRecordIds.size()>0){
-            Set<AgencyClassifierItemKey> recalculatedKeys =
-                h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(),supersededRecordIds);
-            affectedKeys.addAll(recalculatedKeys);
-        }
+         if (bibliographicEntity.getAgencyId() == COMMON_AGENCY) {
+             Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
+             if (supersededRecordIds.size() > 0) {
+                 Set<AgencyClassifierItemKey> recalculatedKeys =
+                         h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(), supersededRecordIds);
+                 affectedKeys.addAll(recalculatedKeys);
+             }
+         }
 
         EnqueueAdapter.enqueueAll(queue,affectedKeys, commitWithin);
     }
@@ -162,11 +165,11 @@ public class BibliographicBean {
                 case NonFBS: // Ignore holdings for Non FBS libraries
                     continue;
                 case FBS:
-                    if (agency == 300000) continue; // 300000 is only for FBSSchool records
+                    if (agency == SCHOOL_COMMON_AGENCY ) continue;
                     if (bibRecords.contains(holdingsAgency)) continue;
                     break;
                 case FBSSchool:
-                    if (agency == 870970 && bibRecords.contains(300000)) continue;
+                    if (agency == COMMON_AGENCY && bibRecords.contains(SCHOOL_COMMON_AGENCY)) continue;
                     if (bibRecords.contains(holdingsAgency)) continue;
                     break;
             }
