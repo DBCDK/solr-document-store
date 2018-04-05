@@ -77,7 +77,7 @@ public class StatusBean {
         return Response.ok().entity(O.writeValueAsString(obj)).build();
     }
 
-    private static final ObjectNode QUEUE_STATUS = O.createObjectNode();;
+    private static final ObjectNode QUEUE_STATUS = O.createObjectNode();
 
     @GET
     @Path("queue")
@@ -96,8 +96,10 @@ public class StatusBean {
                     QUEUE_STATUS.put("diag", "Internal Error");
                     Future<JsonNode> queue = es.submit(this::createQueueStatusNode);
                     Future<JsonNode> diag = es.submit(this::createDiagStatusNode);
+                    Future<Integer> diagCount = es.submit(this::createDiagCount);
                     QUEUE_STATUS.set("queue", queue.get());
                     QUEUE_STATUS.set("diag", diag.get());
+                    QUEUE_STATUS.put("diag-count", diagCount.get());
                     QUEUE_STATUS.put("expires", Instant.now().plusSeconds(60).toString());
                 }
                 QUEUE_STATUS.put("max-age", maxAge);
@@ -167,7 +169,7 @@ public class StatusBean {
             while (resultSet.next() && c++ <= DIAG_COLLAPSE_MAX_ROWS) {
                 addToDiags(diags, resultSet.getString(1));
             }
-            if(c > DIAG_COLLAPSE_MAX_ROWS) {
+            if (c > DIAG_COLLAPSE_MAX_ROWS) {
                 node.put("", "Diags limited to " + DIAG_COLLAPSE_MAX_ROWS + " rows");
             }
             Map<ArrayList<String>, String> sortKey = diags.keySet().stream()
@@ -183,6 +185,20 @@ public class StatusBean {
             log.debug("Sql error counting queue entries: ", ex);
             return new TextNode("SQL Exception");
         }
+    }
+
+    private Integer createDiagCount() {
+        try (Connection connection = dataSource.getConnection() ;
+             Statement stmt = connection.createStatement() ;
+             ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) FROM queue_error")) {
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException ex) {
+            log.error("Sql error counting queue entries: {}", ex.getMessage());
+            log.debug("Sql error counting queue entries: ", ex);
+        }
+        return null;
     }
 
     private void addToDiags(HashMap<ArrayList<String>, AtomicInteger> accumulated, String text) {
