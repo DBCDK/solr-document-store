@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,7 +79,13 @@ public class StatusBean {
         return Response.ok().entity(O.writeValueAsString(obj)).build();
     }
 
-    private static final ObjectNode QUEUE_STATUS = O.createObjectNode();
+    private static final ObjectNode QUEUE_STATUS = makeQueueStatueFramework();
+
+    private static ObjectNode makeQueueStatueFramework() {
+        ObjectNode root = O.createObjectNode();
+        root.putObject("props");
+        return root;
+    }
 
     @GET
     @Path("queue")
@@ -86,12 +94,15 @@ public class StatusBean {
         log.info("getQueueStatus called");
         try {
             synchronized (QUEUE_STATUS) {
-                JsonNode expires = QUEUE_STATUS.get("expires");
+                ObjectNode props = (ObjectNode) QUEUE_STATUS.get("props");
+                JsonNode expires = props.get("expires");
                 if (expires != null && Instant.parse(expires.asText()).isAfter(Instant.now())) {
-                    QUEUE_STATUS.put("cached", Boolean.TRUE);
+                    props.put("cached", Boolean.TRUE);
                 } else {
+                    Instant preTime = Instant.now();
                     QUEUE_STATUS.removeAll();
-                    QUEUE_STATUS.put("cached", Boolean.FALSE);
+                    props = QUEUE_STATUS.putObject("props");
+                    props.put("cached", Boolean.FALSE);
                     QUEUE_STATUS.put("queue", "Internal Error");
                     QUEUE_STATUS.put("diag", "Internal Error");
                     Future<JsonNode> queue = es.submit(this::createQueueStatusNode);
@@ -100,9 +111,15 @@ public class StatusBean {
                     QUEUE_STATUS.set("queue", queue.get());
                     QUEUE_STATUS.set("diag", diag.get());
                     QUEUE_STATUS.put("diag-count", diagCount.get());
-                    QUEUE_STATUS.put("expires", Instant.now().plusSeconds(60).toString());
+                    Instant postTime = Instant.now();
+                    long duration = preTime.until(postTime, ChronoUnit.MILLIS);
+                    props.put("query-time(ms)", duration);
+                    long seconds = Long.min(60, (long) Math.pow(2.0, Math.log(duration)));
+                    props.put("will-cache(s)", seconds);
+                    props.put("run-at", postTime.toString());
+                    props.put("expires", postTime.plusSeconds(seconds).toString());
                 }
-                QUEUE_STATUS.put("max-age", maxAge);
+                props.put("max-age", maxAge);
                 JsonNode queue = QUEUE_STATUS.get("queue");
                 if (queue.isObject()) {
                     QUEUE_STATUS.put("ok", Boolean.TRUE);
@@ -119,6 +136,40 @@ public class StatusBean {
                 }
                 return Response.ok().entity(O.writeValueAsString(QUEUE_STATUS)).build();
             }
+        } catch (InterruptedException | ExecutionException ex) {
+            log.error("Error getting queue status: {}", ex.getMessage());
+            log.debug("Error getting queue status: ", ex);
+            return Response.status(Response.Status.REQUEST_TIMEOUT).build();
+        } catch (JsonProcessingException ex) {
+            log.error("Error getting queue status: {}", ex.getMessage());
+            log.debug("Error getting queue status: ", ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Path("diags")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getDiagDistribution(@QueryParam("zone") @DefaultValue("CET") String timeZoneName) {
+        log.info("getDiagDistribution");
+        try {
+            ZoneId zone = ZoneId.of(timeZoneName);
+            ObjectNode obj = O.createObjectNode();
+            JsonNode ret = obj;
+            JsonNode node = createDiagStatusNode();
+            if (node.isObject()) {
+                HashMap<String, Future<JsonNode>> futures = new HashMap<>();
+                for (Iterator<String> iterator = node.fieldNames() ; iterator.hasNext() ;) {
+                    String pattern = iterator.next();
+                    futures.put(pattern, es.submit(() -> listDiagsByTime(pattern, zone)));
+                }
+                for (Map.Entry<String, Future<JsonNode>> entry : futures.entrySet()) {
+                    obj.set(entry.getKey(), entry.getValue().get());
+                }
+            } else {
+                ret = node;
+            }
+            return Response.ok().entity(O.writeValueAsString(ret)).build();
         } catch (InterruptedException | ExecutionException ex) {
             log.error("Error getting queue status: {}", ex.getMessage());
             log.debug("Error getting queue status: ", ex);
@@ -199,6 +250,26 @@ public class StatusBean {
             log.debug("Sql error counting queue entries: ", ex);
         }
         return null;
+    }
+
+    private JsonNode listDiagsByTime(String pattern, ZoneId zone) {
+        ObjectNode obj = O.createObjectNode();
+        String likePattern = pattern.replaceAll("([_%])", "\\$1").replaceAll("\\*", "%");
+        log.debug("pattern = {}; likePattern = {}", pattern, likePattern);
+        try (Connection connection = dataSource.getConnection() ;
+             PreparedStatement stmt = connection.prepareStatement("SELECT DATE_TRUNC('MINUTE',failedat) AS at, COUNT(*) FROM queue_error WHERE diag LIKE ? GROUP BY at ORDER BY at")) {
+            stmt.setString(1, pattern);
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    obj.put(resultSet.getTimestamp(1).toInstant().atZone(zone).toString(), resultSet.getInt(2));
+                }
+            }
+            return obj;
+        } catch (SQLException ex) {
+            log.error("Sql error grouping diags by time: {}", ex.getMessage());
+            log.debug("Sql error grouping diags by time: ", ex);
+            return new TextNode("SQL Exception");
+        }
     }
 
     private void addToDiags(HashMap<ArrayList<String>, AtomicInteger> accumulated, String text) {
