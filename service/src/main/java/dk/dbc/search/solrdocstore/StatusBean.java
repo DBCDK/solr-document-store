@@ -258,7 +258,7 @@ public class StatusBean {
         log.debug("pattern = {}; likePattern = {}", pattern, likePattern);
         try (Connection connection = dataSource.getConnection() ;
              PreparedStatement stmt = connection.prepareStatement("SELECT DATE_TRUNC('MINUTE',failedat) AS at, COUNT(*) FROM queue_error WHERE diag LIKE ? GROUP BY at ORDER BY at")) {
-            stmt.setString(1, pattern);
+            stmt.setString(1, likePattern);
             try (ResultSet resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
                     obj.put(resultSet.getTimestamp(1).toInstant().atZone(zone).toString(), resultSet.getInt(2));
