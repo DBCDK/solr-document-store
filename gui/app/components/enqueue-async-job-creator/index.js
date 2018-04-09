@@ -12,19 +12,19 @@ const EnqueueAsyncJobCreator = ({}) => {
       <EnqueueAsyncJob
         name="Udskriv fejlede poster til log"
         placeholder="Pattern"
-        consumer="Consumer (Valgfri)"
+        consumer="Kø navn (Valgfri)"
         path="list-errors"
       />
       <EnqueueAsyncJob
         name="Slet fejlede poster fra fejl-tabel"
         placeholder="Pattern"
-        consumer="Consumer (Valgfri)"
+        consumer="Kø navn (Valgfri)"
         path="delete-errors"
       />
       <EnqueueAsyncJob
         name="Sæt fejlede poster på kø"
         placeholder="Pattern"
-        consumer="Consumer (Valgfri)"
+        consumer="Kø navn (Valgfri)"
         path="requeue-errors"
       />
     </React.Fragment>

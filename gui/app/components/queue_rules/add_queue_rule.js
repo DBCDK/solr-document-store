@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { createQueueRule } from "../../actions/queues";
+import { Button } from "reactstrap";
 
 class AddQueueRule extends React.PureComponent {
   constructor(props) {
@@ -25,35 +26,34 @@ class AddQueueRule extends React.PureComponent {
           value={this.state.queueRule}
           onChange={this.handleSearchTyped}
         />,
-        <button
-          type="button"
+        <Button
           key="add_queue_rule_add_button"
-          className="btn btn-success mx-2"
+          color="success"
+          className="mx-2"
           disabled={this.props.addQueueRulePending}
           onClick={this.submitQueueRule}
         >
           Tilføj
-        </button>,
-        <button
-          type="button"
+        </Button>,
+        <Button
           key="add_queue_rule_cancel_button"
-          className="btn btn-danger mx-2"
+          color="danger"
+          className="mx-2"
           disabled={this.props.addQueueRulePending}
           onClick={this.cancelEditor}
         >
-          Anullér
-        </button>
+          Annullér
+        </Button>
       ];
     } else {
       return (
-        <button
-          type="button"
-          className="btn btn-success"
+        <Button
+          color="success"
           disabled={this.props.addQueueRulePending}
           onClick={this.toggleQueueRuleEditor}
         >
-          Tilføj kø regel
-        </button>
+          Tilføj kø og regel
+        </Button>
       );
     }
   }

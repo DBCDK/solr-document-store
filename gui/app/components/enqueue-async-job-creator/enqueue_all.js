@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { enqueueAllJob } from "../../actions/async_job";
+import { Button, Input } from "reactstrap";
 
 class EnqueueAllAsyncJob extends React.Component {
   constructor(props) {
@@ -17,31 +18,30 @@ class EnqueueAllAsyncJob extends React.Component {
     return (
       <div className="py-3">
         <h5>Sæt alle poster i kø</h5>
-        <input
-          placeholder="Kø navn"
-          value={this.state.queueInput}
-          onChange={e => this.setState({ queueInput: e.target.value })}
-        />
-        <span
-          className="px-4"
-          style={{ cursor: "pointer" }}
-          onClick={this.toggleDeleteIncluded}
-        >
-          Slettede poster inkluderet:
-          <input
-            type="checkbox"
-            aria-label="Checkbox for following text input"
-            checked={this.state.includeDeleted}
-            onClick={this.toggleDeleteIncluded}
+        <div className="d-flex">
+          <Input
+            placeholder="Kø navn"
+            style={{ width: "15vw" }}
+            value={this.state.queueInput}
+            onChange={e => this.setState({ queueInput: e.target.value })}
           />
-        </span>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={this.enqueueAll}
-        >
-          Start job
-        </button>
+          <span
+            className="px-4"
+            style={{ cursor: "pointer" }}
+            onClick={this.toggleDeleteIncluded}
+          >
+            Slettede poster inkluderet:
+            <input
+              type="checkbox"
+              aria-label="Checkbox for following text input"
+              checked={this.state.includeDeleted}
+              onClick={this.toggleDeleteIncluded}
+            />
+          </span>
+          <Button color="primary" onClick={this.enqueueAll}>
+            Start job
+          </Button>
+        </div>
       </div>
     );
   }

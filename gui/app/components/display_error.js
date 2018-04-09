@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import { Alert } from "reactstrap";
 
 class DisplayError extends React.PureComponent {
   constructor(props) {
@@ -8,9 +9,7 @@ class DisplayError extends React.PureComponent {
 
   render() {
     return this.props.displayMessage.length > 0 ? (
-      <div className="alert alert-danger" role="alert">
-        {this.props.displayMessage}
-      </div>
+      <Alert color="danger">{this.props.displayMessage}</Alert>
     ) : null;
   }
 }

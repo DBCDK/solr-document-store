@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { queueErrorsWithPattern } from "../../actions/async_job";
+import { Button, Input } from "reactstrap";
 
 class EnqueueAsyncJob extends React.PureComponent {
   constructor(props) {
@@ -17,23 +18,23 @@ class EnqueueAsyncJob extends React.PureComponent {
     return (
       <div className="p-2">
         <h5>{name}</h5>
-        <input
-          placeholder={placeholder}
-          value={this.state.patternInput}
-          onChange={e => this.setState({ patternInput: e.target.value })}
-        />
-        <input
-          placeholder={consumer}
-          value={this.state.consumerInput}
-          onChange={e => this.setState({ consumerInput: e.target.value })}
-        />
-        <button
-          type="button"
-          className="btn btn-primary ml-3"
-          onClick={this.enqueue}
-        >
-          Start job
-        </button>
+        <div className="d-flex">
+          <Input
+            placeholder={placeholder}
+            style={{ width: "15vw" }}
+            value={this.state.patternInput}
+            onChange={e => this.setState({ patternInput: e.target.value })}
+          />
+          <Input
+            placeholder={consumer}
+            style={{ width: "15vw" }}
+            value={this.state.consumerInput}
+            onChange={e => this.setState({ consumerInput: e.target.value })}
+          />
+          <Button color="primary" className="ml-3" onClick={this.enqueue}>
+            Start job
+          </Button>
+        </div>
       </div>
     );
   }
