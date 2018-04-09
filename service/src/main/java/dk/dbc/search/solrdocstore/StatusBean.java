@@ -90,7 +90,7 @@ public class StatusBean {
     @GET
     @Path("queue")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getQueueStatus(@QueryParam("max-age") @DefaultValue("60") Integer maxAge) {
+    public Response getQueueStatus() {
         log.info("getQueueStatus called");
         try {
             synchronized (QUEUE_STATUS) {
@@ -104,13 +104,32 @@ public class StatusBean {
                     props = QUEUE_STATUS.putObject("props");
                     props.put("cached", Boolean.FALSE);
                     QUEUE_STATUS.put("queue", "Internal Error");
+                    QUEUE_STATUS.put("queue-max-age", "NaN");
                     QUEUE_STATUS.put("diag", "Internal Error");
+                    QUEUE_STATUS.put("diag-count", "NaN");
                     Future<JsonNode> queue = es.submit(this::createQueueStatusNode);
                     Future<JsonNode> diag = es.submit(this::createDiagStatusNode);
                     Future<Integer> diagCount = es.submit(this::createDiagCount);
-                    QUEUE_STATUS.set("queue", queue.get());
+
+                    JsonNode queueNode = queue.get();
+                    QUEUE_STATUS.set("queue", queueNode);
+                    int queueMaxAge = 0;
+                    if (queueNode.isObject()) {
+                        for (JsonNode node : queueNode) {
+                            if (node.isObject() && node.has("age")) {
+                                int age = node.get("age").asInt();
+                                queueMaxAge = Integer.max(queueMaxAge, age);
+                            }
+                        }
+                    }
+                    QUEUE_STATUS.put("queue-max-age", queueMaxAge);
+
                     QUEUE_STATUS.set("diag", diag.get());
-                    QUEUE_STATUS.put("diag-count", diagCount.get());
+                    int diagCountNumber = diagCount.get();
+                    QUEUE_STATUS.put("diag-count", diagCountNumber);
+                    if (diagCountNumber > DIAG_COLLAPSE_MAX_ROWS) {
+                        QUEUE_STATUS.put("diag-count-warning", "Too many diag rows for collapsing, only looking at " + DIAG_COLLAPSE_MAX_ROWS + " rows");
+                    }
                     Instant postTime = Instant.now();
                     long duration = preTime.until(postTime, ChronoUnit.MILLIS);
                     props.put("query-time(ms)", duration);
@@ -118,21 +137,6 @@ public class StatusBean {
                     props.put("will-cache(s)", seconds);
                     props.put("run-at", postTime.toString());
                     props.put("expires", postTime.plusSeconds(seconds).toString());
-                }
-                props.put("max-age", maxAge);
-                JsonNode queue = QUEUE_STATUS.get("queue");
-                if (queue.isObject()) {
-                    QUEUE_STATUS.put("ok", Boolean.TRUE);
-                    for (JsonNode node : queue) {
-                        if (node.isObject() && node.has("age")) {
-                            int age = node.get("age").asInt();
-                            if (age > maxAge) {
-                                QUEUE_STATUS.put("ok", Boolean.FALSE);
-                            }
-                        }
-                    }
-                } else {
-                    QUEUE_STATUS.put("ok", Boolean.FALSE);
                 }
                 return Response.ok().entity(O.writeValueAsString(QUEUE_STATUS)).build();
             }
@@ -211,31 +215,27 @@ public class StatusBean {
     }
 
     private JsonNode createDiagStatusNode() {
+        HashMap<ArrayList<String>, AtomicInteger> diags = new HashMap<>();
         try (Connection connection = dataSource.getConnection() ;
              Statement stmt = connection.createStatement() ;
-             ResultSet resultSet = stmt.executeQuery("SELECT diag FROM queue_error")) {
-            ObjectNode node = O.createObjectNode();
-            HashMap<ArrayList<String>, AtomicInteger> diags = new HashMap<>();
-            int c = 0;
-            while (resultSet.next() && c++ <= DIAG_COLLAPSE_MAX_ROWS) {
+             ResultSet resultSet = stmt.executeQuery("SELECT diag FROM queue_error LIMIT " + DIAG_COLLAPSE_MAX_ROWS)) {
+            while (resultSet.next()) {
                 addToDiags(diags, resultSet.getString(1));
             }
-            if (c > DIAG_COLLAPSE_MAX_ROWS) {
-                node.put("", "Diags limited to " + DIAG_COLLAPSE_MAX_ROWS + " rows");
-            }
-            Map<ArrayList<String>, String> sortKey = diags.keySet().stream()
-                    .collect(Collectors.toMap(a -> a, a -> diagAsString(a)));
-            diags.entrySet().stream()
-                    .sorted((l, r) -> sortKey.get(l.getKey()).compareToIgnoreCase(sortKey.get(r.getKey())))
-                    .forEach(e -> {
-                        node.put(sortKey.get(e.getKey()), e.getValue().get());
-                    });
-            return node;
         } catch (SQLException ex) {
             log.error("Sql error counting queue entries: {}", ex.getMessage());
             log.debug("Sql error counting queue entries: ", ex);
             return new TextNode("SQL Exception");
         }
+        ObjectNode node = O.createObjectNode();
+        Map<ArrayList<String>, String> sortKey = diags.keySet().stream()
+                .collect(Collectors.toMap(a -> a, a -> diagAsString(a)));
+        diags.entrySet().stream()
+                .sorted((l, r) -> sortKey.get(l.getKey()).compareToIgnoreCase(sortKey.get(r.getKey())))
+                .forEach(e -> {
+                    node.put(sortKey.get(e.getKey()), e.getValue().get());
+                });
+        return node;
     }
 
     private Integer createDiagCount() {
