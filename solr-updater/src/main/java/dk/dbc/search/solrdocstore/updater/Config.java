@@ -82,6 +82,7 @@ public class Config {
         idleRescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("idleRescanEvery", "IDLE_RESCAN_EVERY", "5"), 10));
         maxQueryTime = Long.max(100L, Long.parseLong(get("maxQueryTime", "MAX_QUERY_TIME", "100"), 10));
         threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
+        maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
     }
 
     public String getSolrUrl() {

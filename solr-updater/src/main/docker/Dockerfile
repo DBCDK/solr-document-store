@@ -13,7 +13,8 @@ LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       RESCAN_EVERY="How often to scan for newest timestamp, every n attempts to dequeue (default: 100)" \
       IDLE_RESCAN_EVERY="How often to scan for newest timestamp, when the queue is idle (default: 5)" \
       MAX_QUERY_TIME="How long a rescan query can take, before recalculating thre prepared statement quiery plan(default: 100)" \
-      THREADS="Number of parallel threads (default: 1)"
+      THREADS="Number of parallel threads (default: 1)" \
+      MAX_TRIES="Number of tries to process job (default: 3)"
 
 ADD pre/* $PAYARA_CFG/pre/
 ADD post/* $PAYARA_CFG/post/
