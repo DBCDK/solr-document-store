@@ -4,7 +4,6 @@ import { searchBibRecord } from "../actions/searching";
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
   Input,
   InputGroupText,
   Button
@@ -42,16 +41,14 @@ class SearchField extends React.Component {
             onChange={this.handleSearchTyped}
           />
           <InputGroupAddon addonType="append">
-            <InputGroupButton>
-              <Button
-                color="outline-primary"
-                className="search-btn"
-                disabled={pendingSearch}
-                onClick={this.searchSubmit}
-              >
-                {load}Søg
-              </Button>
-            </InputGroupButton>
+            <Button
+              color="outline-primary"
+              className="search-btn"
+              disabled={pendingSearch}
+              onClick={this.searchSubmit}
+            >
+              {load}Søg
+            </Button>
           </InputGroupAddon>
         </InputGroup>
       </div>
