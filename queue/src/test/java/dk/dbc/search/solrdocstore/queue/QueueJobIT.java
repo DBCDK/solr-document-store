@@ -75,20 +75,23 @@ public class QueueJobIT {
         System.out.println("store-retrieve");
 
         QueueJob job1 = new QueueJob(888888, "clazzifier", "12345678");
-        QueueJob job2 = new QueueJob(888888, "clazzifier", "87654321", 1000);
+        QueueJob job2 = new QueueJob(888888, "clazzifier", "87654321", 1000); // This should be collapsed
+        QueueJob job3 = new QueueJob(888888, "clazzifier", "87654321", 10); // This should be used (shorter commitwithin)
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedQueueSupplier<QueueJob> supplier = QUEUE_SUPPLIER.preparedSupplier(connection);
 
             supplier.enqueue(QUEUE, job1);
             supplier.enqueue(QUEUE, job2);
+            supplier.enqueue(QUEUE, job3);
 
             BlockingDeque<QueueJob> list = new LinkedBlockingDeque<>();
 
-            QueueWorker worker = QueueWorker.builder()
+            QueueWorker worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                     .consume(QUEUE)
                     .dataSource(dataSource)
-                    .build(QueueJob.STORAGE_ABSTRACTION, (JobConsumer<QueueJob>) (Connection connection1, QueueJob job, JobMetaData metaData) -> {
+                    .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
+                    .build((JobConsumer<QueueJob>) (Connection connection1, QueueJob job, JobMetaData metaData) -> {
                        list.add(job);
                    });
             worker.start();
@@ -99,7 +102,7 @@ public class QueueJobIT {
             worker.stop();
 
             assertEquals(job1.toString(), actual1.toString());
-            assertEquals(job2.toString(), actual2.toString());
+            assertEquals(job3.toString(), actual2.toString());
         }
     }
 }

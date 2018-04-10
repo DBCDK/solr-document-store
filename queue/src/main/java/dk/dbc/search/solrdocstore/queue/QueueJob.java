@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.queue;
 
+import dk.dbc.pgqueue.DeduplicateAbstraction;
 import dk.dbc.pgqueue.QueueStorageAbstraction;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,6 +105,43 @@ public class QueueJob {
                 stmt.setInt(startColumn++, job.getCommitwithin());
             } else {
                 stmt.setNull(startColumn++, INTEGER);
+            }
+        }
+    };
+
+    public static final DeduplicateAbstraction<QueueJob> DEDUPLICATE_ABSTRACTION = new DeduplicateAbstraction<QueueJob>() {
+        private final String[] COLUMNS = "agencyId,classifier,bibliographicRecordId".split(",");
+
+        @Override
+        public String[] duplicateDeleteColumnList() {
+            return COLUMNS;
+        }
+
+        @Override
+        public void duplicateValues(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
+            stmt.setInt(startColumn++, job.getAgencyId());
+            stmt.setString(startColumn++, job.getClassifier());
+            stmt.setString(startColumn++, job.getBibliographicRecordId());
+        }
+
+        @Override
+        public QueueJob mergeJob(QueueJob originalJob, QueueJob skippedJob) {
+            Integer originalCommitWithin = originalJob.getCommitwithin();
+            Integer skippedCommitWithin = skippedJob.getCommitwithin();
+            if (originalCommitWithin == null) {
+                if (skippedCommitWithin == null) {
+                    return originalJob;
+                } else {
+                    return skippedJob;
+                }
+            } else {
+                if (skippedCommitWithin == null) {
+                    return originalJob;
+                } else if (originalCommitWithin.compareTo(skippedCommitWithin) <= 0) {
+                    return originalJob;
+                } else {
+                    return skippedJob;
+                }
             }
         }
     };

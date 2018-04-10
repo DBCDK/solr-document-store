@@ -19,7 +19,7 @@
     <properties>
         <flyway.version>4.1.0</flyway.version>
         <dbc-commons.version>1.3-SNAPSHOT</dbc-commons.version>
-        <pg-queue.version>1.0-SNAPSHOT</pg-queue.version>
+        <pg-queue.version>1.1-SNAPSHOT</pg-queue.version>
     </properties>
 
     <modules>
