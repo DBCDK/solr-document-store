@@ -27,7 +27,6 @@ class SolrDocstoreGUI extends React.PureComponent {
       activeItem: BIBLIOGRAPHIC_EXPLORER,
       systemName: ""
     };
-    this.activeTabComponent = this.activeTabComponent.bind(this);
     this.activateTabWithKey = this.activateTabWithKey.bind(this);
     this.activateIndexKeyExplorer = this.activateIndexKeyExplorer.bind(this);
     this.activateRelatedHoldingsExplorer = this.activateRelatedHoldingsExplorer.bind(
