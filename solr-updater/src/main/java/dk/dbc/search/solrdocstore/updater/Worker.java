@@ -68,7 +68,8 @@ public class Worker {
 
     @PostConstruct
     public void init() {
-        this.worker = QueueWorker.builder()
+        this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
+                .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
                 .dataSource(dataSource)
                 .consume(config.getQueues())
                 .databaseConnectThrottle(config.getDatabaseConnectThrottle())
@@ -79,8 +80,7 @@ public class Worker {
                 .maxTries(config.getMaxTries())
                 .maxQueryTime(config.getMaxQueryTime())
                 .metricRegistry(metricRegistry.getMetrics())
-                .build(QueueJob.STORAGE_ABSTRACTION,
-                       config.getThreads(),
+                .build(config.getThreads(),
                        this::makeWorker);
         this.worker.start();
     }
