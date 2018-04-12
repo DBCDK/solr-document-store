@@ -60,7 +60,7 @@ public class AgencyClassifierItemKey implements Serializable {
     public String toString() {
         return "AgencyItemKey{" +
                 "agencyId=" + agencyId +
-                "classifier=" + classifier +
+                ", classifier=" + classifier +
                 ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
                 '}';
     }
