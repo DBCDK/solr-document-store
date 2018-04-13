@@ -30,6 +30,11 @@
             <version>${pg-queue.version}</version>
         </dependency>
         <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>pg-queue-ee-diags</artifactId>
+            <version>${pg-queue.version}</version>
+        </dependency>
+        <dependency>
             <groupId>dk.dbc.commoms.testutils</groupId>
             <artifactId>dbc-commons-testutil-postgres-connection</artifactId>
             <version>${dbc-commons.version}</version>
