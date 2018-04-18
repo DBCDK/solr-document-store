@@ -56,7 +56,6 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void setUp() throws SQLException {
         datasource = jpaTestEnvironment.getDatasource();
-        new DatabaseMigrator(datasource).migrate();
         try (Connection connection = datasource.getConnection() ;
              Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("TRUNCATE queueRule");

@@ -28,6 +28,7 @@
         <module>service</module>
         <module>corepo-worker</module>
         <module>solr-updater</module>
+        <module>postgresql</module>
     </modules>
 
     <groupId>dk.dbc</groupId>
