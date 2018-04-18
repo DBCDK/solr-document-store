@@ -53,7 +53,6 @@ public class QueueAsyncJobIT extends JpaSolrDocStoreIntegrationTester {
     public void setUp() throws SQLException {
         this.em = env().getEntityManager();
         this.dataSource = jpaTestEnvironment.getDatasource();
-        new DatabaseMigrator(dataSource).migrate();
         try (Connection connection = dataSource.getConnection() ;
              Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("TRUNCATE queueRule");
