@@ -27,6 +27,7 @@ public class Config {
     private long jobPruneMinutes;
     private String systemName;
     private String jmxDomain;
+    private Boolean allowNonEmptySchema;
 
     @PostConstruct
     public void loadProperties() {
@@ -36,6 +37,7 @@ public class Config {
         // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
         jmxDomain = getValue(props, "jmxDomain", "JMX_DOMAIN", "metrics", null);
+        allowNonEmptySchema = getValue(props, "allowNonEmptySchema", "ALLOW_NON_EMPTY_SCHEMA", "false", null, Boolean::parseBoolean);
     }
 
     public String getOaURL() {
@@ -54,6 +56,9 @@ public class Config {
         return jmxDomain;
     }
 
+    public Boolean getAllowNonEmptySchema() {
+        return allowNonEmptySchema;
+    }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
         String value = props.getProperty(propertyName);

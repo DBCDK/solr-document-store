@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 @Singleton
@@ -20,11 +21,17 @@ public class DatabaseMigrator {
     @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
+    @Inject
+    Config config;
+
     @PostConstruct
     public void migrate() {
         final Flyway flyway = new Flyway();
         flyway.setTable("schema_version");
-        flyway.setBaselineOnMigrate(true);
+        if (config.getAllowNonEmptySchema()) {
+            flyway.setBaselineOnMigrate(true);
+            flyway.setBaselineVersionAsString("0"); // This is needed for afterMigrate
+        }
         flyway.setDataSource(dataSource);
         for (MigrationInfo i : flyway.info().all()) {
             log.info("db task {} : {} from file '{}'", i.getVersion(), i.getDescription(), i.getScript());
