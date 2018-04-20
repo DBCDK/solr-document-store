@@ -1,7 +1,7 @@
 FROM docker.dbc.dk/dbc-payara-mq
 MAINTAINER os-team
 
-ENV KAFKA_LOG_APPNAME solr-indexer-cloud-worker
+ENV KAFKA_LOG_APPNAME solr-sdoc-store-corepo-worker
 
 LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Required)" \
       COREPO_SHARDn="CORepo shard database url user:passwork@host:port/database" \
