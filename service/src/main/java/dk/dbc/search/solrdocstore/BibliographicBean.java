@@ -94,9 +94,6 @@ public class BibliographicBean {
 
         log.info("AddBibliographicKeys called {}-{}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
 
-        // Todo Remove after migration to classifier
-        brBean.migrateBibliographicEntityToClassifier(bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
-
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
         affectedKeys.add( bibliographicEntity.asAgencyClassifierItemKey());
         if (dbbe == null) {
