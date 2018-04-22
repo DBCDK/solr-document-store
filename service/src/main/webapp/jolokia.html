@@ -91,6 +91,7 @@
                 var func = function () {
                     if (that.classList.contains('shown')) {
                         removeClass(that, 'shown');
+                        stopUpdater(that);
                     } else {
                         that.classList.add('shown');
                         startUpdater(that);
