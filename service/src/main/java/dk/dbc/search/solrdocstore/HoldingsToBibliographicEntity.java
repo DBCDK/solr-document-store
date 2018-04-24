@@ -21,19 +21,21 @@ public class HoldingsToBibliographicEntity implements Serializable {
 
     private String bibliographicRecordId;
     private int bibliographicAgencyId;
+    private boolean isCommonDerived;
 
     public HoldingsToBibliographicEntity() {
     }
 
-    HoldingsToBibliographicEntity(int holdingsAgencyId, String bibliographicRecordId, int bibliographicAgencyId) {
-        this(holdingsAgencyId, bibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
+    HoldingsToBibliographicEntity(int holdingsAgencyId, String bibliographicRecordId, int bibliographicAgencyId, boolean isCommonDerived) {
+        this(holdingsAgencyId, bibliographicRecordId, bibliographicAgencyId, bibliographicRecordId, isCommonDerived);
     }
 
-    public HoldingsToBibliographicEntity(int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId, String bibliographicRecordId) {
+    public HoldingsToBibliographicEntity(int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId, String bibliographicRecordId, boolean isCommonDerived) {
         this.holdingsAgencyId = holdingsAgencyId;
         this.holdingsBibliographicRecordId = holdingsBibliographicRecordId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.bibliographicAgencyId = bibliographicAgencyId;
+        this.isCommonDerived = isCommonDerived;
     }
 
     @Override
@@ -43,6 +45,7 @@ public class HoldingsToBibliographicEntity implements Serializable {
                ", holdingsBibliographicRecordId='" + holdingsBibliographicRecordId + '\'' +
                ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
                ", bibliographicAgencyId=" + bibliographicAgencyId +
+               ", isCommonDerived=" + isCommonDerived +
                '}';
     }
 
@@ -58,12 +61,13 @@ public class HoldingsToBibliographicEntity implements Serializable {
         return holdingsAgencyId == that.holdingsAgencyId &&
                bibliographicAgencyId == that.bibliographicAgencyId &&
                Objects.equals(holdingsBibliographicRecordId, that.holdingsBibliographicRecordId) &&
-               Objects.equals(bibliographicRecordId, that.bibliographicRecordId);
+               Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+               Objects.equals(isCommonDerived, that.isCommonDerived);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(holdingsAgencyId, holdingsBibliographicRecordId, bibliographicRecordId, bibliographicAgencyId);
+        return Objects.hash(holdingsAgencyId, holdingsBibliographicRecordId, bibliographicRecordId, bibliographicAgencyId, isCommonDerived);
     }
 
     public HoldingsToBibliographicKey asKey() {
@@ -100,6 +104,14 @@ public class HoldingsToBibliographicEntity implements Serializable {
 
     public void setBibliographicAgencyId(int bibliographicAgencyId) {
         this.bibliographicAgencyId = bibliographicAgencyId;
+    }
+
+    public boolean getIsCommonDerived() {
+        return isCommonDerived;
+    }
+
+    public void setIsCommonDerived(boolean isCommonDerived) {
+        this.isCommonDerived = isCommonDerived;
     }
 
 }

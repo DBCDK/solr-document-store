@@ -225,13 +225,15 @@ public class BibliographicBean {
         return Collections.emptySet();
     }
 
-    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
+    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency) {
         return addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId);
     }
 
-    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency, String bibliographicRecordId) {
+    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId) {
+        LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(holdingsAgency);
+        boolean  isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-                holdingsAgency, recordId, agency, bibliographicRecordId
+                holdingsAgency, recordId, agency, bibliographicRecordId, isCommonDerived
         );
         return h2bBean.attachToAgency(h2b);
     }

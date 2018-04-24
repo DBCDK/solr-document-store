@@ -35,14 +35,17 @@ public class HoldingsToBibliographicBean {
 
         switch (libraryType) {
             case NonFBS:
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, hAgencyId);
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, false, hAgencyId);
 
-            case FBS:
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, COMMON_AGENCY);
-
-            case FBSSchool:
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, findLiveBibliographicRecordId(hBibliographicRecordId), hAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY);
-
+            case FBS: {
+                String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
+                boolean isCommonDerived = bibliographicEntityExists(870970, liveBibliographicRecordId);
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, hAgencyId, COMMON_AGENCY);
+            }
+            case FBSSchool: {
+                String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, hAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY);
+            }
         }
         return Collections.emptySet();
     }
@@ -60,11 +63,13 @@ public class HoldingsToBibliographicBean {
                 switch (libraryType) {
                     case NonFBS:
                         break;
-                    case FBS:
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, h2b.getBibliographicAgencyId(), COMMON_AGENCY));
+                    case FBS: {
+                        boolean isCommonDerived = bibliographicEntityExists(870970, newRecordId);
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, h2b.getBibliographicAgencyId(), COMMON_AGENCY));
                         break;
+                    }
                     case FBSSchool:
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, h2b.getBibliographicAgencyId(), SCHOOL_COMMON_AGENCY, COMMON_AGENCY));
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, h2b.getBibliographicAgencyId(), SCHOOL_COMMON_AGENCY, COMMON_AGENCY));
                         break;
                 }
             }
@@ -105,14 +110,15 @@ public class HoldingsToBibliographicBean {
         }
     }
 
-    private Set<AgencyClassifierItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
+    private Set<AgencyClassifierItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, boolean isCommonDerived, int... bibliographicAgencyPriorities) {
         for (int i = 0 ; i < bibliographicAgencyPriorities.length ; i++) {
             Set<AgencyClassifierItemKey> keysUpdated =
                     attachIfExists(
                             bibliographicAgencyPriorities[i],
                             bibliographicRecordId,
                             holdingsAgencyId,
-                            holdingsBibliographicRecordId);
+                            holdingsBibliographicRecordId,
+                            isCommonDerived);
             if (!keysUpdated.isEmpty()) {
                 return keysUpdated;
             }
@@ -120,15 +126,15 @@ public class HoldingsToBibliographicBean {
         return Collections.emptySet();
     }
 
-    private Set<AgencyClassifierItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
+    private Set<AgencyClassifierItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId, boolean isCommonDerived) {
         if (bibliographicEntityExists(bibliographicAgencyId, bibliographicRecordId)) {
-            HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
+            HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId, isCommonDerived);
             return attachToAgency(expectedState);
         }
         return Collections.emptySet();
     }
 
-    private boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
+    public boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
         BibliographicEntity e = brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
         return ( ( e != null ) && ( !e.isDeleted() ) );
     }

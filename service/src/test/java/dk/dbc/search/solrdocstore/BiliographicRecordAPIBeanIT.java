@@ -219,10 +219,12 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
             String bibliographicRecordId,
             @NotNull int... agencies) {
         BibliographicEntity b = createBibliographicEntity(agencyId, bibliographicRecordId);
+//        boolean isCommonDerived = Arrays.stream(agencies)
+//                .anyMatch(i -> i == commonAgency);
         for (int i = 0 ; i < agencies.length ; i++) {
             createHoldingsItem(agencies[i], bibliographicRecordId);
             HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-                    agencies[i], bibliographicRecordId, agencyId
+                    agencies[i], bibliographicRecordId, agencyId, false
             );
             em.persist(h2b);
         }

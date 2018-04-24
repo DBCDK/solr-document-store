@@ -31,8 +31,8 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "w", "u", "v1", false, Collections.EMPTY_MAP, "T1"));
         em.merge(new HoldingsItemEntity(300101, "12345678", "v2", Collections.EMPTY_LIST, "T2"));
         em.merge(new HoldingsItemEntity(300102, "12345678", "v2", Collections.EMPTY_LIST, "T3"));
-        em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000));
-        em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000));
+        em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
+        em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
         DocumentRetrieveResponse doc = env().getPersistenceContext()
                 .run(() -> bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678")
                 );

@@ -47,10 +47,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 870970),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970),
-                   new HoldingsToBibliographicEntity(300100, "new", 870970),
-                   new HoldingsToBibliographicEntity(300200, "new", 870970)
+                   new HoldingsToBibliographicEntity(700000, "new", 870970, true),
+                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                   new HoldingsToBibliographicEntity(300100, "new", 870970, false),
+                   new HoldingsToBibliographicEntity(300200, "new", 870970, false)
            ));
 
         String b700000 = makeBibliographicRequestJson(700000);
@@ -64,10 +64,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 700000),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970),
-                   new HoldingsToBibliographicEntity(300100, "new", 870970),
-                   new HoldingsToBibliographicEntity(300200, "new", 870970)
+                   new HoldingsToBibliographicEntity(700000, "new", 700000, true),
+                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                   new HoldingsToBibliographicEntity(300100, "new", 870970, false),
+                   new HoldingsToBibliographicEntity(300200, "new", 870970, false)
            ));
 
         String b300100 = makeBibliographicRequestJson(300100);
@@ -79,10 +79,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 700000),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970),
-                   new HoldingsToBibliographicEntity(300100, "new", 300100),
-                   new HoldingsToBibliographicEntity(300200, "new", 870970)
+                   new HoldingsToBibliographicEntity(700000, "new", 700000, true),
+                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                   new HoldingsToBibliographicEntity(300100, "new", 300100, false),
+                   new HoldingsToBibliographicEntity(300200, "new", 870970, false)
            ));
 
         String b300000 = makeBibliographicRequestJson(300000);
@@ -94,10 +94,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 700000),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970),
-                   new HoldingsToBibliographicEntity(300100, "new", 300100),
-                   new HoldingsToBibliographicEntity(300200, "new", 300000)
+                   new HoldingsToBibliographicEntity(700000, "new", 700000, true),
+                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                   new HoldingsToBibliographicEntity(300100, "new", 300100, false),
+                   new HoldingsToBibliographicEntity(300200, "new", 300000, false)
            ));
     }
 
@@ -119,7 +119,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Ensure related holdings are unchanged
         List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.bibliographicRecordId='properUpdate'", HoldingsToBibliographicEntity.class).getResultList();
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(610510, "properUpdate", 600100)
+                   new HoldingsToBibliographicEntity(610510, "properUpdate", 600100, false)
            ));
     }
 
@@ -153,9 +153,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Before common FBS update
         List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDelete");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600200, "onDelete", 600200),
-                   new HoldingsToBibliographicEntity(620520, "onDelete", 600200),
-                   new HoldingsToBibliographicEntity(620521, "onDelete", 600521)
+                   new HoldingsToBibliographicEntity(600200, "onDelete", 600200, true),
+                   new HoldingsToBibliographicEntity(620520, "onDelete", 600200, true),
+                   new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
            ));
         // Update common for FBS
         runDeleteUpdate(600200, "onDelete", true);
@@ -163,29 +163,29 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Ensure related holdings are moved to a higher level
         l = getRelatedHoldings("onDelete");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600200, "onDelete", 870970),
-                   new HoldingsToBibliographicEntity(620520, "onDelete", 870970),
-                   new HoldingsToBibliographicEntity(620521, "onDelete", 600521)
+                   new HoldingsToBibliographicEntity(600200, "onDelete", 870970, true),
+                   new HoldingsToBibliographicEntity(620520, "onDelete", 870970, true),
+                   new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
            ));
         // Before common FBS School update
         l = getRelatedHoldings("onDeleteSchool");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300200),
-                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000)
+                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300200, false),
+                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
            ));
         // Update common FBS School, moved one level up
         runDeleteUpdate(300200, "onDeleteSchool", true);
         l = getRelatedHoldings("onDeleteSchool");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300000),
-                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000)
+                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300000, false),
+                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
            ));
         // Update common FBS School, moved up yet again
         runDeleteUpdate(300000, "onDeleteSchool", true);
         l = getRelatedHoldings("onDeleteSchool");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 870970),
-                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 870970)
+                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 870970, false),
+                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 870970, false)
            ));
 
         // Update single record (no ancestor) holdings does not change
@@ -194,7 +194,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Ensure related holdings no ancestor does not change
         l = getRelatedHoldings("onDeleteSingle");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(644444, "onDeleteSingle", 633333)
+                   new HoldingsToBibliographicEntity(644444, "onDeleteSingle", 633333, false)
            ));
 
     }
@@ -210,7 +210,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Before update
         List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreate");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600300, "onRecreate", 870970)
+                   new HoldingsToBibliographicEntity(600300, "onRecreate", 870970, true)
            ));
         // Recreate FBS library
         runDeleteUpdate(600300, "onRecreate", false);
@@ -218,12 +218,12 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Ensure related holdings are moved back to their lower level
         l = getRelatedHoldings("onRecreate");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600300, "onRecreate", 600300)
+                   new HoldingsToBibliographicEntity(600300, "onRecreate", 600300, true)
            ));
         // Before update of FBS School
         l = getRelatedHoldings("onRecreateSchool");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300000)
+                   new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300000, false)
            ));
         // Recreate FBS School
         runDeleteUpdate(300300, "onRecreateSchool", false);
@@ -231,13 +231,13 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Ensure related holdings are moved to a higher level
         l = getRelatedHoldings("onRecreateSchool");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300300)
+                   new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300300, false)
            ));
         // Recreate no holdings on lower level, nothing is moved
         runDeleteUpdate(655555, "onRecreateSingle", false);
         l = getRelatedHoldings("onRecreateSingle");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(607000, "onRecreateSingle", 655555)
+                   new HoldingsToBibliographicEntity(607000, "onRecreateSingle", 655555, false)
            ));
     }
 
@@ -246,39 +246,39 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Before supersede update FBS
         List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDeleteSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 600400, "onDeleteSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 600400, "onDeleteSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 600400, "onDeleteSupersedeNew")
+                   new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true)
            ));
         // Delete update FBS, records moved to higher level
         runDeleteUpdate(600400, "onDeleteSupersedeNew", true);
         l = getRelatedHoldings("onDeleteSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 870970, "onDeleteSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 870970, "onDeleteSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 870970, "onDeleteSupersedeNew")
+                   new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true)
            ));
         // Before supersede update FBS School
         l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew")
+                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false)
            ));
         // Delete update FBS School, moved to higher level
         runDeleteUpdate(300400, "onDeleteSchoolSupersedeNew", true);
         l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew")
+                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false)
            ));
         runDeleteUpdate(300000, "onDeleteSchoolSupersedeNew", true);
         l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew")
+                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false)
            ));
     }
 
@@ -287,39 +287,39 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Before FBS re-create
         List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreateSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 870970, "onRecreateSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew")
+                   new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
            ));
         // Re-create FBS
         runDeleteUpdate(600500, "onRecreateSupersedeNew", false);
         l = getRelatedHoldings("onRecreateSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 600500, "onRecreateSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew"),
-                   new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew")
+                   new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 600500, "onRecreateSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
+                   new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
            ));
         // Before FBS School re-create
         l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew")
+                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false)
            ));
         // Re-create FBSSchool
         runDeleteUpdate(300000, "onRecreateSchoolSupersedeNew", false);
         l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew")
+                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
            ));
         runDeleteUpdate(300500, "onRecreateSchoolSupersedeNew", false);
         l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
         assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300500, "onRecreateSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew"),
-                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew")
+                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300500, "onRecreateSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
+                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
            ));
     }
 
@@ -358,7 +358,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
-        assertThat(l, contains(( new HoldingsToBibliographicEntity(800000, "new", 800000) )));
+        assertThat(l, contains(( new HoldingsToBibliographicEntity(800000, "new", 800000, false) )));
     }
 
     @Test
@@ -414,7 +414,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 });
         env().getPersistenceContext()
                 .run(() -> {
-                    em.persist(new HoldingsToBibliographicEntity(700000, "a", 870970));
+                    em.persist(new HoldingsToBibliographicEntity(700000, "a", 870970, true));
                 });
 
         String b870970 = makeBibliographicRequestJson(
@@ -442,7 +442,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                    new HoldingsToBibliographicKey(700000, "a"));
                 });
 
-        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 870970, "b"), h2bBefore);
+        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 870970, "b", true), h2bBefore);
 
         String b70000 = makeBibliographicRequestJson(
                 700000, e -> {
@@ -458,7 +458,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                    new HoldingsToBibliographicKey(700000, "a"));
                 });
 
-        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b"), h2bAfter);
+        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b", true), h2bAfter);
     }
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {

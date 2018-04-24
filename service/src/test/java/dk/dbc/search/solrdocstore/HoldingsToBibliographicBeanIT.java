@@ -236,6 +236,38 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         });
     }
 
+    @Test
+    public void isCommonDerived() throws Exception {
+        env().getPersistenceContext().run(() -> {
+            String biblId = "87654321";
+            createBibRecord(301020, biblId);
+            createBibRecord(701020, biblId);
+            createBibRecord(870970, biblId);
+            createBibRecord(876543, biblId);
+            createAgency(301020, LibraryConfig.LibraryType.FBSSchool);
+            createAgency(302030, LibraryConfig.LibraryType.FBSSchool);
+            createAgency(701020, LibraryConfig.LibraryType.FBS);
+            createAgency(702030, LibraryConfig.LibraryType.FBS);
+            createAgency(876543, LibraryConfig.LibraryType.NonFBS);
+            bean.tryToAttachToBibliographicRecord(301020, biblId);
+            bean.tryToAttachToBibliographicRecord(302030, biblId);
+            bean.tryToAttachToBibliographicRecord(701020, biblId);
+            bean.tryToAttachToBibliographicRecord(702030, biblId);
+            bean.tryToAttachToBibliographicRecord(702030, biblId);
+            bean.tryToAttachToBibliographicRecord(876543, biblId);
+            HoldingsToBibliographicEntity h2b_301020 = fetchH2BRecord(301020, biblId);
+            HoldingsToBibliographicEntity h2b_302030 = fetchH2BRecord(302030, biblId);
+            HoldingsToBibliographicEntity h2b_701020 = fetchH2BRecord(701020, biblId);
+            HoldingsToBibliographicEntity h2b_702030 = fetchH2BRecord(702030, biblId);
+            HoldingsToBibliographicEntity h2b_876543 = fetchH2BRecord(876543, biblId);
+            assertEquals(new HoldingsToBibliographicEntity(301020, biblId, 301020, false), h2b_301020);
+            assertEquals(new HoldingsToBibliographicEntity(302030, biblId, LibraryConfig.COMMON_AGENCY, false), h2b_302030);
+            assertEquals(new HoldingsToBibliographicEntity(701020, biblId, 701020, true), h2b_701020);
+            assertEquals(new HoldingsToBibliographicEntity(702030, biblId, LibraryConfig.COMMON_AGENCY, true), h2b_702030);
+            assertEquals(new HoldingsToBibliographicEntity(876543, biblId, 876543, false), h2b_876543);
+        });
+    }
+
     private void createB2B(String oldRecordId, String newRecordId) {
         em.merge(new BibliographicToBibliographicEntity(oldRecordId, newRecordId));
     }
@@ -283,7 +315,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
                 holdingsAgencyId,
                 holdingsBibliographicRecordId,
                 bibliographicAgencyId,
-                bibliographicRecordId
+                bibliographicRecordId,
+                false
         );
         em.merge(e);
     }
