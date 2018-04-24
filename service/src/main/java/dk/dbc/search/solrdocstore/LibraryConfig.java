@@ -9,12 +9,12 @@ public class LibraryConfig {
     public static int COMMON_AGENCY = 870970;
     public static int SCHOOL_COMMON_AGENCY = 300000;
 
-
     @Inject
     AgencyLibraryTypeBean agencyLibraryTypeBean;
 
     /**
-     * FBS and FBSSchool is allowed to hookup holdings to CommonRecords ( 870970 / 300000 )
+     * FBS and FBSSchool is allowed to hookup holdings to CommonRecords ( 870970
+     * / 300000 )
      */
     public enum LibraryType {
         NonFBS, FBS, FBSSchool

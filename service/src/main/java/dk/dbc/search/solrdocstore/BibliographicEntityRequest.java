@@ -36,5 +36,4 @@ public class BibliographicEntityRequest extends BibliographicEntity {
         this.commitWithin = commitWithin;
     }
 
-
 }

@@ -20,17 +20,15 @@ package dk.dbc.search.solrdocstore.asyncjob;
 
 import dk.dbc.search.solrdocstore.Config;
 
-
 /**
  *
  * @author DBC {@literal <dbc.dk>}
  */
 public class AsyncJobRunnerFactory {
 
-
     public static AsyncJobRunner makeAsyncJobRunner() {
         AsyncJobRunner runner = new AsyncJobRunner();
-        runner.config  = new Config() {
+        runner.config = new Config() {
             @Override
             public long getJobPruneMinutes() {
                 return 1L;

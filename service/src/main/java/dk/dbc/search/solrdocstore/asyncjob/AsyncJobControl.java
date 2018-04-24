@@ -83,15 +83,15 @@ public class AsyncJobControl {
     /**
      * Run the "queue everything" async job
      *
-     * @param queue      Name of consumer
+     * @param queue     Name of consumer
      * @param deletedTo even the deleted
      * @return HTTP response with the UUID of the job
      * */
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     @Path("queue-all/{queue}/{deletedTo}")
-    public Response queueAll(@PathParam("queue") String queue,@PathParam("deletedTo") boolean deletedTo){
-        String id = queueAsyncJob.runQueueAllManifestationsFor(queue,deletedTo);
+    public Response queueAll(@PathParam("queue") String queue, @PathParam("deletedTo") boolean deletedTo) {
+        String id = queueAsyncJob.runQueueAllManifestationsFor(queue, deletedTo);
         return Response.ok(id).build();
     }
 
@@ -105,9 +105,9 @@ public class AsyncJobControl {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     @Path("list-errors/{pattern}")
-    public Response listErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
-        log.info("Pattern: {} - Consumer: {}",pattern,consumer);
-        String id = queueAsyncJob.runQueueErrorListJobs(consumer,pattern);
+    public Response listErrors(@PathParam("pattern") String pattern, @QueryParam("consumer") String consumer) {
+        log.info("Pattern: {} - Consumer: {}", pattern, consumer);
+        String id = queueAsyncJob.runQueueErrorListJobs(consumer, pattern);
         return Response.ok(id).build();
     }
 
@@ -121,8 +121,8 @@ public class AsyncJobControl {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     @Path("delete-errors/{pattern}")
-    public Response deleteErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
-        String id = queueAsyncJob.runQueueErrorDeleteJobs(consumer,pattern);
+    public Response deleteErrors(@PathParam("pattern") String pattern, @QueryParam("consumer") String consumer) {
+        String id = queueAsyncJob.runQueueErrorDeleteJobs(consumer, pattern);
         return Response.ok(id).build();
     }
 
@@ -136,8 +136,8 @@ public class AsyncJobControl {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     @Path("requeue-errors/{pattern}")
-    public Response requeueErrors(@PathParam("pattern") String pattern,@QueryParam("consumer") String consumer){
-        String id = queueAsyncJob.runQueueErrorRequeueJobs(consumer,pattern);
+    public Response requeueErrors(@PathParam("pattern") String pattern, @QueryParam("consumer") String consumer) {
+        String id = queueAsyncJob.runQueueErrorRequeueJobs(consumer, pattern);
         return Response.ok(id).build();
     }
 
@@ -163,10 +163,11 @@ public class AsyncJobControl {
     @Path("jobs-status")
     public Response jobsWithStatus() {
         return Response.ok().entity(runner.jobs().stream()
-                .map(e -> new StatusResponse(e.getValue(),e.getKey().toString()))
+                .map(e -> new StatusResponse(e.getValue(), e.getKey().toString()))
                 .collect(Collectors.toList()))
                 .build();
     }
+
     /**
      * Cancel a running job
      *
@@ -256,7 +257,7 @@ public class AsyncJobControl {
         if (job == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok().entity(new StatusResponse(job,id)).build();
+        return Response.ok().entity(new StatusResponse(job, id)).build();
     }
 
     @XmlRootElement
@@ -268,7 +269,7 @@ public class AsyncJobControl {
         public StatusResponse() {
         }
 
-        public StatusResponse(AsyncJobHandle job,String uuid) {
+        public StatusResponse(AsyncJobHandle job, String uuid) {
             running = job.isRunning();
             started = job.isStarted();
             canceled = job.isCanceled();

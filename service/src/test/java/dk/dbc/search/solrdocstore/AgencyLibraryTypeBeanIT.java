@@ -31,14 +31,14 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void ensureReadsCache(){
+    public void ensureReadsCache() {
         int dummyAgency = 1234;
         LibraryConfig.LibraryType dummyType = LibraryConfig.LibraryType.NonFBS;
 
-        persist(dummyAgency,dummyType);
+        persist(dummyAgency, dummyType);
 
         LibraryConfig.LibraryType libraryType = bean.fetchAndCacheLibraryType(dummyAgency);
-        Assert.assertEquals(dummyType,libraryType);
+        Assert.assertEquals(dummyType, libraryType);
         remove(dummyAgency);
 
         AgencyLibraryTypeEntity entity = findEntityWithKey(dummyAgency);
@@ -46,41 +46,41 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void canReadRealAgency(){
+    public void canReadRealAgency() {
 
         LibraryConfig.LibraryType expectedType = LibraryConfig.LibraryType.FBSSchool;
 
         LibraryConfig.LibraryType libraryType = bean.fetchAndCacheLibraryType(realAgency);
-        Assert.assertEquals(expectedType,libraryType);
+        Assert.assertEquals(expectedType, libraryType);
     }
 
     @Test
-    public void ensureReadCacheFirst(){
+    public void ensureReadCacheFirst() {
         canReadRealAgency(); //Plants realAgency in the database
         update(realAgency, LibraryConfig.LibraryType.FBS);
-        Assert.assertEquals(LibraryConfig.LibraryType.FBS,bean.fetchAndCacheLibraryType(realAgency));
+        Assert.assertEquals(LibraryConfig.LibraryType.FBS, bean.fetchAndCacheLibraryType(realAgency));
         remove(realAgency);
     }
 
     @Test
-    public void nonExisting(){
+    public void nonExisting() {
         try {
             bean.fetchAndCacheLibraryType(42);
             Assert.fail("Should throw hard exception");
-        } catch (LibraryRuleException e){
+        } catch (LibraryRuleException e) {
             // all good
         }
     }
 
     private void remove(int agency) {
         AgencyLibraryTypeEntity entity = findEntityWithKey(agency);
-        env().getPersistenceContext().run( () -> em.remove(entity));
+        env().getPersistenceContext().run(() -> em.remove(entity));
     }
 
     private void update(int agency, LibraryConfig.LibraryType libraryType) {
         AgencyLibraryTypeEntity entity = findEntityWithKey(agency);
         entity.setLibraryType(libraryType.name());
-        env().getPersistenceContext().run( () -> em.merge(entity));
+        env().getPersistenceContext().run(() -> em.merge(entity));
     }
 
     private void persist(int key, LibraryConfig.LibraryType fbs) {
@@ -89,7 +89,7 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-    private AgencyLibraryTypeEntity findEntityWithKey(int key){
+    private AgencyLibraryTypeEntity findEntityWithKey(int key) {
         return env().getPersistenceContext().run(() -> em.find(AgencyLibraryTypeEntity.class, key));
 
     }

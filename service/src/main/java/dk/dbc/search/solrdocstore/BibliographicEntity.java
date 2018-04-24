@@ -23,13 +23,15 @@ import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "bibliographicSolrKeys")
-@NamedEntityGraph(name = "bibPostWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
-@SqlResultSetMapping(name="BibliographicEntityWithSupersedeId",entities = {
-        @EntityResult(entityClass = BibliographicEntity.class),
-},columns = {@ColumnResult(name="supersede_id")})
+@NamedEntityGraph(name = "bibPostWithIndexKeys", attributeNodes =
+                  @NamedAttributeNode("indexKeys"))
+@SqlResultSetMapping(name = "BibliographicEntityWithSupersedeId", entities = {
+    @EntityResult(entityClass = BibliographicEntity.class),}, columns = {
+    @ColumnResult(name = "supersede_id")})
 @IdClass(AgencyClassifierItemKey.class)
 public class BibliographicEntity implements Serializable {
-    public static final List<String> sortableColumns = Arrays.asList("agencyId","bibliographicRecordId","producerVersion","deleted","trackingId");
+
+    public static final List<String> sortableColumns = Arrays.asList("agencyId", "bibliographicRecordId", "producerVersion", "deleted", "trackingId");
 
     private static final long serialVersionUID = -2773872842011755768L;
 
@@ -88,19 +90,23 @@ public class BibliographicEntity implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o){
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         BibliographicEntity that = (BibliographicEntity) o;
         return agencyId == that.agencyId &&
-                Objects.equals(classifier, that.classifier) &&
-                Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
-                Objects.equals(repositoryId, that.repositoryId) &&
-                Objects.equals(work, that.work) &&
-                Objects.equals(unit, that.unit) &&
-                Objects.equals(producerVersion, that.producerVersion) &&
-                deleted == that.deleted &&
-                Objects.equals(trackingId, that.trackingId);
+               Objects.equals(classifier, that.classifier) &&
+               Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+               Objects.equals(repositoryId, that.repositoryId) &&
+               Objects.equals(work, that.work) &&
+               Objects.equals(unit, that.unit) &&
+               Objects.equals(producerVersion, that.producerVersion) &&
+               deleted == that.deleted &&
+               Objects.equals(trackingId, that.trackingId);
     }
 
     /**

@@ -61,8 +61,6 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-
-
     public static LibraryConfig createLibraryConfig() {
         LibraryConfig config = new LibraryConfig() {
             @Override
@@ -105,7 +103,6 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-
     public static HoldingsItemBean createHoldingsItemBean(EntityManager em, EnqueueSupplierBean queue, HoldingsToBibliographicBean h2bBean) {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = em;
@@ -114,4 +111,3 @@ public class BeanFactoryUtil {
         return bean;
     }
 }
-

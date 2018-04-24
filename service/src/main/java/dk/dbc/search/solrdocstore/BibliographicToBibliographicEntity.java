@@ -39,6 +39,5 @@ public class BibliographicToBibliographicEntity implements Serializable {
     public void setDeadBibliographicRecordId(String deadBibliographicRecordId) {
         this.deadBibliographicRecordId = deadBibliographicRecordId;
     }
-    
-    
+
 }

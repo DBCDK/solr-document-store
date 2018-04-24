@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @Stateless
 @Path("")
 public class BiliographicRecordAPIBean {
+
     private static final ObjectMapper O = new ObjectMapper();
     private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
 
@@ -39,8 +40,8 @@ public class BiliographicRecordAPIBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    private int pageCount(long resCount,int pageSize){
-        return (int)Math.ceil((double)resCount/pageSize);
+    private int pageCount(long resCount, int pageSize) {
+        return (int) Math.ceil((double) resCount / pageSize);
     }
 
     /*
@@ -56,21 +57,21 @@ public class BiliographicRecordAPIBean {
             @DefaultValue("1") @QueryParam("page") int page,
             @DefaultValue("10") @QueryParam("page_size") int pageSize,
             @DefaultValue("agencyId") @QueryParam("order_by") String orderBy,
-            @DefaultValue("false") @QueryParam("desc") boolean desc){
+            @DefaultValue("false") @QueryParam("desc") boolean desc) {
         log.info("Requesting bibliographic record id: {}", bibliographicRecordId);
-        log.info("Query parameters - page: {}, page_size: {}, order_by: {}, desc: {}",page,pageSize,orderBy,desc);
+        log.info("Query parameters - page: {}, page_size: {}, order_by: {}, desc: {}", page, pageSize, orderBy, desc);
         // Checking for valid  query parameters
-        if (!BibliographicEntity.sortableColumns.contains(orderBy)){
+        if (!BibliographicEntity.sortableColumns.contains(orderBy)) {
             return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
         }
-        Query frontendQuery = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId,orderBy,desc);
-        List<Object[]> resultList = frontendQuery.setFirstResult((page-1)*pageSize).setMaxResults(pageSize).getResultList();
+        Query frontendQuery = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId, orderBy, desc);
+        List<Object[]> resultList = frontendQuery.setFirstResult(( page - 1 ) * pageSize).setMaxResults(pageSize).getResultList();
         List<BibliographicFrontendEntity> bibliographicFrontendEntityList = resultList.stream().map((record) -> {
-            BibliographicEntity b = (BibliographicEntity)record[0];
-            return new BibliographicFrontendEntity(b,(String)record[1]);
+            BibliographicEntity b = (BibliographicEntity) record[0];
+            return new BibliographicFrontendEntity(b, (String) record[1]);
         }).collect(Collectors.toList());
         long countResult = brBean.getBibliographicEntityCountById(bibliographicRecordId);
-        return Response.ok(new FrontendReturnListType<>(bibliographicFrontendEntityList,pageCount(countResult,pageSize)), MediaType.APPLICATION_JSON).build();
+        return Response.ok(new FrontendReturnListType<>(bibliographicFrontendEntityList, pageCount(countResult, pageSize)), MediaType.APPLICATION_JSON).build();
     }
 
     @GET
@@ -84,31 +85,30 @@ public class BiliographicRecordAPIBean {
             @DefaultValue("agencyId") @QueryParam("order_by") String orderBy,
             @DefaultValue("false") @QueryParam("desc") boolean desc) throws JsonProcessingException {
 
-        log.info("Requesting bibliographic record with repository id: {}",repositoryID);
-        log.info("Query parameters - page: {}, page_size: {}, order_by: {}",page,pageSize,orderBy);
+        log.info("Requesting bibliographic record with repository id: {}", repositoryID);
+        log.info("Query parameters - page: {}, page_size: {}, order_by: {}", page, pageSize, orderBy);
         // Checking for valid  query parameters
-        if (!BibliographicEntity.sortableColumns.contains(orderBy)){
+        if (!BibliographicEntity.sortableColumns.contains(orderBy)) {
             return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
         }
 
-        String direction = (desc) ? "DESC" : "ASC";
+        String direction = ( desc ) ? "DESC" : "ASC";
         Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
-                "FROM bibliographicsolrkeys b " +
-                "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
-                "WHERE b.repositoryId = ? ORDER BY b."+orderBy+" "+direction,"BibliographicEntityWithSupersedeId")
-                .setParameter(1,repositoryID)
-                .setParameter(2,orderBy)
-                .setFirstResult((page-1)*pageSize)
+                                                              "FROM bibliographicsolrkeys b " +
+                                                              "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
+                                                              "WHERE b.repositoryId = ? ORDER BY b." + orderBy + " " + direction, "BibliographicEntityWithSupersedeId")
+                .setParameter(1, repositoryID)
+                .setParameter(2, orderBy)
+                .setFirstResult(( page - 1 ) * pageSize)
                 .setMaxResults(pageSize);
-        List<BibliographicFrontendEntity> res = ((List<Object[]>)frontendQuery.getResultList()).stream().map((record) -> {
-            BibliographicEntity b = (BibliographicEntity)record[0];
-            return new BibliographicFrontendEntity(b,(String)record[1]);
+        List<BibliographicFrontendEntity> res = ( (List<Object[]>) frontendQuery.getResultList() ).stream().map((record) -> {
+            BibliographicEntity b = (BibliographicEntity) record[0];
+            return new BibliographicFrontendEntity(b, (String) record[1]);
         }).collect(Collectors.toList());
-        Query queryTotal = entityManager.createNativeQuery
-                ("SELECT COUNT(b.bibliographicRecordId) FROM bibliographicsolrkeys b WHERE b.repositoryId = ?")
-                .setParameter(1,repositoryID);
-        long count = (long)queryTotal.getSingleResult();
-        return Response.ok(new FrontendReturnListType<>(res,pageCount(count,pageSize)),MediaType.APPLICATION_JSON).build();
+        Query queryTotal = entityManager.createNativeQuery("SELECT COUNT(b.bibliographicRecordId) FROM bibliographicsolrkeys b WHERE b.repositoryId = ?")
+                .setParameter(1, repositoryID);
+        long count = (long) queryTotal.getSingleResult();
+        return Response.ok(new FrontendReturnListType<>(res, pageCount(count, pageSize)), MediaType.APPLICATION_JSON).build();
     }
 
     @GET
@@ -117,15 +117,15 @@ public class BiliographicRecordAPIBean {
     @Timed
     public Response getBibliographicRecord(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
-            @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
+            @PathParam("bibliographicAgencyId") int bibliographicAgencyId) {
         Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
-                "FROM bibliographicsolrkeys b " +
-                "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
-                "WHERE (b.bibliographicrecordid=?1 AND b.agencyid=?2)","BibliographicEntityWithSupersedeId")
-                .setParameter(1,bibliographicRecordId)
-                .setParameter(2,bibliographicAgencyId);
-        Object[] record = (Object[])frontendQuery.getSingleResult();
-        return Response.ok(new BibliographicFrontendEntity((BibliographicEntity)record[0],(String)record[1])).build();
+                                                              "FROM bibliographicsolrkeys b " +
+                                                              "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
+                                                              "WHERE (b.bibliographicrecordid=?1 AND b.agencyid=?2)", "BibliographicEntityWithSupersedeId")
+                .setParameter(1, bibliographicRecordId)
+                .setParameter(2, bibliographicAgencyId);
+        Object[] record = (Object[]) frontendQuery.getSingleResult();
+        return Response.ok(new BibliographicFrontendEntity((BibliographicEntity) record[0], (String) record[1])).build();
     }
 
     /*
@@ -137,11 +137,11 @@ public class BiliographicRecordAPIBean {
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
     public Response getRelatedHoldings(@PathParam("bibliographicRecordId") String bibliographicRecordId,
-                                       @PathParam("bibliographicAgencyId") int bibliographicAgencyId){
+                                       @PathParam("bibliographicAgencyId") int bibliographicAgencyId) {
         log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",
-                bibliographicRecordId,bibliographicAgencyId);
+                 bibliographicRecordId, bibliographicAgencyId);
         List<HoldingsItemEntity> res = holdingsItemBean.getRelatedHoldingsWithIndexKeys(bibliographicRecordId, bibliographicAgencyId);
-        return Response.ok(new FrontendReturnListType<>(res,0),MediaType.APPLICATION_JSON).build();
+        return Response.ok(new FrontendReturnListType<>(res, 0), MediaType.APPLICATION_JSON).build();
     }
 
 }

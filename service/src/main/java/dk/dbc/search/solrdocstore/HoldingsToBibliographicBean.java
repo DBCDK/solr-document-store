@@ -14,7 +14,6 @@ import javax.persistence.Query;
 import static dk.dbc.search.solrdocstore.LibraryConfig.COMMON_AGENCY;
 import static dk.dbc.search.solrdocstore.LibraryConfig.SCHOOL_COMMON_AGENCY;
 
-
 @Stateless
 public class HoldingsToBibliographicBean {
 
@@ -31,9 +30,8 @@ public class HoldingsToBibliographicBean {
 
     @Timed
     public Set<AgencyClassifierItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
-        log.info("Update HoldingsToBibliographic for {} {}", hAgencyId,hBibliographicRecordId);
+        log.info("Update HoldingsToBibliographic for {} {}", hAgencyId, hBibliographicRecordId);
         LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
-
 
         switch (libraryType) {
             case NonFBS:
@@ -49,18 +47,17 @@ public class HoldingsToBibliographicBean {
         return Collections.emptySet();
     }
 
-
     @Timed
     public Set<AgencyClassifierItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
-        Map<Integer,LibraryConfig.LibraryType> map = new HashMap<>();
+        Map<Integer, LibraryConfig.LibraryType> map = new HashMap<>();
         Set<AgencyClassifierItemKey> keysUpdated = EnqueueAdapter.makeSet();
 
         for (String supersededRecordId : supersededRecordIds) {
             List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
-            for (HoldingsToBibliographicEntity h2b : recalcCandidates){
+            for (HoldingsToBibliographicEntity h2b : recalcCandidates) {
 
                 LibraryConfig.LibraryType libraryType = getFromCache(map, h2b.getHoldingsAgencyId());
-                switch (libraryType){
+                switch (libraryType) {
                     case NonFBS:
                         break;
                     case FBS:
@@ -76,32 +73,32 @@ public class HoldingsToBibliographicBean {
     }
 
     private LibraryConfig.LibraryType getFromCache(Map<Integer, LibraryConfig.LibraryType> map, int holdingsAgencyId) {
-        LibraryConfig.LibraryType t = map.computeIfAbsent(holdingsAgencyId, k->libraryConfig.getLibraryType(holdingsAgencyId));
+        LibraryConfig.LibraryType t = map.computeIfAbsent(holdingsAgencyId, k -> libraryConfig.getLibraryType(holdingsAgencyId));
         return t;
     }
 
     @Timed
-    public List<HoldingsToBibliographicEntity> getRelatedHoldingsToBibliographic(int bibliographicAgencyId, String bibliographicRecordId){
+    public List<HoldingsToBibliographicEntity> getRelatedHoldingsToBibliographic(int bibliographicAgencyId, String bibliographicRecordId) {
         return entityManager.createQuery(
                 "SELECT h FROM HoldingsToBibliographicEntity h WHERE " +
-                        "h.bibliographicRecordId=:bibId and " +
-                        "h.bibliographicAgencyId=:agencyId", HoldingsToBibliographicEntity.class)
-                .setParameter("agencyId",bibliographicAgencyId)
-                .setParameter("bibId",bibliographicRecordId).getResultList();
+                "h.bibliographicRecordId=:bibId and " +
+                "h.bibliographicAgencyId=:agencyId", HoldingsToBibliographicEntity.class)
+                .setParameter("agencyId", bibliographicAgencyId)
+                .setParameter("bibId", bibliographicRecordId).getResultList();
     }
 
     public List<HoldingsToBibliographicEntity> findRecalcCandidates(String bibliographicRecordId) {
 
         Query q = entityManager.createQuery(
                 "SELECT h FROM HoldingsToBibliographicEntity h " +
-                        "WHERE h.bibliographicRecordId = :recId", HoldingsToBibliographicEntity.class);
+                "WHERE h.bibliographicRecordId = :recId", HoldingsToBibliographicEntity.class);
         q.setParameter("recId", bibliographicRecordId);
-        return  q.getResultList();
+        return q.getResultList();
     }
 
     private String findLiveBibliographicRecordId(String bibliographicRecordId) {
         BibliographicToBibliographicEntity e = entityManager.find(BibliographicToBibliographicEntity.class, bibliographicRecordId);
-        if (e==null) {
+        if (e == null) {
             return bibliographicRecordId;
         } else {
             return e.getLiveBibliographicRecordId();
@@ -109,21 +106,22 @@ public class HoldingsToBibliographicBean {
     }
 
     private Set<AgencyClassifierItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, int... bibliographicAgencyPriorities) {
-        for (int i=0; i<bibliographicAgencyPriorities.length;i++) {
+        for (int i = 0 ; i < bibliographicAgencyPriorities.length ; i++) {
             Set<AgencyClassifierItemKey> keysUpdated =
                     attachIfExists(
                             bibliographicAgencyPriorities[i],
                             bibliographicRecordId,
                             holdingsAgencyId,
                             holdingsBibliographicRecordId);
-            if (!keysUpdated.isEmpty()) return keysUpdated;
+            if (!keysUpdated.isEmpty()) {
+                return keysUpdated;
+            }
         }
         return Collections.emptySet();
     }
 
-
     private Set<AgencyClassifierItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId) {
-        if (bibliographicEntityExists(bibliographicAgencyId,bibliographicRecordId)){
+        if (bibliographicEntityExists(bibliographicAgencyId, bibliographicRecordId)) {
             HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
             return attachToAgency(expectedState);
         }

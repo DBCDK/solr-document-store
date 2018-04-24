@@ -52,9 +52,9 @@ public class AgencyItemKey implements Serializable {
     @Override
     public String toString() {
         return "AgencyItemKey{" +
-                "agencyId=" + agencyId +
-                ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
-                '}';
+               "agencyId=" + agencyId +
+               ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
+               '}';
     }
 
     public int getAgencyId() {

@@ -80,7 +80,6 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
         // Logic testing is in QueueRulesBeanIT, since
         // the interface for creating/deleting queuerules
         // is much simpler there.
-
         assertThat("Start with empty queuerule", daemon.getManifestationQueues().isEmpty(), is(true));
         try (Connection connection = datasource.getConnection() ;
              Statement stmt = connection.createStatement()) {
@@ -88,9 +87,10 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
         }
         assertThat("Just after insert queuerule is still empty", daemon.getManifestationQueues().isEmpty(), is(true));
 
-        for (int i = 0 ; i < 1000; i++) {
-            if(!daemon.getManifestationQueues().isEmpty())
+        for (int i = 0 ; i < 1000 ; i++) {
+            if (!daemon.getManifestationQueues().isEmpty()) {
                 break;
+            }
             Thread.sleep(1);
         }
         System.out.println("queues = " + daemon.getManifestationQueues());

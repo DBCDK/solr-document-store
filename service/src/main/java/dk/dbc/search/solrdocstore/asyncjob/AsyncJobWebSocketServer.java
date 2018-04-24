@@ -17,28 +17,30 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.StringReader;
 
 /**
- * Class managing websocket connections, mainly parses and delegates to the session handler
+ * Class managing websocket connections, mainly parses and delegates to the
+ * session handler
  * */
 @Singleton
 @ServerEndpoint("/ws")
 public class AsyncJobWebSocketServer {
+
     private static final Logger log = LoggerFactory.getLogger(AsyncJobWebSocketServer.class);
 
     @Inject
     AsyncJobSessionHandler sessionHandler;
 
     @OnOpen
-    public void open(Session session){
+    public void open(Session session) {
         sessionHandler.addSession(session);
     }
 
     @OnClose
-    public void close(Session session){
+    public void close(Session session) {
         sessionHandler.removeSession(session);
     }
 
     @OnError
-    public void error(Throwable error){
+    public void error(Throwable error) {
         log.error("Web socket error:", error);
     }
 
@@ -48,7 +50,7 @@ public class AsyncJobWebSocketServer {
         try (JsonReader reader = Json.createReader(new StringReader(message))) {
             JsonObject jsonMessage = reader.readObject();
             String uuid = jsonMessage.getString("uuid");
-            switch (jsonMessage.getString("type")){
+            switch (jsonMessage.getString("type")) {
                 case "Requesting subscription":
                     sessionHandler.subscribe(session, uuid);
                     break;

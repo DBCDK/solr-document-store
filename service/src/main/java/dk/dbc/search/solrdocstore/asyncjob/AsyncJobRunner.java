@@ -106,7 +106,7 @@ public class AsyncJobRunner {
                                           e -> e.getValue().getJob().getName()));
     }
 
-    public List<Map.Entry<UUID,AsyncJobHandle>> jobs(){
+    public List<Map.Entry<UUID, AsyncJobHandle>> jobs() {
         return new ArrayList<>(jobs.entrySet());
     }
 
@@ -123,10 +123,10 @@ public class AsyncJobRunner {
         do {
             id = UUID.randomUUID();
         } while (jobs.computeIfAbsent(id, s -> {
-            AsyncJobWesocketAppender wa = new AsyncJobWesocketAppender(s, wrapper, sessionHandler);
-            wrapper.setWebsocketAppender(wa);
-            return wrapper;
-        }) != wrapper);
+                                  AsyncJobWesocketAppender wa = new AsyncJobWesocketAppender(s, wrapper, sessionHandler);
+                                  wrapper.setWebsocketAppender(wa);
+                                  return wrapper;
+                              }) != wrapper);
         log.info("mes = {}", mes);
         mes.execute(wrapper);
         return id.toString();

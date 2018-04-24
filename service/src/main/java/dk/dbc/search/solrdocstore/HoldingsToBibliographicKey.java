@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class HoldingsToBibliographicKey implements Serializable {
+
     private static final long serialVersionUID = -2054293971622143423L;
 
     private int holdingsAgencyId;
@@ -19,11 +20,15 @@ public class HoldingsToBibliographicKey implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HoldingsToBibliographicKey that = (HoldingsToBibliographicKey) o;
         return holdingsAgencyId == that.holdingsAgencyId &&
-                Objects.equals(holdingsBibliographicRecordId, that.holdingsBibliographicRecordId);
+               Objects.equals(holdingsBibliographicRecordId, that.holdingsBibliographicRecordId);
     }
 
     @Override

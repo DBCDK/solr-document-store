@@ -21,8 +21,8 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
     @Before
     public void ClearDatabase() throws SQLException {
-        try (Connection conn = env().getDatasource().getConnection();
-             Statement statement = conn.createStatement() )  {
+        try (Connection conn = env().getDatasource().getConnection() ;
+             Statement statement = conn.createStatement()) {
             statement.executeUpdate("DELETE FROM holdingsToBibliographic");
             statement.executeUpdate("DELETE FROM holdingsItemssolrkeys");
             statement.executeUpdate("DELETE FROM bibliographicToBibliographic");
@@ -61,13 +61,15 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         dbMigrator.migrate();
     }
 
-
     /**
-        When IDEA tries to run all unit tests in the project - it will fail on this class.
-        Since {@link JpaSolrDocStoreIntegrationTester} has a @Before annotation - it is considered a test class
-        But since it has no methods to execute, then IDEA will fail the class with "No runnable method".
+     * When IDEA tries to run all unit tests in the project - it will fail on
+     * this class.
+     * Since {@link JpaSolrDocStoreIntegrationTester} has a @Before annotation -
+     * it is considered a test class
+     * But since it has no methods to execute, then IDEA will fail the class
+     * with "No runnable method".
      */
     @Test
-    public void noTest(){
+    public void noTest() {
     }
 }

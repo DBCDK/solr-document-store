@@ -59,10 +59,10 @@ public class AgencyClassifierItemKey implements Serializable {
     @Override
     public String toString() {
         return "AgencyItemKey{" +
-                "agencyId=" + agencyId +
-                ", classifier=" + classifier +
-                ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
-                '}';
+               "agencyId=" + agencyId +
+               ", classifier=" + classifier +
+               ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
+               '}';
     }
 
     public int getAgencyId() {

@@ -26,6 +26,7 @@ import java.util.HashMap;
 @Stateless
 @Path("")
 public class QueueFrontendAPIBean {
+
     private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
     private final JSONBContext jsonbContext = new JSONBContext();
 
@@ -41,7 +42,7 @@ public class QueueFrontendAPIBean {
     @GET
     @Path("queue-rules")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getQueueRules(){
+    public Response getQueueRules() {
         log.info("Queue rules listed, probably by queue tool frontend");
         return Response.ok(new FrontendReturnListType<>(queueRulesBean.getAllQueueRules(), 1)).build();
     }
@@ -63,9 +64,9 @@ public class QueueFrontendAPIBean {
     @DELETE
     @Path("queue-rule/{queueID}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response deleteQueueRule(@PathParam("queueID") String queueID){
+    public Response deleteQueueRule(@PathParam("queueID") String queueID) {
         QueueRuleEntity queue = entityManager.find(QueueRuleEntity.class, queueID);
-        if (queue != null){
+        if (queue != null) {
             log.info("Deleting queue rule: {}", queue.getQueue());
             queueRulesBean.delQueueRule(queue);
             return Response.ok(queue).build();

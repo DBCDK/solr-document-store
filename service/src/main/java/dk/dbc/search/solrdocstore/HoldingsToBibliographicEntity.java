@@ -26,7 +26,7 @@ public class HoldingsToBibliographicEntity implements Serializable {
     }
 
     HoldingsToBibliographicEntity(int holdingsAgencyId, String bibliographicRecordId, int bibliographicAgencyId) {
-        this(holdingsAgencyId,bibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
+        this(holdingsAgencyId, bibliographicRecordId, bibliographicAgencyId, bibliographicRecordId);
     }
 
     public HoldingsToBibliographicEntity(int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId, String bibliographicRecordId) {
@@ -39,22 +39,26 @@ public class HoldingsToBibliographicEntity implements Serializable {
     @Override
     public String toString() {
         return "HoldingsToBibliographicEntity{" +
-                "holdingsAgencyId=" + holdingsAgencyId +
-                ", holdingsBibliographicRecordId='" + holdingsBibliographicRecordId + '\'' +
-                ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
-                ", bibliographicAgencyId=" + bibliographicAgencyId +
-                '}';
+               "holdingsAgencyId=" + holdingsAgencyId +
+               ", holdingsBibliographicRecordId='" + holdingsBibliographicRecordId + '\'' +
+               ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
+               ", bibliographicAgencyId=" + bibliographicAgencyId +
+               '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HoldingsToBibliographicEntity that = (HoldingsToBibliographicEntity) o;
         return holdingsAgencyId == that.holdingsAgencyId &&
-                bibliographicAgencyId == that.bibliographicAgencyId &&
-                Objects.equals(holdingsBibliographicRecordId, that.holdingsBibliographicRecordId) &&
-                Objects.equals(bibliographicRecordId, that.bibliographicRecordId);
+               bibliographicAgencyId == that.bibliographicAgencyId &&
+               Objects.equals(holdingsBibliographicRecordId, that.holdingsBibliographicRecordId) &&
+               Objects.equals(bibliographicRecordId, that.bibliographicRecordId);
     }
 
     @Override
@@ -63,7 +67,7 @@ public class HoldingsToBibliographicEntity implements Serializable {
     }
 
     public HoldingsToBibliographicKey asKey() {
-        return new HoldingsToBibliographicKey(holdingsAgencyId,holdingsBibliographicRecordId);
+        return new HoldingsToBibliographicKey(holdingsAgencyId, holdingsBibliographicRecordId);
     }
 
     public int getHoldingsAgencyId() {

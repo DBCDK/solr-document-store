@@ -7,12 +7,13 @@ import org.junit.Test;
 import javax.persistence.EntityManager;
 
 public class BibliographicToBibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
+
     @Test
     public void storeEntity() {
         executeScriptResource("/entityTestData.sql");
-        EntityManager em=env().getEntityManager();
+        EntityManager em = env().getEntityManager();
 
-        env().getPersistenceContext().run( () -> {
+        env().getPersistenceContext().run(() -> {
             em.persist(new BibliographicToBibliographicEntity("300", "4321"));
         });
     }

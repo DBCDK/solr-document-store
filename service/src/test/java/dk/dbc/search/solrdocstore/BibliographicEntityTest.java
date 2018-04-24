@@ -23,7 +23,7 @@ public class BibliographicEntityTest {
         indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
         indexKeys.put("id", Collections.singletonList("argle"));
 
-        BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1","work:1", "unit:2", "1234", false, indexKeys, "");
+        BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1", "work:1", "unit:2", "1234", false, indexKeys, "");
         String s = context.marshall(be);
         assertThat(s, is("{\"agencyId\":200,\"classifier\":\"clazzifier\",\"bibliographicRecordId\":\"1234\",\"repositoryId\":\"id#1\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"trackingId\":\"\"}"));
     }

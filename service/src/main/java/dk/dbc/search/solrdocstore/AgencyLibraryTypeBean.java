@@ -18,34 +18,34 @@ public class AgencyLibraryTypeBean {
     EntityManager entityManager;
 
     @Timed
-    public LibraryConfig.LibraryType fetchAndCacheLibraryType(int agency){
+    public LibraryConfig.LibraryType fetchAndCacheLibraryType(int agency) {
         LibraryConfig.LibraryType returnValue;
         AgencyLibraryTypeEntity cachedValue = findByAgency(agency);
-        if (cachedValue!=null){
+        if (cachedValue != null) {
             returnValue = LibraryConfig.LibraryType.valueOf(cachedValue.getLibraryType());
         } else {
             LibraryConfig.LibraryType libraryType = proxy.fetchLibraryTypeFor(agency);
-            storeTypeOnAgency(agency,libraryType);
+            storeTypeOnAgency(agency, libraryType);
             returnValue = libraryType;
         }
         return returnValue;
     }
 
-    private void storeTypeOnAgency(int agency, LibraryConfig.LibraryType libraryType){
+    private void storeTypeOnAgency(int agency, LibraryConfig.LibraryType libraryType) {
         AgencyLibraryTypeEntity e = new AgencyLibraryTypeEntity();
         e.setAgencyId(agency);
         e.setLibraryType(libraryType.name());
         entityManager.persist(e);
     }
 
-    private void deleteLibraryTypeOnAgency(int agency){
+    private void deleteLibraryTypeOnAgency(int agency) {
         AgencyLibraryTypeEntity e = findByAgency(agency);
         if (e != null) {
             entityManager.remove(e);
         }
     }
 
-    private void updateAgencyTo(int agency, LibraryConfig.LibraryType libraryType){
+    private void updateAgencyTo(int agency, LibraryConfig.LibraryType libraryType) {
         AgencyLibraryTypeEntity e = findByAgency(agency);
         if (e != null) {
             e.setLibraryType(libraryType.name());
@@ -53,7 +53,7 @@ public class AgencyLibraryTypeBean {
         }
     }
 
-    private AgencyLibraryTypeEntity findByAgency(int agency){
+    private AgencyLibraryTypeEntity findByAgency(int agency) {
         AgencyLibraryTypeEntity e = entityManager.find(AgencyLibraryTypeEntity.class, agency);
         return e;
     }

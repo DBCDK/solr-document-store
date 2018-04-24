@@ -12,7 +12,7 @@ public class JSONParser {
 
     private static final Logger log = LoggerFactory.getLogger(JSONParser.class);
 
-    public static LibraryRules getLibraryRules(String jsonInput){
+    public static LibraryRules getLibraryRules(String jsonInput) {
         LibraryRules result = new LibraryRules();
         JsonNode productNode = parseJSON(jsonInput);
         JsonNode rootElement = getRootElement(productNode);
@@ -26,19 +26,19 @@ public class JSONParser {
         try {
             return new ObjectMapper().readTree(jsonInput);
         } catch (IOException e) {
-            log.error("Failed to parse JSON. {}",jsonInput);
-            throw new LibraryRuleException("Failed to parse JSON",e);
+            log.error("Failed to parse JSON. {}", jsonInput);
+            throw new LibraryRuleException("Failed to parse JSON", e);
         }
     }
 
     protected static Boolean findUseEnrichments(JsonNode rootElement) {
-        Iterator<JsonNode> libraryRuleIterator = getNodeFailIfNull(rootElement,"libraryRule").elements();
+        Iterator<JsonNode> libraryRuleIterator = getNodeFailIfNull(rootElement, "libraryRule").elements();
 
-        while(libraryRuleIterator.hasNext()) {
+        while (libraryRuleIterator.hasNext()) {
             JsonNode e = libraryRuleIterator.next();
-            String name = getAsText(e,"name");
-            if ("use_enrichments".equals(name)){
-                String boolAsText = getAsText(e,"bool");
+            String name = getAsText(e, "name");
+            if ("use_enrichments".equals(name)) {
+                String boolAsText = getAsText(e, "bool");
                 return "1".equals(boolAsText);
             }
         }
@@ -47,39 +47,42 @@ public class JSONParser {
 
     protected static String getAsText(JsonNode e, String fieldName, String def) {
         JsonNode jsonNode = e.get(fieldName);
-        if(jsonNode == null)
+        if (jsonNode == null) {
             return def;
+        }
         jsonNode = jsonNode.get("$");
-        if(jsonNode == null)
+        if (jsonNode == null) {
             return def;
+        }
         return jsonNode.asText(def);
     }
+
     protected static String getAsText(JsonNode e, String fieldName) {
         JsonNode jsonNode = e.get(fieldName);
-        failIfNull(jsonNode,fieldName);
+        failIfNull(jsonNode, fieldName);
         jsonNode = jsonNode.get("$");
-        failIfNull(jsonNode,fieldName+"/$");
+        failIfNull(jsonNode, fieldName + "/$");
         return jsonNode.asText();
     }
 
     protected static JsonNode getRootElement(JsonNode productNode) {
         JsonNode n = productNode;
-        n = getNodeFailIfNull(n,"libraryRulesResponse");
-        n = getNodeFailIfNull(n,"libraryRules");
+        n = getNodeFailIfNull(n, "libraryRulesResponse");
+        n = getNodeFailIfNull(n, "libraryRules");
         JsonNode libraryRules = n.get(0);
-        failIfNull(n,"No elements under libraryRulesResponse/libraryRules");
+        failIfNull(n, "No elements under libraryRulesResponse/libraryRules");
         return libraryRules;
     }
 
     protected static JsonNode getNodeFailIfNull(JsonNode n, String elementname) {
         JsonNode result = n.get(elementname);
-        failIfNull(result,elementname);
+        failIfNull(result, elementname);
         return result;
     }
 
     protected static void failIfNull(JsonNode jsonNode, String fieldName) {
-        if (jsonNode==null){
-            log.error("Failed to read element: \"{}\" from input \"{}\"",fieldName,jsonNode);
+        if (jsonNode == null) {
+            log.error("Failed to read element: \"{}\" from input \"{}\"", fieldName, jsonNode);
             throw new LibraryRuleException("Failed to read field " + fieldName);
         }
     }

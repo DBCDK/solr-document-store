@@ -7,19 +7,19 @@ import javax.inject.Inject;
 import java.io.Serializable;
 
 @Stateless
-public class LibraryRulesProxy implements Serializable{
+public class LibraryRulesProxy implements Serializable {
 
     @Inject
     OpenAgencyClient oaclient;
 
-    private static String SCHOOLLIBRARY="Skolebibliotek";
+    private static String SCHOOLLIBRARY = "Skolebibliotek";
 
     @Timed
-    public LibraryConfig.LibraryType fetchLibraryTypeFor(int agency){
+    public LibraryConfig.LibraryType fetchLibraryTypeFor(int agency) {
 
         LibraryRules libraryRules = oaclient.fetchLibraryRuleFor(agency);
-        if (libraryRules.canUseEnrichments){
-            if (SCHOOLLIBRARY.equals(libraryRules.agencyType)){
+        if (libraryRules.canUseEnrichments) {
+            if (SCHOOLLIBRARY.equals(libraryRules.agencyType)) {
                 return LibraryConfig.LibraryType.FBSSchool;
             } else {
                 return LibraryConfig.LibraryType.FBS;

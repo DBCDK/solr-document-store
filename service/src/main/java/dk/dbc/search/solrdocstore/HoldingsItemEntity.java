@@ -19,7 +19,8 @@ import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
-@NamedEntityGraph(name = "holdingItemsWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
+@NamedEntityGraph(name = "holdingItemsWithIndexKeys", attributeNodes =
+                  @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
