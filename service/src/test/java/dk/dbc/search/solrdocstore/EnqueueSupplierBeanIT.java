@@ -98,15 +98,15 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private Integer nonfbsAgency = 800111;
     private Integer schoolAgency = 300111;
     private Integer fbsAgency = 600111;
-    private Integer commonAgency = LibraryConfig.COMMON_AGENCY;
-    private Integer schoolCommonAgency = LibraryConfig.SCHOOL_COMMON_AGENCY;
+    private Integer commonAgency = LibraryType.COMMON_AGENCY;
+    private Integer schoolCommonAgency = LibraryType.SCHOOL_COMMON_AGENCY;
 
     @Test
     public void checkConfig() {
         System.out.println("checkConfig");
-        assertEquals(LibraryConfig.LibraryType.NonFBS, bibliographicBean.libraryConfig.getLibraryType(nonfbsAgency));
-        assertEquals(LibraryConfig.LibraryType.FBS, bibliographicBean.libraryConfig.getLibraryType(fbsAgency));
-        assertEquals(LibraryConfig.LibraryType.FBSSchool, bibliographicBean.libraryConfig.getLibraryType(schoolAgency));
+        assertEquals(LibraryType.NonFBS, bibliographicBean.libraryConfig.getLibraryType(nonfbsAgency));
+        assertEquals(LibraryType.FBS, bibliographicBean.libraryConfig.getLibraryType(fbsAgency));
+        assertEquals(LibraryType.FBSSchool, bibliographicBean.libraryConfig.getLibraryType(schoolAgency));
     }
 
     @Test

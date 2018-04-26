@@ -64,25 +64,25 @@ public class BeanFactoryUtil {
     public static LibraryConfig createLibraryConfig() {
         LibraryConfig config = new LibraryConfig() {
             @Override
-            public LibraryConfig.LibraryType getLibraryType(int agencyId) {
+            public LibraryType getLibraryType(int agencyId) {
                 if (agencyId >= 800000) {
-                    return LibraryConfig.LibraryType.NonFBS;
+                    return LibraryType.NonFBS;
                 }
                 if (agencyId < 400000) {
-                    return LibraryConfig.LibraryType.FBSSchool;
+                    return LibraryType.FBSSchool;
                 }
-                return LibraryConfig.LibraryType.FBS;
+                return LibraryType.FBS;
             }
 
             @Override
-            public LibraryConfig.RecordType getRecordType(int agencyId) {
+            public RecordType getRecordType(int agencyId) {
                 if (agencyId == 870970) {
-                    return LibraryConfig.RecordType.CommonRecord;
+                    return RecordType.CommonRecord;
                 }
                 if (agencyId == 300000) {
-                    return LibraryConfig.RecordType.CommonRecord;
+                    return RecordType.CommonRecord;
                 }
-                return LibraryConfig.RecordType.SingleRecord;
+                return RecordType.SingleRecord;
             }
 
         };

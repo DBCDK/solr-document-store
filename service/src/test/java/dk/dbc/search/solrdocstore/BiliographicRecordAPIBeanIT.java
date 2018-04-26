@@ -19,7 +19,7 @@ import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 
 public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    int commonAgency = LibraryConfig.COMMON_AGENCY;
+    int commonAgency = LibraryType.COMMON_AGENCY;
     int[] holdingAgencies = {133, 134, 135};
 
     EntityManager em;

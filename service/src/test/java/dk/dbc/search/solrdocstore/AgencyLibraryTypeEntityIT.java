@@ -12,7 +12,7 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
     @Test
     public void insertFindAndDelete() {
         int key = 1234;
-        LibraryConfig.LibraryType fbs = LibraryConfig.LibraryType.FBS;
+        LibraryType fbs = LibraryType.FBS;
 
         EntityManager em = env().getEntityManager();
 
@@ -21,7 +21,7 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
         AgencyLibraryTypeEntity searchResult = findEntityWithKey(key, em);
 
         assertEquals(key, searchResult.getAgencyId());
-        assertEquals(fbs, LibraryConfig.LibraryType.valueOf(searchResult.getLibraryType()));
+        assertEquals(fbs, LibraryType.valueOf(searchResult.getLibraryType()));
 
         remove(searchResult, em);
 
@@ -35,7 +35,7 @@ public class AgencyLibraryTypeEntityIT extends JpaSolrDocStoreIntegrationTester 
         env().getPersistenceContext().run(() -> em.remove(entity));
     }
 
-    private void persist(int key, LibraryConfig.LibraryType fbs, EntityManager em) {
+    private void persist(int key, LibraryType fbs, EntityManager em) {
         env().getPersistenceContext().run(() -> {
             em.persist(new AgencyLibraryTypeEntity(key, fbs.name()));
         });

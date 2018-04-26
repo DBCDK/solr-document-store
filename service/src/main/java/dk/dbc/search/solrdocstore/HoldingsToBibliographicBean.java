@@ -11,9 +11,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import static dk.dbc.search.solrdocstore.LibraryConfig.COMMON_AGENCY;
-import static dk.dbc.search.solrdocstore.LibraryConfig.SCHOOL_COMMON_AGENCY;
-
 @Stateless
 public class HoldingsToBibliographicBean {
 
@@ -31,7 +28,7 @@ public class HoldingsToBibliographicBean {
     @Timed
     public Set<AgencyClassifierItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId, hBibliographicRecordId);
-        LibraryConfig.LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
+        LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
 
         switch (libraryType) {
             case NonFBS:
@@ -40,11 +37,11 @@ public class HoldingsToBibliographicBean {
             case FBS: {
                 String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
                 boolean isCommonDerived = bibliographicEntityExists(870970, liveBibliographicRecordId);
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, hAgencyId, COMMON_AGENCY);
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, hAgencyId, LibraryType.COMMON_AGENCY);
             }
             case FBSSchool: {
                 String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, hAgencyId, SCHOOL_COMMON_AGENCY, COMMON_AGENCY);
+                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, hAgencyId, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
             }
         }
         return Collections.emptySet();
@@ -52,24 +49,24 @@ public class HoldingsToBibliographicBean {
 
     @Timed
     public Set<AgencyClassifierItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
-        Map<Integer, LibraryConfig.LibraryType> map = new HashMap<>();
+        Map<Integer, LibraryType> map = new HashMap<>();
         Set<AgencyClassifierItemKey> keysUpdated = EnqueueAdapter.makeSet();
 
         for (String supersededRecordId : supersededRecordIds) {
             List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
             for (HoldingsToBibliographicEntity h2b : recalcCandidates) {
 
-                LibraryConfig.LibraryType libraryType = getFromCache(map, h2b.getHoldingsAgencyId());
+                LibraryType libraryType = getFromCache(map, h2b.getHoldingsAgencyId());
                 switch (libraryType) {
                     case NonFBS:
                         break;
                     case FBS: {
                         boolean isCommonDerived = bibliographicEntityExists(870970, newRecordId);
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, h2b.getBibliographicAgencyId(), COMMON_AGENCY));
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, h2b.getBibliographicAgencyId(), LibraryType.COMMON_AGENCY));
                         break;
                     }
                     case FBSSchool:
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, h2b.getBibliographicAgencyId(), SCHOOL_COMMON_AGENCY, COMMON_AGENCY));
+                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, h2b.getBibliographicAgencyId(), LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY));
                         break;
                 }
             }
@@ -77,8 +74,8 @@ public class HoldingsToBibliographicBean {
         return keysUpdated;
     }
 
-    private LibraryConfig.LibraryType getFromCache(Map<Integer, LibraryConfig.LibraryType> map, int holdingsAgencyId) {
-        LibraryConfig.LibraryType t = map.computeIfAbsent(holdingsAgencyId, k -> libraryConfig.getLibraryType(holdingsAgencyId));
+    private LibraryType getFromCache(Map<Integer, LibraryType> map, int holdingsAgencyId) {
+        LibraryType t = map.computeIfAbsent(holdingsAgencyId, k -> libraryConfig.getLibraryType(holdingsAgencyId));
         return t;
     }
 

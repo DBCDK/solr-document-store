@@ -33,11 +33,11 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void ensureReadsCache() {
         int dummyAgency = 1234;
-        LibraryConfig.LibraryType dummyType = LibraryConfig.LibraryType.NonFBS;
+        LibraryType dummyType = LibraryType.NonFBS;
 
         persist(dummyAgency, dummyType);
 
-        LibraryConfig.LibraryType libraryType = bean.fetchAndCacheLibraryType(dummyAgency);
+        LibraryType libraryType = bean.fetchAndCacheLibraryType(dummyAgency);
         Assert.assertEquals(dummyType, libraryType);
         remove(dummyAgency);
 
@@ -48,17 +48,17 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void canReadRealAgency() {
 
-        LibraryConfig.LibraryType expectedType = LibraryConfig.LibraryType.FBSSchool;
+        LibraryType expectedType = LibraryType.FBSSchool;
 
-        LibraryConfig.LibraryType libraryType = bean.fetchAndCacheLibraryType(realAgency);
+        LibraryType libraryType = bean.fetchAndCacheLibraryType(realAgency);
         Assert.assertEquals(expectedType, libraryType);
     }
 
     @Test
     public void ensureReadCacheFirst() {
         canReadRealAgency(); //Plants realAgency in the database
-        update(realAgency, LibraryConfig.LibraryType.FBS);
-        Assert.assertEquals(LibraryConfig.LibraryType.FBS, bean.fetchAndCacheLibraryType(realAgency));
+        update(realAgency, LibraryType.FBS);
+        Assert.assertEquals(LibraryType.FBS, bean.fetchAndCacheLibraryType(realAgency));
         remove(realAgency);
     }
 
@@ -77,13 +77,13 @@ public class AgencyLibraryTypeBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> em.remove(entity));
     }
 
-    private void update(int agency, LibraryConfig.LibraryType libraryType) {
+    private void update(int agency, LibraryType libraryType) {
         AgencyLibraryTypeEntity entity = findEntityWithKey(agency);
         entity.setLibraryType(libraryType.name());
         env().getPersistenceContext().run(() -> em.merge(entity));
     }
 
-    private void persist(int key, LibraryConfig.LibraryType fbs) {
+    private void persist(int key, LibraryType fbs) {
         env().getPersistenceContext().run(() -> {
             em.persist(new AgencyLibraryTypeEntity(key, fbs.name()));
         });
