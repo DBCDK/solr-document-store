@@ -91,19 +91,6 @@ public class DocumentRetrieveBean {
         return Response.ok(response).build();
     }
 
-    @GET
-    @Produces({MediaType.APPLICATION_JSON})
-    @Path("part-of-danbib/{ bibliographicRecordId : .*}")
-    @Timed
-    public Response getPartOfDanbib(@Context UriInfo uriInfo,
-                                    @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
-        List<Integer> response = getPartOfDanbib(bibliographicRecordId);
-        if (response == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
-        }
-        return Response.ok(response).build();
-    }
-
     //! TODO Remove Deprecated
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(Integer agencyId, String bibliographicRecordId) throws Exception {
 
@@ -112,13 +99,19 @@ public class DocumentRetrieveBean {
             return null;
         }
 
-        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
+        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null, null);
 
         if (!biblEntity.isDeleted()) {
             TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
             query.setParameter("bibliographicRecordId", bibliographicRecordId);
             query.setParameter("agencyId", agencyId);
             response.holdingsItemRecords = query.getResultList();
+
+            if(LibraryType.COMMON_AGENCY == agencyId) {
+                response.partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
+            } else {
+                response.partOfDanbib = getPartOfDanbib(agencyId, bibliographicRecordId);
+            }
         }
         return response;
     }
@@ -130,18 +123,24 @@ public class DocumentRetrieveBean {
             return null;
         }
 
-        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
+        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null, null);
 
         if (!biblEntity.isDeleted()) {
             TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
             query.setParameter("bibliographicRecordId", bibliographicRecordId);
             query.setParameter("agencyId", agencyId);
             response.holdingsItemRecords = query.getResultList();
+
+            if(LibraryType.COMMON_AGENCY == agencyId) {
+                response.partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
+            } else {
+                response.partOfDanbib = getPartOfDanbib(agencyId, bibliographicRecordId);
+            }
         }
         return response;
     }
 
-    public List<Integer> getPartOfDanbib(String bibliographicRecordId) {
+    public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {
         return entityManager.createQuery(
                 "SELECT h2b.holdingsAgencyId FROM HoldingsToBibliographicEntity h2b" +
                 " JOIN OpenAgencyEntity oa ON oa.agencyId = h2b.holdingsAgencyId" +
@@ -154,6 +153,25 @@ public class DocumentRetrieveBean {
                 "  AND oa.partOfDanbib = TRUE" +
                 "  AND h.hasLiveHoldings = TRUE", Integer.class)
                 .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .setParameter("fbs", LibraryType.FBS)
+                .getResultList();
+    }
+
+    public List<Integer> getPartOfDanbib(int agencyId, String bibliographicRecordId) {
+        return entityManager.createQuery(
+                "SELECT h2b.holdingsAgencyId FROM HoldingsToBibliographicEntity h2b" +
+                " JOIN OpenAgencyEntity oa ON oa.agencyId = h2b.holdingsAgencyId" +
+                " JOIN HoldingsItemEntity h ON (h.agencyId = h2b.holdingsAgencyId" +
+                "  AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId)" +
+                " WHERE" +
+                "  h2b.isCommonDerived = TRUE" +
+                "  AND h2b.bibliographicRecordId = :bibliographicRecordId" +
+                "  AND h2b.bibliographicAgencyId = :agencyId" +
+                "  AND oa.libraryType = :fbs" +
+                "  AND oa.partOfDanbib = TRUE" +
+                "  AND h.hasLiveHoldings = TRUE", Integer.class)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .setParameter("agencyId", agencyId)
                 .setParameter("fbs", LibraryType.FBS)
                 .getResultList();
     }

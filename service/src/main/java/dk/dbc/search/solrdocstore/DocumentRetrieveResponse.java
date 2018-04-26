@@ -33,9 +33,12 @@ public class DocumentRetrieveResponse {
 
     public List<HoldingsItemEntity> holdingsItemRecords;
 
-    public DocumentRetrieveResponse(BibliographicEntity bibliographicRecord, List<HoldingsItemEntity> holdingsItemRecords) {
+    public List<Integer> partOfDanbib;
+
+    public DocumentRetrieveResponse(BibliographicEntity bibliographicRecord, List<HoldingsItemEntity> holdingsItemRecords, List<Integer> partOfDanbib) {
         this.bibliographicRecord = bibliographicRecord;
         this.holdingsItemRecords = holdingsItemRecords;
+        this.partOfDanbib = partOfDanbib;
     }
 
 }
