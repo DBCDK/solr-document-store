@@ -104,9 +104,9 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void checkConfig() {
         System.out.println("checkConfig");
-        assertEquals(LibraryType.NonFBS, bibliographicBean.libraryConfig.getLibraryType(nonfbsAgency));
-        assertEquals(LibraryType.FBS, bibliographicBean.libraryConfig.getLibraryType(fbsAgency));
-        assertEquals(LibraryType.FBSSchool, bibliographicBean.libraryConfig.getLibraryType(schoolAgency));
+        assertEquals(LibraryType.NonFBS, bibliographicBean.openAgency.lookup(nonfbsAgency).getLibraryType());
+        assertEquals(LibraryType.FBS, bibliographicBean.openAgency.lookup(fbsAgency).getLibraryType());
+        assertEquals(LibraryType.FBSSchool, bibliographicBean.openAgency.lookup(schoolAgency).getLibraryType());
     }
 
     @Test

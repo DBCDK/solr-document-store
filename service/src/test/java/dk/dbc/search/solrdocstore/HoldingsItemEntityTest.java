@@ -41,7 +41,6 @@ public class HoldingsItemEntityTest {
     public void verifySyntheticHasLiveHoldings() throws Exception {
         System.out.println("asHoldingsItemEntity");
 
-        List<Map<String, List<String>>> indexKeys = indexKeys("[{\"holdingsitem.status\":[\"Foo\", \"Decommissioned\"]}]");
         HoldingsItemEntity he = new HoldingsItemEntity(0, "A", "", indexKeys("[{\"holdingsitem.status\":[\"Foo\", \"Decommissioned\"]}]"), "");
         assertTrue(he.getHasLiveHoldings());
         he.setIndexKeys(indexKeys("[{\"holdingsitem.status\":[\"Decommissioned\"]},{\"holdingsitem.status\":[\"Decommissioned\"]}]"));
@@ -50,8 +49,7 @@ public class HoldingsItemEntityTest {
     }
 
     private static List<Map<String, List<String>>> indexKeys(String json) throws Exception {
-        return O.readValue(json, new TypeReference<List<Map<String, List<String>>>>() {
-                   });
+        return O.readValue(json, new TypeReference<List<Map<String, List<String>>>>(){});
     }
 
 }

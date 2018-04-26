@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.RecordType.SingleRecord;
-import static dk.dbc.search.solrdocstore.LibraryConfig.*;
 
 @Stateless
 @Path("bibliographic")
@@ -41,7 +40,7 @@ public class BibliographicBean {
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @Inject
-    LibraryConfig libraryConfig;
+    OpenAgencyBean openAgency;
 
     @Inject
     EnqueueSupplierBean queue;
@@ -138,7 +137,7 @@ public class BibliographicBean {
      *
      */
     private Set<AgencyClassifierItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
-        if (libraryConfig.getRecordType(agency) == SingleRecord) {
+        if (openAgency.getRecordType(agency) == SingleRecord) {
             return updateHoldingsSingleRecord(agency, recordId);
         } else {
             return updateHoldingsForCommonRecords(agency, recordId);
@@ -158,7 +157,7 @@ public class BibliographicBean {
         Set<Integer> bibRecords = new HashSet<>(q.getResultList());
 
         for (Integer holdingsAgency : query.getResultList()) {
-            switch (libraryConfig.getLibraryType(holdingsAgency)) {
+            switch (openAgency.lookup(holdingsAgency).getLibraryType()) {
                 case NonFBS: // Ignore holdings for Non FBS libraries
                     continue;
                 case FBS:
@@ -177,6 +176,8 @@ public class BibliographicBean {
                         continue;
                     }
                     break;
+                case Missing:
+                    throw new IllegalStateException("This state should not have leaked");
             }
             affectedKeys.addAll(
                     addHoldingsToBibliographic(agency, recordId, holdingsAgency)
@@ -187,7 +188,7 @@ public class BibliographicBean {
     }
 
     private Set<AgencyClassifierItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
-        if (libraryConfig.getLibraryType(agency) == LibraryType.NonFBS) {
+        if (openAgency.lookup(agency).getLibraryType() == LibraryType.NonFBS) {
             TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
             query.setParameter("agency", agency);
             query.setParameter("bibId", recordId);
@@ -230,8 +231,8 @@ public class BibliographicBean {
     }
 
     private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId) {
-        LibraryType libraryType = libraryConfig.getLibraryType(holdingsAgency);
-        boolean  isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
+        LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
+        boolean isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                 holdingsAgency, recordId, agency, bibliographicRecordId, isCommonDerived
         );

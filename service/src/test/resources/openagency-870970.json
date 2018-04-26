@@ -1,0 +1,51 @@
+{
+    "libraryRulesResponse": {
+        "libraryRules": [
+            {
+                "agencyId": {
+                    "$": "870970",
+                    "@": "oa"
+                },
+                "agencyType": {
+                    "$": "Folkebibliotek",
+                    "@": "oa"
+                },
+                "libraryRule": [
+                    {
+                        "name": {
+                            "$": "use_holdings_items",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    },
+                    {
+                        "name": {
+                            "$": "part_of_danbib",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    },
+                    {
+                        "name": {
+                            "$": "use_enrichments",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }
+                ]
+            }
+        ]
+    }
+}

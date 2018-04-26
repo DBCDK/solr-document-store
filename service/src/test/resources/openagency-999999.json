@@ -1,0 +1,8 @@
+{
+    "libraryRulesResponse": {
+        "@": "oa"
+    },
+    "@namespaces": {
+        "oa": "http:\/\/oss.dbc.dk\/ns\/openagency"
+    }
+}

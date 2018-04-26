@@ -17,7 +17,7 @@ public class HoldingsToBibliographicBean {
     private static final Logger log = LoggerFactory.getLogger(HoldingsToBibliographicBean.class);
 
     @Inject
-    LibraryConfig libraryConfig;
+    OpenAgencyBean  openAgency;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -28,7 +28,7 @@ public class HoldingsToBibliographicBean {
     @Timed
     public Set<AgencyClassifierItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId, hBibliographicRecordId);
-        LibraryType libraryType = libraryConfig.getLibraryType(hAgencyId);
+        LibraryType libraryType = openAgency.lookup(hAgencyId).getLibraryType();
 
         switch (libraryType) {
             case NonFBS:
@@ -75,7 +75,7 @@ public class HoldingsToBibliographicBean {
     }
 
     private LibraryType getFromCache(Map<Integer, LibraryType> map, int holdingsAgencyId) {
-        LibraryType t = map.computeIfAbsent(holdingsAgencyId, k -> libraryConfig.getLibraryType(holdingsAgencyId));
+        LibraryType t = map.computeIfAbsent(holdingsAgencyId, k -> openAgency.lookup(holdingsAgencyId).getLibraryType());
         return t;
     }
 

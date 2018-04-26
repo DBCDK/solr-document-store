@@ -6,7 +6,7 @@ package dk.dbc.search.solrdocstore;
  */
 public enum LibraryType {
 
-    NonFBS, FBS, FBSSchool;
+    NonFBS, FBS, FBSSchool, Missing;
 
     public static final int COMMON_AGENCY = 870970;
     public static final int SCHOOL_COMMON_AGENCY = 300000;

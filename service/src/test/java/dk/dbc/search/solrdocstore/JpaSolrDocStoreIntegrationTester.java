@@ -23,12 +23,12 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     public void ClearDatabase() throws SQLException {
         try (Connection conn = env().getDatasource().getConnection() ;
              Statement statement = conn.createStatement()) {
-            statement.executeUpdate("DELETE FROM holdingsToBibliographic");
-            statement.executeUpdate("DELETE FROM holdingsItemssolrkeys");
-            statement.executeUpdate("DELETE FROM bibliographicToBibliographic");
-            statement.executeUpdate("DELETE FROM bibliographicSolrKeys");
-            statement.executeUpdate("DELETE FROM agencylibrarytype");
-            statement.executeUpdate("DELETE FROM queuerule");
+            statement.executeUpdate("TRUNCATE holdingsToBibliographic");
+            statement.executeUpdate("TRUNCATE holdingsItemssolrkeys");
+            statement.executeUpdate("TRUNCATE bibliographicToBibliographic");
+            statement.executeUpdate("TRUNCATE bibliographicSolrKeys");
+            statement.executeUpdate("TRUNCATE openagencycache");
+            statement.executeUpdate("TRUNCATE queuerule");
         }
     }
 
@@ -43,7 +43,6 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         } else {
             datasource.setDatabaseName(System.getProperty("user.name"));
             datasource.setPortNumber(5432);
-
         }
         datasource.setUser(System.getProperty("user.name"));
         datasource.setPassword(System.getProperty("user.name"));

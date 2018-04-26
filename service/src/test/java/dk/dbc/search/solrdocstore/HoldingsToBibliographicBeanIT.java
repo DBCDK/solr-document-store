@@ -30,7 +30,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBS);
+            bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             createH2BRecord(agencyId, bibliographicRecordId, 132);
             Set<AgencyClassifierItemKey> affectedKeys = bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
@@ -48,7 +48,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBS);
+            bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity h2BRecord = fetchH2BRecord(agencyId, bibliographicRecordId);
@@ -63,7 +63,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBS);
+            bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             deleteBibRecord(agencyId, bibliographicRecordId);
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
@@ -77,7 +77,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBS);
+            bean.openAgency = mockToReturn(LibraryType.FBS);
 
             createBibRecord(LibraryType.COMMON_AGENCY, bibliographicRecordId);
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
@@ -93,7 +93,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBSSchool);
+            bean.openAgency = mockToReturn(LibraryType.FBSSchool);
             createBibRecord(LibraryType.SCHOOL_COMMON_AGENCY, bibliographicRecordId);
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
@@ -108,7 +108,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBSSchool);
+            bean.openAgency = mockToReturn(LibraryType.FBSSchool);
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNull(e);
@@ -123,7 +123,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             String bibliographicRecordId = "ABC";
             String newRecordId = "DEF";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBS);
+            bean.openAgency = mockToReturn(LibraryType.FBS);
 
             createBibRecord(LibraryType.COMMON_AGENCY, bibliographicRecordId);
             createBibRecord(agencyId, newRecordId);
@@ -144,7 +144,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             String bibliographicRecordId = "ABC";
             String newRecordId = "DEF";
 
-            bean.libraryConfig = mockToReturn(LibraryType.FBSSchool);
+            bean.openAgency = mockToReturn(LibraryType.FBSSchool);
             createBibRecord(LibraryType.SCHOOL_COMMON_AGENCY, bibliographicRecordId);
             createBibRecord(LibraryType.COMMON_AGENCY, newRecordId);
             createB2B(bibliographicRecordId, newRecordId);
@@ -159,9 +159,9 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     @Test
     public void onB2BUpdateRecalc() {
         env().getPersistenceContext().run(() -> {
-            bean.libraryConfig = new LibraryConfig();
-            bean.libraryConfig.agencyLibraryTypeBean = new AgencyLibraryTypeBean();
-            bean.libraryConfig.agencyLibraryTypeBean.entityManager = em;
+            bean.openAgency = new OpenAgencyBean();
+            bean.openAgency.entityManager = em;
+            bean.openAgency.proxy = null;
 
             // Override LibraryConfig OpenAgency by add agencies directly to cache
             int fbsSchoolAgency = 3711;
@@ -223,7 +223,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             String bibliographicRecordId = "ABC";
             String newRecordId = "DEF";
 
-            bean.libraryConfig = mockToReturn(LibraryType.NonFBS);
+            bean.openAgency = mockToReturn(LibraryType.NonFBS);
             createBibRecord(agencyId, bibliographicRecordId);
             createBibRecord(LibraryType.COMMON_AGENCY, bibliographicRecordId);
             createBibRecord(LibraryType.COMMON_AGENCY, newRecordId);
@@ -272,12 +272,10 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         em.merge(new BibliographicToBibliographicEntity(oldRecordId, newRecordId));
     }
 
-    private LibraryConfig mockToReturn(LibraryType libraryType) {
-        LibraryConfig mock = Mockito.mock(LibraryConfig.class);
-        Mockito.when(mock.getLibraryType(Mockito.anyInt())).thenReturn(libraryType);
-
+    private OpenAgencyBean mockToReturn(LibraryType libraryType) {
+        OpenAgencyBean mock = Mockito.mock(OpenAgencyBean.class);
+        Mockito.when(mock.lookup(Mockito.anyInt())).thenReturn(new OpenAgencyEntity(-1, libraryType, true));
         return mock;
-
     }
 
     private HoldingsToBibliographicEntity fetchH2BRecord(int agencyId, String bibliographicRecordId) {
@@ -322,7 +320,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     }
 
     private void createAgency(int agencyId, LibraryType t) {
-        em.merge(new AgencyLibraryTypeEntity(agencyId, t.name()));
+        em.merge(new OpenAgencyEntity(agencyId, t, true));
     }
 
 }
