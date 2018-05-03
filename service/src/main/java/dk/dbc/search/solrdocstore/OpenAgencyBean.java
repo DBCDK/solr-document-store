@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.search.solrdocstore.monitor.Timed;
 import java.util.List;
 import javax.ejb.EJBException;
@@ -20,7 +19,6 @@ public class OpenAgencyBean {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAgencyBean.class);
 
-    private static final ObjectMapper O = new ObjectMapper();
     private static final long MISSING_AGENCY_TIMEOUT = 60_000L;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
@@ -41,9 +39,13 @@ public class OpenAgencyBean {
 
     @Timed
     public OpenAgencyEntity lookup(int agencyId) {
+        return lookup(agencyId, true);
+    }
+
+    public OpenAgencyEntity lookup(int agencyId, boolean fail_missing) {
         OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
 
-            // If someone keeps hammering with an unknown agencyid, multiple requests
+        // If someone keeps hammering with an unknown agencyid, multiple requests
         if (entity == null || ( entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT )) {
             entity = proxy.loadOpenAgencyEntry(agencyId);
             if (entity == null) {
@@ -51,8 +53,12 @@ public class OpenAgencyBean {
             }
             entityManager.persist(entity);
         }
-        if(entity.getLibraryType() == LibraryType.Missing) {
-            throw new EJBException("Cannot find openagency entry for: " + agencyId);
+        if (entity.getLibraryType() == LibraryType.Missing) {
+            log.warn("Agency is missing");
+            if (fail_missing) {
+                throw new EJBException("Cannot find openagency entry for: " + agencyId);
+            }
+            return null;
         }
         return entity;
     }
