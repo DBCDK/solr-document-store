@@ -9,8 +9,6 @@ import java.util.concurrent.TimeUnit;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -45,7 +43,7 @@ public class OpenAgencyProxyBean {
         try {
             JsonNode json = loadOpenAgencyJson(agencyId);
             return parseOpenAgencyJSON(json);
-        } catch (IllegalStateException ex) {
+        } catch (RuntimeException ex) {
             log.error("Error processing agency: {}: {}", agencyId, ex.getMessage());
             log.debug("Error processing agency: {}: ", agencyId, ex);
             return null;
@@ -58,7 +56,6 @@ public class OpenAgencyProxyBean {
             return Failsafe.with(RETRY_POLICY).get(() -> fetchOpenAgencyJSON(agencyId));
         } catch (EJBException e) {
             throw e;
-
         } catch (RuntimeException e) {
             log.error("Cannot get openagency entry for: {}: {}", agencyId, e.getMessage());
             log.debug("Cannot get openagency entry for: {}:", agencyId, e);
