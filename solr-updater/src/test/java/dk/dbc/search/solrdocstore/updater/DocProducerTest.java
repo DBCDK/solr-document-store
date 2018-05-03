@@ -74,6 +74,9 @@ public class DocProducerTest {
         assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300104"));
         assertTrue(document.get("rec.repositoryId").getValues().contains("300101-katalog:23645564"));
 
+        assertTrue(document.containsKey("dkcclterm.ln"));
+        assertTrue(document.get("dkcclterm.ln").getValues().contains("777777"));
+
         String linkId = document.getField("rec.childDocId").getValue().toString();
         for (SolrInputDocument childDocument : document.getChildDocuments()) {
             assertEquals(linkId, childDocument.getField("parentDocId").getValue().toString());

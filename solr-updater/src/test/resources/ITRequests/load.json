@@ -15,11 +15,8 @@
         ]
     },
     "test1-part3": {
-        "bibliographic": [
-            "b-300000-23645564.json"
-        ],
         "holdings": [
-            "h-300101-23645564.json"
+            "h-300101-23645564_decommissioned.json"
         ]
     },
     "test2-part1": {

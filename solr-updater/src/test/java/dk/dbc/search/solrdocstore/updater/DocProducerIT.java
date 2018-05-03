@@ -28,6 +28,9 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -98,19 +101,31 @@ public class DocProducerIT {
                 .withDataSource("jdbc/solr-doc-store", pg.getUrl())
                 .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
                 .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
+
+        Invocation invocation = client.target(solrDocStoreUrl + "/api/evict-all")
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .buildGet();
+        for (int i = 0 ; i < 1000 ; i++) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                log.error("Exception: {}", ex.getMessage());
+                log.debug("Exception: ", ex);
+            }
+            int status = invocation.invoke().getStatus();
+            if(status == 200) {
+                log.debug("i = {}", i);
+                return;
+            }
+        }
+
+        throw new IllegalStateException("solr-doc-store not ready yet");
     }
 
     @Before
     public void setUp() throws Exception {
         try {
-            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "agencylibrarytype");
-            try (Connection connection = dataSource.getConnection() ;
-                 Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300101, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300102, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300103, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300010, 'FBSSchool');");
-            }
+            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
@@ -127,7 +142,6 @@ public class DocProducerIT {
     }
 
     @Test
-    @Ignore
     public void loadAndDelete() throws Exception {
         System.out.println("loadAndDelete");
 
@@ -135,16 +149,13 @@ public class DocProducerIT {
 
         deployAndSearch(300000, docProducer, 3);
 
-        // Merge is no implemented yet, so clear table to load new (deleted) record
-        //! @todo remove clear, when merge and recalc h2b is done
-        pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part2", solrDocStoreUrl);
 
         deployAndSearch(300000, docProducer, 0);
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void loadAndFewerHolding() throws Exception {
         System.out.println("loadAndFewerHolding");
 
@@ -152,7 +163,7 @@ public class DocProducerIT {
 
         deployAndSearch(300000, docProducer, 3);
 
-        pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
+//        pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part3", solrDocStoreUrl);
 
         deployAndSearch(300000, docProducer, 2);
