@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
-import java.util.Arrays;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
