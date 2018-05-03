@@ -19,6 +19,7 @@
 package dk.dbc.search.solrdocstore.asyncjob;
 
 import dk.dbc.search.solrdocstore.Config;
+import java.util.concurrent.Executors;
 
 /**
  *
@@ -36,6 +37,7 @@ public class AsyncJobRunnerFactory {
         };
         runner.sessionHandler = new AsyncJobSessionHandler();
         runner.init();
+        runner.mes = Executors.newCachedThreadPool();
         return runner;
     }
 }
