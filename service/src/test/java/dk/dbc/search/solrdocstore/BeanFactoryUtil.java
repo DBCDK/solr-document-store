@@ -45,6 +45,13 @@ public class BeanFactoryUtil {
         return bean;
     }
 
+    public static EnqueueBean createEnqueueBean(JpaTestEnvironment env) {
+        EnqueueBean bean = new EnqueueBean();
+        bean.entityManager = env.getEntityManager();
+        bean.enqueueSupplier = createEnqueueSupplier(env);
+        return bean;
+    }
+
     public static EnqueueSupplierBean createEnqueueSupplier(JpaTestEnvironment env) {
         EnqueueSupplierBean bean = new EnqueueSupplierBean();
         bean.daemon = new QueueRulesDaemon() {
@@ -55,9 +62,6 @@ public class BeanFactoryUtil {
         };
         EntityManager entityManager = env.getEntityManager();
         bean.entityManager = entityManager;
-        env.getPersistenceContext().run(() -> {
-            clearQueue(entityManager);
-        });
         return bean;
     }
 
