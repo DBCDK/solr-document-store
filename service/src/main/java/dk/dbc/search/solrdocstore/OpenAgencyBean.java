@@ -63,6 +63,12 @@ public class OpenAgencyBean {
         return entity;
     }
 
+    /**
+     * Run through known open agency entries,
+     * call agencyHasChanged if an agency has new values, otherwise set
+     * fetched-now value to indicate last time it was fetched from oa with this
+     * value
+     */
     @Timed
     public void verifyOpenAgencyCache() {
         List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class)
@@ -81,6 +87,19 @@ public class OpenAgencyBean {
         }
     }
 
+    /**
+     * Migrate open agency.
+     *
+     * - If live holding exists log error
+     *
+     * - If no live holdings exists clear h2b and old holdings
+     *
+     * - If no holdings exists (strange why should oa have been cached then?)
+     * then just update the cache
+     *
+     * @param oldEntry how things was before
+     * @param newEntry how things are supposed to be now
+     */
     void agencyHasChanged(OpenAgencyEntity oldEntry, OpenAgencyEntity newEntry) {
         int agencyId = oldEntry.getAgencyId();
         List<Boolean> booleans = entityManager.createQuery("SELECT NEW java.lang.Boolean(h.hasLiveHoldings) FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId GROUP BY h.hasLiveHoldings", Boolean.class)
@@ -95,10 +114,18 @@ public class OpenAgencyBean {
             entityManager.merge(newEntry);
         } else {
             log.warn("Migrate OpenAgency entry for {}, has no holdings ({} -> {})", agencyId, oldEntry, newEntry);
-            entityManager.merge(newEntry);
+            oldEntry.setFetched(newEntry.getFetched());
+            oldEntry.setLibraryType(newEntry.getLibraryType());
+            oldEntry.setPartOfDanbib(newEntry.getPartOfDanbib());
+            entityManager.merge(oldEntry);
         }
     }
 
+    /**
+     * Remove all trace of existing holdings
+     *
+     * @param agencyId agency that needs purging
+     */
     void purgeHoldingFor(int agencyId) {
         List<HoldingsToBibliographicEntity> h2b = entityManager.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.holdingsAgencyId = :agencyId", HoldingsToBibliographicEntity.class)
                 .setParameter("agencyId", agencyId)
