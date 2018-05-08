@@ -19,6 +19,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.monitor.Timed;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -98,13 +99,19 @@ public class DocumentRetrieveBean {
             return null;
         }
 
-        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
+        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null, null);
 
         if (!biblEntity.isDeleted()) {
             TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
             query.setParameter("bibliographicRecordId", bibliographicRecordId);
             query.setParameter("agencyId", agencyId);
             response.holdingsItemRecords = query.getResultList();
+
+            if(LibraryType.COMMON_AGENCY == agencyId) {
+                response.partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
+            } else {
+                response.partOfDanbib = getPartOfDanbib(agencyId, bibliographicRecordId);
+            }
         }
         return response;
     }
@@ -116,14 +123,56 @@ public class DocumentRetrieveBean {
             return null;
         }
 
-        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null);
+        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null, null);
 
         if (!biblEntity.isDeleted()) {
             TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
             query.setParameter("bibliographicRecordId", bibliographicRecordId);
             query.setParameter("agencyId", agencyId);
             response.holdingsItemRecords = query.getResultList();
+
+            if(LibraryType.COMMON_AGENCY == agencyId) {
+                response.partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
+            } else {
+                response.partOfDanbib = getPartOfDanbib(agencyId, bibliographicRecordId);
+            }
         }
         return response;
+    }
+
+    public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {
+        return entityManager.createQuery(
+                "SELECT h2b.holdingsAgencyId FROM HoldingsToBibliographicEntity h2b" +
+                " JOIN OpenAgencyEntity oa ON oa.agencyId = h2b.holdingsAgencyId" +
+                " JOIN HoldingsItemEntity h ON (h.agencyId = h2b.holdingsAgencyId" +
+                "  AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId)" +
+                " WHERE" +
+                "  h2b.isCommonDerived = TRUE" +
+                "  AND h2b.bibliographicRecordId = :bibliographicRecordId" +
+                "  AND oa.libraryType = :fbs" +
+                "  AND oa.partOfDanbib = TRUE" +
+                "  AND h.hasLiveHoldings = TRUE", Integer.class)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .setParameter("fbs", LibraryType.FBS)
+                .getResultList();
+    }
+
+    public List<Integer> getPartOfDanbib(int agencyId, String bibliographicRecordId) {
+        return entityManager.createQuery(
+                "SELECT h2b.holdingsAgencyId FROM HoldingsToBibliographicEntity h2b" +
+                " JOIN OpenAgencyEntity oa ON oa.agencyId = h2b.holdingsAgencyId" +
+                " JOIN HoldingsItemEntity h ON (h.agencyId = h2b.holdingsAgencyId" +
+                "  AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId)" +
+                " WHERE" +
+                "  h2b.isCommonDerived = TRUE" +
+                "  AND h2b.bibliographicRecordId = :bibliographicRecordId" +
+                "  AND h2b.bibliographicAgencyId = :agencyId" +
+                "  AND oa.libraryType = :fbs" +
+                "  AND oa.partOfDanbib = TRUE" +
+                "  AND h.hasLiveHoldings = TRUE", Integer.class)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .setParameter("agencyId", agencyId)
+                .setParameter("fbs", LibraryType.FBS)
+                .getResultList();
     }
 }

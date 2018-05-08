@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashSet;
 import org.junit.Before;
 import org.postgresql.ds.PGSimpleDataSource;
 
@@ -43,7 +44,8 @@ public class DatabaseMigratorIT {
                 return true;
             }
         };
-        databaseMigrator.migrate();
+        HashSet<String> migrated = databaseMigrator.migrate();
+        System.out.println("migrated = " + migrated);
 
         try (Connection connection = datasource.getConnection() ;
              Statement stmt = connection.createStatement() ;
@@ -53,7 +55,7 @@ public class DatabaseMigratorIT {
                 System.out.println("version = " + version);
             }
         }
-        assertEquals(10, version);
+        assertEquals(13, version);
 
         String queueRule = null;
         try (Connection connection = datasource.getConnection() ;

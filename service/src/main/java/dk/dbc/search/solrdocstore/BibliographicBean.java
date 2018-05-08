@@ -28,8 +28,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dk.dbc.search.solrdocstore.LibraryConfig.RecordType.SingleRecord;
-import static dk.dbc.search.solrdocstore.LibraryConfig.*;
+import static dk.dbc.search.solrdocstore.RecordType.SingleRecord;
 
 @Stateless
 @Path("bibliographic")
@@ -41,7 +40,7 @@ public class BibliographicBean {
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @Inject
-    LibraryConfig libraryConfig;
+    OpenAgencyBean openAgency;
 
     @Inject
     EnqueueSupplierBean queue;
@@ -70,7 +69,7 @@ public class BibliographicBean {
             log.debug("addBibliographicKeys error: ", ex);
             String message = null;
             Throwable tw = ex;
-            while(tw != null && message == null) {
+            while (tw != null && message == null) {
                 message = tw.getMessage();
                 tw = tw.getCause();
             }
@@ -81,21 +80,21 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds){
-        addBibliographicKeys(bibliographicEntity,superceds,Optional.empty());
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds) {
+        addBibliographicKeys(bibliographicEntity, superceds, Optional.empty());
     }
 
-     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin){
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin) {
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
-         if (bibliographicEntity.getClassifier() == null) {
-             throw new IllegalStateException("classifier is not set");
-         }
+        if (bibliographicEntity.getClassifier() == null) {
+            throw new IllegalStateException("classifier is not set");
+        }
 
         log.info("AddBibliographicKeys called {}-{}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
-        affectedKeys.add( bibliographicEntity.asAgencyClassifierItemKey());
+        affectedKeys.add(bibliographicEntity.asAgencyClassifierItemKey());
         if (dbbe == null) {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             Set<AgencyClassifierItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
@@ -103,15 +102,15 @@ public class BibliographicBean {
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
-            if(bibliographicEntity.isDeleted() != dbbe.isDeleted()){
+            if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
                 entityManager.flush();
-                List<HoldingsToBibliographicEntity> relatedHoldings = (bibliographicEntity.isDeleted()) ?
-                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
-                        h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
-                for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings){
+                List<HoldingsToBibliographicEntity> relatedHoldings = ( bibliographicEntity.isDeleted() ) ?
+                                                                      h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
+                                                                      h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
+                for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings) {
                     Set<AgencyClassifierItemKey> reattachedKeys =
                             h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId());
                     affectedKeys.addAll(reattachedKeys);
@@ -122,23 +121,23 @@ public class BibliographicBean {
             }
         }
 
-         if (bibliographicEntity.getAgencyId() == COMMON_AGENCY) {
-             Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
-             if (supersededRecordIds.size() > 0) {
-                 Set<AgencyClassifierItemKey> recalculatedKeys =
-                         h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(), supersededRecordIds);
-                 affectedKeys.addAll(recalculatedKeys);
-             }
-         }
+        if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
+            Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
+            if (supersededRecordIds.size() > 0) {
+                Set<AgencyClassifierItemKey> recalculatedKeys =
+                        h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(), supersededRecordIds);
+                affectedKeys.addAll(recalculatedKeys);
+            }
+        }
 
-        EnqueueAdapter.enqueueAll(queue,affectedKeys, commitWithin);
+        EnqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
     }
 
     /*
      *
      */
     private Set<AgencyClassifierItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
-        if (libraryConfig.getRecordType(agency) == SingleRecord) {
+        if (openAgency.getRecordType(agency) == SingleRecord) {
             return updateHoldingsSingleRecord(agency, recordId);
         } else {
             return updateHoldingsForCommonRecords(agency, recordId);
@@ -151,24 +150,34 @@ public class BibliographicBean {
         query.setParameter("bibId", recordId);
 
         TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
-                "WHERE b.deleted=FALSE AND b.bibliographicRecordId = :recId", Integer.class);
+                                                          "WHERE b.deleted=FALSE AND b.bibliographicRecordId = :recId", Integer.class);
 
         q.setParameter("recId", recordId);
 
         Set<Integer> bibRecords = new HashSet<>(q.getResultList());
 
         for (Integer holdingsAgency : query.getResultList()) {
-            switch (libraryConfig.getLibraryType(holdingsAgency)) {
+            switch (openAgency.lookup(holdingsAgency).getLibraryType()) {
                 case NonFBS: // Ignore holdings for Non FBS libraries
                     continue;
                 case FBS:
-                    if (agency == SCHOOL_COMMON_AGENCY ) continue;
-                    if (bibRecords.contains(holdingsAgency)) continue;
+                    if (agency == LibraryType.SCHOOL_COMMON_AGENCY) {
+                        continue;
+                    }
+                    if (bibRecords.contains(holdingsAgency)) {
+                        continue;
+                    }
                     break;
                 case FBSSchool:
-                    if (agency == COMMON_AGENCY && bibRecords.contains(SCHOOL_COMMON_AGENCY)) continue;
-                    if (bibRecords.contains(holdingsAgency)) continue;
+                    if (agency == LibraryType.COMMON_AGENCY && bibRecords.contains(LibraryType.SCHOOL_COMMON_AGENCY)) {
+                        continue;
+                    }
+                    if (bibRecords.contains(holdingsAgency)) {
+                        continue;
+                    }
                     break;
+                case Missing:
+                    throw new IllegalStateException("This state should not have leaked");
             }
             affectedKeys.addAll(
                     addHoldingsToBibliographic(agency, recordId, holdingsAgency)
@@ -179,7 +188,7 @@ public class BibliographicBean {
     }
 
     private Set<AgencyClassifierItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
-        if (libraryConfig.getLibraryType(agency) == LibraryConfig.LibraryType.NonFBS) {
+        if (openAgency.lookup(agency).getLibraryType() == LibraryType.NonFBS) {
             TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
             query.setParameter("agency", agency);
             query.setParameter("bibId", recordId);
@@ -206,7 +215,7 @@ public class BibliographicBean {
             query.setParameter("allIds", allIds);
             List<String> holdingsItems = query.getResultList();
 
-            if(holdingsItems.size() >= 2) {
+            if (holdingsItems.size() >= 2) {
                 log.info("Strange: {}:{} has multiple holdings ({}) pointing to it (002/b2b issue?)", agency, recordId, holdingsItems);
             }
             for (String holdingsItem : holdingsItems) {
@@ -217,13 +226,15 @@ public class BibliographicBean {
         return Collections.emptySet();
     }
 
-    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency) {
+    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency) {
         return addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId);
     }
 
-    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, Integer holdingsAgency, String bibliographicRecordId) {
+    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId) {
+        LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
+        boolean isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-                holdingsAgency, recordId, agency, bibliographicRecordId
+                holdingsAgency, recordId, agency, bibliographicRecordId, isCommonDerived
         );
         return h2bBean.attachToAgency(h2b);
     }

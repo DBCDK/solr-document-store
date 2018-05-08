@@ -68,7 +68,7 @@ public class StatusBean {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getQueueStatus(@QueryParam("ignore") String ignore) {
         Set<String> ign = Collections.EMPTY_SET;
-        if(ignore != null && ! ignore.isEmpty()) {
+        if (ignore != null && !ignore.isEmpty()) {
             ign = new HashSet<>(Arrays.asList(ignore.split(",")));
             log.debug("getQueueStatus(ign = {})", ign);
         }

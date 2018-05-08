@@ -7,16 +7,18 @@ import org.junit.Test;
 import javax.persistence.EntityManager;
 
 public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
+
     @Test
     public void StoreEntity() {
         executeScriptResource("/entityTestData.sql");
-        EntityManager em=env().getEntityManager();
+        EntityManager em = env().getEntityManager();
 
-        env().getPersistenceContext().run( () -> {
-            HoldingsToBibliographicEntity h2b=new HoldingsToBibliographicEntity(
+        env().getPersistenceContext().run(() -> {
+            HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                     300,
                     "4321",
-                    200
+                    200,
+                    true
             );
             em.persist(h2b);
         });
@@ -35,5 +37,6 @@ public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationT
         assertThat(h2b.getHoldingsAgencyId(), is(600));
         assertThat(h2b.getBibliographicRecordId(), is("600"));
         assertThat(h2b.getBibliographicAgencyId(), is(100));
+        assertThat(h2b.getIsCommonDerived(), is(false));
     }
 }

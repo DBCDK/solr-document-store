@@ -21,14 +21,14 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
     @Before
     public void ClearDatabase() throws SQLException {
-        try (Connection conn = env().getDatasource().getConnection();
-             Statement statement = conn.createStatement() )  {
-            statement.executeUpdate("DELETE FROM holdingsToBibliographic");
-            statement.executeUpdate("DELETE FROM holdingsItemssolrkeys");
-            statement.executeUpdate("DELETE FROM bibliographicToBibliographic");
-            statement.executeUpdate("DELETE FROM bibliographicSolrKeys");
-            statement.executeUpdate("DELETE FROM agencylibrarytype");
-            statement.executeUpdate("DELETE FROM queuerule");
+        try (Connection conn = env().getDatasource().getConnection() ;
+             Statement statement = conn.createStatement()) {
+            statement.executeUpdate("TRUNCATE holdingsToBibliographic");
+            statement.executeUpdate("TRUNCATE holdingsItemssolrkeys");
+            statement.executeUpdate("TRUNCATE bibliographicToBibliographic");
+            statement.executeUpdate("TRUNCATE bibliographicSolrKeys");
+            statement.executeUpdate("TRUNCATE openagencycache");
+            statement.executeUpdate("TRUNCATE queuerule");
         }
     }
 
@@ -43,7 +43,6 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         } else {
             datasource.setDatabaseName(System.getProperty("user.name"));
             datasource.setPortNumber(5432);
-
         }
         datasource.setUser(System.getProperty("user.name"));
         datasource.setPassword(System.getProperty("user.name"));
@@ -61,13 +60,15 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         dbMigrator.migrate();
     }
 
-
     /**
-        When IDEA tries to run all unit tests in the project - it will fail on this class.
-        Since {@link JpaSolrDocStoreIntegrationTester} has a @Before annotation - it is considered a test class
-        But since it has no methods to execute, then IDEA will fail the class with "No runnable method".
+     * When IDEA tries to run all unit tests in the project - it will fail on
+     * this class.
+     * Since {@link JpaSolrDocStoreIntegrationTester} has a @Before annotation -
+     * it is considered a test class
+     * But since it has no methods to execute, then IDEA will fail the class
+     * with "No runnable method".
      */
     @Test
-    public void noTest(){
+    public void noTest() {
     }
 }

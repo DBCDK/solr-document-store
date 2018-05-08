@@ -52,36 +52,37 @@ public class HoldingsItemBean {
         return Response.ok().entity("{ \"ok\": true }").build();
     }
 
-    public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin){
+    public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin) {
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
         Set<AgencyClassifierItemKey> affectedKeys =
-            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
-        EnqueueAdapter.enqueueAll(queue, affectedKeys,commitWithin);
+                h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
+        EnqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
     }
 
-    private Query generateRelatedHoldingsQuery(String bibliographicRecordId,int bibliographicAgencyId){
+    private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {
         Query query = entityManager.createNativeQuery(
                 "select * " +
-                        "from holdingsitemssolrkeys  " +
-                        "where (agencyid,bibliographicrecordid) " +
-                        "IN ( select holdingsagencyid,holdingsbibliographicrecordid " +
-                        "FROM holdingstobibliographic h2b " +
-                        "where h2b.bibliographicagencyid = ? " +
-                        "and h2b.bibliographicrecordid = ?)",
+                "from holdingsitemssolrkeys  " +
+                "where (agencyid,bibliographicrecordid) " +
+                "IN ( select holdingsagencyid,holdingsbibliographicrecordid " +
+                "FROM holdingstobibliographic h2b " +
+                "where h2b.bibliographicagencyid = ? " +
+                "and h2b.bibliographicrecordid = ?)",
                 HoldingsItemEntity.class);
-        query.setParameter(1,bibliographicAgencyId);
-        query.setParameter(2,bibliographicRecordId);
+        query.setParameter(1, bibliographicAgencyId);
+        query.setParameter(2, bibliographicRecordId);
         return query;
     }
 
-    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId){
-        return generateRelatedHoldingsQuery(bibliographicRecordId,bibliographicAgencyId).getResultList();
+    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId) {
+        return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId).getResultList();
 
     }
-    public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId){
-        return generateRelatedHoldingsQuery(bibliographicRecordId,bibliographicAgencyId)
-                .setHint("javax.persistence.loadgraph",entityManager.getEntityGraph("holdingItemsWithIndexKeys"))
+
+    public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId) {
+        return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId)
+                .setHint("javax.persistence.loadgraph", entityManager.getEntityGraph("holdingItemsWithIndexKeys"))
                 .getResultList();
     }
 }

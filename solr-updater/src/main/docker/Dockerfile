@@ -1,7 +1,7 @@
-FROM docker.dbc.dk/dbc-payara
-MAINTAINER os-team
+FROM docker.dbc.dk/payara-micro:LogAsJson
 
-ENV KAFKA_LOG_APPNAME solr-indexer-cloud-worker
+ENV APPLICATION_NAME=solr-indexer-cloud-worker \
+    ADD_PAYARA_ARGS=--nocluster
 
 LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       SOLR_DOC_STORE_URL="http url of solr-doc-store-service (required)" \
@@ -16,7 +16,5 @@ LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       THREADS="Number of parallel threads (default: 1)" \
       MAX_TRIES="Number of tries to process job (default: 3)"
 
-ADD pre/* $PAYARA_CFG/pre/
-ADD post/* $PAYARA_CFG/post/
-ADD solr-doc-store-updater-1.0-SNAPSHOT.war $PAYARA_CFG/pre/solr-doc-store-updater.war
-RUN payara-setup $PAYARA_CFG/pre/
+ADD config.d/* config.d
+ADD *.war wars/

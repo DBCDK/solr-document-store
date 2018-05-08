@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import java.io.Serializable;
+import java.util.Collections;
 import org.eclipse.persistence.annotations.Mutable;
 
 import javax.persistence.Basic;
@@ -19,7 +20,8 @@ import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
-@NamedEntityGraph(name = "holdingItemsWithIndexKeys",attributeNodes = @NamedAttributeNode("indexKeys"))
+@NamedEntityGraph(name = "holdingItemsWithIndexKeys", attributeNodes =
+                  @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
@@ -44,12 +46,15 @@ public class HoldingsItemEntity implements Serializable {
 
     private String trackingId;
 
+    private boolean hasLiveHoldings;
+
     HoldingsItemEntity(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.producerVersion = producerVersion;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
+        this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
     }
 
     /**
@@ -133,12 +138,30 @@ public class HoldingsItemEntity implements Serializable {
         this.trackingId = trackingId;
     }
 
+    public Boolean getHasLiveHoldings() {
+        return hasLiveHoldings;
+    }
+
+    public void setHasLiveHoldings(Boolean hasLiveHoldings) {
+        this.hasLiveHoldings = hasLiveHoldings;
+    }
+
     public List<Map<String, List<String>>> getIndexKeys() {
         return indexKeys;
     }
 
     public void setIndexKeys(List<Map<String, List<String>>> indexKeys) {
         this.indexKeys = indexKeys;
+        this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
     }
 
+    private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
+        if (indexKeys == null) {
+            return false;
+        } else {
+            return indexKeys.stream()
+                    .flatMap(m -> m.getOrDefault("holdingsitem.status", Collections.emptyList()).stream())
+                    .anyMatch(s -> !s.equals("Decommissioned"));
+        }
+    }
 }

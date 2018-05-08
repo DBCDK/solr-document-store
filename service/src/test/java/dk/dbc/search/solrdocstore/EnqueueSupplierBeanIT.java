@@ -42,11 +42,11 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(EnqueueSupplierBeanIT.class);
     private BibliographicBean bibliographicBean;
     private HoldingsItemBean holdingsItemBean;
-    private EntityManager em ;
+    private EntityManager em;
 
     @Before
-    public void onTest(){
-        bibliographicBean = BeanFactoryUtil.createBibliographicBean( env() );
+    public void onTest() {
+        bibliographicBean = BeanFactoryUtil.createBibliographicBean(env());
         holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(env());
 
         em = env().getEntityManager();
@@ -95,24 +95,22 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-
     private Integer nonfbsAgency = 800111;
     private Integer schoolAgency = 300111;
     private Integer fbsAgency = 600111;
-    private Integer commonAgency = LibraryConfig.COMMON_AGENCY;
-    private Integer schoolCommonAgency = LibraryConfig.SCHOOL_COMMON_AGENCY;
+    private Integer commonAgency = LibraryType.COMMON_AGENCY;
+    private Integer schoolCommonAgency = LibraryType.SCHOOL_COMMON_AGENCY;
 
     @Test
-    public void checkConfig(){
+    public void checkConfig() {
         System.out.println("checkConfig");
-        assertEquals(LibraryConfig.LibraryType.NonFBS, bibliographicBean.libraryConfig.getLibraryType(nonfbsAgency));
-        assertEquals(LibraryConfig.LibraryType.FBS, bibliographicBean.libraryConfig.getLibraryType(fbsAgency));
-        assertEquals(LibraryConfig.LibraryType.FBSSchool, bibliographicBean.libraryConfig.getLibraryType(schoolAgency));
+        assertEquals(LibraryType.NonFBS, bibliographicBean.openAgency.lookup(nonfbsAgency).getLibraryType());
+        assertEquals(LibraryType.FBS, bibliographicBean.openAgency.lookup(fbsAgency).getLibraryType());
+        assertEquals(LibraryType.FBSSchool, bibliographicBean.openAgency.lookup(schoolAgency).getLibraryType());
     }
 
-
     @Test
-    public void singleRecords(){
+    public void singleRecords() {
         System.out.println("singleRecords");
         /*
          * Single records
@@ -130,7 +128,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             // Check setup of base holdings are showing up
             queueIs(em,
-                    queueItem(nonfbsAgency,"clazzifier", id)
+                    queueItem(nonfbsAgency, "clazzifier", id)
             );
 
             // No need to keep the old updates.
@@ -139,7 +137,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             // Updated to potentially the same
             addBibliographic(nonfbsAgency, id);
             queueIs(em,
-                    queueItem(nonfbsAgency,"clazzifier", id)
+                    queueItem(nonfbsAgency, "clazzifier", id)
             );
 
             // No need to keep the old updates.
@@ -147,7 +145,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             deleteBibliographic(fbsOwnEntryToDelete);
             queueIs(em,
-                    queueItem(nonfbsAgency,"clazzifier", id)
+                    queueItem(nonfbsAgency, "clazzifier", id)
             );
 
         });
@@ -155,7 +153,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void localAndCommonBibAndHoldings(){
+    public void localAndCommonBibAndHoldings() {
         System.out.println("localAndCommonBibAndHoldings");
         /*
          * Local bib and holdings
@@ -173,32 +171,30 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Holding reattaches to 870970
          * Queue contains (870970, OWN).
          */
-        env().getPersistenceContext().run( () -> {
+        env().getPersistenceContext().run(() -> {
             String id = "test";
             addBibliographic(commonAgency, id);
             BibliographicEntity fbsToDelete = addBibliographic(fbsAgency, id);
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier", id),
-                    queueItem(fbsAgency,"clazzifier", id)
-                    );
+                    queueItem(commonAgency, "clazzifier", id),
+                    queueItem(fbsAgency, "clazzifier", id)
+            );
             clearQueue(em);
 
             addHoldings(fbsAgency, id);
             queueIs(em,
-                    queueItem(fbsAgency,"clazzifier", id));
+                    queueItem(fbsAgency, "clazzifier", id));
             clearQueue(em);
 
             deleteBibliographic(fbsToDelete);
             queueIs(em,
-                    queueItem(fbsAgency,"clazzifier", id),
-                    queueItem(commonAgency,"clazzifier", id));
+                    queueItem(fbsAgency, "clazzifier", id),
+                    queueItem(commonAgency, "clazzifier", id));
         });
     }
 
-
-
     @Test
-    public void commonAndSchoolRecords(){
+    public void commonAndSchoolRecords() {
         System.out.println("commonAndSchoolRecords");
         /*
          * Common & School records
@@ -220,24 +216,24 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Queue contains (OWN, 870970)
          *
          */
-        env().getPersistenceContext().run( ()-> {
+        env().getPersistenceContext().run(() -> {
             String id = "test";
-            addBibliographic(commonAgency,id);
+            addBibliographic(commonAgency, id);
             BibliographicEntity toDelete = addBibliographic(schoolCommonAgency, id);
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier",id),
-                    queueItem(schoolCommonAgency,"clazzifier",id));
+                    queueItem(commonAgency, "clazzifier", id),
+                    queueItem(schoolCommonAgency, "clazzifier", id));
             clearQueue(em);
 
-            addHoldings(schoolAgency,id);
+            addHoldings(schoolAgency, id);
             queueIs(em,
-                    queueItem(schoolCommonAgency,"clazzifier",id));
+                    queueItem(schoolCommonAgency, "clazzifier", id));
             clearQueue(em);
 
             deleteBibliographic(toDelete);
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier",id),
-                    queueItem(schoolCommonAgency,"clazzifier",id));
+                    queueItem(commonAgency, "clazzifier", id),
+                    queueItem(schoolCommonAgency, "clazzifier", id));
         });
 
     }
@@ -256,22 +252,22 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          */
         env().getPersistenceContext().run(() -> {
             String id = "test";
-            addBibliographic(commonAgency,id);
+            addBibliographic(commonAgency, id);
             HoldingsItemEntity h = addHoldings(fbsAgency, id);
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier",id));
+                    queueItem(commonAgency, "clazzifier", id));
             clearQueue(em);
 
             h.setTrackingId("NEW");
             holdingsItemBean.setHoldingsKeys(h, Optional.empty());
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier",id));
+                    queueItem(commonAgency, "clazzifier", id));
         });
 
     }
 
     @Test
-    public void superseeds(){
+    public void superseeds() {
         System.out.println("superseeds");
         /*
          * Superseeds
@@ -286,27 +282,27 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          * Queue contains 870970: 1,2,3,4
          *
          */
-        env().getPersistenceContext().run(()->{
-            List<String> ids = Arrays.asList("test1","test2","test3");
+        env().getPersistenceContext().run(() -> {
+            List<String> ids = Arrays.asList("test1", "test2", "test3");
             String superseedId = "test4";
 
-            for(String id : ids){
-                addBibliographic(commonAgency,id);
-                addHoldings(fbsAgency,id);
+            for (String id : ids) {
+                addBibliographic(commonAgency, id);
+                addHoldings(fbsAgency, id);
             }
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier","test1"),
-                    queueItem(commonAgency,"clazzifier","test2"),
-                    queueItem(commonAgency,"clazzifier","test3"));
+                    queueItem(commonAgency, "clazzifier", "test1"),
+                    queueItem(commonAgency, "clazzifier", "test2"),
+                    queueItem(commonAgency, "clazzifier", "test3"));
             clearQueue(em);
 
             int commitWithin = 100;
-            addBibliographic(commonAgency,superseedId,Optional.of(ids), Optional.of(commitWithin));
+            addBibliographic(commonAgency, superseedId, Optional.of(ids), Optional.of(commitWithin));
             queueIs(em,
-                    queueItem(commonAgency,"clazzifier","test1", commitWithin),
-                    queueItem(commonAgency,"clazzifier","test2", commitWithin),
-                    queueItem(commonAgency,"clazzifier","test3", commitWithin),
-                    queueItem(commonAgency,"clazzifier","test4", commitWithin));
+                    queueItem(commonAgency, "clazzifier", "test1", commitWithin),
+                    queueItem(commonAgency, "clazzifier", "test2", commitWithin),
+                    queueItem(commonAgency, "clazzifier", "test3", commitWithin),
+                    queueItem(commonAgency, "clazzifier", "test4", commitWithin));
 
         });
 
@@ -334,27 +330,28 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-
-
-    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId){
-        return addBibliographic(agency,bibliographicRecordId,Optional.empty());
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId) {
+        return addBibliographic(agency, bibliographicRecordId, Optional.empty());
     }
-    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed){
-        return addBibliographic(agency,bibliographicRecordId,superseed,Optional.empty());
+
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed) {
+        return addBibliographic(agency, bibliographicRecordId, superseed, Optional.empty());
     }
-    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin){
+
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) {
         return addBibliographic(agency, "clazzifier", bibliographicRecordId, superseed, commitWithin);
     }
-    private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin){
+
+    private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) {
         List<String> superseedList = superseed.orElse(Collections.emptyList());
         BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
-        bibliographicBean.addBibliographicKeys(e,superseedList, commitWithin);
+        bibliographicBean.addBibliographicKeys(e, superseedList, commitWithin);
         return e;
     }
 
     private void deleteBibliographic(BibliographicEntity ownRecord) {
         ownRecord.setDeleted(true);
-        bibliographicBean.addBibliographicKeys(ownRecord,Collections.emptyList(),Optional.empty());
+        bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), Optional.empty());
     }
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {
@@ -362,10 +359,12 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         holdingsItemBean.setHoldingsKeys(e, Optional.empty());
         return e;
     }
-    private String queueItem(int agency, String classifier, String bibliographicRecordId){
+
+    private String queueItem(int agency, String classifier, String bibliographicRecordId) {
         return "a," + agency + "," + classifier + "," + bibliographicRecordId;
     }
-    private String queueItem(int agency, String classifier, String bibliographicRecordId, int commitWithin){
+
+    private String queueItem(int agency, String classifier, String bibliographicRecordId, int commitWithin) {
         return "a," + agency + "," + classifier + "," + bibliographicRecordId + "," + commitWithin;
     }
 

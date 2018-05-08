@@ -121,7 +121,7 @@ public abstract class AsyncJob {
      * Set up logging for this class
      *
      * @param wesocketAppender Optional websocket appender to notify with log.
-     * If undesired, null can safely be passed instead
+     *                         If undesired, null can safely be passed instead
      * @throws IOException in case of file errors
      */
     final void initLog(AsyncJobWesocketAppender wesocketAppender) throws IOException {
@@ -148,7 +148,7 @@ public abstract class AsyncJob {
         appender.setEncoder(encoder);
         appender.start();
         log.addAppender(appender);
-        if(wesocketAppender != null){
+        if (wesocketAppender != null) {
             // Setup notifier using websocket to push updates to frontend
             //this.wsAppender = new AsyncJobWesocketAppender(uuid,name,sessionHandler);
             this.wsAppender = wesocketAppender;
@@ -165,7 +165,7 @@ public abstract class AsyncJob {
         if (appender != null) {
             log.detachAppender(appender);
         }
-        if(wsAppender != null){
+        if (wsAppender != null) {
             log.detachAppender(wsAppender);
             // Also unregisters and unsubscribes clients, will cause memory leak if not called
             wsAppender.stop();

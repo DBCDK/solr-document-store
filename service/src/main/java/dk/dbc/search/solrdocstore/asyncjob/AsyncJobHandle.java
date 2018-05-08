@@ -77,7 +77,7 @@ public class AsyncJobHandle implements Runnable {
         }
     }
 
-    public void setWebsocketAppender(AsyncJobWesocketAppender appender){
+    public void setWebsocketAppender(AsyncJobWesocketAppender appender) {
         this.wesocketAppender = appender;
     }
 

@@ -1,8 +1,0 @@
-[jdbc/solr-doc-store/pool]
-postgres
-
-[properties]
-${SOLR_DOC_STORE_DATABASE}
-ApplicationName=docstore-solr-updater-${HOSTNAME}
-
-[jdbc/solr-doc-store]

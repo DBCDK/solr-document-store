@@ -12,9 +12,9 @@ public class BeanFactoryUtil {
     public static BibliographicBean createBibliographicBean(JpaTestEnvironment env) {
         BibliographicBean bean = new BibliographicBean();
         EntityManager em = env.getEntityManager();
-        LibraryConfig config = createLibraryConfig();
+        OpenAgencyBean config = createOpenAgencyBean();
         bean.entityManager = em;
-        bean.libraryConfig = config;
+        bean.openAgency = config;
         bean.queue = createEnqueueSupplier(env);
         bean.h2bBean = createHoldingsToBibliographicBean(env);
         bean.brBean = createBibliographicRetrieveBean(env);
@@ -40,7 +40,7 @@ public class BeanFactoryUtil {
     public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(JpaTestEnvironment env) {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
         bean.entityManager = env.getEntityManager();
-        bean.libraryConfig = createLibraryConfig();
+        bean.openAgency = createOpenAgencyBean();
         bean.brBean = createBibliographicRetrieveBean(env);
         return bean;
     }
@@ -61,34 +61,30 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-
-
-    public static LibraryConfig createLibraryConfig() {
-        LibraryConfig config = new LibraryConfig() {
+    public static OpenAgencyBean createOpenAgencyBean() {
+        return new OpenAgencyBean() {
             @Override
-            public LibraryConfig.LibraryType getLibraryType(int agencyId) {
+            public OpenAgencyEntity lookup(int agencyId) {
                 if (agencyId >= 800000) {
-                    return LibraryConfig.LibraryType.NonFBS;
+                    return new OpenAgencyEntity(agencyId, LibraryType.NonFBS, agencyId % 100000 < 50000);
                 }
                 if (agencyId < 400000) {
-                    return LibraryConfig.LibraryType.FBSSchool;
+                    return new OpenAgencyEntity(agencyId, LibraryType.FBSSchool, false);
                 }
-                return LibraryConfig.LibraryType.FBS;
+                return new OpenAgencyEntity(agencyId, LibraryType.FBS, agencyId % 100000 < 50000);
             }
 
             @Override
-            public LibraryConfig.RecordType getRecordType(int agencyId) {
+            public RecordType getRecordType(int agencyId) {
                 if (agencyId == 870970) {
-                    return LibraryConfig.RecordType.CommonRecord;
+                    return RecordType.CommonRecord;
                 }
                 if (agencyId == 300000) {
-                    return LibraryConfig.RecordType.CommonRecord;
+                    return RecordType.CommonRecord;
                 }
-                return LibraryConfig.RecordType.SingleRecord;
+                return RecordType.SingleRecord;
             }
-
         };
-        return config;
     }
 
     public static BibliographicRetrieveBean createBibliographicRetrieveBean(JpaTestEnvironment env) {
@@ -97,14 +93,13 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em, LibraryConfig config, EnqueueSupplierBean queue, BibliographicRetrieveBean brBean) {
+    public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em, OpenAgencyBean openAgency, EnqueueSupplierBean queue, BibliographicRetrieveBean brBean) {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
         bean.entityManager = em;
-        bean.libraryConfig = config;
+        bean.openAgency = openAgency;
         bean.brBean = brBean;
         return bean;
     }
-
 
     public static HoldingsItemBean createHoldingsItemBean(EntityManager em, EnqueueSupplierBean queue, HoldingsToBibliographicBean h2bBean) {
         HoldingsItemBean bean = new HoldingsItemBean();
@@ -114,4 +109,3 @@ public class BeanFactoryUtil {
         return bean;
     }
 }
-

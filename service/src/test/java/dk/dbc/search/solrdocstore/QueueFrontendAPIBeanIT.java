@@ -13,13 +13,14 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
-    EntityManager em ;
+
+    EntityManager em;
     JSONBContext jsonbContext = new JSONBContext();
 
     QueueFrontendAPIBean bean;
 
     @Before
-    public void before(){
+    public void before() {
         // Setup bean
         em = env().getEntityManager();
         bean = new QueueFrontendAPIBean();
@@ -34,10 +35,9 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void testGetQueueRules(){
+    public void testGetQueueRules() {
         Response queueRulesReponse = bean.getQueueRules();
-        FrontendReturnListType<QueueRuleEntity> queueRules = (FrontendReturnListType<QueueRuleEntity>)
-                queueRulesReponse.getEntity();
+        FrontendReturnListType<QueueRuleEntity> queueRules = (FrontendReturnListType<QueueRuleEntity>) queueRulesReponse.getEntity();
         List<QueueRuleEntity> queueRuleEntityList = queueRules.result;
         int expected = 4;
         Assert.assertEquals(expected, queueRuleEntityList.size());
@@ -48,7 +48,7 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
         QueueRuleEntity createQueueRule = new QueueRuleEntity("q1");
         String queueJson = jsonbContext.marshall(createQueueRule);
         Response createQueueRuleResponse = env().getPersistenceContext()
-                .run(() -> bean.createQueueRule(null,queueJson)
+                .run(() -> bean.createQueueRule(null, queueJson)
                 );
         QueueRuleEntity createdQueueRule = (QueueRuleEntity) createQueueRuleResponse.getEntity();
         Assert.assertEquals(createQueueRule, createdQueueRule);
@@ -57,7 +57,7 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testCreateInvalidQueueRule(){
+    public void testCreateInvalidQueueRule() {
         String queueJson = "{not:\"proper\"}";
         Response createQueueRuleResponse = env().getPersistenceContext()
                 .run(() -> bean.createQueueRule(null, queueJson));
@@ -76,7 +76,7 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void testDeleteNonExistingQueueRule(){
+    public void testDeleteNonExistingQueueRule() {
         Response createQueueRuleResponse = env().getPersistenceContext()
                 .run(() -> bean.deleteQueueRule("non-existing"));
         Assert.assertEquals(createQueueRuleResponse.getStatus(), 404);
@@ -84,7 +84,7 @@ public class QueueFrontendAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
         Assert.assertEquals(expected, getNumberOfQueues());
     }
 
-    public int getNumberOfQueues(){
-        return ((Number)em.createQuery("SELECT COUNT(q) FROM QueueRuleEntity q").getSingleResult()).intValue();
+    public int getNumberOfQueues() {
+        return ( (Number) em.createQuery("SELECT COUNT(q) FROM QueueRuleEntity q").getSingleResult() ).intValue();
     }
 }

@@ -369,6 +369,7 @@
                             <pgPort>${postgresql.port}</pgPort>
                             <pgDbName>solrdocstore</pgDbName>
                             <pgDbScripts>
+                                <pgDbScript>${basedir}/src/test/resources/solrdocstore-data.sql</pgDbScript>
                             </pgDbScripts>
                         </configuration>
                     </execution>

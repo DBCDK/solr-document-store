@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ public class Config {
     private String systemName;
     private String jmxDomain;
     private Boolean allowNonEmptySchema;
+    private int[] openAgencyValidateTime;
 
     @PostConstruct
     public void loadProperties() {
@@ -38,6 +40,7 @@ public class Config {
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
         jmxDomain = getValue(props, "jmxDomain", "JMX_DOMAIN", "metrics", null);
         allowNonEmptySchema = getValue(props, "allowNonEmptySchema", "ALLOW_NON_EMPTY_SCHEMA", "false", null, Boolean::parseBoolean);
+        openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
     }
 
     public String getOaURL() {
@@ -58,6 +61,10 @@ public class Config {
 
     public Boolean getAllowNonEmptySchema() {
         return allowNonEmptySchema;
+    }
+
+    public int[] getOpenAgencyValidateTime() {
+        return openAgencyValidateTime;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
@@ -108,5 +115,26 @@ public class Config {
             log.error("Exception: {}", ex.getMessage());
         }
         return new Properties();
+    }
+
+    private static int[] validateTime(String time) {
+        String[] parts = time.split(":");
+        try {
+            if (parts.length == 3) {
+                int[] ret = new int[3];
+
+                for (int i = 0 ; i < 3 ; i++) {
+                    if (parts[i].isEmpty()) {
+                        throw new IllegalArgumentException("Empty part");
+                    }
+                    ret[i] = Integer.parseUnsignedInt(parts[i], 10);
+                }
+                return ret;
+            }
+        } catch (RuntimeException ex) {
+            log.error("Error processing time: {}", ex.getMessage());
+            log.debug("Error processing time: ", ex);
+        }
+        throw new IllegalArgumentException("Invalid time: " + time);
     }
 }

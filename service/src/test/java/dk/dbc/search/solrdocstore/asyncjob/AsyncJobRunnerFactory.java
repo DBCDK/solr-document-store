@@ -19,7 +19,7 @@
 package dk.dbc.search.solrdocstore.asyncjob;
 
 import dk.dbc.search.solrdocstore.Config;
-
+import java.util.concurrent.Executors;
 
 /**
  *
@@ -27,10 +27,9 @@ import dk.dbc.search.solrdocstore.Config;
  */
 public class AsyncJobRunnerFactory {
 
-
     public static AsyncJobRunner makeAsyncJobRunner() {
         AsyncJobRunner runner = new AsyncJobRunner();
-        runner.config  = new Config() {
+        runner.config = new Config() {
             @Override
             public long getJobPruneMinutes() {
                 return 1L;
@@ -38,6 +37,7 @@ public class AsyncJobRunnerFactory {
         };
         runner.sessionHandler = new AsyncJobSessionHandler();
         runner.init();
+        runner.mes = Executors.newCachedThreadPool();
         return runner;
     }
 }

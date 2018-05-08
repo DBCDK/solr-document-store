@@ -20,16 +20,21 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Maintains session with frontend clients. Communicates changes to queues and asynchronous jobs.
- * It broadcast specific actions to all sessions, to keep frontend data up to date. These are:
- *  - QueueRule creation and deletion
- *  - Any asynchronous job start and finish
- * It keeps track of "subscribers", which are session who wish to receive log messages from a specific
- * asynchronous job, and facilitates sending these log messages to the appropriate subscribers.
+ * Maintains session with frontend clients. Communicates changes to queues and
+ * asynchronous jobs.
+ * It broadcast specific actions to all sessions, to keep frontend data up to
+ * date. These are:
+ * - QueueRule creation and deletion
+ * - Any asynchronous job start and finish
+ * It keeps track of "subscribers", which are session who wish to receive log
+ * messages from a specific
+ * asynchronous job, and facilitates sending these log messages to the
+ * appropriate subscribers.
  * */
 @Singleton
 @Startup
 public class AsyncJobSessionHandler {
+
     private static final String SUBSCRIBE_FRONTEND_TYPE = "Subscribing";
     private static final String UNSUBSCRIBE_FRONTEND_TYPE = "Unsubscribing";
     private static final String APPEND_LOG_FRONTEND_TYPE = "Appending log";
@@ -44,19 +49,19 @@ public class AsyncJobSessionHandler {
     // Maps UUID of an asynchronous job to all its frontend session subscribers
     private final Map<UUID, List<Session>> subscribers = new HashMap<>();
 
-    public void addSession(Session session){
+    public void addSession(Session session) {
         sessions.add(session);
     }
 
-    public void removeSession(Session session){
+    public void removeSession(Session session) {
         sessions.remove(session);
-        subscribers.forEach((uuid, sessionList)-> sessionList.remove(session));
+        subscribers.forEach((uuid, sessionList) -> sessionList.remove(session));
     }
 
-    public void subscribe(Session session, String id){
+    public void subscribe(Session session, String id) {
         UUID uuid = UUID.fromString(id);
-        List <Session> sessions = subscribers.get(uuid);
-        if(sessions != null){
+        List<Session> sessions = subscribers.get(uuid);
+        if (sessions != null) {
             sessions.add(session);
         } else {
             subscribers.put(uuid, Collections.singletonList(session));
@@ -67,7 +72,7 @@ public class AsyncJobSessionHandler {
         sendToSession(session, subscribeAction);
     }
 
-    public void unsubscribe(Session session, String id){
+    public void unsubscribe(Session session, String id) {
         UUID uuid = UUID.fromString(id);
         subscribers.get(uuid).remove(session);
         HashMap<String, Object> fields = new HashMap<>();
@@ -76,22 +81,22 @@ public class AsyncJobSessionHandler {
         sendToSession(session, unsubscribeAction);
     }
 
-    public void broadcastAction(String type, Map<String, Object> fields){
+    public void broadcastAction(String type, Map<String, Object> fields) {
         broadcast(buildAction(type, fields));
     }
 
-    public ObjectNode buildAction(String type, Map<String, Object> fields){
+    public ObjectNode buildAction(String type, Map<String, Object> fields) {
         ObjectNode obj = O.createObjectNode();
         obj.put("type", type);
         fields.forEach((fieldName, fieldValue) -> {
             Class fieldValueClass = fieldValue.getClass();
-            if(fieldValueClass == String.class){
+            if (fieldValueClass == String.class) {
                 obj.put(fieldName, (String) fieldValue);
-            } else if(fieldValueClass == Boolean.class) {
+            } else if (fieldValueClass == Boolean.class) {
                 obj.put(fieldName, (Boolean) fieldValue);
-            } else if(fieldValueClass == Integer.class){
+            } else if (fieldValueClass == Integer.class) {
                 obj.put(fieldName, (Integer) fieldValue);
-            } else if(fieldValueClass == Float.class) {
+            } else if (fieldValueClass == Float.class) {
                 obj.put(fieldName, (Float) fieldValue);
             } else {
                 obj.putPOJO(fieldName, fieldValue);
@@ -100,7 +105,7 @@ public class AsyncJobSessionHandler {
         return obj;
     }
 
-    public void register(UUID uuid, AsyncJobHandle job){
+    public void register(UUID uuid, AsyncJobHandle job) {
         subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
         HashMap<String, Object> fields = new HashMap<>();
         fields.put("uuid", uuid.toString());
@@ -108,7 +113,7 @@ public class AsyncJobSessionHandler {
         broadcastAction(JOB_STARTED_FRONTEND_TYPE, fields);
     }
 
-    public void unregister(UUID uuid, AsyncJobHandle job){
+    public void unregister(UUID uuid, AsyncJobHandle job) {
         List<Session> sessions = subscribers.remove(uuid);
         HashMap<String, Object> fieldsUnsubscribe = new HashMap<>();
         fieldsUnsubscribe.put("uuid", uuid.toString());
@@ -124,7 +129,7 @@ public class AsyncJobSessionHandler {
      * Sends a log message to all sessions subscribed to the job with the
      * corresponding UUID argument
      */
-    public void appendLog(UUID uuid, String message){
+    public void appendLog(UUID uuid, String message) {
         // If this job has not been messaged yet, we create it
         List<Session> sessions = subscribers.computeIfAbsent(uuid, id -> new ArrayList<>());
         // Building log message
@@ -133,10 +138,10 @@ public class AsyncJobSessionHandler {
         fields.put("logLine", message);
         ObjectNode action = buildAction(APPEND_LOG_FRONTEND_TYPE, fields);
         // Sending log message to subscribers
-        sessions.forEach((session)-> sendToSession(session, action));
+        sessions.forEach((session) -> sendToSession(session, action));
     }
 
-    private void broadcast(String message){
+    private void broadcast(String message) {
         sessions.forEach(session -> {
             try {
                 session.getBasicRemote().sendText(message);
@@ -147,7 +152,7 @@ public class AsyncJobSessionHandler {
         });
     }
 
-    private void broadcast(ObjectNode message){
+    private void broadcast(ObjectNode message) {
         try {
             broadcast(O.writeValueAsString(message));
         } catch (JsonProcessingException e) {
@@ -155,7 +160,7 @@ public class AsyncJobSessionHandler {
         }
     }
 
-    private void sendToSession(Session session, ObjectNode message){
+    private void sendToSession(Session session, ObjectNode message) {
         try {
             session.getBasicRemote().sendText(O.writeValueAsString(message));
         } catch (IOException ex) {

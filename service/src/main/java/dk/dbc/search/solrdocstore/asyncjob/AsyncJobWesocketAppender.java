@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
+
     private static final Logger log = LoggerFactory.getLogger(AsyncJobHandle.class);
     private final UUID uuid;
     private final AsyncJobHandle job;
@@ -20,9 +21,9 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
     }
 
     @Override
-    public void start(){
+    public void start() {
         super.start();
-        sessionHandler.register(uuid,job);
+        sessionHandler.register(uuid, job);
     }
 
     @Override
@@ -31,7 +32,7 @@ public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
     }
 
     @Override
-    public void stop(){
+    public void stop() {
         sessionHandler.unregister(uuid, job);
         super.stop();
     }

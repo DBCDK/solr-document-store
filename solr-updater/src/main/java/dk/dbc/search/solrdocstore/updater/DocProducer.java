@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import dk.dbc.pgqueue.consumer.NonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.io.InputStream;
@@ -295,6 +294,7 @@ public class DocProducer {
         setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
         addRecHoldingsAgencyId(indexKeys, sourceDoc);
+        addFromPartOfDanbib(indexKeys, sourceDoc);
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
         addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
 
@@ -362,6 +362,20 @@ public class DocProducer {
                 String agency = find(record, "agencyId").asText();
                 addField(indexKeys, "rec.holdingsAgencyId", agency);
             }
+        }
+    }
+
+    /**
+     * Include add agencies listed in 'partOfDanbib' in ln field
+     *
+     * @param indexKeys  solr output document
+     * @param collection entire json from solr-doc-store
+     */
+    private void addFromPartOfDanbib(JsonNode indexKeys, JsonNode collection) {
+        JsonNode agencies = find(collection, "partOfDanbib");
+        for (JsonNode agency : agencies) {
+            String agencyId = String.format("%06d", agency.asInt());
+            addField(indexKeys, "dkcclterm.ln", agencyId);
         }
     }
 
