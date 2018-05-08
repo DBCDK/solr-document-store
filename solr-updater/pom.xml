@@ -116,6 +116,20 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JOLOKIA servlet -->
+        <dependency>
+            <groupId>org.jolokia</groupId>
+            <artifactId>jolokia-core</artifactId>
+            <version>1.5.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jolokia</groupId>
+            <artifactId>jolokia-jsr160</artifactId>
+            <version>1.5.0</version>
+            <type>jar</type>
+        </dependency>
+
     </dependencies>
 
     <build>

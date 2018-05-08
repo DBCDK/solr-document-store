@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jolokia - Solr Doc Store</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style type="text/css">
+            .list {
+
+            }
+            .list > div, .list > div > div { /* Segment */
+                padding: .2em;
+
+            }
+            /* HEADER */
+            .list > div > div:first-of-type {
+                background-color: lightgray;
+            }
+            /* BODY */
+            .list > div > div:last-of-type {
+                display: none;
+            }
+            .list > div.shown  > div:last-of-type {
+                display: inherit;
+            }
+            div.table {
+                display: table;
+            }
+            div.table-row {
+                display: table-row;
+            }
+            div.table-cell {
+                display: table-cell;
+                padding-left: 2em;
+            }
+            div.table-cell:first-of-type {
+                display: table-cell;
+                padding-left: 0em;
+            }
+        </style>
+        <script type="text/javascript">
+            var req = function (url, success, failure, content) {
+                if (failure === undefined)
+                    failure = success;
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (request.readyState === 4) {
+                        if (request.status === 200) {
+                            success(request.responseText, request);
+                        } else {
+                            failure(request.responseText, request);
+                        }
+                    }
+                };
+                if (content === undefined) {
+                    request.open("GET", url);
+                    request.send();
+                } else {
+                    request.open("POST", url);
+                    request.send(content);
+                }
+            };
+            var startUpdater = function (e) {
+                for (var c = e.firstChild; c !== null; c = c.nextSibling) {
+                    if (c.nodeType === Node.ELEMENT_NODE &&
+                            c.hasAttribute("data-read")) {
+                        var read = reader(c.lastChild, c.getAttribute("data-read"));
+                        read();
+                        c.setAttribute("data-timer", window.setInterval(read, 5000));
+                    }
+                }
+            };
+            var stopUpdater = function (e) {
+                for (var c = e.firstChild; c !== null; c = c.nextSibling) {
+                    if (c.nodeType === Node.ELEMENT_NODE &&
+                            c.hasAttribute("data-timer")) {
+                        var i = c.getAttribute("data-timer");
+                        c.removeAttribute("data-timer");
+                        window.clearInterval(i);
+                    }
+                }
+            };
+            var removeClass = function (e, clazz) {
+                e.classList.remove(clazz);
+                for (var c = e.firstChild; c !== null; c = c.nextSibling) {
+                    if (c.nodeType === Node.ELEMENT_NODE)
+                        removeClass(c, clazz);
+                }
+            };
+            var toggler = function (that) {
+                var func = function () {
+                    if (that.classList.contains('shown')) {
+                        removeClass(that, 'shown');
+                        stopUpdater(that);
+                    } else {
+                        that.classList.add('shown');
+                        startUpdater(that);
+                    }
+                };
+                return func;
+            };
+            var sort = function (list) {
+                var o = {};
+                list.forEach(function (k) {
+                    o[k] = k.replace(/0*(0|[1-9][0-9]*)/g, function (m, d) {
+                        return '0' + String.fromCharCode(64 + d.length) + d;
+                    });
+                });
+                return list.sort(function (a, b) {
+                    return o[a].localeCompare(o[b]);
+                });
+            };
+            var list = function (target, list, filler) {
+                sort(Object.keys(list)).forEach(function (key) {
+                    var div = document.createElement("div");
+                    div.setAttribute("data-name", key);
+                    var header = document.createElement("div");
+                    header.onclick = toggler(div);
+                    header.appendChild(document.createTextNode(key));
+                    div.appendChild(header);
+                    var body = document.createElement("div");
+                    div.appendChild(body);
+                    target.appendChild(div);
+                    filler(body, key, list[key]);
+                });
+            };
+            var readerResponse = function (s, target) {
+                var json = JSON.parse(s);
+                var result = json.value;
+                while (target.firstChild !== null) {
+                    target.removeChild(target.firstChild);
+                }
+                list(target, result, function (div, element, obj) {
+                    div.parentNode.parentNode.classList.add("table");
+                    div.parentNode.classList.add("table-row");
+                    div.previousSibling.classList.add("table-cell");
+                    div.classList.add("table-cell");
+                    div.appendChild(document.createTextNode(obj));
+                });
+            };
+            var reader = function (target, name) {
+                return function () {
+                    req("jolokia/read/" + escape(name),
+                            function (s) {
+                                readerResponse(s, target);
+                            });
+                };
+            };
+            var listResponse = function (s) {
+                var json = JSON.parse(s);
+                var result = json.value;
+                var div = document.getElementById("list");
+                list(div, result, function (div, scope, obj) {
+                    div.classList.add('list');
+                    list(div, obj, function (div, element, obj) {
+                        div.appendChild(document.createTextNode(obj.desc + ":" + scope + ":" + element));
+                        if (obj.attr) {
+                            div.setAttribute("data-read", scope + ":" + element);
+                            var content = document.createElement('div');
+                            content.appendChild(document.createTextNode("LOADING"));
+                            div.appendChild(content);
+                        }
+
+                    });
+
+                });
+
+            };
+            var reqError = function (s, req) {
+                console.log(req.status);
+                console.log(s);
+            };
+            window.addEventListener("load", function () {
+                req("jolokia/list", listResponse, reqError);
+            });
+        </script>
+    </head>
+    <body>
+        <div class="list" id="list"></div>
+    </body>
+</html>
