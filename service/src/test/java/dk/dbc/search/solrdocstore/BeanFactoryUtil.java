@@ -66,12 +66,12 @@ public class BeanFactoryUtil {
             @Override
             public OpenAgencyEntity lookup(int agencyId) {
                 if (agencyId >= 800000) {
-                    return new OpenAgencyEntity(agencyId, LibraryType.NonFBS, agencyId % 100000 < 50000);
+                    return new OpenAgencyEntity(agencyId, LibraryType.NonFBS, false, agencyId % 100000 < 50000);
                 }
                 if (agencyId < 400000) {
-                    return new OpenAgencyEntity(agencyId, LibraryType.FBSSchool, false);
+                    return new OpenAgencyEntity(agencyId, LibraryType.FBSSchool, false, false);
                 }
-                return new OpenAgencyEntity(agencyId, LibraryType.FBS, agencyId % 100000 < 50000);
+                return new OpenAgencyEntity(agencyId, LibraryType.FBS, agencyId % 100000 < 50000, agencyId % 50000 < 25000);
             }
 
             @Override

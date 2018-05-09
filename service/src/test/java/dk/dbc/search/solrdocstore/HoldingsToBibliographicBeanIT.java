@@ -274,7 +274,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
     private OpenAgencyBean mockToReturn(LibraryType libraryType) {
         OpenAgencyBean mock = Mockito.mock(OpenAgencyBean.class);
-        Mockito.when(mock.lookup(Mockito.anyInt())).thenReturn(new OpenAgencyEntity(-1, libraryType, true));
+        Mockito.when(mock.lookup(Mockito.anyInt())).thenReturn(new OpenAgencyEntity(-1, libraryType, true, true));
         return mock;
     }
 
@@ -320,7 +320,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     }
 
     private void createAgency(int agencyId, LibraryType t) {
-        em.merge(new OpenAgencyEntity(agencyId, t, true));
+        em.merge(new OpenAgencyEntity(agencyId, t, true, true));
     }
 
 }

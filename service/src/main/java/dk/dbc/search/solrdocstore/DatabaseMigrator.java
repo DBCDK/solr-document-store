@@ -42,7 +42,7 @@ public class DatabaseMigrator {
         log.debug("migrated = {}", migrated);
 
         boolean has_logged = false;
-        if (migrated.contains("13")) {
+        if (migrated.contains("14")) {
             log.info("----------------------OpenAgencyReload-------------------------");
             has_logged = true;
             reloadOpenAgency();

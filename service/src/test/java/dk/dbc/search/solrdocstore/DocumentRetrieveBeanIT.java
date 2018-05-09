@@ -57,42 +57,42 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         List<Integer> agencies = env().getPersistenceContext().run(() -> {
 
             // School part of danbib derived from common
-            em.persist(new OpenAgencyEntity(311111, LibraryType.FBSSchool, false));
+            em.persist(new OpenAgencyEntity(311111, LibraryType.FBSSchool, false, false));
             em.persist(new HoldingsItemEntity(311111, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(311111, "a", 870970, "a", true));
 
             // Fbs part of danbib from common (*)
-            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(711111, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(711111, "a", 870970, "a", true));
 
             // Fbs part of danbib from common - no live holdings
-            em.persist(new OpenAgencyEntity(771111, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(771111, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(771111, "a", "", DECOMMISSIONED, ""));
             em.persist(new HoldingsToBibliographicEntity(771111, "a", 870970, "a", true));
 
             // Fbs part of danbib from common - superceeded (*)
-            em.persist(new OpenAgencyEntity(777111, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(777111, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(777111, "b", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(777111, "b", 870970, "a", true));
 
             // Fbs part of danbib from common - own datastream (*)
-            em.persist(new OpenAgencyEntity(777711, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(777711, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(777711, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(777711, "a", 777711, "a", true));
 
             // Fbs part of danbib own record (invalid id)
-            em.persist(new OpenAgencyEntity(777771, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(777771, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(777771, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(777771, "a", 777771, "a", false));
 
             // Fbs from common
-            em.persist(new OpenAgencyEntity(811111, LibraryType.FBS, false));
+            em.persist(new OpenAgencyEntity(811111, LibraryType.FBS, false, false));
             em.persist(new HoldingsItemEntity(811111, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(811111, "a", 870970, "a", true));
 
             // Fbs part of danbib own record
-            em.persist(new OpenAgencyEntity(881111, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(881111, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(881111, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(881111, "a", 881111, "a", false));
 
@@ -108,7 +108,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getPartOfDanbibSchool() throws Exception {
         System.out.println("getPartOfDanbib-School");
         List<Integer> agencies = env().getPersistenceContext().run(() -> {
-            em.persist(new OpenAgencyEntity(311111, LibraryType.FBSSchool, false));
+            em.persist(new OpenAgencyEntity(311111, LibraryType.FBSSchool, false, false));
             em.persist(new HoldingsItemEntity(311111, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(311111, "a", 870970, "a", true));
             return bean.getPartOfDanbib(311111, "a");
@@ -121,7 +121,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("getPartOfDanbib-not-partOfDanbib");
         List<Integer> agencies = env().getPersistenceContext().run(() -> {
             // Fbs part of danbib own record
-            em.persist(new OpenAgencyEntity(881111, LibraryType.FBS, false));
+            em.persist(new OpenAgencyEntity(881111, LibraryType.FBS, false, false));
             em.persist(new HoldingsItemEntity(881111, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(881111, "a", 881111, "a", false));
             return bean.getPartOfDanbib(881111, "a");
@@ -135,7 +135,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("getPartOfDanbib-LocalStream");
         List<Integer> agencies = env().getPersistenceContext().run(() -> {
             // Fbs part of danbib from common - own datastream (*)
-            em.persist(new OpenAgencyEntity(777711, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(777711, LibraryType.FBS, false, true));
             em.persist(new HoldingsItemEntity(777711, "a", "", ON_SHELF, ""));
             em.persist(new HoldingsToBibliographicEntity(777711, "a", 777711, "a", true));
             return bean.getPartOfDanbib(777711, "a");
