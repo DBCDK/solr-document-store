@@ -68,8 +68,8 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("openAgencyVerify");
 
         env().getPersistenceContext().run(() -> {
-            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true));
-            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, true));
+            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true, true));
+            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, true, true));
             openAgencyLoader.verifyOpenAgencyCache();
         });
         System.out.println("changedAgencies = " + changedAgencies);
@@ -81,14 +81,14 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("openAgencyVerifyChangesCanMigrateNoHoldings");
 
         env().getPersistenceContext().run(() -> {
-            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true));
-            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, false));
+            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true, true));
+            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, true, false));
             em.flush();
             openAgencyLoader.verifyOpenAgencyCache();
 
             // Migrated
             OpenAgencyEntity oae711111 = em.find(OpenAgencyEntity.class, 711111);
-            assertEquals(new OpenAgencyEntity(711111, LibraryType.FBS, true), oae711111);
+            assertEquals(new OpenAgencyEntity(711111, LibraryType.FBS, true, true), oae711111);
         });
         System.out.println("changedAgencies = " + changedAgencies);
         System.out.println("purgedAgencies = " + purgedAgencies);
@@ -101,8 +101,8 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("openAgencyVerifyChangesCanMigrateDecommissioned");
 
         env().getPersistenceContext().run(() -> {
-            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true));
-            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, false));
+            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true, true));
+            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, true, false));
             em.persist(new HoldingsItemEntity(711111, "1", "", indexKeys("[{\"holdingsitem.status\":[\"Decommissioned\"]}]"), ""));
             em.persist(new HoldingsToBibliographicEntity(711111, "1", 870970, "1", true));
             em.flush();
@@ -110,7 +110,7 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             // Migrated
             OpenAgencyEntity oae711111 = em.find(OpenAgencyEntity.class, 711111);
-            assertEquals(new OpenAgencyEntity(711111, LibraryType.FBS, true), oae711111);
+            assertEquals(new OpenAgencyEntity(711111, LibraryType.FBS, true, true), oae711111);
             HoldingsItemEntity holding = em.find(HoldingsItemEntity.class, new AgencyItemKey(711111, "1"));
             assertNull(holding);
             HoldingsToBibliographicEntity relation = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(711111, "1"));
@@ -129,14 +129,14 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("openAgencyVerifyChangesCantMigrate");
 
         env().getPersistenceContext().run(() -> {
-            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true));
-            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, false));
+            em.persist(new OpenAgencyEntity(870970, LibraryType.NonFBS, true, true));
+            em.persist(new OpenAgencyEntity(711111, LibraryType.FBS, true, false));
             em.persist(new HoldingsItemEntity(711111, "1", "", indexKeys("[{\"holdingsitem.status\":[\"Foo\", \"Decommissioned\"]}]"), ""));
             em.flush();
             openAgencyLoader.verifyOpenAgencyCache();
 
             OpenAgencyEntity oae711111 = em.find(OpenAgencyEntity.class, 711111);
-            assertEquals(new OpenAgencyEntity(711111, LibraryType.FBS, false), oae711111);
+            assertEquals(new OpenAgencyEntity(711111, LibraryType.FBS, true, false), oae711111);
         });
         System.out.println("changedAgencies = " + changedAgencies);
         System.out.println("purgedAgencies = " + purgedAgencies);

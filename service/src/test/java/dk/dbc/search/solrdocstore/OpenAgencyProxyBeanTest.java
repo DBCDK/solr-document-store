@@ -24,7 +24,7 @@ public class OpenAgencyProxyBeanTest {
 
         OpenAgencyEntity openAgency = openAgencyLoader.loadOpenAgencyEntry(LibraryType.COMMON_AGENCY);
         System.out.println("COMMON_AGENCY = " + openAgency);
-        assertEquals(new OpenAgencyEntity(LibraryType.COMMON_AGENCY, LibraryType.NonFBS, true), openAgency);
+        assertEquals(new OpenAgencyEntity(LibraryType.COMMON_AGENCY, LibraryType.NonFBS, true, true), openAgency);
     }
 
     @Test
