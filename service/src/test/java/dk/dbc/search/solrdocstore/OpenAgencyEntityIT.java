@@ -3,6 +3,7 @@ package dk.dbc.search.solrdocstore;
 import javax.persistence.EntityManager;
 import org.junit.Test;
 
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 import static org.junit.Assert.*;
 
 /**
@@ -20,7 +21,7 @@ public class OpenAgencyEntityIT extends JpaSolrDocStoreIntegrationTester {
             OpenAgencyEntity foundBefore = em.find(OpenAgencyEntity.class, LibraryType.COMMON_AGENCY);
             assertNull(foundBefore);
 
-            OpenAgencyEntity oa870970 = new OpenAgencyEntity(LibraryType.COMMON_AGENCY, LibraryType.NonFBS, false, false);
+            OpenAgencyEntity oa870970 = makeOpenAgencyEntity(COMMON_AGENCY);
             em.persist(oa870970);
             em.getEntityManagerFactory().getCache().evictAll();
 
@@ -28,7 +29,8 @@ public class OpenAgencyEntityIT extends JpaSolrDocStoreIntegrationTester {
             assertNotNull(foundAfter);
             assertEquals(LibraryType.COMMON_AGENCY, foundAfter.getAgencyId());
             assertEquals(LibraryType.NonFBS, foundAfter.getLibraryType());
-            assertFalse(foundAfter.getPartOfDanbib());
+            assertTrue(foundAfter.getPartOfDanbib());
+            assertTrue(foundAfter.getAuthCreateCommonRecord());
         });
     }
 }

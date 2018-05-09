@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
@@ -164,14 +165,14 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.openAgency.proxy = null;
 
             // Override LibraryConfig OpenAgency by add agencies directly to cache
-            int fbsSchoolAgency = 3711;
-            int fbsAgencyWithoutLocalBib = 4711;
-            int fbsAgencyWithLocalBib = 4712;
-            int nonFbsAgency = 4750;
-            createAgency(fbsSchoolAgency, LibraryType.FBSSchool);
-            createAgency(fbsAgencyWithoutLocalBib, LibraryType.FBS);
-            createAgency(fbsAgencyWithLocalBib, LibraryType.FBS);
-            createAgency(nonFbsAgency, LibraryType.NonFBS);
+            int fbsSchoolAgency = 300711;
+            int fbsAgencyWithoutLocalBib = 704711;
+            int fbsAgencyWithLocalBib = 704712;
+            int nonFbsAgency = 884750;
+            createAgency(fbsSchoolAgency);
+            createAgency(fbsAgencyWithoutLocalBib);
+            createAgency(fbsAgencyWithLocalBib);
+            createAgency(nonFbsAgency);
 
             int[] agencies = {fbsAgencyWithLocalBib, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY};
             String originalRecordId = "A";
@@ -244,11 +245,11 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createBibRecord(701020, biblId);
             createBibRecord(870970, biblId);
             createBibRecord(876543, biblId);
-            createAgency(301020, LibraryType.FBSSchool);
-            createAgency(302030, LibraryType.FBSSchool);
-            createAgency(701020, LibraryType.FBS);
-            createAgency(702030, LibraryType.FBS);
-            createAgency(876543, LibraryType.NonFBS);
+            createAgency(301020);
+            createAgency(302030);
+            createAgency(701020);
+            createAgency(702030);
+            createAgency(876543);
             bean.tryToAttachToBibliographicRecord(301020, biblId);
             bean.tryToAttachToBibliographicRecord(302030, biblId);
             bean.tryToAttachToBibliographicRecord(701020, biblId);
@@ -319,8 +320,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         em.merge(e);
     }
 
-    private void createAgency(int agencyId, LibraryType t) {
-        em.merge(new OpenAgencyEntity(agencyId, t, true, true));
+    private void createAgency(int agencyId) {
+        em.merge(makeOpenAgencyEntity(agencyId));
     }
 
 }
