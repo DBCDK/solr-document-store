@@ -1,13 +1,19 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 import static dk.dbc.search.solrdocstore.QueueTestUtil.clearQueue;
 
 public class BeanFactoryUtil {
+
+    private static final ObjectMapper O = new ObjectMapper();
 
     public static BibliographicBean createBibliographicBean(JpaTestEnvironment env) {
         BibliographicBean bean = new BibliographicBean();
@@ -65,24 +71,32 @@ public class BeanFactoryUtil {
         return new OpenAgencyBean() {
             @Override
             public OpenAgencyEntity lookup(int agencyId) {
-                if (agencyId >= 800000) {
-                    return new OpenAgencyEntity(agencyId, LibraryType.NonFBS, false, agencyId % 100000 < 50000);
-                }
-                if (agencyId < 400000) {
-                    return new OpenAgencyEntity(agencyId, LibraryType.FBSSchool, false, false);
-                }
-                return new OpenAgencyEntity(agencyId, LibraryType.FBS, agencyId % 100000 < 50000, agencyId % 50000 < 25000);
+                return makeOpenAgencyEntity(agencyId);
             }
 
             @Override
             public RecordType getRecordType(int agencyId) {
-                if (agencyId == 870970) {
+                if (agencyId == LibraryType.COMMON_AGENCY) {
                     return RecordType.CommonRecord;
                 }
-                if (agencyId == 300000) {
+                if (agencyId ==  LibraryType.SCHOOL_COMMON_AGENCY) {
                     return RecordType.CommonRecord;
                 }
                 return RecordType.SingleRecord;
+            }
+        };
+    }
+
+    public static OpenAgencyProxyBean createOpenAgencyProxyBean() {
+        return new OpenAgencyProxyBean() {
+            @Override
+            public JsonNode loadOpenAgencyJson(int agencyId) {
+                try {
+                    String resource = "openagency-" + agencyId + ".json";
+                    return O.readTree(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource));
+                } catch (IOException ex) {
+                    return null;
+                }
             }
         };
     }
