@@ -13,11 +13,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,11 +42,7 @@ public class EnqueueBean {
     public Response enqueuePids(@PathParam("queue") String queue, String content) {
         log.info("enqueue to {}", queue);
         HashMap<String, String> failed = enqueue(content, queueSupplierFor(queue));
-        if (failed.isEmpty()) {
-            return Response.ok(true).build();
-        } else {
-            return Response.status(Status.BAD_REQUEST).entity(failed).build();
-        }
+        return response(failed);
     }
 
     @POST
@@ -58,11 +52,13 @@ public class EnqueueBean {
     public Response enqueuePids(String content) {
         log.info("enqueue to ALL");
         HashMap<String, String> failed = enqueue(content, enqueueSupplier.getManifestationEnqueueService());
-        if (failed.isEmpty()) {
-            return Response.ok(true).build();
-        } else {
-            return Response.status(Status.BAD_REQUEST).entity(failed).build();
-        }
+        return response(failed);
+    }
+
+    private Response response(HashMap<String, String> failed) {
+        boolean success = failed.isEmpty();
+        failed.put("_success_", String.valueOf(success));
+        return Response.status(success ? Status.OK : Status.BAD_REQUEST).entity(failed).build();
     }
 
     @POST
