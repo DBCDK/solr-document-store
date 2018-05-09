@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.persistence.EntityManager;
 
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
-import static dk.dbc.search.solrdocstore.QueueTestUtil.clearQueue;
 
 public class BeanFactoryUtil {
 
@@ -18,9 +18,9 @@ public class BeanFactoryUtil {
     public static BibliographicBean createBibliographicBean(JpaTestEnvironment env) {
         BibliographicBean bean = new BibliographicBean();
         EntityManager em = env.getEntityManager();
-        OpenAgencyBean config = createOpenAgencyBean();
+        OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = em;
-        bean.openAgency = config;
+        bean.openAgency = openAgency;
         bean.queue = createEnqueueSupplier(env);
         bean.h2bBean = createHoldingsToBibliographicBean(env);
         bean.brBean = createBibliographicRetrieveBean(env);
@@ -55,6 +55,19 @@ public class BeanFactoryUtil {
         EnqueueBean bean = new EnqueueBean();
         bean.entityManager = env.getEntityManager();
         bean.enqueueSupplier = createEnqueueSupplier(env);
+        return bean;
+    }
+
+    public static OpenAgencyStatusBean createOpenAgencyStatusBean(JpaTestEnvironment env) {
+        OpenAgencyStatusBean bean = new OpenAgencyStatusBean() {
+            @Override
+            String hash(int agencyId) throws NoSuchAlgorithmException {
+                return "";
+            }
+        };
+        bean.entityManager = env.getEntityManager();
+        bean.proxy = createOpenAgencyProxyBean();
+        bean.supplier = createEnqueueSupplier(env);
         return bean;
     }
 

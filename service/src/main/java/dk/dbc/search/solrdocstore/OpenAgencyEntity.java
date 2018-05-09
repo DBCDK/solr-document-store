@@ -6,6 +6,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -28,6 +29,8 @@ public class OpenAgencyEntity implements Serializable {
 
     private Timestamp fetched;
 
+    private boolean valid;
+
     public OpenAgencyEntity() {
     }
 
@@ -37,6 +40,7 @@ public class OpenAgencyEntity implements Serializable {
         this.authCreateCommonRecord = authCreateCommonRecord;
         this.partOfDanbib = partOfDanbib;
         this.fetched = Timestamp.from(Instant.now());
+        this.valid = true;
     }
 
     public int getAgencyId() {
@@ -85,6 +89,14 @@ public class OpenAgencyEntity implements Serializable {
 
     public long getFetchedAgeMs() {
         return Instant.now().toEpochMilli() - fetched.toInstant().toEpochMilli();
+    }
+
+    public boolean getValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
     @Override

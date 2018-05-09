@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +14,7 @@ import static org.junit.Assert.*;
  */
 public class OpenAgencyProxyBeanTest {
 
-    private static final ObjectMapper O = new ObjectMapper();
+    OpenAgencyProxyBean openAgencyLoader;
 
     private OpenAgencyProxyBean proxy;
 

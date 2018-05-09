@@ -83,6 +83,7 @@ public class OpenAgencyBean {
                 agencyHasChanged(entry, newEntry);
             } else {
                 entry.setFetchedNow();
+                entry.setValid(true); // In case openagency has reverted back to our state
             }
         }
     }

@@ -37,6 +37,7 @@ public class DocStoreApplication extends Application {
         classes.add(AsyncJobControl.class);
         classes.add(AsyncJobWebSocketServer.class);
         classes.add(EnqueueBean.class);
+        classes.add(OpenAgencyStatusBean.class);
 
         for (Class<?> clazz : classes) {
             log.info("Registered {} resource", clazz.getName());

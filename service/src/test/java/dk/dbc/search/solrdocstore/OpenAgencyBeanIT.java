@@ -1,16 +1,14 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
+import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.*;
 
 import static org.junit.Assert.*;
 
@@ -66,6 +64,33 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
+    public void openAgencyVerifyChangesOpenAgencyReverted() throws Exception {
+        System.out.println("openAgencyVerifyChangesOpenAgencyReverted");
+
+        env().getPersistenceContext().run(() -> {
+            OpenAgencyEntity original = new OpenAgencyEntity(711100, LibraryType.FBS, true, true);
+            original.setValid(false); // Has Holdings but openagency has changed
+            em.persist(original);
+            em.flush();
+        });
+        env().getPersistenceContext().run(() -> {
+            OpenAgencyEntity oae711100 = em.find(OpenAgencyEntity.class, 711100);
+            assertEquals(false, oae711100.getValid()); //
+            openAgency.verifyOpenAgencyCache();
+        });
+        env().getPersistenceContext().run(() -> {
+            // Migrated
+            OpenAgencyEntity oae711100 = em.find(OpenAgencyEntity.class, 711100);
+            assertEquals(new OpenAgencyEntity(711100, LibraryType.FBS, true, true), oae711100);
+            assertEquals(true, oae711100.getValid()); //
+        });
+        System.out.println("changedAgencies = " + changedAgencies);
+        System.out.println("purgedAgencies = " + purgedAgencies);
+        assertTrue(changedAgencies.isEmpty());
+        assertTrue(purgedAgencies.isEmpty());
+    }
+
+    @Test
     public void openAgencyVerifyChangesCanMigrateNoHoldings() throws Exception {
         System.out.println("openAgencyVerifyChangesCanMigrateNoHoldings");
 
@@ -92,7 +117,7 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> {
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", "", indexKeys("[{\"holdingsitem.status\":[\"Decommissioned\"]}]"), ""));
+            em.persist(new HoldingsItemEntity(711100, "1", "", DECOMMISSIONED, ""));
             em.persist(new HoldingsToBibliographicEntity(711100, "1", COMMON_AGENCY, "1", true));
             em.flush();
             openAgency.verifyOpenAgencyCache();
@@ -120,7 +145,7 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> {
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", "", indexKeys("[{\"holdingsitem.status\":[\"Foo\", \"Decommissioned\"]}]"), ""));
+            em.persist(new HoldingsItemEntity(711100, "1", "", ON_SHELF_AND_DECOMMISSIONED, ""));
             em.flush();
             openAgency.verifyOpenAgencyCache();
 
@@ -131,11 +156,6 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("purgedAgencies = " + purgedAgencies);
         assertTrue(changedAgencies.contains(711100));
         assertEquals(1, changedAgencies.size());
-    }
-
-    private static List<Map<String, List<String>>> indexKeys(String json) throws Exception {
-        return O.readValue(json, new TypeReference<List<Map<String, List<String>>>>() {
-                   });
     }
 
 }
