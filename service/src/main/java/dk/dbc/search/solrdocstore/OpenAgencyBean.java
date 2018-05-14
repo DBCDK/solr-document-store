@@ -49,7 +49,7 @@ public class OpenAgencyBean {
         if (entity == null || ( entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT )) {
             entity = proxy.loadOpenAgencyEntry(agencyId);
             if (entity == null) {
-                entity = new OpenAgencyEntity(agencyId, LibraryType.Missing, false);
+                entity = new OpenAgencyEntity(agencyId, LibraryType.Missing, false, false);
             }
             entityManager.persist(entity);
         }

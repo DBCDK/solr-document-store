@@ -24,14 +24,17 @@ public class OpenAgencyEntity implements Serializable {
 
     private boolean partOfDanbib;
 
+    private boolean authCreateCommonRecord;
+
     private Timestamp fetched;
 
     public OpenAgencyEntity() {
     }
 
-    public OpenAgencyEntity(int agencyId, LibraryType libraryType, boolean partOfDanbib) {
+    public OpenAgencyEntity(int agencyId, LibraryType libraryType, boolean authCreateCommonRecord, boolean partOfDanbib) {
         this.agencyId = agencyId;
         this.libraryType = libraryType;
+        this.authCreateCommonRecord = authCreateCommonRecord;
         this.partOfDanbib = partOfDanbib;
         this.fetched = Timestamp.from(Instant.now());
     }
@@ -60,6 +63,14 @@ public class OpenAgencyEntity implements Serializable {
         this.partOfDanbib = partOfDanbib;
     }
 
+    public boolean getAuthCreateCommonRecord() {
+        return authCreateCommonRecord;
+    }
+
+    public void setAuthCreateCommonRecord(boolean authCreateCommonRecord) {
+        this.authCreateCommonRecord = authCreateCommonRecord;
+    }
+
     public Timestamp getFetched() {
         return fetched;
     }
@@ -81,6 +92,7 @@ public class OpenAgencyEntity implements Serializable {
         int hash = 5;
         hash = 67 * hash + this.agencyId;
         hash = 67 * hash + Objects.hashCode(this.libraryType);
+        hash = 67 * hash + ( this.authCreateCommonRecord ? 1 : 0 );
         hash = 67 * hash + ( this.partOfDanbib ? 1 : 0 );
         return hash;
     }
@@ -100,6 +112,9 @@ public class OpenAgencyEntity implements Serializable {
         if (this.agencyId != other.agencyId) {
             return false;
         }
+        if (this.authCreateCommonRecord != other.authCreateCommonRecord) {
+            return false;
+        }
         if (this.partOfDanbib != other.partOfDanbib) {
             return false;
         }
@@ -111,7 +126,7 @@ public class OpenAgencyEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "OpenAgencyEntity{" + "agencyId=" + agencyId + ", libraryType=" + libraryType + ", partOfDanbib=" + partOfDanbib + '}';
+        return "OpenAgencyEntity{" + "agencyId=" + agencyId + ", libraryType=" + libraryType + ", partOfDanbib=" + partOfDanbib + ", authCreateCommonRecord=" + authCreateCommonRecord + ", fetched=" + fetched + '}';
     }
 
 }

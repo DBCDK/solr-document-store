@@ -94,11 +94,15 @@ public class OpenAgencyProxyBean {
             }
             int agencyId = Integer.parseUnsignedInt(agencyIdText, 10);
             JsonNode rules = getJsonKey(libraryRule, "libraryRule");
+            boolean auth_create_common_record = false;
             boolean part_of_danbib = false;
             boolean use_enrichments = false;
             for (JsonNode rule : rules) {
                 String name = getJsonValue(getJsonKey(rule, "name"));
                 switch (name) {
+                    case "auth_create_common_record":
+                        auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                        break;
                     case "part_of_danbib":
                         part_of_danbib = getJsonValue(getJsonKey(rule, "bool")).equals("1");
                         break;
@@ -117,7 +121,7 @@ public class OpenAgencyProxyBean {
                     agencyType = LibraryType.FBS;
                 }
             }
-            return new OpenAgencyEntity(agencyId, agencyType, part_of_danbib);
+            return new OpenAgencyEntity(agencyId, agencyType, auth_create_common_record, part_of_danbib);
         }
         throw new EJBException("Cannot find valid openagency");
     }
