@@ -47,7 +47,7 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
             return (Map<String, String>) entity;
         }).keySet();
 
-        assertThat(failed, contains("870970-basis:23645564"));
+        assertThat(failed, containsInAnyOrder("_success_", "870970-basis:23645564"));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
             return (Map<String, String>) entity;
         }).keySet();
 
-        assertThat(failed, contains("870970-basis23645564"));
+        assertThat(failed, containsInAnyOrder("_success_", "870970-basis23645564"));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
             return (Map<String, String>) entity;
         }).keySet();
 
-        assertThat(failed, empty());
+        assertThat(failed, containsInAnyOrder("_success_"));
         assertThat(listEnqueued(), containsInAnyOrder("foo:870970-basis:23645564"));
     }
 
@@ -98,7 +98,7 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
             return (Map<String, String>) entity;
         }).keySet();
 
-        assertThat(failed, empty());
+        assertThat(failed, containsInAnyOrder("_success_"));
         assertThat(listEnqueued(), containsInAnyOrder("foo:870970-basis:23645564",
                                                       "foo:870970-basis:12236455"));
     }
@@ -130,7 +130,7 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
             return (Map<String, String>) entity;
         }).keySet();
 
-        assertThat(failed, empty());
+        assertThat(failed, containsInAnyOrder("_success_"));
         assertThat(listEnqueued(), containsInAnyOrder("foo:870970-basis:23645564",
                                                       "foo:870970-basis:12236455",
                                                       "bar:870970-basis:23645564",
