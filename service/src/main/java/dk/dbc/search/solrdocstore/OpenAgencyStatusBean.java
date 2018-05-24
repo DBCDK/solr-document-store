@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -63,14 +64,16 @@ public class OpenAgencyStatusBean {
             String hash = hash(agencyId);
             if (hash.equals(reqUuid)) {
                 ArrayList<String> resp = purgeAgency(agencyId);
-                return Response.ok(resp.isEmpty() ? true : resp).build();
+                if (resp.isEmpty()) {
+                    resp.add("SUCCESS");
+                }
+                return Response.ok(resp).build();
             } else {
                 return Response.ok().type(MediaType.TEXT_PLAIN_TYPE).entity("add: ?hash=" + hash + " to path").build();
             }
         } catch (NoSuchAlgorithmException ex) {
             log.error("No SHA-256 ?: {}", ex.getMessage());
             log.debug("No SHA-256 ?: ", ex);
-            entityManager.getTransaction().setRollbackOnly();
             return Response.serverError().type(MediaType.TEXT_PLAIN_TYPE).entity("No SHA256 in javax").build();
         }
     }
