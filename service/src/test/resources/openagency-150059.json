@@ -1,0 +1,89 @@
+{
+    "libraryRulesResponse": {
+        "libraryRules": [{
+                "agencyId": {
+                    "$": "150059",
+                    "@": "oa"
+                },
+                "agencyType": {
+                    "@": "oa"
+                },
+                "libraryRule": [{
+                        "name": {
+                            "$": "create_enrichments",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "use_enrichments",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "use_localdata_stream",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "use_holdings_item",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "part_of_bibliotek_dk",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "auth_create_common_record",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "part_of_danbib",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "0",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }],
+                "@": "oa"
+            }],
+        "@": "oa"
+    },
+    "@namespaces": {
+        "oa": "http:\/\/oss.dbc.dk\/ns\/openagency"
+    }
+}

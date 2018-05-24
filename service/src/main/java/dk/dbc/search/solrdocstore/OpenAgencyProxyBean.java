@@ -89,7 +89,7 @@ public class OpenAgencyProxyBean {
         for (JsonNode libraryRule : libraryRules) {
             String agencyIdText = getJsonValue(getJsonKey(libraryRule, "agencyId"));
             String agencyTypeText = getJsonValue(getJsonKey(libraryRule, "agencyType"));
-            if (agencyIdText == null || agencyTypeText == null) {
+            if (agencyIdText == null) {
                 continue;
             }
             int agencyId = Integer.parseUnsignedInt(agencyIdText, 10);

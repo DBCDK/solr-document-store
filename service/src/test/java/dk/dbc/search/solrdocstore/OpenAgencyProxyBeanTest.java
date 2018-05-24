@@ -34,6 +34,15 @@ public class OpenAgencyProxyBeanTest {
     }
 
     @Test
+    public void openAgencyParser15() throws Exception {
+        System.out.println("openAgencyParser");
+
+        OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(150059);
+        System.out.println("150059 = " + openAgency);
+        assertEquals(new OpenAgencyEntity(150059, LibraryType.NonFBS, false, false), openAgency);
+    }
+
+    @Test
     public void openAgencyParserAgencyGone() throws Exception {
         System.out.println("openAgencyParserAgencyGone");
 
