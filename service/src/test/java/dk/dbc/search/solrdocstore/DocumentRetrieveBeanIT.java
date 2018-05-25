@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 
+import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.*;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
@@ -128,7 +130,6 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
 
-
     private static List<Map<String, List<String>>> indexKeys(String json) {
         try {
             return O.readValue(json, new TypeReference<List<Map<String, List<String>>>>() {
@@ -145,7 +146,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-    }
+   }
 
     private Build build(int holdingsAgencyId) {
         return new Build(holdingsAgencyId, ID);
