@@ -15,8 +15,8 @@ public class BusinessLogic {
 
     private static final Logger log = LoggerFactory.getLogger(BusinessLogic.class);
 
-    static void filterOutDecommissioned(JsonNode collection) {
-        JsonNode records = find(collection, "holdingsItemRecords");
+    static void filterOutDecommissioned(JsonNode sourceDoc) {
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
         if (records == null) {
             return;
         }
@@ -49,11 +49,12 @@ public class BusinessLogic {
     /**
      * Find all holdings agencies and record them
      *
-     * @param indexKeys  solr output document
-     * @param collection entire json from solr-doc-store
+     * @param sourceDoc entire json from solr-doc-store
      */
-    static void addRecHoldingsAgencyId(JsonNode indexKeys, JsonNode collection, DocProducer docProducer) {
-        JsonNode records = find(collection, "holdingsItemRecords");
+    static void addRecHoldingsAgencyId(JsonNode sourceDoc) {
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
             JsonNode holdingsIndexKeys = find(record, "indexKeys");
             if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
@@ -66,11 +67,11 @@ public class BusinessLogic {
     /**
      * Include add agencies listed in 'partOfDanbib' in ln field
      *
-     * @param indexKeys  solr output document
-     * @param collection entire json from solr-doc-store
+     * @param sourceDoc entire json from solr-doc-store
      */
-    static void addFromPartOfDanbib(JsonNode indexKeys, JsonNode collection, DocProducer docProducer) {
-        JsonNode agencies = find(collection, "partOfDanbib");
+    static void addFromPartOfDanbib(JsonNode sourceDoc) {
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+        JsonNode agencies = find(sourceDoc, "partOfDanbib");
         for (JsonNode agency : agencies) {
             String agencyId = String.format("%06d", agency.asInt());
             addField(indexKeys, "dkcclterm.ln", agencyId);

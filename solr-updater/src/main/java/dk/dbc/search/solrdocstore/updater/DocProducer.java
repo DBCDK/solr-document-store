@@ -278,8 +278,8 @@ public class DocProducer {
         setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
 
-        BusinessLogic.addRecHoldingsAgencyId(indexKeys, sourceDoc, this);
-        BusinessLogic.addFromPartOfDanbib(indexKeys, sourceDoc, this);
+        BusinessLogic.addRecHoldingsAgencyId(sourceDoc);
+        BusinessLogic.addFromPartOfDanbib(sourceDoc);
 
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
         addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
