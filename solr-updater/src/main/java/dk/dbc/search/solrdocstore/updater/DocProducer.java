@@ -1,21 +1,3 @@
-/*
- * Copyright (C) 2017 DBC A/S (http://dbc.dk/)
- *
- * This is part of dbc-solr-doc-store-updater
- *
- * dbc-solr-doc-store-updater is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * dbc-solr-doc-store-updater is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package dk.dbc.search.solrdocstore.updater;
 
 import com.codahale.metrics.Timer;
@@ -50,6 +32,8 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static dk.dbc.search.solrdocstore.updater.DocHelpers.*;
 
 /**
  *
@@ -282,7 +266,7 @@ public class DocProducer {
         String id = bibliographicShardId(sourceDoc);
         String linkId = id + "-link";
 
-        filterOutDecommissioned(sourceDoc);
+        BusinessLogic.filterOutDecommissioned(sourceDoc);
 
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         String repositoryId = getField(indexKeys, "rec.repositoryId");
@@ -293,44 +277,14 @@ public class DocProducer {
         setField(indexKeys, "id", id);
         setField(indexKeys, "t", "m"); // Manifestation type
         addField(indexKeys, "rec.childDocId", linkId);
-        addRecHoldingsAgencyId(indexKeys, sourceDoc);
-        addFromPartOfDanbib(indexKeys, sourceDoc);
+
+        BusinessLogic.addRecHoldingsAgencyId(indexKeys, sourceDoc, this);
+        BusinessLogic.addFromPartOfDanbib(indexKeys, sourceDoc, this);
+
         SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
         addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
 
         return doc;
-    }
-
-    private void filterOutDecommissioned(JsonNode collection) {
-        JsonNode records = find(collection, "holdingsItemRecords");
-        if (records == null) {
-            return;
-        }
-
-        for (Iterator<JsonNode> i1 = records.elements() ; i1.hasNext() ;) {
-            boolean keepRecord = false;
-            JsonNode record = i1.next();
-            for (Iterator<JsonNode> i2 = find(record, "indexKeys").elements() ; i2.hasNext() ;) {
-                boolean keepHoldingsDocument = false;
-                JsonNode holdingsRecord = i2.next();
-                for (Iterator<JsonNode> i3 = holdingsRecord.withArray("holdingsitem.status").elements() ; i3.hasNext() ;) {
-                    String status = i3.next().asText("");
-                    if (status.equalsIgnoreCase("decommissioned")) {
-                        i3.remove();
-                    } else {
-                        keepHoldingsDocument = true;
-                    }
-                }
-                if (keepHoldingsDocument) {
-                    keepRecord = true;
-                } else {
-                    i2.remove();
-                }
-            }
-            if (!keepRecord) {
-                i1.remove();
-            }
-        }
     }
 
     static void trimIndexFieldsLength(ObjectNode indexKeys, int maxLength) {
@@ -345,37 +299,6 @@ public class DocProducer {
                 }
                 newValue.add(text);
             }
-        }
-    }
-
-    /**
-     * Find all holdings agencies and record them
-     *
-     * @param indexKeys  solr output document
-     * @param collection entire json from solr-doc-store
-     */
-    private void addRecHoldingsAgencyId(JsonNode indexKeys, JsonNode collection) {
-        JsonNode records = find(collection, "holdingsItemRecords");
-        for (JsonNode record : records) {
-            JsonNode holdingsIndexKeys = find(record, "indexKeys");
-            if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
-                String agency = find(record, "agencyId").asText();
-                addField(indexKeys, "rec.holdingsAgencyId", agency);
-            }
-        }
-    }
-
-    /**
-     * Include add agencies listed in 'partOfDanbib' in ln field
-     *
-     * @param indexKeys  solr output document
-     * @param collection entire json from solr-doc-store
-     */
-    private void addFromPartOfDanbib(JsonNode indexKeys, JsonNode collection) {
-        JsonNode agencies = find(collection, "partOfDanbib");
-        for (JsonNode agency : agencies) {
-            String agencyId = String.format("%06d", agency.asInt());
-            addField(indexKeys, "dkcclterm.ln", agencyId);
         }
     }
 
@@ -412,7 +335,7 @@ public class DocProducer {
      * @param sourceDoc Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    public String bibliographicShardId(JsonNode sourceDoc) {
+    public static String bibliographicShardId(JsonNode sourceDoc) {
         JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
         return shardId(bibliographicRecord);
     }
@@ -423,90 +346,11 @@ public class DocProducer {
      * @param bibliographicRecord Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    private String shardId(JsonNode bibliographicRecord) {
+    static String shardId(JsonNode bibliographicRecord) {
         String agencyId = find(bibliographicRecord, "agencyId").asText();
         String classifier = find(bibliographicRecord, "classifier").asText();
         String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
         return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
-    }
-
-    /**
-     * Find a node in a json structure
-     *
-     * @param node  start node
-     * @param index list of node names
-     * @return nested node
-     */
-    private static JsonNode find(JsonNode node, String... index) {
-        String path = "";
-        for (String name : index) {
-            if (path.isEmpty()) {
-                path = name;
-            } else {
-                path = path + "/" + name;
-            }
-            if (!node.has(name)) {
-                throw new IllegalArgumentException("Cannot locate node: " + path + " in document");
-            }
-            node = node.get(name);
-        }
-        return node;
-    }
-
-    /**
-     * Add a value to an indexKeys node
-     *
-     * @param indexKeys target node
-     * @param name      name of key
-     * @param value     content to add
-     * @throws IllegalStateException if indexKeys isn't an json object node
-     */
-    private void addField(JsonNode indexKeys, String name, String value) {
-        if (!indexKeys.isObject()) {
-            log.debug("Cannot add " + name + " to non Object Document: " + indexKeys);
-            throw new IllegalStateException("Cannot add " + name + " to non Object Document");
-        }
-        JsonNode idNode = indexKeys.get(name);
-        if (idNode == null || !idNode.isArray()) {
-            idNode = ( (ObjectNode) indexKeys ).putArray(name);
-        }
-        ( (ArrayNode) idNode ).add(value);
-    }
-
-    /**
-     * Get first value in an indexKeys node
-     *
-     * @param indexKeys target node
-     * @param name      name of key
-     * @throws IllegalStateException if indexKeys isn't an json object node
-     */
-    private String getField(JsonNode indexKeys, String name) {
-        if (!indexKeys.isObject()) {
-            log.debug("Cannot set " + name + " in non Object Document: " + indexKeys);
-            throw new IllegalStateException("Cannot add " + name + " to non Object Document");
-        }
-
-        JsonNode array = ( (ObjectNode) indexKeys ).get(name);
-        if (array == null || !array.isArray() || array.size() == 0) {
-            return null;
-        }
-        return array.get(0).asText();
-    }
-
-    /**
-     * Set a value in an indexKeys node
-     *
-     * @param indexKeys target node
-     * @param name      name of key
-     * @param value     content to set/override
-     * @throws IllegalStateException if indexKeys isn't an json object node
-     */
-    private void setField(JsonNode indexKeys, String name, String value) {
-        if (!indexKeys.isObject()) {
-            log.debug("Cannot set " + name + " in non Object Document: " + indexKeys);
-            throw new IllegalStateException("Cannot add " + name + " to non Object Document");
-        }
-        ( (ObjectNode) indexKeys ).putArray(name).add(value);
     }
 
     /**

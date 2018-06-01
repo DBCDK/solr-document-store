@@ -1,31 +1,10 @@
-/*
- * Copyright (C) 2017 DBC A/S (http://dbc.dk/)
- *
- * This is part of dbc-solr-doc-store-updater
- *
- * dbc-solr-doc-store-updater is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * dbc-solr-doc-store-updater is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
-import dk.dbc.search.solrdocstore.updater.SolrApi;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -35,7 +14,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
@@ -90,7 +68,7 @@ public class DocTest {
         try {
             JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
-            String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
+            String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
             docProducer.deleteSolrDocuments(bibliographicShardId, 0);
             docProducer.deploy(doc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
