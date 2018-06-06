@@ -115,12 +115,12 @@ public class WorkerIT {
     @Before
     public void setUp() throws Exception {
         try {
-            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "agencylibrarytype");
+            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "openagencycache");
             try (Connection connection = dataSource.getConnection() ;
                  Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300101, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300102, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300103, 'FBSSchool');");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300101, 'FBSSchool', False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300102, 'FBSSchool', False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300103, 'FBSSchool', False, False, NOW(), True);");
             }
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
