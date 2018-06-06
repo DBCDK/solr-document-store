@@ -1,0 +1,22 @@
+{
+  "id" : "9a10927b-870a-3a0f-8db7-e982a3540de6",
+  "request" : {
+    "url" : "/",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToXml" : "<?xml version='1.0' encoding='UTF-8'?><S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\"><S:Body><ns1:libraryRulesRequest xmlns:ns1=\"http://oss.dbc.dk/ns/openagency\"><ns1:agencyId>717300</ns1:agencyId></ns1:libraryRulesRequest></S:Body></S:Envelope>"
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-(root)-Kwwyq.xml",
+    "headers" : {
+      "Date" : "Wed, 06 Jun 2018 07:05:30 GMT",
+      "Server" : "Apache",
+      "Connection" : "close",
+      "Content-Type" : "text/xml; charset=utf-8",
+      "Set-Cookie" : "SERVERID=OpenAgency-2; path=/"
+    }
+  },
+  "uuid" : "9a10927b-870a-3a0f-8db7-e982a3540de6"
+}
