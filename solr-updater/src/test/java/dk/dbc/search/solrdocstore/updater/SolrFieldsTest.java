@@ -55,7 +55,8 @@ public class SolrFieldsTest {
         };
         solrFields.config = new Config("queues=NONE",
                                        "solrDocStoreUrl=NONE",
-                                       "solrUrl=" + url);
+                                       "solrUrl=" + url,
+                                       "openAgencyUrl=Not-Relevant");
 
         solrFields.init();
 
@@ -64,7 +65,7 @@ public class SolrFieldsTest {
 
     /**
      * Run by hand with a known zk://
-     *
+     * <p>
      * Setting up a solr cloud for integration testing is overkill
      */
     @Test
