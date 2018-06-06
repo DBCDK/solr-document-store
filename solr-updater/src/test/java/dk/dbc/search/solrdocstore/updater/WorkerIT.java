@@ -33,7 +33,6 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -138,6 +137,13 @@ public class WorkerIT {
         worker.docProducer.solrFields = new SolrFields();
         worker.docProducer.solrFields.config = config;
         worker.docProducer.solrFields.init();
+        worker.docProducer.businessLogic = new BusinessLogic();
+        worker.docProducer.businessLogic.oa = new OpenAgency(){
+            @Override
+            public OpenAgency.LibraryRule libraryRule(String agencyId) {
+                return new LibraryRule(true, true, true, true, false);
+            }
+        };
         worker.docProducer.init();
         worker.metricRegistry = new Metrics();
         worker.init();

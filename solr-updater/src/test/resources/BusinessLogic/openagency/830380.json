@@ -1,0 +1,70 @@
+{
+    "libraryRulesResponse": {
+        "libraryRules": [{
+                "agencyId": {
+                    "$": "830380",
+                    "@": "oa"
+                },
+                "agencyType": {
+                    "$": "Forskningsbibliotek",
+                    "@": "oa"
+                },
+                "libraryRule": [{
+                        "name": {
+                            "$": "use_enrichments",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "use_localdata_stream",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "use_holdings_item",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "part_of_bibliotek_dk",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }, {
+                        "name": {
+                            "$": "part_of_danbib",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    }],
+                "@": "oa"
+            }],
+        "@": "oa"
+    },
+    "@namespaces": {
+        "oa": "http:\/\/oss.dbc.dk\/ns\/openagency"
+    }
+}

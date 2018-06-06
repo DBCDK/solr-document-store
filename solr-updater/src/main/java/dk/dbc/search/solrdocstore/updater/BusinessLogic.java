@@ -1,7 +1,11 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import javax.ejb.Singleton;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,11 +15,18 @@ import static dk.dbc.search.solrdocstore.updater.DocHelpers.*;
  *
  * @author DBC {@literal <dbc.dk>}
  */
+@Singleton
+
 public class BusinessLogic {
 
     private static final Logger log = LoggerFactory.getLogger(BusinessLogic.class);
 
-    static void filterOutDecommissioned(JsonNode sourceDoc) {
+    private static final String COLLECTION_IDENTIFIER_FIELD = "rec.collectionIdentifier";
+
+    @Inject
+    OpenAgency oa;
+
+    public void filterOutDecommissioned(JsonNode sourceDoc) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         if (records == null) {
             return;
@@ -51,15 +62,15 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
-    static void addRecHoldingsAgencyId(JsonNode sourceDoc) {
+    public void addRecHoldingsAgencyId(JsonNode sourceDoc) {
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
 
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
             JsonNode holdingsIndexKeys = find(record, "indexKeys");
             if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
-                String agency = find(record, "agencyId").asText();
-                addField(indexKeys, "rec.holdingsAgencyId", agency);
+                String agencyId = find(record, "agencyId").asText();
+                addField(indexKeys, "rec.holdingsAgencyId", agencyId);
             }
         }
     }
@@ -69,7 +80,7 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
-    static void addFromPartOfDanbib(JsonNode sourceDoc) {
+    public void addFromPartOfDanbib(JsonNode sourceDoc) {
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         JsonNode agencies = find(sourceDoc, "partOfDanbib");
         for (JsonNode agency : agencies) {
@@ -78,4 +89,44 @@ public class BusinessLogic {
         }
     }
 
+    /**
+     * Include add agencies listed in 'partOfDanbib' in ln field
+     *
+     * @param sourceDoc entire json from solr-doc-store
+     */
+    public void addCollectionIdentifier800000(JsonNode sourceDoc) {
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+        String field = getField(indexKeys, "rec.excludeFromUnionCatalogue");
+        if ("true".equalsIgnoreCase(field)) {
+            return;
+        }
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
+        List<String> collectionIdentifiers = getFields(indexKeys, COLLECTION_IDENTIFIER_FIELD);
+        if (collectionIdentifiers == null) {
+            collectionIdentifiers = Collections.EMPTY_LIST;
+        }
+        boolean hasBibDk = collectionIdentifiers.contains("800000-bibdk");
+        boolean hasDanbib = collectionIdentifiers.contains("800000-danbib");
+        boolean addBibDk = hasBibDk;
+        boolean addDanbib = hasDanbib;
+        for (Iterator<JsonNode> iterator = records.iterator() ; iterator.hasNext() && !addBibDk && !addDanbib ;) {
+            JsonNode record = iterator.next();
+            JsonNode holdingsIndexKeys = find(record, "indexKeys");
+            if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
+                String agencyId = find(record, "agencyId").asText();
+                OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
+                if (libraryRule.isResearchLibrary() &&
+                    libraryRule.hasUseHoldingItem()) {
+                    addBibDk = addBibDk || libraryRule.isPartOfBibliotekDk();
+                    addDanbib = addDanbib || libraryRule.isPartOfDanbib();
+                }
+            }
+        }
+        if (addBibDk && !hasBibDk) {
+            addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-bibdk");
+        }
+        if (addDanbib && !hasDanbib) {
+            addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-danbib");
+        }
+    }
 }

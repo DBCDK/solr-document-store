@@ -3,6 +3,10 @@ package dk.dbc.search.solrdocstore.updater;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +56,28 @@ public class DocHelpers {
             return null;
         }
         return array.get(0).asText();
+    }
+
+    /**
+     * Get first value in an indexKeys node
+     *
+     * @param indexKeys target node
+     * @param name      name of key
+     * @throws IllegalStateException if indexKeys isn't an json object node
+     */
+    static List<String> getFields(JsonNode indexKeys, String name) {
+        if (!indexKeys.isObject()) {
+            log.debug("Cannot set " + name + " in non Object Document: " + indexKeys);
+            throw new IllegalStateException("Cannot add " + name + " to non Object Document");
+        }
+
+        JsonNode array = ( (ObjectNode) indexKeys ).get(name);
+        if (array == null || !array.isArray() || array.size() == 0) {
+            return null;
+        }
+        return StreamSupport.stream(array.spliterator(), false)
+                .map(e -> e.asText(""))
+                .collect(Collectors.toList());
     }
 
     /**

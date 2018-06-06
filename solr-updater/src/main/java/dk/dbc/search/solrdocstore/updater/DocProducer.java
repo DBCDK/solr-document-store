@@ -66,6 +66,9 @@ public class DocProducer {
     @Inject
     Timer addDocumentTimer;
 
+    @Inject
+    BusinessLogic businessLogic;
+
     private Client client;
     private UriBuilder uriTemplate;
     SolrClient solrClient;
@@ -263,28 +266,35 @@ public class DocProducer {
      * @return solr document
      */
     public SolrInputDocument inputDocument(JsonNode sourceDoc) {
-        String id = bibliographicShardId(sourceDoc);
-        String linkId = id + "-link";
+        try {
+            String id = bibliographicShardId(sourceDoc);
+            String linkId = id + "-link";
 
-        BusinessLogic.filterOutDecommissioned(sourceDoc);
+            businessLogic.filterOutDecommissioned(sourceDoc);
 
-        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
-        String repositoryId = getField(indexKeys, "rec.repositoryId");
-        if (repositoryId == null) {
-            throw new IllegalStateException("Cannot get rec.repositoryId from document");
+            JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+            String repositoryId = getField(indexKeys, "rec.repositoryId");
+            if (repositoryId == null) {
+                throw new IllegalStateException("Cannot get rec.repositoryId from document");
+            }
+
+            setField(indexKeys, "id", id);
+            setField(indexKeys, "t", "m"); // Manifestation type
+            addField(indexKeys, "rec.childDocId", linkId);
+
+            businessLogic.addRecHoldingsAgencyId(sourceDoc);
+            businessLogic.addFromPartOfDanbib(sourceDoc);
+            businessLogic.addCollectionIdentifier800000(sourceDoc);
+
+            SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
+            addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
+
+            return doc;
+        } catch (RuntimeException ex) {
+            log.error("Exception: {}", ex.getMessage());
+            log.debug("Exception: ", ex);
+            throw ex;
         }
-
-        setField(indexKeys, "id", id);
-        setField(indexKeys, "t", "m"); // Manifestation type
-        addField(indexKeys, "rec.childDocId", linkId);
-
-        BusinessLogic.addRecHoldingsAgencyId(sourceDoc);
-        BusinessLogic.addFromPartOfDanbib(sourceDoc);
-
-        SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
-        addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
-
-        return doc;
     }
 
     static void trimIndexFieldsLength(ObjectNode indexKeys, int maxLength) {
@@ -359,7 +369,7 @@ public class DocProducer {
      * @param indexKeys document keys
      * @return new document
      */
-    private SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
+    SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
         if (indexKeys.isObject()) {
             trimIndexFieldsLength((ObjectNode) indexKeys, MAX_SOLR_FIELD_VALUE_SIZE);
         }

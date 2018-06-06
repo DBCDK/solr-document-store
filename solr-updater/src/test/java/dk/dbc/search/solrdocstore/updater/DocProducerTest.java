@@ -56,6 +56,14 @@ public class DocProducerTest {
         };
         docProducer.solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
 
+        docProducer.businessLogic = new BusinessLogic();
+        docProducer.businessLogic.oa = new OpenAgency(){
+            @Override
+            public OpenAgency.LibraryRule libraryRule(String agencyId) {
+                return new LibraryRule(true, true, true, true, false);
+            }
+        };
+
         JsonNode node = docProducer.fetchSourceDoc(new QueueJob(300101, "clazzifier", "23645564"));
 
         System.out.println("node = " + node);
@@ -91,5 +99,4 @@ public class DocProducerTest {
         String text = OBJECT_MAPPER.writeValueAsString(tree);
         assertEquals("{'a':['123','12345'],'b':['12345','567']}".replaceAll("'", "\""), text);
     }
-
 }

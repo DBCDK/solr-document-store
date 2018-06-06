@@ -22,14 +22,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -39,7 +36,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -138,6 +134,13 @@ public class DocProducerIT {
         docProducer.solrFields = new SolrFields();
         docProducer.solrFields.config = config;
         docProducer.solrFields.init();
+        docProducer.businessLogic = new BusinessLogic();
+        docProducer.businessLogic.oa = new OpenAgency() {
+            @Override
+            public OpenAgency.LibraryRule libraryRule(String agencyId) {
+                return new LibraryRule(true, true, true, true, false);
+            }
+        };
         docProducer.init();
     }
 
