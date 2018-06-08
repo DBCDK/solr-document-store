@@ -1,24 +1,8 @@
-/*
- * Copyright (C) 2017 DBC A/S (http://dbc.dk/)
- *
- * This is part of dbc-solr-doc-store-updater
- *
- * dbc-solr-doc-store-updater is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * dbc-solr-doc-store-updater is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package dk.dbc.search.solrdocstore.updater;
 
+import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
@@ -55,6 +39,10 @@ public class Config {
     private int maxTries;
     private long maxQueryTime;
     private int threads;
+    private String openAgencyUrl;
+    private long openAgencyTimeout;
+    private long openAgencyAge;
+    private long openAgencyFailureAge;
 
     public Config() {
         props = findProperties("solr-doc-store-updater");
@@ -82,6 +70,10 @@ public class Config {
         maxQueryTime = Long.max(100L, Long.parseLong(get("maxQueryTime", "MAX_QUERY_TIME", "100"), 10));
         threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
         maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
+        this.openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
+        openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
+        openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_MAX_AGE", "4h")));
+        openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_MAX_FAILURE_AGE", "5m")));
     }
 
     public String getSolrUrl() {
@@ -128,6 +120,22 @@ public class Config {
         return threads;
     }
 
+    public String getOpenAgencyUrl() {
+        return openAgencyUrl;
+    }
+
+    public long getOpenAgencyAge() {
+        return openAgencyAge;
+    }
+
+    public long getOpenAgencyFailureAge() {
+        return openAgencyFailureAge;
+    }
+
+    public long getOpenAgencyTimeout() {
+        return openAgencyTimeout;
+    }
+
     private Properties findProperties(String resourceName) {
         try {
             Object loopup = InitialContext.doLookup(resourceName);
@@ -160,4 +168,32 @@ public class Config {
         }
         return null;
     }
+
+    /**
+     * Convert a string representation of a duration (number{h|m|s|ms}) to
+     * milliseconds
+     *
+     * @param spec string representation
+     * @return number of milliseconds
+     */
+    static long milliseconds(String spec) {
+        String[] split = spec.split("(?<=\\d)(?=\\D)");
+        if (split.length == 2) {
+            long units = Long.parseUnsignedLong(split[0], 10);
+            switch (split[1].toLowerCase(Locale.ROOT)) {
+                case "ms":
+                    return TimeUnit.MILLISECONDS.toMillis(units);
+                case "s":
+                    return TimeUnit.SECONDS.toMillis(units);
+                case "m":
+                    return TimeUnit.MINUTES.toMillis(units);
+                case "h":
+                    return TimeUnit.HOURS.toMillis(units);
+                default:
+                    break;
+            }
+        }
+        throw new IllegalArgumentException("Invalid time spec: " + spec);
+    }
+
 }

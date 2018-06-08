@@ -1,0 +1,22 @@
+{
+  "id" : "53cac844-9b31-3cf0-9b28-11a56dfe659e",
+  "request" : {
+    "url" : "/",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToXml" : "<?xml version='1.0' encoding='UTF-8'?><S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\"><S:Body><ns1:libraryRulesRequest xmlns:ns1=\"http://oss.dbc.dk/ns/openagency\"><ns1:agencyId>710100</ns1:agencyId></ns1:libraryRulesRequest></S:Body></S:Envelope>"
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-(root)-TbNfO.xml",
+    "headers" : {
+      "Date" : "Wed, 06 Jun 2018 07:05:30 GMT",
+      "Server" : "Apache",
+      "Connection" : "close",
+      "Content-Type" : "text/xml; charset=utf-8",
+      "Set-Cookie" : "SERVERID=OpenAgency-1; path=/"
+    }
+  },
+  "uuid" : "53cac844-9b31-3cf0-9b28-11a56dfe659e"
+}

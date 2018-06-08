@@ -33,7 +33,6 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -116,12 +115,12 @@ public class WorkerIT {
     @Before
     public void setUp() throws Exception {
         try {
-            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "agencylibrarytype");
+            pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "openagencycache");
             try (Connection connection = dataSource.getConnection() ;
                  Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300101, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300102, 'FBSSchool');");
-                stmt.executeUpdate("INSERT INTO agencylibrarytype (agencyid, librarytype) VALUES(300103, 'FBSSchool');");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300101, 'FBSSchool', False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300102, 'FBSSchool', False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300103, 'FBSSchool', False, False, NOW(), True);");
             }
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
@@ -138,6 +137,13 @@ public class WorkerIT {
         worker.docProducer.solrFields = new SolrFields();
         worker.docProducer.solrFields.config = config;
         worker.docProducer.solrFields.init();
+        worker.docProducer.businessLogic = new BusinessLogic();
+        worker.docProducer.businessLogic.oa = new OpenAgency(){
+            @Override
+            public OpenAgency.LibraryRule libraryRule(String agencyId) {
+                return new LibraryRule(true, true, true, true, false);
+            }
+        };
         worker.docProducer.init();
         worker.metricRegistry = new Metrics();
         worker.init();

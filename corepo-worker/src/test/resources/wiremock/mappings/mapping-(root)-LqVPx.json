@@ -1,0 +1,22 @@
+{
+  "id" : "1d76fb74-84f2-3130-bcc6-77fa7331c16f",
+  "request" : {
+    "url" : "/",
+    "method" : "POST",
+    "bodyPatterns" : [ {
+      "equalToXml" : "<?xml version='1.0' encoding='UTF-8'?><S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\"><S:Body><ns1:libraryRulesRequest xmlns:ns1=\"http://oss.dbc.dk/ns/openagency\"><ns1:agencyId>766500</ns1:agencyId></ns1:libraryRulesRequest></S:Body></S:Envelope>"
+    } ]
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-(root)-LqVPx.xml",
+    "headers" : {
+      "Date" : "Wed, 06 Jun 2018 07:05:29 GMT",
+      "Server" : "Apache",
+      "Connection" : "close",
+      "Content-Type" : "text/xml; charset=utf-8",
+      "Set-Cookie" : "SERVERID=OpenAgency-3; path=/"
+    }
+  },
+  "uuid" : "1d76fb74-84f2-3130-bcc6-77fa7331c16f"
+}
