@@ -7,6 +7,7 @@ import dk.dbc.gracefulcache.CacheValueException;
 import dk.dbc.gracefulcache.GracefulCache;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -120,9 +121,26 @@ public class OpenAgency {
     }
 
     public LibraryRule provideLibraryRules(String agencyId) throws IOException {
-        URI uri = libraryRulesUri.build(agencyId);
-        ObjectNode json = http.fetchJson(uri);
-        return buildLibraryRule(agencyId, json);
+        try {
+            URI uri = libraryRulesUri.build(agencyId);
+            ObjectNode json = http.fetchJson(uri);
+            return buildLibraryRule(agencyId, json);
+        } catch (IOException | RuntimeException ex) {
+            log.error("Error providing openagency answer for: {}: {}", agencyId, ex.getMessage());
+            log.debug("Error providing openagency answer for: {}: ", agencyId, ex);
+            ArrayList<String> messages = new ArrayList<>();
+            for (Throwable t = ex ; t != null ; t = t.getCause()) {
+                String message = t.getMessage();
+                if (message != null) {
+                    messages.add(message);
+                }
+            }
+            if (messages.isEmpty()) {
+                messages.add("Found no causes");
+            }
+            String message = String.join(", ", messages);
+            throw new RuntimeException(message, ex);
+        }
     }
 
     LibraryRule buildLibraryRule(String agencyId, ObjectNode json) throws IOException {

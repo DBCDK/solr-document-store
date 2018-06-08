@@ -72,8 +72,8 @@ public class Config {
         maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
         this.openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
-        openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_MAX_AGE", "4h")));
-        openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_MAX_FAILURE_AGE", "5m")));
+        openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
+        openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
     }
 
     public String getSolrUrl() {
