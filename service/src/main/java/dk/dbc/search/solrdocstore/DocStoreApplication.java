@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.pgqueue.admin.process.QueueDiagDistribution;
+import dk.dbc.pgqueue.admin.process.QueueStatus;
 import dk.dbc.search.solrdocstore.asyncjob.AsyncJobControl;
 import dk.dbc.search.solrdocstore.asyncjob.AsyncJobWebSocketServer;
 import org.slf4j.Logger;
@@ -37,6 +39,9 @@ public class DocStoreApplication extends Application {
         classes.add(AsyncJobControl.class);
         classes.add(AsyncJobWebSocketServer.class);
         classes.add(EnqueueBean.class);
+        classes.add(OpenAgencyStatusBean.class);
+        classes.add(QueueDiagDistribution.class);
+        classes.add(QueueStatus.class);
         classes.add(OpenAgencyStatusBean.class);
 
         for (Class<?> clazz : classes) {
