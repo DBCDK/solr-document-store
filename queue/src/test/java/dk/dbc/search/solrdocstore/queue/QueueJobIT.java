@@ -64,7 +64,7 @@ public class QueueJobIT {
         try (Connection connection = dataSource.getConnection() ;
              Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("DROP TABLE queue");
-            stmt.executeUpdate("DROP TABLE queue_error");
+            stmt.executeUpdate("DROP TABLE queue_error CASCADE");
             stmt.executeUpdate("DROP TABLE solr_doc_store_queue_version");
             stmt.executeUpdate("DROP TABLE queue_version");
         }

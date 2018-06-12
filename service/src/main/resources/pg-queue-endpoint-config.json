@@ -1,0 +1,5 @@
+{
+    "dataSource": "jdbc/solr-doc-store",
+    "jobLogMapper": "dk.dbc.search.solrdocstore.JobLogMapperImpl.MAPPER",
+    "systemName": "SolrDocStore - queue admin"
+}
