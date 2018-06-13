@@ -15,6 +15,7 @@ LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       MAX_QUERY_TIME="How long a rescan query can take, before recalculating thre prepared statement quiery plan(default: 100)" \
       THREADS="Number of parallel threads (default: 1)" \
       MAX_TRIES="Number of tries to process job (default: 3)" \
+      OPEN_AGENCY_URL="URL for OpenAgency service (required)" \
       OPEN_AGENCY_AGE="Caching of successful openagency call (default: 4h)" \
       OPEN_AGENCY_FAILURE_AGE="Caching of unsuccessful result (default: 5m)"\
       OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)"
