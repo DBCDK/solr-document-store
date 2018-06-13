@@ -27,7 +27,7 @@ import java.util.HashMap;
 @Path("")
 public class QueueFrontendAPIBean {
 
-    private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
+    private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBean.class);
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")

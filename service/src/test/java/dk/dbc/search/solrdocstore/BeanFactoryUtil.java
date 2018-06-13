@@ -27,8 +27,8 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static BiliographicRecordAPIBean createBiliographicRecordAPIBean(JpaTestEnvironment env) {
-        BiliographicRecordAPIBean bean = new BiliographicRecordAPIBean();
+    public static BibliographicRecordAPIBean createBiliographicRecordAPIBean(JpaTestEnvironment env) {
+        BibliographicRecordAPIBean bean = new BibliographicRecordAPIBean();
         bean.entityManager = env.getEntityManager();
         bean.brBean = createBibliographicRetrieveBean(env);
         bean.holdingsItemBean = createHoldingsItemBean(env);

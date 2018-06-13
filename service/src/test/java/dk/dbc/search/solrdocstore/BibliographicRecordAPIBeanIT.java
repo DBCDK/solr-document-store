@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 
-public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
+public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     int commonAgency = LibraryType.COMMON_AGENCY;
     int[] holdingAgencies = {133, 134, 135};
@@ -25,7 +25,7 @@ public class BiliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTeste
     EntityManager em;
     JSONBContext jsonbContext = new JSONBContext();
 
-    BiliographicRecordAPIBean bean;
+    BibliographicRecordAPIBean bean;
 
     @Before
     public void before() {

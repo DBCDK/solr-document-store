@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 
 @Stateless
 @Path("")
-public class BiliographicRecordAPIBean {
+public class BibliographicRecordAPIBean {
 
     private static final ObjectMapper O = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(BiliographicRecordAPIBean.class);
+    private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBean.class);
 
     @Inject
     BibliographicRetrieveBean brBean;
