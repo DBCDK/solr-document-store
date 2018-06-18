@@ -122,6 +122,7 @@ public class OpenAgency {
 
     public LibraryRule provideLibraryRules(String agencyId) throws IOException {
         try {
+            log.info("Fetching openagency rules for {}", agencyId);
             URI uri = libraryRulesUri.build(agencyId);
             ObjectNode json = http.fetchJson(uri);
             return buildLibraryRule(agencyId, json);
