@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-if [ x"$TESTONLY" = xyes ]; then
+if [ x"$STANDALONE" = xyes ]; then
     rm -f $PAYARA_CFG/post/100-mdb-container.res
     rm -f $PAYARA_CFG/post/101.restart
     rm -f $PAYARA_CFG/post/101-remote-jms.res

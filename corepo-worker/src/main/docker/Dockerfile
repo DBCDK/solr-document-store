@@ -14,7 +14,7 @@ LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Require
       SOLR_DOC_STORE_URL="http:// url of solr-doc-store endpoint (required)" \
       JSON_PRETTY_PRINT="Should json to solr-doc-store be prettyprinted (optional, default is false)" \
       COMMIT_WITHIN="How fast should a message be committeted when loaded into solr (<=0 is disabled) (optional, default is -1)"  \
-      TESTONLY="if set to yes - no message driven bean is started, only erst endpoint" \
+      STANDALONE="if set to yes - no message driven bean is started, only http endpoint http://.../api/test/{pid}" \
       JAVASCRIPT_TEST="run with '-v $PWD:/javascript' to have scripts located here copied into container on startup"
 
 ADD docker-entrypoint-confd.d/* /docker-entrypoint-confd.d/
