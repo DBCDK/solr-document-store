@@ -125,7 +125,9 @@ public class OpenAgency {
             log.info("Fetching openagency rules for {}", agencyId);
             URI uri = libraryRulesUri.build(agencyId);
             ObjectNode json = http.fetchJson(uri);
-            return buildLibraryRule(agencyId, json);
+            LibraryRule rule = buildLibraryRule(agencyId, json);
+            log.info("Fetched openagency rules for {}", agencyId);
+            return rule;
         } catch (IOException | RuntimeException ex) {
             log.error("Error providing openagency answer for: {}: {}", agencyId, ex.getMessage());
             log.debug("Error providing openagency answer for: {}: ", agencyId, ex);
