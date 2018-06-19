@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.io.InputStream;
@@ -171,7 +172,7 @@ public class DocProducer {
      *                  }
      * @return null if deleted otherwise a expanded solr document
      */
-    public SolrInputDocument createSolrDocument(JsonNode sourceDoc) {
+    public SolrInputDocument createSolrDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         boolean deleted = isDeleted(sourceDoc);
         log.trace("deleted = {}", deleted);
         SolrInputDocument doc = null;
@@ -265,7 +266,7 @@ public class DocProducer {
      * @param sourceDoc docstore collection
      * @return solr document
      */
-    public SolrInputDocument inputDocument(JsonNode sourceDoc) {
+    public SolrInputDocument inputDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         try {
             String id = bibliographicShardId(sourceDoc);
             String linkId = id + "-link";

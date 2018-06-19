@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -94,7 +95,7 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
-    public void addCollectionIdentifier800000(JsonNode sourceDoc) {
+    public void addCollectionIdentifier800000(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         String field = getField(indexKeys, "rec.excludeFromUnionCatalogue");
         if ("true".equalsIgnoreCase(field)) {

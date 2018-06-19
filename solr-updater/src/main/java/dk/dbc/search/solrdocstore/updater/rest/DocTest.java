@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class DocTest {
             String xml = ClientUtils.toXML(document);
 
             return Response.ok(xml, MediaType.APPLICATION_XML_TYPE).build();
-        } catch (IOException ex) {
+        } catch (IOException | PostponedNonFatalQueueError ex) {
             log.error("Exception: {}", ex.getMessage());
             log.debug("Exception:", ex);
             return Response.ok(ex.getMessage(), MediaType.TEXT_PLAIN).build();
@@ -72,7 +73,7 @@ public class DocTest {
             docProducer.deleteSolrDocuments(bibliographicShardId, 0);
             docProducer.deploy(doc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
-        } catch (SolrServerException | IOException ex) {
+        } catch (SolrServerException | IOException | PostponedNonFatalQueueError ex) {
             log.error("Exception: {}", ex.getMessage());
             log.debug("Exception:", ex);
             return Response.ok(ex.getMessage()).build();

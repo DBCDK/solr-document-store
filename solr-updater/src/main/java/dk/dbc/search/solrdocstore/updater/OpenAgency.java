@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.gracefulcache.CacheTimeoutException;
 import dk.dbc.gracefulcache.CacheValueException;
 import dk.dbc.gracefulcache.GracefulCache;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -110,13 +111,13 @@ public class OpenAgency {
                 config.getOpenAgencyTimeout());
     }
 
-    public LibraryRule libraryRule(String agencyId) {
+    public LibraryRule libraryRule(String agencyId) throws PostponedNonFatalQueueError {
         try {
             return libraryRules.get(agencyId);
         } catch (CacheTimeoutException | CacheValueException ex) {
             log.error("Error looking up {} in open agency: {}", agencyId, ex.getMessage());
             log.debug("Error looking up {} in open agency: ", agencyId, ex);
-            throw new EJBException("Error looking up: " + agencyId + " in open agency");
+            throw new PostponedNonFatalQueueError("Error looking up: " + agencyId + " in open agency", 5000L);
         }
     }
 
@@ -125,6 +126,9 @@ public class OpenAgency {
             log.info("Fetching openagency rules for {}", agencyId);
             URI uri = libraryRulesUri.build(agencyId);
             ObjectNode json = http.fetchJson(uri);
+            if (json == null) {
+                throw new NullPointerException("Error fetching library rules for: " + agencyId);
+            }
             LibraryRule rule = buildLibraryRule(agencyId, json);
             log.info("Fetched openagency rules for {}", agencyId);
             return rule;

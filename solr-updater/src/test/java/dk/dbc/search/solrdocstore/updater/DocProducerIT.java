@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -185,7 +186,7 @@ public class DocProducerIT {
         deployAndSearch(300010, docProducer, 0);
     }
 
-    private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException {
+    private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
         JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, "clazzifier", "23645564"));
         SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
         String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
