@@ -1,3 +1,3 @@
 #!/bin/bash
 
-chmod +x *.sh
+chmod +x docker-entrypoint-confd.d/*.sh
