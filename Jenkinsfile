@@ -4,7 +4,7 @@ if (env.BRANCH_NAME == 'master') {
             triggers: [
                 [
                     $class: 'jenkins.triggers.ReverseBuildTrigger',
-                    upstreamProjects: "pg-queue,solr-indexer-cloud,dbc-commons", threshold: hudson.model.Result.SUCCESS
+                    upstreamProjects: "../pg-queue/master, solr-indexer-cloud, dbc-commons", threshold: hudson.model.Result.SUCCESS
                 ]
     	    ]
         ]),
