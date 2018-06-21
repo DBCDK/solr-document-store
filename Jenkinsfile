@@ -1,3 +1,15 @@
+if (env.BRANCH_NAME == 'master') {
+    properties([
+        pipelineTriggers([
+            triggers: [
+                [
+                    $class: 'jenkins.triggers.ReverseBuildTrigger',
+                    upstreamProjects: "pg-queue,solr-indexer-cloud,dbc-commons", threshold: hudson.model.Result.SUCCESS
+                ]
+    	    ]
+        ]),
+    ])
+}
 pipeline {
     agent { label "devel8" }
     tools {
