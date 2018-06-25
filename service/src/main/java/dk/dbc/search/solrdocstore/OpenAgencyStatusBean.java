@@ -52,7 +52,9 @@ public class OpenAgencyStatusBean {
             resp.states.put(solrDocStore.getAgencyId(), new OpenAgencyStatusResponse.Diag(solrDocStore, openAgency));
         }
         resp.ok = resp.states.isEmpty();
-        return Response.ok(resp).build();
+        return Response.ok(resp)
+                .header("Access-Control-Allow-Origin", "*")
+                .build();
     }
 
     @GET
