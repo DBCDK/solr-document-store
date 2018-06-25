@@ -1,16 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.pgqueue.admin.process.QueueDiagDistribution;
-import dk.dbc.pgqueue.admin.process.QueueStatus;
-import dk.dbc.search.solrdocstore.asyncjob.AsyncJobControl;
-import dk.dbc.search.solrdocstore.asyncjob.AsyncJobWebSocketServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -22,39 +14,6 @@ import javax.ws.rs.core.Application;
 @ApplicationPath("/api")
 public class DocStoreApplication extends Application {
 
-    private static final Logger log = LoggerFactory.getLogger(DocStoreApplication.class);
-
-    private static final Set<Class<?>> CLASSES = makeClasses();
-
-    private static Set<Class<?>> makeClasses() {
-        HashSet<Class<?>> classes = new HashSet<>();
-
-        classes.add(StatusBean.class);
-        classes.add(BibliographicBean.class);
-        classes.add(HoldingsItemBean.class);
-        classes.add(BibliographicRecordAPIBean.class);
-        classes.add(QueueFrontendAPIBean.class);
-        classes.add(DocumentRetrieveBean.class);
-        classes.add(EvictAll.class);
-        classes.add(AsyncJobControl.class);
-        classes.add(AsyncJobWebSocketServer.class);
-        classes.add(EnqueueBean.class);
-        classes.add(OpenAgencyStatusBean.class);
-        classes.add(QueueDiagDistribution.class);
-        classes.add(QueueStatus.class);
-        classes.add(OpenAgencyStatusBean.class);
-
-        for (Class<?> clazz : classes) {
-            log.info("Registered {} resource", clazz.getName());
-        }
-        return classes;
-    }
-
-    @Override
-    public Set<Class<?>> getClasses() {
-        return CLASSES;
-    }
-
     @Override
     public Map<String, Object> getProperties() {
         Map<String, Object> props = new HashMap<>();
@@ -63,4 +22,5 @@ public class DocStoreApplication extends Application {
 
         return props;
     }
+
 }
