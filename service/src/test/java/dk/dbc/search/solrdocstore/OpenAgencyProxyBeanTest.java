@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import javax.ejb.EJBException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,9 +46,12 @@ public class OpenAgencyProxyBeanTest {
     public void openAgencyParserAgencyGone() throws Exception {
         System.out.println("openAgencyParserAgencyGone");
 
-        OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(999999);
-        System.out.println("999999 = " + openAgency);
-        assertNull(openAgency);
+        try {
+            OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(999999);
+            System.out.println("999999 = " + openAgency);
+            fail("Expected EJBException");
+        } catch (EJBException ex) {
+        }
     }
 
 }
