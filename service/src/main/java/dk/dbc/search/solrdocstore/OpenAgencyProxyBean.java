@@ -43,10 +43,12 @@ public class OpenAgencyProxyBean {
         try {
             JsonNode json = loadOpenAgencyJson(agencyId);
             return parseOpenAgencyJSON(json);
+        } catch (EJBException ex) {
+            throw ex;
         } catch (RuntimeException ex) {
             log.error("Error processing agency: {}: {}", agencyId, ex.getMessage());
             log.debug("Error processing agency: {}: ", agencyId, ex);
-            return null;
+            throw new EJBException(ex);
         }
     }
 
@@ -54,12 +56,12 @@ public class OpenAgencyProxyBean {
     public JsonNode loadOpenAgencyJson(int agencyId) {
         try {
             return Failsafe.with(RETRY_POLICY).get(() -> fetchOpenAgencyJSON(agencyId));
-        } catch (EJBException e) {
-            throw e;
-        } catch (RuntimeException e) {
-            log.error("Cannot get openagency entry for: {}: {}", agencyId, e.getMessage());
-            log.debug("Cannot get openagency entry for: {}:", agencyId, e);
-            return null;
+        } catch (EJBException ex) {
+            throw ex;
+        } catch (RuntimeException ex) {
+            log.error("Cannot get openagency entry for: {}: {}", agencyId, ex.getMessage());
+            log.debug("Cannot get openagency entry for: {}:", agencyId, ex);
+            throw new EJBException(ex);
         }
     }
 
