@@ -57,6 +57,7 @@ public class Worker {
                 .databaseConnectThrottle(config.getDatabaseConnectThrottle())
                 .failureThrottle(config.getFailureThrottle())
                 .emptyQueueSleep(config.getEmptyQueueSleep())
+                .window(config.getQueueWindow())
                 .rescanEvery(config.getRescanEvery())
                 .idleRescanEvery(config.getIdleRescanEvery())
                 .maxTries(config.getMaxTries())

@@ -34,6 +34,7 @@ public class Config {
     private String databaseConnectThrottle;
     private String failureThrottle;
     private long emptyQueueSleep;
+    private long queueWindow;
     private int rescanEvery;
     private int idleRescanEvery;
     private int maxTries;
@@ -64,10 +65,11 @@ public class Config {
         queues = get("queues", "QUEUES", null);
         databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
         failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
-        emptyQueueSleep = Long.max(100L, Long.parseLong(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10000"), 10));
+        emptyQueueSleep = Long.max(100L, milliseconds(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10s")));
+        queueWindow = Long.max(0, milliseconds(get("queueWindow", "QUEUE_WINDOW", "1s")));
         rescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("rescanEvery", "RESCAN_EVERY", "100"), 10));
         idleRescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("idleRescanEvery", "IDLE_RESCAN_EVERY", "5"), 10));
-        maxQueryTime = Long.max(100L, Long.parseLong(get("maxQueryTime", "MAX_QUERY_TIME", "100"), 10));
+        maxQueryTime = Long.max(100L, milliseconds(get("maxQueryTime", "MAX_QUERY_TIME", "100ms")));
         threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
         maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
         this.openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
@@ -98,6 +100,10 @@ public class Config {
 
     public long getEmptyQueueSleep() {
         return emptyQueueSleep;
+    }
+
+    public long getQueueWindow() {
+        return queueWindow;
     }
 
     public int getRescanEvery() {
