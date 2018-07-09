@@ -86,7 +86,7 @@ public class WorkerIT {
                             "rescanEvery=2",
                             "idleRescanEvery=1",
                             "maxTries=1",
-                            "emptyQueueSleep=10") {
+                            "emptyQueueSleep=10ms") {
             // values are not ready at object construnction time
             @Override
             public String getSolrDocStoreUrl() {
