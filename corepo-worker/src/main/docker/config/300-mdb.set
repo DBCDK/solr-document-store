@@ -1,0 +1,9 @@
+[ensure]
+'configs/config[@name="server-config"]'
+
+. = mdb-container
+
+[attributes]
+'configs/config[@name="server-config"]/mdb-container'
+
+max-pool-size = "${POOL_SIZE|2}"

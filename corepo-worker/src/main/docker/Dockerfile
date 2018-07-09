@@ -1,7 +1,11 @@
-FROM docker.dbc.dk/dbc-payara-mq
+FROM docker.dbc.dk/dbc-payara5-full
 MAINTAINER os-team
 
 ENV KAFKA_LOG_APPNAME solr-sdoc-store-corepo-worker
+
+USER root
+RUN apt-install zip
+USER payara
 
 LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Required)" \
       COREPO_SHARDn="CORepo shard database url user:passwork@host:port/database" \
@@ -17,10 +21,9 @@ LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Require
       STANDALONE="if set to yes - no message driven bean is started, only http endpoint http://.../api/test/{pid}" \
       JAVASCRIPT_TEST="run with '-v $PWD:/javascript' to have scripts located here copied into container on startup"
 
-ADD docker-entrypoint-confd.d/* /docker-entrypoint-confd.d/
 
-ADD pre/* $PAYARA_CFG/pre/
-ADD post/* $PAYARA_CFG/post/
-ADD *.war $PAYARA_CFG/pre/solr-doc-store-corepo-worker.war
-RUN payara-setup $PAYARA_CFG/pre/
+COPY --chown=payara:payara startup.d/* /startup.d/
+COPY --chown=payara:payara config/* $PAYARA_CFG_DIR
+COPY --chown=payara:payara *.war $PAYARA_CFG_DIR/app.war
+COPY --chown=payara:payara logback.xml /home/payara/
 

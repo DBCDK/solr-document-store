@@ -1,0 +1,15 @@
+[QueueConnectionFactory]
+name = jms/indexerConnectionFactory
+
+[Queue]
+name = jms/pidQueue
+Name = ${INPUT_QUEUE_NAME|jms_pidQueue}
+
+[Queue]
+name = jms/solrDocuments
+Name = ${OUTPUT_QUEUE_NAME|jms_solrDocuments}
+
+[Queue]
+name = jms/deadPidQueue
+Name = ${ERROR_QUEUE_NAME|jms_deadPidQueue}
+
