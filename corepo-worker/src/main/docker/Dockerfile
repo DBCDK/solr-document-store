@@ -25,5 +25,4 @@ LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Require
 COPY --chown=payara:payara startup.d/* /startup.d/
 COPY --chown=payara:payara config/* $PAYARA_CFG_DIR
 COPY --chown=payara:payara *.war $PAYARA_CFG_DIR/app.war
-COPY --chown=payara:payara logback.xml /home/payara/
 
