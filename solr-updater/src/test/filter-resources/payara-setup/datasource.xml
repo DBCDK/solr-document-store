@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE resources PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Resource Definitions//EN" "http://glassfish.org/dtds/glassfish-resources_1_5.dtd">
+<resources>
+    <jdbc-connection-pool pool-resize-quantity="5" max-pool-size="10" steady-pool-size="10"
+                          fail-all-connections="true" validate-atmost-once-period-in-seconds="60"
+                          connection-validation-method="custom-validation"
+                          name="jdbc/solr-doc-store/pool"
+                          validation-classname="org.glassfish.api.jdbc.validation.PostgresConnectionValidation"
+                          is-connection-validation-required="true"
+                          datasource-classname="org.postgresql.ds.PGSimpleDataSource" res-type="javax.sql.DataSource">
+        <property name="serverName" value="localhost"></property>
+        <property name="password" value=""></property>
+        <property name="PortNumber" value="${postgresql.port}"></property>
+        <property name="user" value=""></property>
+        <property name="DatabaseName" value="solrdocstore"></property>
+        <property name="ApplicationName" value="SolrDocStore"></property>
+    </jdbc-connection-pool>
+    <jdbc-resource pool-name="jdbc/solr-doc-store/pool" jndi-name="jdbc/solr-doc-store"/>
+  </resources>

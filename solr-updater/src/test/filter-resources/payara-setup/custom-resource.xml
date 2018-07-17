@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE resources PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Resource Definitions//EN" "http://glassfish.org/dtds/glassfish-resources_1_5.dtd">
+<resources>
+    <custom-resource factory-class="org.glassfish.resources.custom.factory.PropertiesFactory" res-type="java.util.Properties" jndi-name="solr-doc-store-service">
+        <property name="openAgencyUrl" value="http://localhost:${wiremock.port}/"/>
+        <property name="allowNonEmptySchema" value="true"/>
+    </custom-resource>
+</resources>

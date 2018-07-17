@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.ee.stats.Timed;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
@@ -56,30 +57,11 @@ public class DocProducer {
     SolrFields solrFields;
 
     @Inject
-    Timer fetchTimer;
-
-    @Inject
-    Timer selectByRootTimer;
-
-    @Inject
-    Timer deleteByIdTimer;
-
-    @Inject
-    Timer addDocumentTimer;
-
-    @Inject
     BusinessLogic businessLogic;
 
     private Client client;
     private UriBuilder uriTemplate;
     SolrClient solrClient;
-
-    private static final Timer UNITTESTING_TIMER = new Timer();
-
-    public DocProducer() {
-        // Create timers for unit testing
-        fetchTimer = deleteByIdTimer = selectByRootTimer = addDocumentTimer = UNITTESTING_TIMER;
-    }
 
     @PostConstruct
     public void init() {
@@ -104,6 +86,7 @@ public class DocProducer {
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
+    @Timed
     public void deploy(SolrInputDocument doc, Integer commitWithin) throws IOException, SolrServerException {
 
         if (doc != null) {
@@ -118,17 +101,15 @@ public class DocProducer {
                 }
                 log.trace("doc = {}", doc);
             }
-            try (Timer.Context time = addDocumentTimer.time()) {
-                if (commitWithin == null || commitWithin <= 0) {
-                    UpdateResponse resp = solrClient.add(doc);
-                    if (resp.getStatus() != 0) {
-                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
-                    }
-                } else {
-                    UpdateResponse resp = solrClient.add(doc, commitWithin);
-                    if (resp.getStatus() != 0) {
-                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
-                    }
+            if (commitWithin == null || commitWithin <= 0) {
+                UpdateResponse resp = solrClient.add(doc);
+                if (resp.getStatus() != 0) {
+                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
+                }
+            } else {
+                UpdateResponse resp = solrClient.add(doc, commitWithin);
+                if (resp.getStatus() != 0) {
+                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
                 }
             }
         }
@@ -144,20 +125,18 @@ public class DocProducer {
      * @throws SolrServerException solr communication error
      */
     //! Todo: add another n sub documents pr holdingid if more has been addad before last commit, also take into account the known subdocument ids from sourceDoc
-    public void deleteSolrDocuments(String bibliographicShardId, Integer commitWithin) throws IOException, SolrServerException {
-        List<String> ids = documentsIdsByRoot(bibliographicShardId, solrClient);
+    @Timed
+    public void deleteSolrDocuments(String bibliographicShardId, List<String> ids, Integer commitWithin) throws IOException, SolrServerException {
         if (!ids.isEmpty()) {
-            try (Timer.Context time = deleteByIdTimer.time()) {
-                if (commitWithin == null || commitWithin <= 0) {
-                    UpdateResponse resp = solrClient.deleteById(ids);
-                    if (resp.getStatus() != 0) {
-                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
-                    }
-                } else {
-                    UpdateResponse resp = solrClient.deleteById(ids, commitWithin);
-                    if (resp.getStatus() != 0) {
-                        throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
-                    }
+            if (commitWithin == null || commitWithin <= 0) {
+                UpdateResponse resp = solrClient.deleteById(ids);
+                if (resp.getStatus() != 0) {
+                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
+                }
+            } else {
+                UpdateResponse resp = solrClient.deleteById(ids, commitWithin);
+                if (resp.getStatus() != 0) {
+                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
                 }
             }
         }
@@ -171,7 +150,9 @@ public class DocProducer {
      * @param sourceDoc the document from {@link  #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
      *                  }
      * @return null if deleted otherwise a expanded solr document
+     * @throws dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError
      */
+    @Timed
     public SolrInputDocument createSolrDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         boolean deleted = isDeleted(sourceDoc);
         log.trace("deleted = {}", deleted);
@@ -182,7 +163,8 @@ public class DocProducer {
         return doc;
     }
 
-    private List<String> documentsIdsByRoot(String id, SolrClient client1) throws IOException, SolrServerException {
+    @Timed
+    public List<String> documentsIdsByRoot(String id) throws IOException, SolrServerException {
         // Delete by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
         // Converted to nested to delete subdocuments only, then delete owner by id
@@ -192,14 +174,12 @@ public class DocProducer {
         req.setFields("id");
         req.setRows(MAX_ROWS_OF_SHARDED_SOLR);
         req.setStart(0);
-        try (final Timer.Context time = selectByRootTimer.time()) {
-            ArrayList<String> list = new ArrayList<>();
-            list.add(id);
-            client1.query(req).getResults().stream()
-                    .map(d -> String.valueOf(d.getFirstValue("id")))
-                    .forEach(list::add);
-            return list;
-        }
+        ArrayList<String> list = new ArrayList<>();
+        list.add(id);
+        solrClient.query(req).getResults().stream()
+                .map(d -> String.valueOf(d.getFirstValue("id")))
+                .forEach(list::add);
+        return list;
     }
 
     /**
@@ -209,15 +189,13 @@ public class DocProducer {
      * @return the document collection
      * @throws IOException In case of http errors
      */
+    @Timed
     public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
         URI uri = uriTemplate.buildFromMap(mapForUri(job));
         log.debug("Fetching: {}", uri);
-        Response response;
-        try (Timer.Context time = fetchTimer.time()) {
-            response = client.target(uri)
-                    .request(MediaType.APPLICATION_JSON_TYPE)
-                    .get();
-        }
+        Response response = client.target(uri)
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .get();
         Response.StatusType status = response.getStatusInfo();
         if (status.getStatusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("Could not access document " + uri + ": " + status);

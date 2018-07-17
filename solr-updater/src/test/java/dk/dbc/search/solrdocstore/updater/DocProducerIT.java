@@ -24,6 +24,7 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -58,7 +59,6 @@ public class DocProducerIT {
 
     private static String payaraPort;
     private static String solrDocStoreUrl;
-    private static Payara payara;
 
     private static String solrPort;
     private static String solrUrl;
@@ -92,14 +92,9 @@ public class DocProducerIT {
 
     private static void initPayara() throws Exception {
         payaraPort = System.getProperty("glassfish.port", "18080");
-        solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
-        payara = Payara.getInstance(payaraPort)
-                .cmd("set-log-level dk.dbc=FINE")
-                .withDataSource("jdbc/solr-doc-store", pg.getUrl())
-                .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
-                .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
+        solrDocStoreUrl = "http://localhost:" + payaraPort + "/";
 
-        Invocation invocation = client.target(solrDocStoreUrl + "/api/evict-all")
+        Invocation invocation = client.target(solrDocStoreUrl + "api/evict-all")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .buildGet();
         for (int i = 0 ; i < 1000 ; i++) {
@@ -189,8 +184,9 @@ public class DocProducerIT {
     private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
         JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, "clazzifier", "23645564"));
         SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
-        String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
-        docProducer.deleteSolrDocuments(bibliographicShardId, 0);
+        String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
+        List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
+        docProducer.deleteSolrDocuments(bibliographicShardId, ids, 0);
         docProducer.deploy(doc, 0);
         docProducer.solrClient.commit(true, true);
         QueryResponse response1 = docProducer.solrClient.query(new SolrQuery("*:*"));

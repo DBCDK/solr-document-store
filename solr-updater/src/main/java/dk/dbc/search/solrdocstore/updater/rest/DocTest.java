@@ -5,6 +5,7 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -70,13 +71,14 @@ public class DocTest {
             JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
             String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-            docProducer.deleteSolrDocuments(bibliographicShardId, 0);
+            List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
+            docProducer.deleteSolrDocuments(bibliographicShardId, ids, 0);
             docProducer.deploy(doc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
         } catch (SolrServerException | IOException | PostponedNonFatalQueueError ex) {
             log.error("Exception: {}", ex.getMessage());
             log.debug("Exception:", ex);
-            return Response.ok(ex.getMessage()).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         }
     }
 }

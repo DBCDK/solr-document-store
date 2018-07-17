@@ -56,7 +56,7 @@ public class Requests {
         if (test == null) {
             throw new IllegalStateException("Don't know about test: " + testName);
         }
-        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
+        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "api/evict-all").request().get().toString());
         for (Iterator<Map.Entry<String, JsonNode>> iterator = test.fields() ; iterator.hasNext() ;) {
             Map.Entry<String, JsonNode> entry = iterator.next();
             String api = entry.getKey();
@@ -64,7 +64,8 @@ public class Requests {
             if (!array.isArray()) {
                 throw new IllegalStateException("Value of " + api + " in test: " + testName + " is not an array");
             }
-            WebTarget target = CLIENT.target(solrDocStoreUrl + "/api/" + api);
+            String targetUrl = solrDocStoreUrl + "api/" + api;
+            WebTarget target = CLIENT.target(targetUrl);
             for (JsonNode file : array) {
                 String fileName = file.asText();
                 log.debug("fileName = {}", fileName);
@@ -76,12 +77,12 @@ public class Requests {
                     Response resp = target.request(MediaType.APPLICATION_JSON_TYPE).buildPost(Entity.entity(content.toString(), MediaType.APPLICATION_JSON)).invoke();
                     System.out.println("resp.getStatusInfo() = " + resp.getStatusInfo());
                     if (resp.getStatus() != 200) {
-                        throw new IllegalArgumentException("Cannot post: ITRequests/" + fileName + ": " + resp.getStatusInfo());
+                        throw new IllegalArgumentException("Cannot post content of: ITRequests/" + fileName + " to: " +  targetUrl + ": " + resp.getStatusInfo());
                     }
                 }
             }
         }
-        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "/api/evict-all").request().get().toString());
+        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "api/evict-all").request().get().toString());
     }
 
 }

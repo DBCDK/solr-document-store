@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import dk.dbc.ee.stats.Timed;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import java.util.Collections;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ public class BusinessLogic {
     @Inject
     OpenAgency oa;
 
+    @Timed
     public void filterOutDecommissioned(JsonNode sourceDoc) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         if (records == null) {
@@ -63,6 +65,7 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
+    @Timed
     public void addRecHoldingsAgencyId(JsonNode sourceDoc) {
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
 
@@ -81,6 +84,7 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
+    @Timed
     public void addFromPartOfDanbib(JsonNode sourceDoc) {
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         JsonNode agencies = find(sourceDoc, "partOfDanbib");
@@ -95,6 +99,7 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
+    @Timed
     public void addCollectionIdentifier800000(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
         String field = getField(indexKeys, "rec.excludeFromUnionCatalogue");

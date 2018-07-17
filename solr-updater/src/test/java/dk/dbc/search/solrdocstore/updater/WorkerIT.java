@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import com.codahale.metrics.MetricRegistry;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
@@ -53,7 +54,6 @@ public class WorkerIT {
 
     private static String payaraPort;
     private static String solrDocStoreUrl;
-    private static Payara payara;
 
     private static String solrPort;
     private static String solrUrl;
@@ -104,12 +104,7 @@ public class WorkerIT {
 
     private static void initPayara() throws Exception {
         payaraPort = System.getProperty("glassfish.port", "18080");
-        solrDocStoreUrl = "http://localhost:" + payaraPort + "/solr-doc-store";
-        payara = Payara.getInstance(payaraPort)
-                .cmd("set-log-level dk.dbc=FINE")
-                .withDataSource("jdbc/solr-doc-store", pg.getUrl())
-                .withDataSourceNonTransactional("jdbc/solr-doc-store-nt", pg.getUrl())
-                .deploy("../service/target/solr-doc-store-service-1.0-SNAPSHOT.war", "/solr-doc-store");
+        solrDocStoreUrl = "http://localhost:" + payaraPort + "/";
     }
 
     @Before
@@ -145,7 +140,7 @@ public class WorkerIT {
             }
         };
         worker.docProducer.init();
-        worker.metricRegistry = new Metrics();
+        worker.metrics = new MetricRegistry();
         worker.init();
     }
 

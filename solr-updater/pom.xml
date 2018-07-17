@@ -34,6 +34,11 @@
             <version>${pg-queue.version}</version>
         </dependency>
         <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>ee-stats</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.9.0</version>
@@ -83,23 +88,11 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>3.0.2</version>
-        </dependency>
         
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>pg-queue-supplier</artifactId>
             <version>${pg-queue.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>fish.payara.extras</groupId>
-            <artifactId>payara-micro</artifactId>
-            <version>4.1.152.1</version>
-            <type>jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -128,23 +121,21 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JOLOKIA servlet -->
-        <dependency>
-            <groupId>org.jolokia</groupId>
-            <artifactId>jolokia-core</artifactId>
-            <version>1.5.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.jolokia</groupId>
-            <artifactId>jolokia-jsr160</artifactId>
-            <version>1.5.0</version>
-            <type>jar</type>
-        </dependency>
 
     </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+            </testResource>
+            <testResource>
+                <directory>src/test/filter-resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+                
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -359,8 +350,8 @@
                             <goal>deploy-war</goal>
                         </goals>
                         <configuration>
-                            <!--<detail>true</detail>-->
-                            <!--<dumpOnStart>true</dumpOnStart>-->
+                            <detail>false</detail>
+                            <dumpOnStart>false</dumpOnStart>
                             <war>${project.build.directory}/solr/solr-7.2.1/server/solr-webapp/webapp</war>
                             <webApp>
                                 <contextPath>/solr</contextPath>
@@ -397,7 +388,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+            
             <plugin>
                 <groupId>dk.dbc</groupId>
                 <artifactId>postgresql-maven-plugin</artifactId>
@@ -423,6 +414,86 @@
                         <goals>
                             <goal>shutdown</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>fish.payara.maven.plugins</groupId>
+                <artifactId>payara-micro-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <configuration>
+                    <useUberJar>false</useUberJar>
+                    <daemon>true</daemon>
+                    <payaraVersion>4.1.2.181</payaraVersion>
+                    <commandLineOptions>
+                        <option>
+                            <key>--disablephonehome</key>
+                        </option>
+                        <option>
+                            <key>--nocluster</key>
+                        </option>
+                        <option>
+                            <key>--rootdir</key>
+                            <value>${basedir}/target/payara-micro-runtime</value>
+                        </option>
+                        <option>
+                            <key>--addjars</key>
+                            <value>${basedir}/target/postgresql.jar</value>
+                        </option>
+                        <option>
+                            <key>--port</key>
+                            <value>${glassfish.port}</value>
+                        </option>
+                        <option>
+                            <key>--postbootcommandfile</key>
+                            <value>${basedir}/target/test-classes/payara-setup/postbootcommandfile.txt</value>
+                        </option>
+                        <option>
+                            <key>--deploy</key>
+                            <value>${basedir}/../service/target/solr-doc-store-service-1.0-SNAPSHOT.war</value>
+                        </option>
+                    </commandLineOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>payara-micro - service</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <!-- DEPENDS ON "jps" - NOT AVAILABLE ON LINUX WITH ORACLE JDK
+                    <execution>
+                        <id>payara-micro - service - stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                    -->
+                </executions>
+            </plugin>
+
+            <!-- FIX FOR MISSING "jps" -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Terminate payara-micro</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>if [ -e ${basedir}/target/payara-micro-runtime/config/pid ]; then kill `cat ${basedir}/target/payara-micro-runtime/config/pid`; fi</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

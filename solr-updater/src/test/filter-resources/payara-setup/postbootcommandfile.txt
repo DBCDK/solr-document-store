@@ -1,0 +1,3 @@
+add-resources ${basedir}/target/test-classes/payara-setup/datasource.xml
+add-resources ${basedir}/target/test-classes/payara-setup/datasource-nt.xml
+add-resources ${basedir}/target/test-classes/payara-setup/custom-resource.xml

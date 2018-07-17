@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore.updater;
 
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
 import dk.dbc.pgqueue.consumer.JobConsumer;
@@ -10,6 +11,7 @@ import dk.dbc.pgqueue.consumer.QueueWorker;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,7 +45,7 @@ public class Worker {
     DocProducer docProducer;
 
     @Inject
-    Metrics metricRegistry;
+    MetricRegistry metrics;
 
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
@@ -62,7 +64,7 @@ public class Worker {
                 .idleRescanEvery(config.getIdleRescanEvery())
                 .maxTries(config.getMaxTries())
                 .maxQueryTime(config.getMaxQueryTime())
-                .metricRegistry(metricRegistry.getMetrics())
+                .metricRegistry(metrics)
                 .build(config.getThreads(),
                        this::makeWorker);
         this.worker.start();
@@ -82,8 +84,10 @@ public class Worker {
                 try {
                     JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
                     SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
-                    String bibliographicShardId = docProducer.bibliographicShardId(sourceDoc);
-                    docProducer.deleteSolrDocuments(bibliographicShardId, job.getCommitwithin());
+                    String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
+                    List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
+
+                    docProducer.deleteSolrDocuments(bibliographicShardId, ids, job.getCommitwithin());
 
                     docProducer.deploy(solrDocument, job.getCommitwithin());
                 } catch (IOException ex) {
