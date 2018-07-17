@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,6 @@ public class Config {
     private String oaURL;
     private long jobPruneMinutes;
     private String systemName;
-    private String jmxDomain;
     private Boolean allowNonEmptySchema;
     private int[] openAgencyValidateTime;
 
@@ -38,7 +36,6 @@ public class Config {
         jobPruneMinutes = getValue(props, "jobPruneMinutes", "JOB_PRUNE_MINUTES", "60", null, Long::parseUnsignedLong);
         // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
-        jmxDomain = getValue(props, "jmxDomain", "JMX_DOMAIN", "metrics", null);
         allowNonEmptySchema = getValue(props, "allowNonEmptySchema", "ALLOW_NON_EMPTY_SCHEMA", "false", null, Boolean::parseBoolean);
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
     }
@@ -53,10 +50,6 @@ public class Config {
 
     public String getSystemName() {
         return systemName;
-    }
-
-    public String getJmxDomain() {
-        return jmxDomain;
     }
 
     public Boolean getAllowNonEmptySchema() {

@@ -2,7 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.dbc.search.solrdocstore.monitor.Timed;
+import dk.dbc.ee.stats.Timed;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;

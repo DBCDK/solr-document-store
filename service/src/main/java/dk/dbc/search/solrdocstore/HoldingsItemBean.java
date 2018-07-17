@@ -1,7 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.search.solrdocstore.monitor.Timed;
+import dk.dbc.ee.stats.Timed;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.monitor.Timed;
+import dk.dbc.ee.stats.Timed;
 import java.util.List;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;

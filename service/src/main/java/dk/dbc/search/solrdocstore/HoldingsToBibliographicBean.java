@@ -1,6 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.monitor.Timed;
+import dk.dbc.ee.stats.Timed;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
