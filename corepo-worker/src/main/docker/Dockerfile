@@ -1,7 +1,8 @@
 FROM docker.dbc.dk/dbc-payara5-full
 MAINTAINER os-team
 
-ENV KAFKA_LOG_APPNAME solr-sdoc-store-corepo-worker
+ENV KAFKA_LOG_APPNAME solr-doc-store-corepo-worker \
+    APPLICATION_NAME solr-doc-store-corepo-worker
 
 USER root
 RUN apt-install zip
