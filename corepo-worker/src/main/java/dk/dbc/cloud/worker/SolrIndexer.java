@@ -105,30 +105,34 @@ public class SolrIndexer {
     @SuppressFBWarnings(value = "ICAST_IDIV_CAST_TO_DOUBLE", justification = "trimming of number of digits for LogStash.Marker#append()")
     public void buildDocuments(String pid, SolrIndexerJS jsWrapper, BiConsumer<String, SolrUpdaterCallback> function) throws Exception {
         try (IRepositoryDAO dao = daoProvider.getRepository()) {
-            if (jsWrapper.isIndexableIdentifier(pid)) {
-                long starttime = System.nanoTime();
-                String trackingId = getTrackingId(dao, pid);
-                DBCTrackedLogContext.setTrackingId(trackingId);
+            try {
+                if (jsWrapper.isIndexableIdentifier(pid)) {
+                    long starttime = System.nanoTime();
+                    String trackingId = getTrackingId(dao, pid);
+                    DBCTrackedLogContext.setTrackingId(trackingId);
 
-                String data = getObjectData(dao, pid);
-                SolrUpdaterCallback callback = new SolrUpdaterCallback(jsWrapper.getEnvironment(), trackingId, pid);
-                jsWrapper.createIndexData(dao, pid, data, callback, libraryRuleHandler);
-                documentsDeleted.inc(callback.getDeletedDocumentsCount());
-                documentsUpdated.inc(callback.getUpdatedDocumentsCount());
+                    String data = getObjectData(dao, pid);
+                    SolrUpdaterCallback callback = new SolrUpdaterCallback(jsWrapper.getEnvironment(), trackingId, pid);
+                    jsWrapper.createIndexData(dao, pid, data, callback, libraryRuleHandler);
+                    documentsDeleted.inc(callback.getDeletedDocumentsCount());
+                    documentsUpdated.inc(callback.getUpdatedDocumentsCount());
 
-                if (callback.getDeletedDocumentsCount() > 0 || callback.getUpdatedDocumentsCount() > 0) {
-                    function.accept(data, callback);
+                    if (callback.getDeletedDocumentsCount() > 0 || callback.getUpdatedDocumentsCount() > 0) {
+                        function.accept(data, callback);
+                    } else {
+                        log.info("Indexing {} skipped by javascript", pid);
+                    }
+                    long endtime = System.nanoTime();
+                    log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED).and(
+                            append("duration", ( ( endtime - starttime ) / 10000L ) / 100.0)).and(
+                            append("updates", callback.getUpdatedDocumentsCount())).and(
+                            append("deletes", callback.getDeletedDocumentsCount())),
+                             "Documents successfully build");
                 } else {
-                    log.info("Indexing {} skipped by javascript", pid);
+                    log.debug("object {} filtered", pid);
                 }
-                long endtime = System.nanoTime();
-                log.info(LogAppender.getMarker(App.APP_NAME, pid, LogAppender.SUCCEDED).and(
-                        append("duration", ( ( endtime - starttime ) / 10000L ) / 100.0)).and(
-                        append("updates", callback.getUpdatedDocumentsCount())).and(
-                        append("deletes", callback.getDeletedDocumentsCount())),
-                         "Documents successfully build");
-            } else {
-                log.debug("object {} filtered", pid);
+            } finally {
+                dao.rollback();
             }
         } catch (Exception ex) {
             String error = String.format("Error calling indexing logic for '%s'", pid);
@@ -143,10 +147,10 @@ public class SolrIndexer {
     public String unitFor(String pid) throws RepositoryException {
         try (IRepositoryDAO dao = daoProvider.getRepository()) {
             IRepositoryIdentifier id = dao.createIdentifier(pid);
-            if(!dao.hasObject(id)) {
+            if (!dao.hasObject(id)) {
                 throw new IllegalStateException("Doesn't have pid: " + pid);
             }
-            if(dao.getObjectState(id) == IRepositoryDAO.State.DELETED) {
+            if (dao.getObjectState(id) == IRepositoryDAO.State.DELETED) {
                 return null;
             }
             ISysRelationsStream relations = dao.getSysRelationsStream(id);
