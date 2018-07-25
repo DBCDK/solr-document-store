@@ -111,14 +111,14 @@ public class BusinessLogicTest {
                 .map(JsonNode::asText)
                 .toArray(String[]::new);
 
-        SolrInputDocument before = dp.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        SolrInputDocument before = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
         try {
             Method method = BusinessLogic.class.getMethod(name.split("[^0-9a-zA-Z]", 2)[0], JsonNode.class);
             method.invoke(businessLogic, json);
         } catch (InvocationTargetException ex) {
             throw (Exception) ex.getTargetException();
         }
-        SolrInputDocument after = dp.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        SolrInputDocument after = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
 
         List<String> diff = diff(before, after);
         System.out.println("diff = " + diff);

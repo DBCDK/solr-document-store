@@ -1,10 +1,16 @@
 package dk.dbc.search.solrdocstore.updater;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.ee.stats.Timed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -23,6 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.cloud.ClusterState;
 import org.apache.solr.common.cloud.Replica;
 import org.slf4j.Logger;
@@ -43,6 +50,7 @@ public class SolrFields {
     private static final Logger log = LoggerFactory.getLogger(SolrFields.class);
 
     private static final DocumentBuilder DOCUMENT_BUILDER = newDocumentBuilder();
+    private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
 
     private final ConcurrentHashMap<String, Boolean> knownFields;
     private final ArrayList<String[]> dynamicFieldSpecs;
@@ -231,6 +239,51 @@ public class SolrFields {
             }
         } catch (ParserConfigurationException ex) {
             throw new EJBException("Error making a XML parser", ex);
+        }
+    }
+
+    /**
+     * Construct a document from indexKeys filtered by what the solr knows about
+     *
+     * @param indexKeys document keys
+     * @return new document
+     */
+    @Timed
+    SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
+        if (indexKeys.isObject()) {
+            trimIndexFieldsLength((ObjectNode) indexKeys, MAX_SOLR_FIELD_VALUE_SIZE);
+        }
+        SolrInputDocument doc = new SolrInputDocument();
+        if (indexKeys.isObject()) {
+            for (Iterator<String> nameIterator = indexKeys.fieldNames() ; nameIterator.hasNext() ;) {
+                String name = nameIterator.next();
+                if (isKnownField(name)) {
+                    JsonNode array = indexKeys.get(name);
+                    ArrayList<String> values = new ArrayList<>(array.size());
+                    for (Iterator<JsonNode> valueIterator = array.iterator() ; valueIterator.hasNext() ;) {
+                        values.add(valueIterator.next().asText(""));
+                    }
+                    doc.addField(name, values);
+                } else {
+                    log.trace("Unknown field: {}", name);
+                }
+            }
+        }
+        return doc;
+    }
+
+    static void trimIndexFieldsLength(ObjectNode indexKeys, int maxLength) {
+        for (Iterator<Map.Entry<String, JsonNode>> entries = indexKeys.fields() ; entries.hasNext() ;) {
+            Map.Entry<String, JsonNode> entry = entries.next();
+            JsonNode oldValue = entry.getValue();
+            ArrayNode newValue = indexKeys.putArray(entry.getKey());
+            for (Iterator<JsonNode> texts = oldValue.iterator() ; texts.hasNext() ;) {
+                String text = texts.next().asText();
+                if (text.length() > maxLength) {
+                    text = text.substring(0, maxLength);
+                }
+                newValue.add(text);
+            }
         }
     }
 }

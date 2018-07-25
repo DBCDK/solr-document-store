@@ -1,10 +1,7 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.ee.stats.Timed;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
@@ -14,7 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,7 +44,6 @@ public class DocProducer {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final int MAX_ROWS_OF_SHARDED_SOLR = 10000;
-    private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
 
     @Inject
     Config config;
@@ -265,8 +260,8 @@ public class DocProducer {
             businessLogic.addFromPartOfDanbib(sourceDoc);
             businessLogic.addCollectionIdentifier800000(sourceDoc);
 
-            SolrInputDocument doc = newDocumentFromIndexKeys(indexKeys);
-            addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
+            SolrInputDocument doc = solrFields.newDocumentFromIndexKeys(indexKeys);
+            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId, this);
 
             return doc;
         } catch (RuntimeException ex) {
@@ -276,47 +271,7 @@ public class DocProducer {
         }
     }
 
-    static void trimIndexFieldsLength(ObjectNode indexKeys, int maxLength) {
-        for (Iterator<Map.Entry<String, JsonNode>> entries = indexKeys.fields() ; entries.hasNext() ;) {
-            Map.Entry<String, JsonNode> entry = entries.next();
-            JsonNode oldValue = entry.getValue();
-            ArrayNode newValue = indexKeys.putArray(entry.getKey());
-            for (Iterator<JsonNode> texts = oldValue.iterator() ; texts.hasNext() ;) {
-                String text = texts.next().asText();
-                if (text.length() > maxLength) {
-                    text = text.substring(0, maxLength);
-                }
-                newValue.add(text);
-            }
-        }
-    }
 
-    /**
-     * Append all holdings as nested document
-     *
-     * @param doc          root solr document
-     * @param sourceDoc    document containing holdings
-     * @param linkId       id for linking foe solr join searches
-     * @param repositoryId id of record used by
-     */
-    private void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
-        JsonNode records = find(sourceDoc, "holdingsItemRecords");
-        for (JsonNode record : records) {
-            String id = bibliographicShardId(sourceDoc) + "@" +
-                        find(record, "agencyId").asText() + "-" +
-                        find(record, "bibliographicRecordId").asText();
-            JsonNode indexKeyList = find(record, "indexKeys");
-            int i = 0;
-            for (JsonNode indexKeys : indexKeyList) {
-                setField(indexKeys, "rec.repositoryId", repositoryId);
-                setField(indexKeys, "id", id + "#" + i++);
-                setField(indexKeys, "t", "h"); // Holdings type
-                addField(indexKeys, "parentDocId", linkId);
-                SolrInputDocument nested = newDocumentFromIndexKeys(indexKeys);
-                doc.addChildDocument(nested);
-            }
-        }
-    }
 
     /**
      * Construct an id string with sharding info using bibliographicrecordid
@@ -342,33 +297,5 @@ public class DocProducer {
         return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
     }
 
-    /**
-     * Construct a document from indexKeys filtered by what the solr knows about
-     *
-     * @param indexKeys document keys
-     * @return new document
-     */
-    SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
-        if (indexKeys.isObject()) {
-            trimIndexFieldsLength((ObjectNode) indexKeys, MAX_SOLR_FIELD_VALUE_SIZE);
-        }
-        SolrInputDocument doc = new SolrInputDocument();
-        if (indexKeys.isObject()) {
-            for (Iterator<String> nameIterator = indexKeys.fieldNames() ; nameIterator.hasNext() ;) {
-                String name = nameIterator.next();
-                if (solrFields.isKnownField(name)) {
-                    JsonNode array = indexKeys.get(name);
-                    ArrayList<String> values = new ArrayList<>(array.size());
-                    for (Iterator<JsonNode> valueIterator = array.iterator() ; valueIterator.hasNext() ;) {
-                        values.add(valueIterator.next().asText(""));
-                    }
-                    doc.addField(name, values);
-                } else {
-                    log.trace("Unknown field: {}", name);
-                }
-            }
-        }
-        return doc;
-    }
 
 }

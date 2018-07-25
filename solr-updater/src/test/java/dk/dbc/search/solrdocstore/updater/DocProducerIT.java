@@ -127,7 +127,8 @@ public class DocProducerIT {
 
         docProducer = new DocProducer();
         docProducer.config = config;
-        docProducer.solrFields = new SolrFields();
+        SolrFields solrFields = new SolrFields();
+        docProducer.solrFields = solrFields;
         docProducer.solrFields.config = config;
         docProducer.solrFields.init();
         docProducer.businessLogic = new BusinessLogic();
@@ -137,6 +138,7 @@ public class DocProducerIT {
                 return new LibraryRule(true, true, true, true, false);
             }
         };
+        docProducer.businessLogic.solrFields = solrFields;
         docProducer.init();
     }
 

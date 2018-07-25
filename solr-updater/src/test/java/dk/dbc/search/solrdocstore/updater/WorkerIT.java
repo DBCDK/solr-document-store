@@ -129,7 +129,8 @@ public class WorkerIT {
         worker.dataSource = dataSource;
         worker.docProducer = new DocProducer();
         worker.docProducer.config = config;
-        worker.docProducer.solrFields = new SolrFields();
+        SolrFields solrFields = new SolrFields();
+        worker.docProducer.solrFields = solrFields;
         worker.docProducer.solrFields.config = config;
         worker.docProducer.solrFields.init();
         worker.docProducer.businessLogic = new BusinessLogic();
@@ -139,6 +140,7 @@ public class WorkerIT {
                 return new LibraryRule(true, true, true, true, false);
             }
         };
+        worker.docProducer.businessLogic.solrFields = solrFields;
         worker.docProducer.init();
         worker.metrics = new MetricRegistry();
         worker.init();

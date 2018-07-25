@@ -54,7 +54,8 @@ public class DocProducerTest {
                 }
             }
         };
-        docProducer.solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
+        SolrFields solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
+        docProducer.solrFields = solrFields;
 
         docProducer.businessLogic = new BusinessLogic();
         docProducer.businessLogic.oa = new OpenAgency(){
@@ -63,6 +64,7 @@ public class DocProducerTest {
                 return new LibraryRule(true, true, true, true, false);
             }
         };
+        docProducer.businessLogic.solrFields = solrFields;
 
         JsonNode node = docProducer.fetchSourceDoc(new QueueJob(300101, "clazzifier", "23645564"));
 
@@ -95,7 +97,7 @@ public class DocProducerTest {
     @Test
     public void trimTexts() throws Exception {
         JsonNode tree = OBJECT_MAPPER.readTree("{'a':['123','1234567890'],'b':['1234567890','567']}".replaceAll("'", "\""));
-        DocProducer.trimIndexFieldsLength((ObjectNode) tree, 5);
+        SolrFields.trimIndexFieldsLength((ObjectNode) tree, 5);
         String text = OBJECT_MAPPER.writeValueAsString(tree);
         assertEquals("{'a':['123','12345'],'b':['12345','567']}".replaceAll("'", "\""), text);
     }

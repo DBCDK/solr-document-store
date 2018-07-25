@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
+import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,9 @@ public class BusinessLogic {
 
     @Inject
     OpenAgency oa;
+
+    @Inject
+    SolrFields solrFields;
 
     @Timed
     public void filterOutDecommissioned(JsonNode sourceDoc) {
@@ -133,6 +137,32 @@ public class BusinessLogic {
         }
         if (addDanbib && !hasDanbib) {
             addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-danbib");
+        }
+    }
+
+    /**
+     * Append all holdings as nested document
+     *
+     * @param doc          root solr document
+     * @param sourceDoc    document containing holdings
+     * @param linkId       id for linking foe solr join searches
+     * @param repositoryId id of record used by
+     */
+    @Timed
+    void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId, DocProducer docProducer) {
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
+        for (JsonNode record : records) {
+            String id = DocProducer.bibliographicShardId(sourceDoc) + "@" + find(record, "agencyId").asText() + "-" + find(record, "bibliographicRecordId").asText();
+            JsonNode indexKeyList = find(record, "indexKeys");
+            int i = 0;
+            for (JsonNode indexKeys : indexKeyList) {
+                setField(indexKeys, "rec.repositoryId", repositoryId);
+                setField(indexKeys, "id", id + "#" + i++);
+                setField(indexKeys, "t", "h"); // Holdings type
+                addField(indexKeys, "parentDocId", linkId);
+                SolrInputDocument nested = solrFields.newDocumentFromIndexKeys(indexKeys);
+                doc.addChildDocument(nested);
+            }
         }
     }
 }
