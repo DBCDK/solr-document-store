@@ -281,6 +281,9 @@ public class SolrFields {
                 String text = texts.next().asText();
                 if (text.length() > maxLength) {
                     int pos = text.lastIndexOf(' ', maxLength);
+                    if (pos <= 0) {
+                        pos = maxLength;
+                    }
                     text = text.substring(0, pos);
                 }
                 newValue.add(text);
