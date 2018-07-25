@@ -149,7 +149,7 @@ public class BusinessLogic {
      * @param repositoryId id of record used by
      */
     @Timed
-    void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId, DocProducer docProducer) {
+    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId, DocProducer docProducer) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
             String id = DocProducer.bibliographicShardId(sourceDoc) + "@" + find(record, "agencyId").asText() + "-" + find(record, "bibliographicRecordId").asText();

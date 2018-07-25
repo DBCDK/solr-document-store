@@ -249,7 +249,7 @@ public class SolrFields {
      * @return new document
      */
     @Timed
-    SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
+    public SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
         if (indexKeys.isObject()) {
             trimIndexFieldsLength((ObjectNode) indexKeys, MAX_SOLR_FIELD_VALUE_SIZE);
         }
@@ -280,7 +280,8 @@ public class SolrFields {
             for (Iterator<JsonNode> texts = oldValue.iterator() ; texts.hasNext() ;) {
                 String text = texts.next().asText();
                 if (text.length() > maxLength) {
-                    text = text.substring(0, maxLength);
+                    int pos = text.lastIndexOf(' ', maxLength);
+                    text = text.substring(0, pos);
                 }
                 newValue.add(text);
             }
