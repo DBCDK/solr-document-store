@@ -16,9 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJBException;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -45,6 +48,7 @@ import org.xml.sax.SAXException;
  */
 @Singleton
 @Startup
+@Lock(LockType.READ)
 public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(SolrFields.class);
@@ -57,6 +61,8 @@ public class SolrFields {
 
     @Inject
     Config config;
+
+    Client httpClient;
 
     public SolrFields() {
         this.knownFields = new ConcurrentHashMap<>();
@@ -71,6 +77,7 @@ public class SolrFields {
                 .queryParam("file", "schema.xml")
                 .build();
         log.debug("fetching: uri = {}", uri);
+        httpClient = ClientBuilder.newClient();
         Object entity = getSchemaXml(uri);
         Document doc;
         try {
@@ -158,7 +165,7 @@ public class SolrFields {
      * @return content stream
      */
     InputStream getSchemaXml(URI uri) {
-        Response response = ClientBuilder.newClient()
+        Response response = httpClient
                 .target(uri)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .get();

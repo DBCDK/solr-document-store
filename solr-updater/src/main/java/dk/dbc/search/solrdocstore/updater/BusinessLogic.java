@@ -6,6 +6,8 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
 import org.apache.solr.common.SolrInputDocument;
@@ -19,7 +21,7 @@ import static dk.dbc.search.solrdocstore.updater.DocHelpers.*;
  * @author DBC {@literal <dbc.dk>}
  */
 @Singleton
-
+@Lock(LockType.READ)
 public class BusinessLogic {
 
     private static final Logger log = LoggerFactory.getLogger(BusinessLogic.class);
