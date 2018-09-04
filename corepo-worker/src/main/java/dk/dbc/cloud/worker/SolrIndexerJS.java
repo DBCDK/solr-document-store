@@ -46,6 +46,7 @@ public class SolrIndexerJS {
                         Arrays.asList("classpath:javascript/",
                                       "classpath:javascript/javacore/",
                                       "classpath:javascript/jscommon/system/",
+                                      "classpath:javascript/jscommon/tables/",
                                       "classpath:javascript/jscommon/convert/",
                                       "classpath:javascript/jscommon/devel/",
                                       "classpath:javascript/jscommon/util/",
