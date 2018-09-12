@@ -30,6 +30,7 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
             statement.executeUpdate("TRUNCATE openagencycache");
             statement.executeUpdate("TRUNCATE queuerule");
             statement.executeUpdate("TRUNCATE queue");
+            statement.executeUpdate("TRUNCATE resource");
         }
     }
 

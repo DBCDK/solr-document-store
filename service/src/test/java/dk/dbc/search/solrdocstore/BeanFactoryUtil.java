@@ -139,4 +139,12 @@ public class BeanFactoryUtil {
         bean.queue = queue;
         return bean;
     }
+
+    public static ResourceBean createResourceBean(JpaTestEnvironment env){
+        ResourceBean bean = new ResourceBean();
+        OpenAgencyBean openAgency = createOpenAgencyBean();
+        bean.entityManager = env.getEntityManager();
+        bean.openAgency = openAgency;
+        return bean;
+    }
 }

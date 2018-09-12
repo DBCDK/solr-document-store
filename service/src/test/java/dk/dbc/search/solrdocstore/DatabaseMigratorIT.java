@@ -55,7 +55,7 @@ public class DatabaseMigratorIT {
                 System.out.println("version = " + version);
             }
         }
-        assertEquals(16, version);
+        assertEquals(17, version);
 
         String queueRule = null;
         try (Connection connection = datasource.getConnection() ;
