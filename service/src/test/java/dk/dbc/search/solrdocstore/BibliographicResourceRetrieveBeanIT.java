@@ -72,7 +72,7 @@ public class BibliographicResourceRetrieveBeanIT extends JpaSolrDocStoreIntegrat
             em.merge(new BibliographicResourceEntity(710100, "a", "foo", true));
             em.merge(new BibliographicResourceEntity(710100, "a", "bar", false));
             em.merge(new BibliographicResourceEntity(310100, "a", "foo", false));
-        });
+        }); 
         List<BibliographicResourceEntity> resourcesFor = bean.getResourcesFor(710100, "a");
         System.out.println("resourcesFor = " + resourcesFor);
 
