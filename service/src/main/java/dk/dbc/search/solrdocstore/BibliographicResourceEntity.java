@@ -12,16 +12,16 @@ public class BibliographicResourceEntity {
     private int agencyId;
 
     @Id
-    private String field;
+    private String bibliographicRecordId;
 
     @Id
-    private String bibliographicRecordId;
+    private String field;
 
     private boolean value;
 
     public BibliographicResourceEntity(){}
 
-    public BibliographicResourceEntity(int agencyId, String field, String bibliographicRecordId, boolean value){
+    public BibliographicResourceEntity(int agencyId, String bibliographicRecordId, String field, boolean value){
         this.agencyId = agencyId;
         this.field = field;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -73,4 +73,11 @@ public class BibliographicResourceEntity {
     public void setValue(boolean value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", field=" + field + ", bibliographicRecordId=" + bibliographicRecordId + ", value=" + value + '}';
+    }
+
+
 }

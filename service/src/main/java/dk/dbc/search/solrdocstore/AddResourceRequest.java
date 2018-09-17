@@ -5,11 +5,11 @@ public class AddResourceRequest extends BibliographicResourceEntity {
     public AddResourceRequest(){}
 
     public AddResourceRequest(int agencyId, String field, String bibliographicRecordId, boolean value){
-        super(agencyId, field, bibliographicRecordId, value);
+        super(agencyId, bibliographicRecordId, field, value);
     }
 
     BibliographicResourceEntity asBibliographicResource() {
-        return new BibliographicResourceEntity(this.getAgencyId(), this.getField(),
-                this.getBibliographicRecordId(), this.getValue());
+        return new BibliographicResourceEntity(this.getAgencyId(),
+                this.getBibliographicRecordId(), this.getField(), this.getValue());
     }
 }
