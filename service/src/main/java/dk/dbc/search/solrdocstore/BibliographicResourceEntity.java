@@ -8,6 +8,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "resource")
 public class BibliographicResourceEntity {
+
     @Id
     private int agencyId;
 
@@ -19,9 +20,10 @@ public class BibliographicResourceEntity {
 
     private boolean value;
 
-    public BibliographicResourceEntity(){}
+    public BibliographicResourceEntity() {
+    }
 
-    public BibliographicResourceEntity(int agencyId, String bibliographicRecordId, String field, boolean value){
+    public BibliographicResourceEntity(int agencyId, String bibliographicRecordId, String field, boolean value) {
         this.agencyId = agencyId;
         this.field = field;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -38,8 +40,19 @@ public class BibliographicResourceEntity {
         }
         BibliographicResourceEntity that = (BibliographicResourceEntity) o;
         return agencyId == that.agencyId &&
-                Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
-                Objects.equals(field, that.field);
+               Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+               Objects.equals(field, that.field) &&
+               Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 73 * hash + this.agencyId;
+        hash = 73 * hash + Objects.hashCode(this.bibliographicRecordId);
+        hash = 73 * hash + Objects.hashCode(this.field);
+        hash = 73 * hash + ( this.value ? 1 : 0 );
+        return hash;
     }
 
     public int getAgencyId() {
@@ -78,6 +91,5 @@ public class BibliographicResourceEntity {
     public String toString() {
         return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", field=" + field + ", bibliographicRecordId=" + bibliographicRecordId + ", value=" + value + '}';
     }
-
 
 }
