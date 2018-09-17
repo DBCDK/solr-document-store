@@ -45,10 +45,9 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     public void testGetResourcesByBibItem() {
         Response response = bean.getResourcesByBibItem(870970, "11111111");
         List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
-        assertThat(result, containsInAnyOrder(
-                new BibliographicResourceEntity(870970, "hasCoverUrl", "11111111", true),
-                new BibliographicResourceEntity(870970, "hasBackCoverUrl", "11111111", false),
-                new BibliographicResourceEntity(870970, "includesCD", "11111111", true))
+        assertThat(result, containsInAnyOrder(new BibliographicResourceEntity(870970, "11111111", "hasCoverUrl", true),
+                new BibliographicResourceEntity(870970, "11111111", "hasBackCoverUrl", false),
+                new BibliographicResourceEntity(870970, "11111111", "includesCD", true))
         );
     }
 }
