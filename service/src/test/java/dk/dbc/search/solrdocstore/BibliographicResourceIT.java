@@ -30,7 +30,7 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     }
     @Test
     public void testAddResource() throws JSONBException {
-        AddResourceRequest request = new AddResourceRequest(870970, "hasCoverUrl", "23556455", true);
+        AddResourceRequest request = new AddResourceRequest(870970, "23556455", "hasCoverUrl", true);
         bean.addResource(jsonbContext.marshall(request));
         TypedQuery<BibliographicResourceEntity> query = em.createQuery(
                 "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
