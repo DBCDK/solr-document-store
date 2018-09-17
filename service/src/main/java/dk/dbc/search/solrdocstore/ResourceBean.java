@@ -52,7 +52,7 @@ public class ResourceBean {
             return Response.ok().entity(new StatusBean.Resp("Unknown agency")).build();
         }
         // Add resource
-        BibliographicResource resource = request.asBibliographicResource();
+        BibliographicResourceEntity resource = request.asBibliographicResource();
         entityManager.merge(resource);
         return Response.ok().entity(new StatusBean.Resp()).build();
     }
@@ -66,11 +66,11 @@ public class ResourceBean {
         return Response.ok(getResourcesByAgencyAndRecId(agencyId, recId)).build();
     }
 
-    public List<BibliographicResource> getResourcesByAgencyAndRecId(int agencyId, String recId) {
-        TypedQuery<BibliographicResource> query = entityManager.createQuery(
+    public List<BibliographicResourceEntity> getResourcesByAgencyAndRecId(int agencyId, String recId) {
+        TypedQuery<BibliographicResourceEntity> query = entityManager.createQuery(
                 "SELECT br FROM BibliographicResource br " +
                 "WHERE br.agencyId = :agencyId AND br.bibliographicRecordId = :recId",
-                BibliographicResource.class);
+                BibliographicResourceEntity.class);
         query.setParameter("agencyId", agencyId);
         query.setParameter("recId", recId);
         return query.getResultList();

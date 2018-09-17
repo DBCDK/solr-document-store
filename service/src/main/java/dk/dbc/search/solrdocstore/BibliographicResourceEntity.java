@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "resource")
-public class BibliographicResource {
+public class BibliographicResourceEntity {
     @Id
     private int agencyId;
 
@@ -19,9 +19,9 @@ public class BibliographicResource {
 
     private boolean value;
 
-    public BibliographicResource(){}
+    public BibliographicResourceEntity(){}
 
-    public BibliographicResource(int agencyId, String field, String bibliographicRecordId, boolean value){
+    public BibliographicResourceEntity(int agencyId, String field, String bibliographicRecordId, boolean value){
         this.agencyId = agencyId;
         this.field = field;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -36,7 +36,7 @@ public class BibliographicResource {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        BibliographicResource that = (BibliographicResource) o;
+        BibliographicResourceEntity that = (BibliographicResourceEntity) o;
         return agencyId == that.agencyId &&
                 Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
                 Objects.equals(field, that.field);

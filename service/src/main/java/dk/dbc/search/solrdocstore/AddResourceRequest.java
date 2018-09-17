@@ -1,6 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
-public class AddResourceRequest extends BibliographicResource {
+public class AddResourceRequest extends BibliographicResourceEntity {
 
     public AddResourceRequest(){}
 
@@ -8,8 +8,8 @@ public class AddResourceRequest extends BibliographicResource {
         super(agencyId, field, bibliographicRecordId, value);
     }
 
-    BibliographicResource asBibliographicResource() {
-        return new BibliographicResource(this.getAgencyId(), this.getField(),
+    BibliographicResourceEntity asBibliographicResource() {
+        return new BibliographicResourceEntity(this.getAgencyId(), this.getField(),
                 this.getBibliographicRecordId(), this.getValue());
     }
 }
