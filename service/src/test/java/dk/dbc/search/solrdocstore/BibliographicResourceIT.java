@@ -32,9 +32,9 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     public void testAddResource() throws JSONBException {
         AddResourceRequest request = new AddResourceRequest(870970, "hasCoverUrl", "23556455", true);
         bean.addResource(jsonbContext.marshall(request));
-        TypedQuery<BibliographicResource> query = em.createQuery(
-                "SELECT r FROM BibliographicResource r WHERE r.agencyId=:agencyId AND " +
-                        "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResource.class);
+        TypedQuery<BibliographicResourceEntity> query = em.createQuery(
+                "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
+                        "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResourceEntity.class);
         query.setParameter("agencyId", request.getAgencyId());
         query.setParameter("bibId", request.getBibliographicRecordId());
         query.setParameter("field", request.getField());
@@ -44,11 +44,11 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void testGetResourcesByBibItem() {
         Response response = bean.getResourcesByBibItem(870970, "11111111");
-        List<BibliographicResource> result = (List<BibliographicResource>) response.getEntity();
+        List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
         assertThat(result, containsInAnyOrder(
-                new BibliographicResource(870970, "hasCoverUrl", "11111111", true),
-                new BibliographicResource(870970, "hasBackCoverUrl", "11111111", false),
-                new BibliographicResource(870970, "includesCD", "11111111", true))
+                new BibliographicResourceEntity(870970, "hasCoverUrl", "11111111", true),
+                new BibliographicResourceEntity(870970, "hasBackCoverUrl", "11111111", false),
+                new BibliographicResourceEntity(870970, "includesCD", "11111111", true))
         );
     }
 }

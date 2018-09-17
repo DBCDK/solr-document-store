@@ -68,7 +68,7 @@ public class ResourceBean {
 
     public List<BibliographicResourceEntity> getResourcesByAgencyAndRecId(int agencyId, String recId) {
         TypedQuery<BibliographicResourceEntity> query = entityManager.createQuery(
-                "SELECT br FROM BibliographicResource br " +
+                "SELECT br FROM BibliographicResourceEntity br " +
                 "WHERE br.agencyId = :agencyId AND br.bibliographicRecordId = :recId",
                 BibliographicResourceEntity.class);
         query.setParameter("agencyId", agencyId);
