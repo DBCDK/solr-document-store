@@ -20,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import javax.ejb.EJBException;
 
 @Stateless
 @Path("resource")
@@ -42,14 +43,18 @@ public class ResourceBean {
     public Response addResource(String jsonContent) throws JSONBException {
         AddResourceRequest request = jsonbContext.unmarshall(jsonContent, AddResourceRequest.class);
         log.debug("Added resource with key: {} - {} - {} having value: {}", request.getAgencyId(),
-                request.getBibliographicRecordId(), request.getField(), request.getValue());
+                  request.getBibliographicRecordId(), request.getField(), request.getValue());
         // Verify agency exists, throws exception if not exist
         // TODO potentially improve error response???
-        openAgency.lookup(request.getAgencyId());
+        try {
+            openAgency.lookup(request.getAgencyId());
+        } catch (EJBException ex) {
+            return Response.ok().entity(new StatusBean.Resp("Unknown agency")).build();
+        }
         // Add resource
         BibliographicResource resource = request.asBibliographicResource();
         entityManager.merge(resource);
-        return Response.ok().entity("{ \"ok\": true }").build();
+        return Response.ok().entity(new StatusBean.Resp()).build();
     }
 
     @GET
@@ -64,7 +69,7 @@ public class ResourceBean {
     public List<BibliographicResource> getResourcesByAgencyAndRecId(int agencyId, String recId) {
         TypedQuery<BibliographicResource> query = entityManager.createQuery(
                 "SELECT br FROM BibliographicResource br " +
-                   "WHERE br.agencyId = :agencyId AND br.bibliographicRecordId = :recId",
+                "WHERE br.agencyId = :agencyId AND br.bibliographicRecordId = :recId",
                 BibliographicResource.class);
         query.setParameter("agencyId", agencyId);
         query.setParameter("recId", recId);
