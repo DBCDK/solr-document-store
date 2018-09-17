@@ -118,6 +118,12 @@ public class BeanFactoryUtil {
         };
     }
 
+    public static BibliographicResourceRetrieveBean createBibliographicResourceRetrieveBean(JpaTestEnvironment env) {
+        BibliographicResourceRetrieveBean bean = new BibliographicResourceRetrieveBean();
+        bean.entityManager = env.getEntityManager();
+        return bean;
+    }
+
     public static BibliographicRetrieveBean createBibliographicRetrieveBean(JpaTestEnvironment env) {
         BibliographicRetrieveBean bean = new BibliographicRetrieveBean();
         bean.entityManager = env.getEntityManager();

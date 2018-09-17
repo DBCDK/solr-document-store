@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -7,7 +8,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "resource")
-public class BibliographicResourceEntity {
+public class BibliographicResourceEntity implements Serializable {
+
+    private static final long serialVersionUID = -2173176418488104877L;
 
     @Id
     private int agencyId;
@@ -45,16 +48,6 @@ public class BibliographicResourceEntity {
                Objects.equals(value, that.value);
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 73 * hash + this.agencyId;
-        hash = 73 * hash + Objects.hashCode(this.bibliographicRecordId);
-        hash = 73 * hash + Objects.hashCode(this.field);
-        hash = 73 * hash + ( this.value ? 1 : 0 );
-        return hash;
-    }
-
     public int getAgencyId() {
         return agencyId;
     }
@@ -89,7 +82,7 @@ public class BibliographicResourceEntity {
 
     @Override
     public String toString() {
-        return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", field=" + field + ", bibliographicRecordId=" + bibliographicRecordId + ", value=" + value + '}';
+        return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", bibliographicRecordId=" + bibliographicRecordId + ", field=" + field + ", value=" + value + '}';
     }
 
 }

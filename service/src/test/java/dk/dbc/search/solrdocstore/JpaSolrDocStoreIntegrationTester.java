@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.persistence.JpaIntegrationTest;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.commons.persistence.TransactionScopedPersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -9,6 +10,8 @@ import org.postgresql.ds.PGSimpleDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
@@ -73,4 +76,33 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     @Test
     public void noTest() {
     }
+
+    protected <T> T jpa(JpaCodeBlockExecution<T> codeBlock) {
+        return env().getPersistenceContext().run(() -> codeBlock.execute(env().getEntityManager()));
+    }
+
+    protected void jpa(JpaCodeBlockVoidExecution codeBlock) {
+        env().getPersistenceContext().run(() -> codeBlock.execute(env().getEntityManager()));
+    }
+
+    /**
+     * Represents a code block execution with return value
+     *
+     * @param <T> return type of the code block execution
+     */
+    @FunctionalInterface
+    public interface JpaCodeBlockExecution<T> {
+
+        T execute(EntityManager em) throws Exception;
+    }
+
+    /**
+     * Represents a code block execution without return value
+     */
+    @FunctionalInterface
+    public interface JpaCodeBlockVoidExecution {
+
+        void execute(EntityManager em) throws Exception;
+    }
+
 }
