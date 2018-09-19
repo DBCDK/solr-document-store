@@ -159,6 +159,7 @@ public class BeanFactoryUtil {
         ResourceBean bean = new ResourceBean();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = env.getEntityManager();
+        bean.queue = createEnqueueSupplier(env);
         bean.openAgency = openAgency;
         return bean;
     }

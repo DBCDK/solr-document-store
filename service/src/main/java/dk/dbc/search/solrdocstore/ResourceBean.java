@@ -6,6 +6,7 @@ import dk.dbc.commons.jsonb.JSONBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -20,7 +21,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import javax.ejb.EJBException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 @Path("resource")
@@ -32,6 +35,9 @@ public class ResourceBean {
     private final JSONBContext jsonbContext = new JSONBContext();
     @Inject
     OpenAgencyBean openAgency;
+
+    @Inject
+    EnqueueSupplierBean queue;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -45,7 +51,6 @@ public class ResourceBean {
         log.debug("Added resource with key: {} - {} - {} having value: {}", request.getAgencyId(),
                   request.getBibliographicRecordId(), request.getField(), request.getValue());
         // Verify agency exists, throws exception if not exist
-        // TODO potentially improve error response???
         try {
             openAgency.lookup(request.getAgencyId());
         } catch (EJBException ex) {
@@ -54,6 +59,15 @@ public class ResourceBean {
         // Add resource
         BibliographicResourceEntity resource = request.asBibliographicResource();
         entityManager.merge(resource);
+        // Enqueue all related bib items
+        TypedQuery<BibliographicEntity> query = entityManager.createQuery(
+                "SELECT b FROM BibliographicEntity  b WHERE b.agencyId=:agencyId " +
+                        "AND b.bibliographicRecordId=:recId", BibliographicEntity.class);
+        query.setParameter("agencyId", resource.getAgencyId());
+        query.setParameter("recId", resource.getBibliographicRecordId());
+        Set<AgencyClassifierItemKey> keySet = query.getResultList().stream()
+                .map(BibliographicEntity::asAgencyClassifierItemKey).collect(Collectors.toSet());
+        EnqueueAdapter.enqueueAll(queue, keySet, Optional.empty());
         return Response.ok().entity(new StatusBean.Resp()).build();
     }
 

@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createResourceBean;
+import static dk.dbc.search.solrdocstore.QueueTestUtil.queueIs;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -28,6 +29,7 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
         // Setup records
         executeScriptResource("/resource.sql");
     }
+
     @Test
     public void testAddResource() throws JSONBException {
         AddResourceRequest request = new AddResourceRequest(870970, "23556455", "hasCoverUrl", true);
@@ -42,6 +44,19 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
+    public void testAddResourceEnqueue() {
+        AddResourceRequest request = new AddResourceRequest(870970, "hasCoverUrl", "45454545", true);
+        env().getPersistenceContext().run(() -> {
+            bean.addResource(jsonbContext.marshall(request));
+            queueIs(em,
+                    queueItem(870970, "classifier:1", "45454545"),
+                    queueItem(870970, "classifier:2", "45454545"),
+                    queueItem(870970, "classifier:3", "45454545")
+            );
+        });
+    }
+
+    @Test
     public void testGetResourcesByBibItem() {
         Response response = bean.getResourcesByBibItem(870970, "11111111");
         List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
@@ -49,5 +64,9 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
                 new BibliographicResourceEntity(870970, "11111111", "hasBackCoverUrl", false),
                 new BibliographicResourceEntity(870970, "11111111", "includesCD", true))
         );
+    }
+
+    private String queueItem(int agency, String classifier, String bibliographicRecordId) {
+        return "a," + agency + "," + classifier + "," + bibliographicRecordId;
     }
 }
