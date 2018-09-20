@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.ee.stats.Timed;
 import java.util.Collections;
 import java.util.HashMap;
