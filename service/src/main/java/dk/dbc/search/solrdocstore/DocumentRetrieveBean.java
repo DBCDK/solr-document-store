@@ -1,8 +1,11 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.ee.stats.Timed;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -43,6 +46,12 @@ public class DocumentRetrieveBean {
     @Inject
     BibliographicRetrieveBean brBean;
 
+    @Inject
+    BibliographicResourceRetrieveBean brrBean;
+
+    @Inject
+    OpenAgencyBean oaBean;
+
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ classifier }/{ bibliographicRecordId : .*}")
@@ -51,34 +60,56 @@ public class DocumentRetrieveBean {
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
-        DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId);
-        if (response == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
+        try {
+            DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId);
+            if (response == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
+            }
+            return Response.ok(response).build();
+        } catch (Exception ex) {
+            log.error("Error retrieving document {}-{}:{}: {}", agencyId, classifier, bibliographicRecordId, ex.getMessage());
+            log.debug("Error retrieving document {}-{}:{}: ", agencyId, classifier, bibliographicRecordId, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving document").build();
         }
-        return Response.ok(response).build();
     }
 
-    public DocumentRetrieveResponse getDocumentWithHoldingsitems(Integer agencyId, String classifier, String bibliographicRecordId) throws Exception {
+    public DocumentRetrieveResponse getDocumentWithHoldingsitems(int agencyId, String classifier, String bibliographicRecordId) throws Exception {
 
         BibliographicEntity biblEntity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId));
         if (biblEntity == null) {
             return null;
         }
 
-        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, null, null);
+        List<HoldingsItemEntity> holdingsItemRecords = Collections.EMPTY_LIST;
+        List<Integer> partOfDanbib = Collections.EMPTY_LIST;
+        Map<String, Map<Integer, Boolean>> attachedResources = Collections.EMPTY_MAP;
 
         if (!biblEntity.isDeleted()) {
             TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
             query.setParameter("bibliographicRecordId", bibliographicRecordId);
             query.setParameter("agencyId", agencyId);
-            response.holdingsItemRecords = query.getResultList();
+            holdingsItemRecords = query.getResultList();
 
             if (LibraryType.COMMON_AGENCY == agencyId) {
-                response.partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
+                partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
             } else {
-                response.partOfDanbib = Collections.EMPTY_LIST;
+                partOfDanbib = Collections.EMPTY_LIST;
             }
+
+            OpenAgencyEntity oaEntity = oaBean.lookup(agencyId);
+            LibraryType libraryType = oaEntity.getLibraryType();
+
+            List<BibliographicResourceEntity> resources;
+            if (LibraryType.COMMON_AGENCY == agencyId ||
+                LibraryType.SCHOOL_COMMON_AGENCY == agencyId ||
+                libraryType == LibraryType.FBS || libraryType == LibraryType.FBSSchool) {
+                resources = brrBean.getResourcesForCommon(bibliographicRecordId);
+            } else {
+                resources = brrBean.getResourcesFor(agencyId, bibliographicRecordId);
+            }
+            attachedResources = mapResources(resources);
         }
+        DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, holdingsItemRecords, partOfDanbib, attachedResources);
         return response;
     }
 
@@ -99,6 +130,15 @@ public class DocumentRetrieveBean {
                 "   AND 'true' = jsonb_extract_path_text(b.indexKeys, 'rec.excludeFromUnionCatalogue', '0'))")
                 .setParameter(1, bibliographicRecordId)
                 .getResultList();
+    }
+
+    public Map<String, Map<Integer, Boolean>> mapResources(List<BibliographicResourceEntity> resources) {
+        Map<String, Map<Integer, Boolean>> map = new HashMap<>();
+        for (BibliographicResourceEntity resource : resources) {
+            Map<Integer, Boolean> agencyResources = map.computeIfAbsent(resource.getField(), a -> new HashMap<>());
+            agencyResources.put(resource.getAgencyId(), resource.getValue());
+        }
+        return map;
     }
 
 }

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 
-import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.*;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -46,11 +45,9 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Before
     public void setupBean() {
-        bean = new DocumentRetrieveBean();
+        bean = createDocumentRetrieveBean(env());
         JpaTestEnvironment env = env();
         em = env.getEntityManager();
-        bean.entityManager = em;
-        bean.brBean = createBibliographicRetrieveBean(env);
         bibl = createBibliographicBean(env);
         hold = createHoldingsItemBean(env);
         h2b = createHoldingsToBibliographicBean(env);

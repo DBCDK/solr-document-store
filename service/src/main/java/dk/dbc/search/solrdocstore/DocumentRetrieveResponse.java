@@ -19,6 +19,7 @@
 package dk.dbc.search.solrdocstore;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -35,10 +36,13 @@ public class DocumentRetrieveResponse {
 
     public List<Integer> partOfDanbib;
 
-    public DocumentRetrieveResponse(BibliographicEntity bibliographicRecord, List<HoldingsItemEntity> holdingsItemRecords, List<Integer> partOfDanbib) {
+    public Map<String, Map<Integer, Boolean>> attachedResources;
+
+    public DocumentRetrieveResponse(BibliographicEntity bibliographicRecord, List<HoldingsItemEntity> holdingsItemRecords, List<Integer> partOfDanbib, Map<String, Map<Integer, Boolean>> attachedResources) {
         this.bibliographicRecord = bibliographicRecord;
         this.holdingsItemRecords = holdingsItemRecords;
         this.partOfDanbib = partOfDanbib;
+        this.attachedResources = attachedResources;
     }
 
 }
