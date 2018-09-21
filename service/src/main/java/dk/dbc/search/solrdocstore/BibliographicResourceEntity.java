@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -7,7 +8,10 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "resource")
-public class BibliographicResourceEntity {
+public class BibliographicResourceEntity implements Serializable {
+
+    private static final long serialVersionUID = -2173176418488104877L;
+
     @Id
     private int agencyId;
 
@@ -19,9 +23,10 @@ public class BibliographicResourceEntity {
 
     private boolean value;
 
-    public BibliographicResourceEntity(){}
+    public BibliographicResourceEntity() {
+    }
 
-    public BibliographicResourceEntity(int agencyId, String bibliographicRecordId, String field, boolean value){
+    public BibliographicResourceEntity(int agencyId, String bibliographicRecordId, String field, boolean value) {
         this.agencyId = agencyId;
         this.field = field;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -38,8 +43,9 @@ public class BibliographicResourceEntity {
         }
         BibliographicResourceEntity that = (BibliographicResourceEntity) o;
         return agencyId == that.agencyId &&
-                Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
-                Objects.equals(field, that.field);
+               Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+               Objects.equals(field, that.field) &&
+               Objects.equals(value, that.value);
     }
 
     public int getAgencyId() {
@@ -76,8 +82,7 @@ public class BibliographicResourceEntity {
 
     @Override
     public String toString() {
-        return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", field=" + field + ", bibliographicRecordId=" + bibliographicRecordId + ", value=" + value + '}';
+        return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", bibliographicRecordId=" + bibliographicRecordId + ", field=" + field + ", value=" + value + '}';
     }
-
 
 }

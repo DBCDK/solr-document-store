@@ -96,7 +96,7 @@ public class BeanFactoryUtil {
                 if (agencyId == LibraryType.COMMON_AGENCY) {
                     return RecordType.CommonRecord;
                 }
-                if (agencyId ==  LibraryType.SCHOOL_COMMON_AGENCY) {
+                if (agencyId == LibraryType.SCHOOL_COMMON_AGENCY) {
                     return RecordType.CommonRecord;
                 }
                 return RecordType.SingleRecord;
@@ -116,6 +116,21 @@ public class BeanFactoryUtil {
                 }
             }
         };
+    }
+
+    public static DocumentRetrieveBean createDocumentRetrieveBean(JpaTestEnvironment env) {
+        DocumentRetrieveBean bean = new DocumentRetrieveBean();
+        bean.entityManager = env.getEntityManager();
+        bean.brBean = createBibliographicRetrieveBean(env);
+        bean.brrBean = createBibliographicResourceRetrieveBean(env);
+        bean.oaBean = createOpenAgencyBean();
+        return bean;
+    }
+
+    public static BibliographicResourceRetrieveBean createBibliographicResourceRetrieveBean(JpaTestEnvironment env) {
+        BibliographicResourceRetrieveBean bean = new BibliographicResourceRetrieveBean();
+        bean.entityManager = env.getEntityManager();
+        return bean;
     }
 
     public static BibliographicRetrieveBean createBibliographicRetrieveBean(JpaTestEnvironment env) {
@@ -140,7 +155,7 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static ResourceBean createResourceBean(JpaTestEnvironment env){
+    public static ResourceBean createResourceBean(JpaTestEnvironment env) {
         ResourceBean bean = new ResourceBean();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = env.getEntityManager();

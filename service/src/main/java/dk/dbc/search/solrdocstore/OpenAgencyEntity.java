@@ -6,7 +6,6 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
