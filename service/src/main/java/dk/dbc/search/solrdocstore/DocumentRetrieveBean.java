@@ -91,8 +91,6 @@ public class DocumentRetrieveBean {
 
             if (LibraryType.COMMON_AGENCY == agencyId) {
                 partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
-            } else {
-                partOfDanbib = Collections.EMPTY_LIST;
             }
 
             OpenAgencyEntity oaEntity = oaBean.lookup(agencyId);
