@@ -6,6 +6,11 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
@@ -167,4 +172,51 @@ public class BusinessLogic {
             }
         }
     }
+
+    @Timed
+    public void attachedResources(JsonNode sourceDoc) {
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+        JsonNode resources = find(sourceDoc, "attachedResources");
+        for (Iterator<Entry<String, JsonNode>> iterator = resources.fields() ; iterator.hasNext() ;) {
+            Entry<String, JsonNode> entry = iterator.next();
+            log.debug("entry = {}", entry);
+            String name = entry.getKey();
+            switch (name) {
+                case "hasCoverUrl":
+                    anyTrue(indexKeys, "rec." + name, entry.getValue());
+                    break;
+                default:
+                    allTrue(indexKeys, "rec." + name, entry.getValue());
+                    break;
+            }
+        }
+    }
+
+    private void anyTrue(JsonNode indexKeys, String key, JsonNode values) {
+        Optional<String> isTrue = fieldsStream(values)
+                .filter(e -> e.getValue().asBoolean(false))
+                .map(Entry::getKey)
+                .findAny();
+        if (isTrue.isPresent()) {
+            log.trace("key {} (anyTrue), {} is true", key, isTrue.get());
+            addField(indexKeys, key, "true");
+        }
+    }
+
+    private void allTrue(JsonNode indexKeys, String key, JsonNode values) {
+        Optional<String> isFalse = fieldsStream(values)
+                .filter(e -> !e.getValue().asBoolean(false))
+                .map(Entry::getKey)
+                .findAny();
+        if (isFalse.isPresent()) {
+            log.trace("key {} (anyTrue), {} is true", key, isFalse.get());
+        } else {
+            addField(indexKeys, key, "true");
+        }
+    }
+
+    private static Stream<Entry<String, JsonNode>> fieldsStream(JsonNode node) {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(node.fields(), 0), false);
+    }
+
 }
