@@ -49,7 +49,6 @@ import static org.junit.Assert.*;
  *
  * @author DBC {@literal <dbc.dk>}
  */
-//@Ignore
 public class DocProducerIT {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducerIT.class);
@@ -156,7 +155,6 @@ public class DocProducerIT {
     }
 
     @Test
-//    @Ignore
     public void loadAndFewerHolding() throws Exception {
         System.out.println("loadAndFewerHolding");
 
@@ -164,7 +162,6 @@ public class DocProducerIT {
 
         deployAndSearch(300000, docProducer, 3);
 
-//        pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
         Requests.load("test1-part3", solrDocStoreUrl);
 
         deployAndSearch(300000, docProducer, 2);
