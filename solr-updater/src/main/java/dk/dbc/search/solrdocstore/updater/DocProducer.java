@@ -260,6 +260,8 @@ public class DocProducer {
             businessLogic.addFromPartOfDanbib(sourceDoc);
             businessLogic.addCollectionIdentifier800000(sourceDoc);
 
+            businessLogic.attachedResources(sourceDoc);
+
             SolrInputDocument doc = solrFields.newDocumentFromIndexKeys(indexKeys);
             businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId, this);
 

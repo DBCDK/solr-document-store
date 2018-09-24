@@ -183,35 +183,40 @@ public class BusinessLogic {
             String name = entry.getKey();
             switch (name) {
                 case "hasCoverUrl":
-                    anyTrue(indexKeys, "rec." + name, entry.getValue());
+                    anyTrueSet(indexKeys, "rec." + name, entry.getValue(), false);
                     break;
                 default:
-                    allTrue(indexKeys, "rec." + name, entry.getValue());
+                    allTrueSet(indexKeys, "rec." + name, entry.getValue(), false);
                     break;
             }
         }
     }
 
-    private void anyTrue(JsonNode indexKeys, String key, JsonNode values) {
+    private void anyTrueSet(JsonNode indexKeys, String key, JsonNode values, boolean setFalseOverrideExisting) {
         Optional<String> isTrue = fieldsStream(values)
                 .filter(e -> e.getValue().asBoolean(false))
                 .map(Entry::getKey)
                 .findAny();
         if (isTrue.isPresent()) {
             log.trace("key {} (anyTrue), {} is true", key, isTrue.get());
-            addField(indexKeys, key, "true");
+            setField(indexKeys, key, "true");
+        } else if (setFalseOverrideExisting) {
+            setField(indexKeys, key, "false");
         }
     }
 
-    private void allTrue(JsonNode indexKeys, String key, JsonNode values) {
+    private void allTrueSet(JsonNode indexKeys, String key, JsonNode values, boolean setFalseOverrideExisting) {
         Optional<String> isFalse = fieldsStream(values)
                 .filter(e -> !e.getValue().asBoolean(false))
                 .map(Entry::getKey)
                 .findAny();
         if (isFalse.isPresent()) {
             log.trace("key {} (anyTrue), {} is true", key, isFalse.get());
+            if (setFalseOverrideExisting) {
+                setField(indexKeys, key, "false");
+            }
         } else {
-            addField(indexKeys, key, "true");
+            setField(indexKeys, key, "true");
         }
     }
 
