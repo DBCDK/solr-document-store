@@ -1,6 +1,6 @@
 FROM docker.dbc.dk/payara-micro:LogAsJson
 
-ENV APPLICATION_NAME=solr-indexer-cloud-worker \
+ENV APPLICATION_NAME=solr-doc-store-updater \
     ADD_PAYARA_ARGS=--nocluster
 
 LABEL SOLR_URL="zk or http url of solr-collection (required)" \
