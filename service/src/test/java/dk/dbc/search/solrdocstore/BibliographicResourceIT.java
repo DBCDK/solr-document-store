@@ -44,14 +44,73 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void testAddResourceEnqueue() {
-        AddResourceRequest request = new AddResourceRequest(870970, "hasCoverUrl", "45454545", true);
-        env().getPersistenceContext().run(() -> {
+    public void testAddNonFBSdResourceEnqueue() {
+        AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
+        jpa(em -> {
+            em.merge(new OpenAgencyEntity(890890,LibraryType.NonFBS,false,false));
+            em.merge(new BibliographicEntity(890890,"classifier:1","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new BibliographicEntity(890890,"classifier:2","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new BibliographicEntity(890890,"classifier:3","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new BibliographicResourceEntity(890890,"45454545","hasCoverUrl",true));
             bean.addResource(jsonbContext.marshall(request));
+            // Only enqueues its own items
             queueIs(em,
-                    queueItem(870970, "classifier:1", "45454545"),
-                    queueItem(870970, "classifier:2", "45454545"),
-                    queueItem(870970, "classifier:3", "45454545")
+                    queueItem(890890, "classifier:1", "45454545"),
+                    queueItem(890890, "classifier:2", "45454545"),
+                    queueItem(890890, "classifier:3", "45454545")
+            );
+        });
+    }
+
+    @Test
+    public void testAddCommonResourceEnqueue() {
+        AddResourceRequest request = new AddResourceRequest(870970, "12121212", "hasCoverUrl", true);
+        runCommonEnqueueTest(request);
+    }
+
+    @Test
+    public void testAddSchoolCommonResourceEnqueue() {
+        AddResourceRequest request = new AddResourceRequest(300000, "12121212", "hasCoverUrl", true);
+        runCommonEnqueueTest(request);
+    }
+
+    @Test
+    public void testAddFBSResourceEnqueue() {
+        AddResourceRequest request = new AddResourceRequest(610610, "12121212", "hasCoverUrl", true);
+        runCommonEnqueueTest(request);
+    }
+
+
+    @Test
+    public void testAddFBSSchoolResourceEnqueue() {
+        AddResourceRequest request = new AddResourceRequest(312000, "12121212", "hasCoverUrl", true);
+        runCommonEnqueueTest(request);
+    }
+
+    private void runCommonEnqueueTest(AddResourceRequest request) {
+        jpa(em -> {
+            // Setup
+            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS,false,false));
+            em.merge(new OpenAgencyEntity(870970,LibraryType.NonFBS,false,false));
+            em.merge(new OpenAgencyEntity(300000,LibraryType.NonFBS,false,false));
+            em.merge(new OpenAgencyEntity(610610,LibraryType.FBS,false,false));
+            em.merge(new OpenAgencyEntity(312000,LibraryType.FBSSchool,false,false));
+            em.merge(new BibliographicEntity(870970,"classifier:1","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new BibliographicEntity(300000,"classifier:1","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new BibliographicEntity(610610,"classifier:2","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new BibliographicEntity(312000,"classifier:3","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            // Elements that should not be enqueued
+            em.merge(new BibliographicEntity(312000,"classifier:3","21212121","repo","work:1","unit:1","producer:1",false,null,"track:1")); // Non-matching bibliographicRecordId
+            em.merge(new BibliographicEntity(890890,"classifier:3","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1")); // NonFBS should not be enqueued
+            // Resource
+            em.merge(new BibliographicResourceEntity(300000,"12121212","hasCoverUrl",true));
+            bean.addResource(jsonbContext.marshall(request));
+            // Enqueues all posts with the recordId, since they might inherit this value from common
+            queueIs(em,
+                    queueItem(870970, "classifier:1", "12121212"),
+                    queueItem(300000, "classifier:1", "12121212"),
+                    queueItem(610610, "classifier:2", "12121212"),
+                    queueItem(312000, "classifier:3", "12121212")
             );
         });
     }

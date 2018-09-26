@@ -12,8 +12,6 @@ import javax.persistence.TypedQuery;
 @Stateless
 public class BibliographicResourceRetrieveBean {
 
-    private static final EnumSet<LibraryType> FBS_LIBS = EnumSet.of(LibraryType.FBS, LibraryType.FBSSchool);
-
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -36,7 +34,7 @@ public class BibliographicResourceRetrieveBean {
                 " ON br.agencyId = oa.agencyId " +
                 " WHERE oa.libraryType IN :types" +
                 " AND br.bibliographicRecordId = :bibId", BibliographicResourceEntity.class);
-        return query.setParameter("types", FBS_LIBS)
+        return query.setParameter("types", LibraryType.FBS_LIBS)
                 .setParameter("bibId", bibliographicRecordId)
                 .getResultList();
     }
