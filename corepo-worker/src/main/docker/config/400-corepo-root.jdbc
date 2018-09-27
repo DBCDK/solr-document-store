@@ -1,4 +1,4 @@
-[jdbc/corepo]
+[jdbc/solr-worker/corepo]
 "${COREPO_ROOT}"
 
 ApplicationName=${APPLICATION_NAME|MyApp}
