@@ -1,5 +1,5 @@
-[jdbc/corepo]
-"${COREPO_ROOT}"
+[jdbc/solr-worker/corepo]
+"${COREPO_POSTGRES_URL}"
 
 ApplicationName=${APPLICATION_NAME|MyApp}
 

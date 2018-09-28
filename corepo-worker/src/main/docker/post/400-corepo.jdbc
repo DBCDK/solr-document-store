@@ -3,6 +3,6 @@ postgres
 nonTransactionalConnections = true
 
 [properties]
-${COREPO_ROOT}
+${COREPO_POSTGRES_URL}
 
 [jdbc/corepo]
