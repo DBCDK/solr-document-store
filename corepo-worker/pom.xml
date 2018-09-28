@@ -19,6 +19,7 @@
     <artifactId>solr-doc-store-corepo-worker</artifactId>
     <packaging>war</packaging>
     <name>solr-doc-store-corepo-worker</name>
+    <version>1.1-SNAPSHOT</version>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -54,7 +55,7 @@
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>corepo-access-ee</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -237,7 +238,7 @@
                                 <artifactItem>
                                     <groupId>dk.dbc</groupId>
                                     <artifactId>corepo-access</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
+                                    <version>1.1-SNAPSHOT</version>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                             </artifactItems>
@@ -266,10 +267,6 @@
                         <configuration>
                             <pgPort>${corepo.port}</pgPort>
                             <pgDbName>corepo</pgDbName>
-                            <pgDbScripts>
-                                <param>${test.resources}/repository/consobjrepo.sql</param>
-                                <param>${test.resources}/repository/root.sql</param>
-                            </pgDbScripts>
                             <parameters>
                                 <max_prepared_transactions>10</max_prepared_transactions>
                                 <log_statement>'all'</log_statement>
@@ -350,7 +347,7 @@
                         </goals>
                         <configuration>
                             <commands>
-                                <command>create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:resourceBase=solr-worker/corepo:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://localhost:${wiremock.port}/":solrDocStoreUrl="http://localhost:${docstore.port}/solr-doc-store/api/bibliographic":commitWithin=1000 solr-worker</command>
+                                <command>create-custom-resource --restype=java.util.Properties --factoryclass=org.glassfish.resources.custom.factory.PropertiesFactory --property=jmxDomain=solr-worker:solrDocumentQueueName=jms_solrDocuments:openAgencyUrl="http://localhost:${wiremock.port}/":solrDocStoreUrl="http://localhost:${docstore.port}/solr-doc-store/api/bibliographic":commitWithin=1000 solr-worker</command>
                                 <command>create-jdbc-connection-pool --restype=javax.sql.DataSource --datasourceclassname=org.postgresql.ds.PGSimpleDataSource --property=driverClass=org.postgresql.Driver:url="jdbc:postgresql://localhost:${corepo.port}/corepo":User=${user.name}:Password="" jdbc/solr-worker/corepo/pool</command>
                                 <command>create-jdbc-resource --connectionpoolid=jdbc/solr-worker/corepo/pool jdbc/solr-worker/corepo</command>
                                 <command>jms-ping</command>
