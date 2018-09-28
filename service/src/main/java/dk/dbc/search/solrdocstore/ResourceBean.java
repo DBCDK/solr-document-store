@@ -6,6 +6,7 @@ import dk.dbc.commons.jsonb.JSONBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -20,18 +21,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import javax.ejb.EJBException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 @Path("resource")
 public class ResourceBean {
-
     private static final Logger log = LoggerFactory.getLogger(ResourceBean.class);
     private static final ObjectMapper O = new ObjectMapper();
 
     private final JSONBContext jsonbContext = new JSONBContext();
     @Inject
     OpenAgencyBean openAgency;
+
+    @Inject
+    EnqueueSupplierBean queue;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -45,16 +50,55 @@ public class ResourceBean {
         log.debug("Added resource with key: {} - {} - {} having value: {}", request.getAgencyId(),
                   request.getBibliographicRecordId(), request.getField(), request.getValue());
         // Verify agency exists, throws exception if not exist
-        // TODO potentially improve error response???
+        LibraryType libraryType;
         try {
-            openAgency.lookup(request.getAgencyId());
+            OpenAgencyEntity oaEntity = openAgency.lookup(request.getAgencyId());
+            libraryType = oaEntity.getLibraryType();
         } catch (EJBException ex) {
             return Response.ok().entity(new StatusBean.Resp("Unknown agency")).build();
         }
         // Add resource
         BibliographicResourceEntity resource = request.asBibliographicResource();
         entityManager.merge(resource);
+        // Enqueue all related bib items
+        List<BibliographicEntity> bibliographicEntities;
+        if (LibraryType.COMMON_AGENCY == request.getAgencyId() ||
+                LibraryType.SCHOOL_COMMON_AGENCY == request.getAgencyId() ||
+                libraryType == LibraryType.FBS || libraryType == LibraryType.FBSSchool) {
+            bibliographicEntities = commonRelatedBibEntities(resource);
+        } else {
+            bibliographicEntities = nonFBSBibEntries(resource);
+        }
+        Set<AgencyClassifierItemKey> keySet = bibliographicEntities.stream()
+                .map(BibliographicEntity::asAgencyClassifierItemKey).collect(Collectors.toSet());
+        EnqueueAdapter.enqueueAll(queue, keySet, Optional.empty());
         return Response.ok().entity(new StatusBean.Resp()).build();
+    }
+
+    private List<BibliographicEntity> commonRelatedBibEntities(BibliographicResourceEntity resource) {
+        TypedQuery<BibliographicEntity> query = entityManager.createQuery(
+                "SELECT b FROM BibliographicEntity  b " +
+                        " JOIN OpenAgencyEntity AS oa" +
+                        " ON b.agencyId = oa.agencyId " +
+                        "WHERE (b.agencyId=:commonAgency1 " +
+                        "OR b.agencyId=:commonAgency2 " +
+                        "OR oa.libraryType IN :types) " +
+                        "AND b.bibliographicRecordId=:recId", BibliographicEntity.class);
+        query.setParameter("commonAgency1", LibraryType.COMMON_AGENCY);
+        query.setParameter("commonAgency2", LibraryType.SCHOOL_COMMON_AGENCY);
+        query.setParameter("recId", resource.getBibliographicRecordId());
+        query.setParameter("types", LibraryType.FBS_LIBS);
+        return query.getResultList();
+    }
+
+    private List<BibliographicEntity> nonFBSBibEntries(BibliographicResourceEntity resource) {
+        TypedQuery<BibliographicEntity> query = entityManager.createQuery(
+                "SELECT b FROM BibliographicEntity  b " +
+                        "WHERE b.agencyId=:agencyId " +
+                        "AND b.bibliographicRecordId=:recId", BibliographicEntity.class);
+        query.setParameter("agencyId", resource.getAgencyId());
+        query.setParameter("recId", resource.getBibliographicRecordId());
+        return query.getResultList();
     }
 
     @GET
