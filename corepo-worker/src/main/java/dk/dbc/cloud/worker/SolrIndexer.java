@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.function.BiConsumer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Lock;
@@ -44,7 +43,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import static net.logstash.logback.marker.Markers.*;
 
@@ -58,6 +56,10 @@ public class SolrIndexer {
     private static final Logger log = LoggerFactory.getLogger(SolrIndexer.class);
 
     @Inject
+    @EEConfig.Name("resourceBase")
+    private String resourceBase;
+
+    @Inject
     @EEConfig.Name("jmxDomain")
     private String jmxDomain;
 
@@ -65,10 +67,7 @@ public class SolrIndexer {
     @EEConfig.Name("openAgencyUrl")
     private String openAgencyUrl;
 
-    @Resource(lookup = "jdbc/solr-worker/corepo")
-    DataSource daoDataSource;
-
-    private CORepoProviderEE daoProvider;
+    private RepositoryProvider daoProvider;
 
     @EJB
     MetricsRegistry registry;
@@ -85,8 +84,13 @@ public class SolrIndexer {
         libraryRuleHandler = OpenAgencyServiceFromURL.builder().connectTimeout(30000).requestTimeout(30000)
                 .build(openAgencyUrl).libraryRules();
 
-        daoProvider = (CORepoProviderEE) (new CORepoProviderEE(jmxDomain));
-        dk.dbc.corepo.access.DatabaseMigrator.migrate(daoDataSource);
+        if (resourceBase != null) {
+            try {
+                daoProvider = new CORepoProviderEE(jmxDomain, resourceBase);
+            } catch (NamingException | SQLException ex) {
+                throw new EJBException("Failed to initialize repository provider " + resourceBase, ex);
+            }
+        }
     }
 
     @PreDestroy
@@ -100,7 +104,7 @@ public class SolrIndexer {
     @Lock(LockType.READ)
     @SuppressFBWarnings(value = "ICAST_IDIV_CAST_TO_DOUBLE", justification = "trimming of number of digits for LogStash.Marker#append()")
     public void buildDocuments(String pid, SolrIndexerJS jsWrapper, BiConsumer<String, SolrUpdaterCallback> function) throws Exception {
-        try (IRepositoryDAO dao = daoProvider.getRepository(daoDataSource)) {
+        try (IRepositoryDAO dao = daoProvider.getRepository()) {
             try {
                 if (jsWrapper.isIndexableIdentifier(pid)) {
                     long starttime = System.nanoTime();
@@ -141,7 +145,7 @@ public class SolrIndexer {
 
     @Lock(LockType.READ)
     public String unitFor(String pid) throws RepositoryException {
-        try (IRepositoryDAO dao = daoProvider.getRepository(daoDataSource)) {
+        try (IRepositoryDAO dao = daoProvider.getRepository()) {
             IRepositoryIdentifier id = dao.createIdentifier(pid);
             if (!dao.hasObject(id)) {
                 throw new IllegalStateException("Doesn't have pid: " + pid);
@@ -160,7 +164,7 @@ public class SolrIndexer {
         if (unit == null) {
             return null;
         }
-        try (IRepositoryDAO dao = daoProvider.getRepository(daoDataSource)) {
+        try (IRepositoryDAO dao = daoProvider.getRepository()) {
             ISysRelationsStream relations = dao.getSysRelationsStream(dao.createIdentifier(unit));
             IRepositoryIdentifier work = relations.getWorkFor();
             return work.toString();
