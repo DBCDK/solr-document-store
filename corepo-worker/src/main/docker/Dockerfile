@@ -8,7 +8,7 @@ USER root
 RUN apt-install zip
 USER payara
 
-LABEL COREPO_ROOT="CORepo database url user:passwork@host:port/database (Required)" \
+LABEL COREPO_POSTGRES_URL="CORepo database url user:passwork@host:port/database (Required)" \
       SOLR_INDEXER_CLOUD_MQ_HOST="Message queue host (required)" \
       SOLR_INDEXER_CLOUD_MQ_PORT="Message queue port (optional, default is 7676)" \
       OPEN_AGENCY_URL="URL for OpenAgency service (required)" \
