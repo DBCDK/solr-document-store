@@ -109,6 +109,8 @@ public class OpenAgencyBean {
         log.debug("has live holdings for {} is {}", agencyId, booleans);
         if (booleans.contains(true)) {
             log.error("Cannot migrate OpenAgency entry for {}, has live holdings ({} -> {})", agencyId, oldEntry, newEntry);
+            oldEntry.setValid(false);
+            entityManager.merge(oldEntry);
         } else if (booleans.contains(false)) {
             log.warn("Migrate OpenAgency entry for {}, has no live holdings ({} -> {})", agencyId, oldEntry, newEntry);
             purgeHoldingFor(agencyId);
