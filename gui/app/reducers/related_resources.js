@@ -15,7 +15,6 @@ export default function relatedResources(
   state = produceInitialState(),
   action = {}
 ) {
-  console.log(action.type);
   switch (action.type) {
     case SELECT_BIB_RECORD:
       // handling invalid actions
@@ -29,10 +28,8 @@ export default function relatedResources(
       });
     case PULL_RELATED_RESOURCES_SUCCESS:
       // Handling invalid actions
-      console.log("before: " + JSON.stringify(action.result));
       let result =
         action.result && Array.isArray(action.result) ? action.result : [];
-      console.log("after: " + JSON.stringify(result));
       return update(state, {
         loading: { $set: false },
         errorMessage: { $set: "" },
