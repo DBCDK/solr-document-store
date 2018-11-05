@@ -12,12 +12,26 @@ const RelatedResourcesExplorer = ({ resources, errorMessage, loading }) => {
   } else if (resources.length === 0) {
     return <div>Nothing to show here</div>;
   } else {
-    return resources.map((r, i) => (
-      <ResourceItem
-        key={resources[i].bibliographicRecordId + "" + i}
-        resource_item={resources[i]}
-      />
-    ));
+    return (
+      <table className="table table-striped">
+        <thead>
+          <tr>
+            <th>Bibliographic Record ID</th>
+            <th>Agency ID</th>
+            <th>Field</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resources.map((r, i) => (
+            <ResourceItem
+              key={resources[i].bibliographicRecordId + "" + i}
+              resource_item={resources[i]}
+            />
+          ))}
+        </tbody>
+      </table>
+    );
   }
 };
 
