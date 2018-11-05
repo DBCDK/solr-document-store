@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara-micro:LogAsJson
+FROM docker.dbc.dk/payara5-micro:os
 
 ENV APPLICATION_NAME=solr-doc-store-updater \
     ADD_PAYARA_ARGS=--nocluster
