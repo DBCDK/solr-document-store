@@ -4,6 +4,7 @@ import ListResults from "./list_results";
 import DisplayError from "./display_error";
 import BibliographicExplorer from "./bibliographic_explorer";
 import RelatedHoldingsExplorer from "./related_holdings";
+import RelatedResourcesExplorer from "./related_resources";
 import { connect } from "react-redux";
 import { initialRetrieveBibItem } from "../actions/searching";
 import {
@@ -19,6 +20,7 @@ import {
 
 const BIBLIOGRAPHIC_EXPLORER = 0;
 const RELATED_HOLDINGS_EXPLORER = 1;
+const RELATED_RESOURCES_EXPLORER = 2;
 
 class SolrDocstoreGUI extends React.PureComponent {
   constructor(props) {
@@ -29,6 +31,9 @@ class SolrDocstoreGUI extends React.PureComponent {
     };
     this.activateTabWithKey = this.activateTabWithKey.bind(this);
     this.activateIndexKeyExplorer = this.activateIndexKeyExplorer.bind(this);
+    this.activateRelatedResourceExplorer = this.activateRelatedResourceExplorer.bind(
+      this
+    );
     this.activateRelatedHoldingsExplorer = this.activateRelatedHoldingsExplorer.bind(
       this
     );
@@ -73,6 +78,10 @@ class SolrDocstoreGUI extends React.PureComponent {
 
   activateRelatedHoldingsExplorer() {
     this.activateTabWithKey(RELATED_HOLDINGS_EXPLORER);
+  }
+
+  activateRelatedResourceExplorer() {
+    this.activateTabWithKey(RELATED_RESOURCES_EXPLORER);
   }
 
   isActive(key) {
@@ -127,6 +136,14 @@ class SolrDocstoreGUI extends React.PureComponent {
                       Related holdings
                     </NavLink>
                   </NavItem>
+                  <NavItem>
+                    <NavLink
+                      className={this.isActive(RELATED_RESOURCES_EXPLORER)}
+                      onClick={this.activateRelatedResourceExplorer}
+                    >
+                      Related resources
+                    </NavLink>
+                  </NavItem>
                 </Nav>
               </div>
               <TabContent activeTab={this.state.activeItem}>
@@ -135,6 +152,9 @@ class SolrDocstoreGUI extends React.PureComponent {
                 </TabPane>
                 <TabPane tabId={RELATED_HOLDINGS_EXPLORER}>
                   <RelatedHoldingsExplorer />
+                </TabPane>
+                <TabPane tabId={RELATED_RESOURCES_EXPLORER}>
+                  <RelatedResourcesExplorer />
                 </TabPane>
               </TabContent>
             </div>
