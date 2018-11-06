@@ -6,6 +6,7 @@ import BibliographicExplorer from "./bibliographic_explorer";
 import RelatedHoldingsExplorer from "./related_holdings";
 import RelatedResourcesExplorer from "./related_resources";
 import { connect } from "react-redux";
+import { hot } from "react-hot-loader";
 import { initialRetrieveBibItem } from "../actions/searching";
 import {
   Nav,
@@ -172,4 +173,6 @@ const mapDispatchToProps = dispatch => ({
     dispatch(initialRetrieveBibItem(bibId, agencyId))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(SolrDocstoreGUI);
+export default hot(module)(
+  connect(mapStateToProps, mapDispatchToProps)(SolrDocstoreGUI)
+);

@@ -2,7 +2,6 @@
 import regeneratorRuntime from "regenerator-runtime/runtime";
 const React = require("react");
 const ReactDOM = require("react-dom");
-import { AppContainer } from "react-hot-loader";
 // Main app
 import SolrDocstoreGUI from "./components/solr-docstore-gui";
 // Redux related
@@ -15,22 +14,9 @@ import "font-awesome/css/font-awesome.min.css";
 
 let store = configureStore();
 
-const render = Component => {
-  ReactDOM.render(
-    <AppContainer>
-      <Provider store={store}>
-        <Component />
-      </Provider>
-    </AppContainer>,
-    document.getElementById("solr-docstore-gui-root")
-  );
-};
-
-render(SolrDocstoreGUI);
-
-// Webpack Hot Module Replacement API
-if (module.hot) {
-  module.hot.accept(() => {
-    render(SolrDocstoreGUI);
-  });
-}
+ReactDOM.render(
+  <Provider store={store}>
+    <SolrDocstoreGUI />
+  </Provider>,
+  document.getElementById("solr-docstore-gui-root")
+);
