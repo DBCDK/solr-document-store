@@ -42,6 +42,13 @@ export default {
       )}/${bibliographicAgencyId}`
     ).then(parse);
   },
+  pullRelatedResources(bibliographicRecordId, bibliographicAgencyId) {
+    return fetch(
+      `api/resource/resources-by-bib-item/${bibliographicAgencyId}/${encodeURIComponent(
+        bibliographicRecordId
+      )}`
+    ).then(parse);
+  },
   fetchQueueRules() {
     return fetch("api/queue-rules").then(parse);
   },

@@ -2,6 +2,7 @@ import { call, fork, takeLatest, select, put, all } from "redux-saga/effects";
 import * as searchActions from "../actions/searching";
 import * as globalActions from "../actions/global";
 import * as relatedHoldingsActions from "../actions/related_holdings";
+import * as relatedResourcesActions from "../actions/related_resources";
 import api, { SEARCH_BIB_ID, SEARCH_REPO_ID } from "../api";
 
 export const getSearchParameter = state => state.search.searchParameter;
@@ -64,6 +65,21 @@ export function* pullRelatedHoldings(action) {
   }
 }
 
+export function* pullRelatedResources(action) {
+  try {
+    let { bibliographicRecordId, agencyId } = action.item;
+    const resources = yield call(
+      api.pullRelatedResources,
+      bibliographicRecordId,
+      agencyId
+    );
+    yield put(relatedResourcesActions.pullSuccess(resources));
+  } catch (e) {
+    console.log("We had the pull error: " + e.message);
+    yield put(relatedResourcesActions.pullFailed(e));
+  }
+}
+
 export function* initialRetrieveBibItem(action) {
   let bibliographicRecordId = action.bibliographicRecordId;
   let bibliographicAgencyId = action.bibliographicAgencyId;
@@ -113,6 +129,10 @@ export function* watchPullRelatedHoldings() {
   yield takeLatest(globalActions.SELECT_BIB_RECORD, pullRelatedHoldings);
 }
 
+export function* watchPullRelatedResources() {
+  yield takeLatest(globalActions.SELECT_BIB_RECORD, pullRelatedResources);
+}
+
 export function* watchInitialRetrieveBibItem() {
   yield takeLatest(
     searchActions.INITIAL_RETRIEVE_BIB_ITEM,
@@ -128,6 +148,7 @@ export default function* root() {
   yield all([
     fork(watchSearch),
     fork(watchPullRelatedHoldings),
+    fork(watchPullRelatedResources),
     fork(watchFetchPage),
     fork(watchInitialRetrieveBibItem),
     fork(watchSelectBibRecord)

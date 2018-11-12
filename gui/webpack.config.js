@@ -2,6 +2,7 @@ var packageJSON = require("./package.json");
 var path = require("path");
 var webpack = require("webpack");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 const PATHS = {
   build: path.join(
@@ -16,66 +17,58 @@ const PATHS = {
   )
 };
 
-const extract = new ExtractTextPlugin({
-  filename: "solr-docstore-gui-styles.css",
-  disable: process.env.NODE_ENV === "development"
-});
+const createExtractPlugin = mode =>
+  new ExtractTextPlugin({
+    filename: "solr-docstore-gui-styles.css",
+    disable: mode === "development"
+  });
 
-var plugins = [
-  new webpack.DefinePlugin({
-    "process.env.NODE_ENV": JSON.stringify(
-      process.env.NODE_ENV || "development"
-    )
-  }),
+var createPlugins = extractPlugin => [
   // Only includes desired locales in moment.js, I assume en (united states) is default included. We further include Danish
   new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /da/),
-  extract
+  extractPlugin
 ];
 
-if (process.env.NODE_ENV === "production") {
-  plugins.push(
-    new webpack.optimize.UglifyJsPlugin({
-      beautify: false,
-      minimize: true,
-      mangle: {
-        screw_ie8: true,
-        keep_fnames: false
-      },
-      compress: {
-        screw_ie8: true,
-        //drop_console: true, // strips console statements
-        unused: true,
-        dead_code: true // big one--strip code that will never execute
-      },
-      comments: false
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
-      minChunks: function(module) {
-        // this assumes your vendor imports exist in the node_modules directory
-        return module.context && module.context.includes("node_modules");
-      }
-    })
-  );
-} else {
-  plugins.push(
-    new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin()
-  );
-}
-
-module.exports = {
+var createConfig = (plugins, extractPlugin) => ({
   entry: {
-    "solr-docstore-gui": ["react-hot-loader/patch", "./app/index.js"],
-    "queue-admin-gui": ["react-hot-loader/patch", "./app/queue-admin.js"]
+    "solr-docstore-gui": "./app/index.js",
+    "queue-admin-gui": "./app/queue-admin.js"
   },
   output: {
     path: PATHS.build,
     publicPath: "/",
     filename: "[name]-bundle.js"
   },
-  devtool: "inline-source-map",
   plugins: plugins,
+  optimization: {
+    //runtimeChunk: "single",
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "vendor",
+          chunks: "all"
+        }
+      }
+    },
+    minimizer: [
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          beautify: false,
+          minimize: true,
+          mangle: {
+            keep_fnames: false
+          },
+          compress: {
+            //drop_console: true, // strips console statements
+            unused: true,
+            dead_code: true // big one--strip code that will never execute
+          },
+          comments: false
+        }
+      })
+    ]
+  },
   module: {
     rules: [
       {
@@ -85,7 +78,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: extract.extract({
+        loader: extractPlugin.extract({
           fallback: "style-loader",
           use: "css-loader"
         })
@@ -134,4 +127,14 @@ module.exports = {
       }
     }
   }
+});
+
+module.exports = (env, argv) => {
+  const extract = createExtractPlugin(argv.mode);
+  const plugins = createPlugins(extract);
+  const config = createConfig(plugins, extract);
+  if (argv.mode === "development") {
+    config.devtool = "source-map";
+  }
+  return config;
 };
