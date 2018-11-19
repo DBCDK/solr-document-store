@@ -1,9 +1,0 @@
-[solr-worker]
-
-resourceBase=corepo
-jmxDomain=solr-cloud-indexer-worker
-openAgencyUrl=${OPEN_AGENCY_URL}
-solrDocStoreUrl=${SOLR_DOC_STORE_URL}
-deadPidQueue=${ERROR_QUEUE_NAME|jms_deadPidQueue}
-jsonPrettyPrint=${JSON_PRETTY_PRINT|false}
-commitWithin=${COMMIT_WITHIN|-1}

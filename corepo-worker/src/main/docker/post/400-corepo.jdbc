@@ -1,8 +1,0 @@
-[jdbc/corepo/pool]
-postgres
-nonTransactionalConnections = true
-
-[properties]
-${COREPO_ROOT}
-
-[jdbc/corepo]
