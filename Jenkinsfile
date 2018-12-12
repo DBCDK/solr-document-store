@@ -1,5 +1,6 @@
 if (env.BRANCH_NAME == 'master') {
     properties([
+        disableConcurrentBuilds(),
         pipelineTriggers([
             triggers: [
                 [
