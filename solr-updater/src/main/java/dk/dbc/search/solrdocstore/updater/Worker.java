@@ -76,6 +76,10 @@ public class Worker {
         this.worker.awaitTermination(1, TimeUnit.MINUTES);
     }
 
+    public List<String> hungThreads() {
+        return worker.hungThreads();
+    }
+
     public JobConsumer<QueueJob> makeWorker() {
         return new JobConsumer<QueueJob>() {
             @Override
