@@ -23,7 +23,10 @@ const mapStateToProps = state => ({
   disabled: state.queues.deletionQueueRulePending
 });
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  dispatchDeletion: () => dispatch(deleteQueueRule(ownProps.queueRule))
+  dispatchDeletion: () => {
+    if (confirm("Du er ved at slette en kø, er du 100% sikker?"))
+      dispatch(deleteQueueRule(ownProps.queueRule));
+  }
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({

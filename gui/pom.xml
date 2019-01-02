@@ -58,9 +58,6 @@
                         <configuration>
                             <arguments>test</arguments>
                         </configuration>
-
-                        <!-- optional: the default plase is "test". Some developers
-                        choose to run karma in the "integration-test" phase. -->
                         <phase>test</phase>
                     </execution>
 
