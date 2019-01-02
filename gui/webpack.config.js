@@ -4,16 +4,18 @@ var webpack = require("webpack");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 var UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
+const publicPathFolders = ["webjars", packageJSON.name, packageJSON.version];
+
 const PATHS = {
+  // For path to be absolute we prepend a /
+  publicPath: "/" + path.join(...publicPathFolders) + "/",
   build: path.join(
     __dirname,
     "target",
     "classes",
     "META-INF",
     "resources",
-    "webjars",
-    packageJSON.name,
-    packageJSON.version
+    ...publicPathFolders
   )
 };
 
@@ -36,7 +38,7 @@ var createConfig = (plugins, extractPlugin) => ({
   },
   output: {
     path: PATHS.build,
-    publicPath: "/",
+    publicPath: PATHS.publicPath,
     filename: "[name]-bundle.js"
   },
   plugins: plugins,
@@ -87,7 +89,7 @@ var createConfig = (plugins, extractPlugin) => ({
         test: /\.(woff|woff2|png|jpg|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
         loader: "file-loader",
         options: {
-          publicPath: "",
+          publicPath: PATHS.publicPath,
           name: "[name].[ext]"
         }
       }
