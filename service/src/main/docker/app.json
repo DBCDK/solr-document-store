@@ -1,0 +1,12 @@
+{
+  "jdbc": {
+    "jdbc/solr-doc-store": {
+      "xa": false,
+      "url": "${DOCSTORE_POSTGRES_URL}"
+    },
+    "jdbc/solr-doc-store-nt": {
+      "xa": true,
+      "url": "${DOCSTORE_POSTGRES_URL}"
+    }
+  }
+}
