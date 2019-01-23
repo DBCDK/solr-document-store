@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.EJBException;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
@@ -45,13 +44,15 @@ public class OpenAgency {
         private final boolean part_of_danbib;
         private final boolean part_of_bibliotek_dk;
         private final boolean research_library;
+        private final boolean auth_create_common_record;
 
-        public LibraryRule(boolean use_localdata_stream, boolean use_holdings_item, boolean part_of_danbib, boolean part_of_bibliotek_dk, boolean research_library) {
+        public LibraryRule(boolean use_localdata_stream, boolean use_holdings_item, boolean part_of_danbib, boolean part_of_bibliotek_dk, boolean research_library, boolean auth_create_common_record) {
             this.use_localdata_stream = use_localdata_stream;
             this.use_holdings_item = use_holdings_item;
             this.part_of_danbib = part_of_danbib;
             this.part_of_bibliotek_dk = part_of_bibliotek_dk;
             this.research_library = research_library;
+            this.auth_create_common_record = auth_create_common_record;
         }
 
         public boolean hasUseLocaldataStream() {
@@ -60,6 +61,10 @@ public class OpenAgency {
 
         public boolean hasUseHoldingItem() {
             return use_holdings_item;
+        }
+
+        public boolean hasAuthCreateCommonRecord() {
+            return auth_create_common_record;
         }
 
         public boolean isPartOfBibliotekDk() {
@@ -169,6 +174,7 @@ public class OpenAgency {
             boolean use_holdings_item = false;
             boolean part_of_danbib = false;
             boolean part_of_bibliotek_dk = false;
+            boolean auth_create_common_record = false;
 
             for (JsonNode rule : rules) {
                 String name = getJsonValue(getJsonKey(rule, "name"));
@@ -185,12 +191,15 @@ public class OpenAgency {
                     case "part_of_bibliotek_dk":
                         part_of_bibliotek_dk = getJsonValue(getJsonKey(rule, "bool")).equals("1");
                         break;
+                    case "auth_create_common_record":
+                        auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                        break;
                     default:
                         break;
                 }
             }
             return new LibraryRule(use_localdata_stream, use_holdings_item, part_of_danbib, part_of_bibliotek_dk,
-                                   RESEARCH_LIBRARY.equals(agencyTypeText));
+                                   RESEARCH_LIBRARY.equals(agencyTypeText), auth_create_common_record);
         }
         throw new IOException("Cannot find valid openagency in json for agency: " + agencyId);
     }
