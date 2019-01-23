@@ -259,11 +259,12 @@ public class DocProducer {
             businessLogic.addRecHoldingsAgencyId(sourceDoc);
             businessLogic.addFromPartOfDanbib(sourceDoc);
             businessLogic.addCollectionIdentifier800000(sourceDoc);
+            businessLogic.addHoldingsItemRole(sourceDoc);
 
             businessLogic.attachedResources(sourceDoc);
 
             SolrInputDocument doc = solrFields.newDocumentFromIndexKeys(indexKeys);
-            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId, this);
+            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
 
             return doc;
         } catch (RuntimeException ex) {

@@ -148,6 +148,38 @@ public class BusinessLogic {
     }
 
     /**
+     * Add holdingsitem.role as declared in #SE-2369
+     *
+     * @param sourceDoc entire json from solr-doc-store
+     */
+    @Timed
+    public void addHoldingsItemRole(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
+        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
+        JsonNode indexKeys = find(bibliographicRecord, "indexKeys");
+        String agencyId = find(bibliographicRecord, "agencyId").asText();
+        OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
+        String repositoryId = find(bibliographicRecord, "repositoryId").asText();
+        boolean excludeFromUnionCatalogue = "true".equalsIgnoreCase(
+                getField(indexKeys, "rec.excludeFromUnionCatalogue")
+        );
+        boolean authCreateCommonRecord = libraryRule.hasAuthCreateCommonRecord();
+
+        addHoldingsItemRole(indexKeys, "bibdk", libraryRule.isPartOfBibliotekDk(),
+                            excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+        addHoldingsItemRole(indexKeys, "danbib", libraryRule.isPartOfDanbib(),
+                            excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+    }
+
+    private void addHoldingsItemRole(JsonNode doc, String role,
+                                     boolean partOf, boolean excludeFromUnionCatalogue,
+                                     boolean authCreateCommonRecord, String repositoryId) {
+        if(partOf && !excludeFromUnionCatalogue)
+            addField(doc, "holdingsitem.role", role);
+        if (!partOf && authCreateCommonRecord && repositoryId.startsWith("870970-basis:"))
+            addField(doc, "holdingsitem.role", role);
+    }
+
+    /**
      * Append all holdings as nested document
      *
      * @param doc          root solr document
@@ -156,7 +188,7 @@ public class BusinessLogic {
      * @param repositoryId id of record used by
      */
     @Timed
-    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId, DocProducer docProducer) {
+    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
             String id = DocProducer.bibliographicShardId(sourceDoc) + "@" + find(record, "agencyId").asText() + "-" + find(record, "bibliographicRecordId").asText();
