@@ -147,8 +147,13 @@ public class BusinessLogic {
         }
     }
 
+    private static final String COMMON_RECORD_BASE_PREFIX = "870970-basis:";
+
     /**
      * Add holdingsitem.role as declared in #SE-2369
+     * <p>
+     * Generate 'bibdk' and/or 'danbib' (or none) values for holdingsitem.role,
+     * depending on if the holdings are part of bibdk/danbib holdings
      *
      * @param sourceDoc entire json from solr-doc-store
      */
@@ -173,9 +178,9 @@ public class BusinessLogic {
     private void addHoldingsItemRole(JsonNode doc, String role,
                                      boolean partOf, boolean excludeFromUnionCatalogue,
                                      boolean authCreateCommonRecord, String repositoryId) {
-        if(partOf && !excludeFromUnionCatalogue)
+        if (partOf && !excludeFromUnionCatalogue)
             addField(doc, "holdingsitem.role", role);
-        if (!partOf && authCreateCommonRecord && repositoryId.startsWith("870970-basis:"))
+        if (!partOf && authCreateCommonRecord && repositoryId.startsWith(COMMON_RECORD_BASE_PREFIX))
             addField(doc, "holdingsitem.role", role);
     }
 
