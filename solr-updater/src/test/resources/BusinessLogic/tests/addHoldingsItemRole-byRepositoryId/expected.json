@@ -1,4 +1,4 @@
 [
-    "+holdingsitem.role:bibdk",
-    "+holdingsitem.role:danbib"
+    "+_:holdingsitem.role:bibdk",
+    "+_:holdingsitem.role:danbib"
 ]

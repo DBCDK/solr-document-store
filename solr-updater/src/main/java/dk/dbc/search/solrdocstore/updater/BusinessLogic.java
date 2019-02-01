@@ -161,18 +161,28 @@ public class BusinessLogic {
     public void addHoldingsItemRole(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
         JsonNode indexKeys = find(bibliographicRecord, "indexKeys");
-        String agencyId = find(bibliographicRecord, "agencyId").asText();
-        OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
+//        String agencyId = find(bibliographicRecord, "agencyId").asText();
+//        OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
         String repositoryId = find(bibliographicRecord, "repositoryId").asText();
         boolean excludeFromUnionCatalogue = "true".equalsIgnoreCase(
                 getField(indexKeys, "rec.excludeFromUnionCatalogue")
         );
-        boolean authCreateCommonRecord = libraryRule.hasAuthCreateCommonRecord();
 
-        addHoldingsItemRole(indexKeys, "bibdk", libraryRule.isPartOfBibliotekDk(),
-                            excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
-        addHoldingsItemRole(indexKeys, "danbib", libraryRule.isPartOfDanbib(),
-                            excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+        JsonNode holdingsItems = find(sourceDoc, "holdingsItemRecords");
+        for (JsonNode holdingItem : holdingsItems) {
+            String agencyId = find(holdingItem, "agencyId").asText();
+            OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
+            boolean authCreateCommonRecord = libraryRule.hasAuthCreateCommonRecord();
+            JsonNode holdingsItemIndexKeys = holdingItem.get("indexKeys");
+            if (holdingsItemIndexKeys != null)
+                holdingsItemIndexKeys.forEach(doc -> {
+                    addHoldingsItemRole(doc, "bibdk", libraryRule.isPartOfBibliotekDk(),
+                                        excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+                    addHoldingsItemRole(doc, "danbib", libraryRule.isPartOfDanbib(),
+                                        excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+                });
+        }
+
     }
 
     private void addHoldingsItemRole(JsonNode doc, String role,
