@@ -19,7 +19,8 @@ LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       OPEN_AGENCY_URL="URL for OpenAgency service (required)" \
       OPEN_AGENCY_AGE="Caching of successful openagency call (default: 4h)" \
       OPEN_AGENCY_FAILURE_AGE="Caching of unsuccessful result (default: 5m)"\
-      OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)"
+      OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)" \
+      JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)"
 
 ADD config.d/* config.d
 ADD *.war wars/

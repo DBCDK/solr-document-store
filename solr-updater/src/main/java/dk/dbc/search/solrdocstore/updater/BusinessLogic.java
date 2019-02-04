@@ -147,6 +147,53 @@ public class BusinessLogic {
         }
     }
 
+    private static final String COMMON_RECORD_BASE_PREFIX = "870970-basis:";
+
+    /**
+     * Add holdingsitem.role as declared in #SE-2369
+     * <p>
+     * Generate 'bibdk' and/or 'danbib' (or none) values for holdingsitem.role,
+     * depending on if the holdings are part of bibdk/danbib holdings
+     *
+     * @param sourceDoc entire json from solr-doc-store
+     */
+    @Timed
+    public void addHoldingsItemRole(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
+        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
+        JsonNode indexKeys = find(bibliographicRecord, "indexKeys");
+//        String agencyId = find(bibliographicRecord, "agencyId").asText();
+//        OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
+        String repositoryId = find(bibliographicRecord, "repositoryId").asText();
+        boolean excludeFromUnionCatalogue = "true".equalsIgnoreCase(
+                getField(indexKeys, "rec.excludeFromUnionCatalogue")
+        );
+
+        JsonNode holdingsItems = find(sourceDoc, "holdingsItemRecords");
+        for (JsonNode holdingItem : holdingsItems) {
+            String agencyId = find(holdingItem, "agencyId").asText();
+            OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
+            boolean authCreateCommonRecord = libraryRule.hasAuthCreateCommonRecord();
+            JsonNode holdingsItemIndexKeys = holdingItem.get("indexKeys");
+            if (holdingsItemIndexKeys != null)
+                holdingsItemIndexKeys.forEach(doc -> {
+                    addHoldingsItemRole(doc, "bibdk", libraryRule.isPartOfBibliotekDk(),
+                                        excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+                    addHoldingsItemRole(doc, "danbib", libraryRule.isPartOfDanbib(),
+                                        excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
+                });
+        }
+
+    }
+
+    private void addHoldingsItemRole(JsonNode doc, String role,
+                                     boolean partOf, boolean excludeFromUnionCatalogue,
+                                     boolean authCreateCommonRecord, String repositoryId) {
+        if (partOf && !excludeFromUnionCatalogue)
+            addField(doc, "holdingsitem.role", role);
+        if (!partOf && authCreateCommonRecord && repositoryId.startsWith(COMMON_RECORD_BASE_PREFIX))
+            addField(doc, "holdingsitem.role", role);
+    }
+
     /**
      * Append all holdings as nested document
      *
@@ -156,7 +203,7 @@ public class BusinessLogic {
      * @param repositoryId id of record used by
      */
     @Timed
-    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId, DocProducer docProducer) {
+    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
             String id = DocProducer.bibliographicShardId(sourceDoc) + "@" + find(record, "agencyId").asText() + "-" + find(record, "bibliographicRecordId").asText();

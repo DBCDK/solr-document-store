@@ -61,7 +61,7 @@ public class DocProducerTest {
         docProducer.businessLogic.oa = new OpenAgency(){
             @Override
             public OpenAgency.LibraryRule libraryRule(String agencyId) {
-                return new LibraryRule(true, true, true, true, false);
+                return new LibraryRule(true, true, true, true, false, true);
             }
         };
         docProducer.businessLogic.solrFields = solrFields;

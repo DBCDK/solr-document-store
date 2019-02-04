@@ -45,6 +45,9 @@ public class Worker {
     DocProducer docProducer;
 
     @Inject
+    DocStasher docStasher;
+
+    @Inject
     MetricRegistry metrics;
 
     @Resource(lookup = Config.DATABASE)
@@ -94,6 +97,14 @@ public class Worker {
                     docProducer.deleteSolrDocuments(bibliographicShardId, ids, job.getCommitwithin());
 
                     docProducer.deploy(solrDocument, job.getCommitwithin());
+                    StringBuilder pid = new StringBuilder();
+                    pid.append(job.getAgencyId())
+                            .append('-')
+                            .append(job.getClassifier())
+                            .append(':')
+                            .append(job.getBibliographicRecordId());
+
+                    docStasher.store(pid.toString(), solrDocument);
                 } catch (IOException ex) {
                     throw new NonFatalQueueError(ex);
                 } catch (SolrServerException ex) {

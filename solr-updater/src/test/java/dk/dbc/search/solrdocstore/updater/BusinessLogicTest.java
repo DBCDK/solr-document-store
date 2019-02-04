@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,7 +100,7 @@ public class BusinessLogicTest {
 
         DocProducer dp = new DocProducer() {
         };
-        dp.solrFields = new SolrFields() {
+        businessLogic.solrFields = dp.solrFields = new SolrFields() {
             @Override
             public boolean isKnownField(String name) {
                 return true;
@@ -112,6 +114,7 @@ public class BusinessLogicTest {
                 .toArray(String[]::new);
 
         SolrInputDocument before = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        businessLogic.addNestedHoldingsDocuments(before, json, "linkId", "repoId");
         try {
             Method method = BusinessLogic.class.getMethod(name.split("[^0-9a-zA-Z]", 2)[0], JsonNode.class);
             method.invoke(businessLogic, json);
@@ -119,98 +122,41 @@ public class BusinessLogicTest {
             throw (Exception) ex.getTargetException();
         }
         SolrInputDocument after = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        businessLogic.addNestedHoldingsDocuments(after, json, "linkId", "repoId");
 
         List<String> diff = diff(before, after);
-        System.out.println("diff = " + diff);
+        System.out.println("diff = " + diff + "; expected = " + Arrays.asList(expected));
 
         assertThat(diff, containsInAnyOrder(expected));
-
     }
 
     private List<String> diff(SolrInputDocument before, SolrInputDocument after) {
+        HashSet<String> beforeKeys = new HashSet<>();
+        addDocumentKeysTo("", before, beforeKeys);
+        HashSet<String> afterKeys = new HashSet<>();
+        addDocumentKeysTo("", after, afterKeys);
+
+        HashSet<String> removed = new HashSet<>(beforeKeys);
+        removed.removeAll(afterKeys);
+        HashSet<String> added = new HashSet<>(afterKeys);
+        added.removeAll(beforeKeys);
+
         ArrayList<String> ret = new ArrayList<>();
-        Iterator<String> beforeNames = before.getFieldNames().stream().sorted().collect(Collectors.toList()).iterator();
-        Iterator<String> afterNames = after.getFieldNames().stream().sorted().collect(Collectors.toList()).iterator();
-        while (beforeNames.hasNext() && afterNames.hasNext()) {
-            String beforeName = beforeNames.next();
-            String afterName = afterNames.next();
-            while (true) {
-                int cmp = beforeName.compareTo(afterName);
-                if (cmp < 0) {
-                    ret.addAll(before(before.getField(beforeName)));
-                    if (beforeNames.hasNext()) {
-                        beforeName = beforeNames.next();
-                    } else {
-                        ret.addAll(after(after.getField(afterName)));
-                        break;
-                    }
-                } else if (cmp > 0) {
-                    ret.addAll(after(after.getField(afterName)));
-                    if (afterNames.hasNext()) {
-                        afterName = afterNames.next();
-                    } else {
-                        ret.addAll(before(before.getField(beforeName)));
-                        break;
-                    }
-                } else {
-                    String fieldName = beforeName;
-                    Iterator<String> beforeValues = before.getFieldValues(fieldName).stream().map(String::valueOf).sorted().collect(Collectors.toList()).iterator();
-                    Iterator<String> afterValues = after.getFieldValues(fieldName).stream().map(String::valueOf).sorted().collect(Collectors.toList()).iterator();
-                    while (beforeValues.hasNext() && afterValues.hasNext()) {
-                        String beforeValue = beforeValues.next();
-                        String afterValue = afterValues.next();
-                        while (true) {
-                            cmp = beforeValue.compareTo(afterValue);
-                            if (cmp < 0) {
-                                ret.add("-" + fieldName + ":" + beforeValue);
-                                if (beforeValues.hasNext()) {
-                                    beforeValue = beforeValues.next();
-                                } else {
-                                    ret.add("+" + fieldName + ":" + afterValue);
-                                    break;
-                                }
-                            } else if (cmp > 0) {
-                                ret.add("+" + fieldName + ":" + afterValue);
-                                if (afterValues.hasNext()) {
-                                    afterValue = afterValues.next();
-                                } else {
-                                    ret.add("-" + fieldName + ":" + beforeValue);
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                    while (beforeValues.hasNext()) {
-                        String beforeValue = beforeValues.next();
-                        ret.add("-" + fieldName + ":" + beforeValue);
-                    }
-                    while (afterValues.hasNext()) {
-                        String afterValue = afterValues.next();
-                        ret.add("+" + fieldName + ":" + afterValue);
-                    }
-                    break;
-                }
-            }
-        }
-        while (beforeNames.hasNext()) {
-            String beforeName = beforeNames.next();
-            ret.addAll(before(before.getField(beforeName)));
-        }
-        while (afterNames.hasNext()) {
-            String afterName = afterNames.next();
-            ret.addAll(after(after.getField(afterName)));
-        }
+        removed.forEach(s -> ret.add("-" + s));
+        added.forEach(s -> ret.add("+" + s));
         return ret;
     }
 
-    private List<String> before(SolrInputField field) {
-        return field.getValues().stream().map(String::valueOf).sorted().map(s -> "-" + field.getName() + ":" + s).collect(Collectors.toList());
-    }
-
-    private List<String> after(SolrInputField field) {
-        return field.getValues().stream().map(String::valueOf).sorted().map(s -> "+" + field.getName() + ":" + s).collect(Collectors.toList());
+    private void addDocumentKeysTo(String prefix, SolrInputDocument before, HashSet<String> keys) {
+        before.forEach((String field, SolrInputField values) -> {
+            values.getValues()
+                    .forEach(value -> keys.add(prefix + field + ":" + value));
+        });
+        if (before.hasChildDocuments()) {
+            String nestedPrefix = prefix.isEmpty() ? "_:" : "_" + prefix;
+            before.getChildDocuments()
+                    .forEach(child -> addDocumentKeysTo(nestedPrefix, child, keys));
+        }
     }
 
 }
