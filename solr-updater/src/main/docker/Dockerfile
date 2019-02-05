@@ -1,6 +1,7 @@
-FROM docker.dbc.dk/payara5-micro:os
+FROM docker.dbc.dk/payara5-micro:latest
 
-ENV APPLICATION_NAME=solr-doc-store-updater \
+ENV THREADS=1 \
+    MAX_POOL_SIZE=3 \
     ADD_PAYARA_ARGS=--nocluster
 
 LABEL SOLR_URL="zk or http url of solr-collection (required)" \
@@ -15,6 +16,7 @@ LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       IDLE_RESCAN_EVERY="How often to scan for newest timestamp, when the queue is idle (default: 5)" \
       MAX_QUERY_TIME="How long a rescan query can take, before recalculating thre prepared statement quiery plan(default: '100ms')" \
       THREADS="Number of parallel threads (default: 1)" \
+      MAX_POOL_SIZE="Max number of connections to the database, should be THREADS+1 (default: 3)" \
       MAX_TRIES="Number of tries to process job (default: 3)" \
       OPEN_AGENCY_URL="URL for OpenAgency service (required)" \
       OPEN_AGENCY_AGE="Caching of successful openagency call (default: 4h)" \
@@ -22,5 +24,4 @@ LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)" \
       JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)"
 
-ADD config.d/* config.d
-ADD *.war wars/
+ADD *.war app.json deployments/
