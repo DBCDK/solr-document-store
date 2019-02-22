@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.ee.stats.Timed;
+import dk.dbc.log.LogWith;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static dk.dbc.log.LogWith.track;
 
 /**
  *
@@ -59,7 +62,7 @@ public class DocumentRetrieveBean {
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
-        try {
+        try (LogWith logWith = track(null)) {
             DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId);
             if (response == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();

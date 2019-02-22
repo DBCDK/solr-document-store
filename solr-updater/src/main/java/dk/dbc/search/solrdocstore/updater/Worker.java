@@ -2,11 +2,11 @@ package dk.dbc.search.solrdocstore.updater;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
+import dk.dbc.log.LogWith;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
 import dk.dbc.pgqueue.consumer.JobConsumer;
 import dk.dbc.pgqueue.consumer.JobMetaData;
 import dk.dbc.pgqueue.consumer.NonFatalQueueError;
-import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.pgqueue.consumer.QueueWorker;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
@@ -25,6 +25,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static dk.dbc.log.LogWith.track;
 
 /**
  *
@@ -84,32 +86,29 @@ public class Worker {
     }
 
     public JobConsumer<QueueJob> makeWorker() {
-        return new JobConsumer<QueueJob>() {
-            @Override
-            public void accept(Connection connection, QueueJob job, JobMetaData metaData) throws FatalQueueError, NonFatalQueueError, PostponedNonFatalQueueError {
+        return (Connection connection, QueueJob job, JobMetaData metaData) -> {
+            try(LogWith logWith = track(null)) {
                 log.info("job = {}, metadata = {}", job, metaData);
-                try {
-                    JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
-                    SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
-                    String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-                    List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
+                JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
+                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
+                String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
+                List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
 
-                    docProducer.deleteSolrDocuments(bibliographicShardId, ids, job.getCommitwithin());
+                docProducer.deleteSolrDocuments(bibliographicShardId, ids, job.getCommitwithin());
 
-                    docProducer.deploy(solrDocument, job.getCommitwithin());
-                    StringBuilder pid = new StringBuilder();
-                    pid.append(job.getAgencyId())
-                            .append('-')
-                            .append(job.getClassifier())
-                            .append(':')
-                            .append(job.getBibliographicRecordId());
-
-                    docStasher.store(pid.toString(), solrDocument);
-                } catch (IOException ex) {
-                    throw new NonFatalQueueError(ex);
-                } catch (SolrServerException ex) {
-                    throw new FatalQueueError(ex);
-                }
+                docProducer.deploy(solrDocument, job.getCommitwithin());
+                StringBuilder pid = new StringBuilder();
+                pid.append(job.getAgencyId())
+                        .append('-')
+                        .append(job.getClassifier())
+                        .append(':')
+                        .append(job.getBibliographicRecordId());
+                log.info("Deleted {} records added {}", ids.size(), solrDocument.getChildDocumentCount() + 1);
+                docStasher.store(pid.toString(), solrDocument);
+            } catch (IOException ex) {
+                throw new NonFatalQueueError(ex);
+            } catch (SolrServerException ex) {
+                throw new FatalQueueError(ex);
             }
         };
     }

@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.ee.stats.Timed;
+import dk.dbc.log.LogWith;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -21,6 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
+
+import static dk.dbc.log.LogWith.track;
 
 @Stateless
 @Path("holdings")
@@ -46,10 +49,12 @@ public class HoldingsItemBean {
     public Response setHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
+        try (LogWith logWith = track(hi.getTrackingId())) {
 
-        setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.getCommitWithin()));
+            setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.getCommitWithin()));
 
-        return Response.ok().entity("{ \"ok\": true }").build();
+            return Response.ok().entity("{ \"ok\": true }").build();
+        }
     }
 
     public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin) {

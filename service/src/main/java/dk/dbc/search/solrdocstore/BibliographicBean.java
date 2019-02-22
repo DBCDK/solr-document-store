@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.ee.stats.Timed;
+import dk.dbc.log.LogWith;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static dk.dbc.log.LogWith.track;
 import static dk.dbc.search.solrdocstore.RecordType.SingleRecord;
 
 @Stateless
@@ -62,8 +64,10 @@ public class BibliographicBean {
 
         try {
             BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
-            return Response.ok().entity("{ \"ok\": true }").build();
+            try (LogWith logWith = track(request.getTrackingId())) {
+                addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
+                return Response.ok().entity("{ \"ok\": true }").build();
+            }
         } catch (RuntimeException ex) {
             log.error("addBibliographicKeys error: {}", ex.getMessage());
             log.debug("addBibliographicKeys error: ", ex);
