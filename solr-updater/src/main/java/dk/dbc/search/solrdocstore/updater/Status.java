@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore.updater;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
+import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.Response;
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 @Stateless
+@LocalBean
 @Path("/")
 public class Status {
 
