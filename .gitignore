@@ -35,3 +35,6 @@ src/main/docker/solr-doc-store*.war
 # targets
 target/
 /queue/nbproject/
+
+# Vim swapfiles
+*.swp
