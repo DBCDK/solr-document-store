@@ -29,6 +29,7 @@
         <module>service</module>
         <module>solr-updater</module>
         <module>postgresql</module>
+        <module>monitor</module>
     </modules>
 
     <groupId>dk.dbc</groupId>
