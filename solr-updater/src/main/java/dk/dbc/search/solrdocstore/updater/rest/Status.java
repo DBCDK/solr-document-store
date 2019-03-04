@@ -1,14 +1,17 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
 import dk.dbc.search.solrdocstore.updater.Config;
+import dk.dbc.search.solrdocstore.updater.Worker;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import javax.annotation.Resource;
-import javax.ejb.LocalBean;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,12 +21,13 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+
 /**
  *
  * @author DBC {@literal <dbc.dk>}
  */
 @Stateless
-@LocalBean
 @Path("status")
 public class Status {
 
@@ -31,6 +35,9 @@ public class Status {
 
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
+
+    @EJB
+    Worker worker;
 
     public Status() {
     }
@@ -43,16 +50,24 @@ public class Status {
         try (Connection connection = dataSource.getConnection() ;
              PreparedStatement stmt = connection.prepareStatement("SELECT clock_timestamp()") ;
              ResultSet resultSet = stmt.executeQuery()) {
-            if (resultSet.next()) {
-                resultSet.getTimestamp(1);
-                return Response.ok(StatusResponse.ok()).build();
-            }
-            return Response.ok(StatusResponse.error("Could not get timestamp from database")).build();
+            if (!resultSet.next())
+                return fail("Could not get timestamp from database");
+            resultSet.getTimestamp(1);
+            List<String> hungThreads = worker.hungThreads();
+            if (!hungThreads.isEmpty())
+                return fail("Hung threads: " + hungThreads);
+            return Response.ok(StatusResponse.ok()).build();
         } catch (SQLException ex) {
             log.error("Error accessing database by status(rest): {}", ex.getMessage());
             log.debug("Error accessing database by status(rest):", ex);
-            return Response.ok(StatusResponse.error("Cannot access database (" + ex.getMessage() + ")")).build();
+            return fail("Cannot access database (" + ex.getMessage() + ")");
         }
+    }
+
+    private static Response fail(String message) {
+        return Response.ok(StatusResponse.error(message))
+                .status(INTERNAL_SERVER_ERROR)
+                .build();
     }
 
     /**

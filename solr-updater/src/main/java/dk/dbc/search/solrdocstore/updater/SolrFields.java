@@ -19,7 +19,6 @@ import javax.ejb.EJBException;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -47,7 +46,6 @@ import org.xml.sax.SAXException;
  * @author DBC {@literal <dbc.dk>}
  */
 @Singleton
-@Startup
 @Lock(LockType.READ)
 public class SolrFields {
 
