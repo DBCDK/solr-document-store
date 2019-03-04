@@ -66,25 +66,33 @@ public class Worker {
 
     @PostConstruct
     public void init() {
-        ses.schedule(() -> {
-            log.info("Starting consumer");
-            this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
-                    .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
-                    .dataSource(dataSource)
-                    .consume(config.getQueues())
-                    .databaseConnectThrottle(config.getDatabaseConnectThrottle())
-                    .failureThrottle(config.getFailureThrottle())
-                    .emptyQueueSleep(config.getEmptyQueueSleep())
-                    .window(config.getQueueWindow())
-                    .rescanEvery(config.getRescanEvery())
-                    .idleRescanEvery(config.getIdleRescanEvery())
-                    .maxTries(config.getMaxTries())
-                    .maxQueryTime(config.getMaxQueryTime())
-                    .metricRegistry(metrics)
-                    .build(config.getThreads(),
-                           this::makeWorker);
-            this.worker.start();
-        }, 10, TimeUnit.SECONDS);
+        if (ses == null) {
+            setupWorker();
+        } else {
+            ses.schedule(() -> {
+                log.info("Starting consumer");
+                setupWorker();
+            }, 10, TimeUnit.SECONDS);
+        }
+    }
+
+    private void setupWorker() {
+        this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
+                .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
+                .dataSource(dataSource)
+                .consume(config.getQueues())
+                .databaseConnectThrottle(config.getDatabaseConnectThrottle())
+                .failureThrottle(config.getFailureThrottle())
+                .emptyQueueSleep(config.getEmptyQueueSleep())
+                .window(config.getQueueWindow())
+                .rescanEvery(config.getRescanEvery())
+                .idleRescanEvery(config.getIdleRescanEvery())
+                .maxTries(config.getMaxTries())
+                .maxQueryTime(config.getMaxQueryTime())
+                .metricRegistry(metrics)
+                .build(config.getThreads(),
+                       this::makeWorker);
+        this.worker.start();
     }
 
     @PreDestroy
