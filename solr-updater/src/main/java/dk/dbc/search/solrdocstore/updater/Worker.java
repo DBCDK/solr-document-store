@@ -105,7 +105,10 @@ public class Worker {
                         .append(job.getClassifier())
                         .append(':')
                         .append(job.getBibliographicRecordId());
-                log.info("Deleted {} records added {}", ids.size(), solrDocument.getChildDocumentCount() + 1);
+                int count = 1;
+                if(solrDocument.hasChildDocuments())
+                    count += solrDocument.getChildDocumentCount();
+                log.info("Deleted {} record(s) and added {} to SolR", ids.size(), count);
                 docStasher.store(pid.toString(), solrDocument);
             } catch (IOException ex) {
                 throw new NonFatalQueueError(ex);

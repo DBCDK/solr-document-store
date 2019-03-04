@@ -1,8 +1,7 @@
-FROM docker.dbc.dk/payara5-micro:latest
+FROM docker.dbc.dk/payara5-micro:hazelcast-disable-4
 
 ENV THREADS=1 \
-    MAX_POOL_SIZE=3 \
-    ADD_PAYARA_ARGS=--nocluster
+    MAX_POOL_SIZE=3
 
 LABEL SOLR_URL="zk or http url of solr-collection (required)" \
       SOLR_DOC_STORE_URL="http url of solr-doc-store-service (required)" \

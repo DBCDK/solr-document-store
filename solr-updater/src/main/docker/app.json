@@ -1,18 +1,10 @@
 {
-  "appName": "solr-docstore-updater",
-  "jdbc": {
-    "jdbc/solr-doc-store": {
-      "xa": false,
-      "url": "${SOLR_DOC_STORE_DATABASE}",
-      "maxSize": "${MAX_POOL_SIZE}"
+    "appName": "solr-docstore-updater",
+    "jdbc": {
+        "jdbc/solr-doc-store": {
+            "xa": false,
+            "url": "${SOLR_DOC_STORE_DATABASE}",
+            "maxSize": "${MAX_POOL_SIZE}"
+        }
     }
-  },
-  "logger": {
-    "dk.dbc": {
-      "level": "${LOG__dk_dbc}"
-    },
-    "dk.dbc.pgqueue": {
-      "level": "${LOG__dk_dbc}"
-    }
-  }
 }
