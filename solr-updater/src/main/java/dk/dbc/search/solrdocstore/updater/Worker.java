@@ -106,7 +106,7 @@ public class Worker {
                         .append(':')
                         .append(job.getBibliographicRecordId());
                 int count = 1;
-                if(solrDocument.hasChildDocuments())
+                if(solrDocument != null && solrDocument.hasChildDocuments())
                     count += solrDocument.getChildDocumentCount();
                 log.info("Deleted {} record(s) and added {} to SolR", ids.size(), count);
                 docStasher.store(pid.toString(), solrDocument);
