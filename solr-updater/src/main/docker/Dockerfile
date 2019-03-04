@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara5-micro:hazelcast-disable-4
+FROM docker.dbc.dk/payara5-micro:latest
 
 ENV THREADS=1 \
     MAX_POOL_SIZE=3
