@@ -1,16 +1,11 @@
 {
-  "appName": "solr-docstore-monitor",
-  "jdbc": {
-    "jdbc/solr-doc-store": {
-      "xa": false,
-      "url": "${DOCSTORE_POSTGRES_URL}",
-      "maxSize": "${POOL_SIZE}",
-      "steadySize": 0
+    "appName": "solr-docstore-monitor",
+    "jdbc": {
+        "jdbc/solr-doc-store": {
+            "xa": false,
+            "url": "${DOCSTORE_POSTGRES_URL}",
+            "maxSize": "${POOL_SIZE}",
+            "steadySize": 0
+        }
     }
-  },
-  "logger": {
-    "dk.dbc": {
-      "level": "${LOG__dk_dbc}"
-    }
-  }
 }
