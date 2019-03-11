@@ -11,7 +11,6 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.sql.DataSource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
