@@ -1,6 +1,8 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.solr.client.solrj.SolrClient;
@@ -18,12 +20,13 @@ public class SolrApi {
     public static SolrClient makeSolrClient(String solrUrl) {
         Matcher zkMatcher = ZK.matcher(solrUrl);
         if (zkMatcher.matches()) {
-            CloudSolrClient.Builder builder = new CloudSolrClient.Builder()
-                    .withZkHost(Arrays.asList(zkMatcher.group(1).split(",")));
+            Optional<String> zkChroot = Optional.empty();
             if (zkMatcher.group(2) != null) {
-                builder.withZkChroot(zkMatcher.group(2));
+                zkChroot = Optional.of(zkMatcher.group(2));
             }
-            CloudSolrClient solrClient = builder.build();
+            List<String> zkHosts = Arrays.asList(zkMatcher.group(1).split(","));
+            CloudSolrClient solrClient = new CloudSolrClient.Builder(zkHosts, zkChroot)
+                    .build();
 
             solrClient.setDefaultCollection(zkMatcher.group(3));
 
