@@ -11,6 +11,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,6 +36,9 @@ public class Status {
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
 
+    @Inject
+    Config config;
+
     @EJB
     Worker worker;
 
@@ -46,6 +50,8 @@ public class Status {
     public Response getStatus() {
         log.info("getStatus called");
 
+        if (!config.isWorker())
+            return Response.ok(StatusResponse.ok()).build();
         try (Connection connection = dataSource.getConnection() ;
              PreparedStatement stmt = connection.prepareStatement("SELECT clock_timestamp()") ;
              ResultSet resultSet = stmt.executeQuery()) {
