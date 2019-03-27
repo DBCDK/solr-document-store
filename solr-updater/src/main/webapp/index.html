@@ -15,7 +15,6 @@
                 var url = "";
                 for(var child = group.firstChild ; child !== null ; child = child.nextSibling) {
                     if(child.nodeType === Node.ELEMENT_NODE) {
-                        console.log(child);
                         if(child.nodeName === "INPUT") {
                             if(child.type !== "button") {
                                url +=  child.value;
@@ -33,8 +32,8 @@
         <h1>solr-doc-store-updater</h1>
 
         Test:
-        <div>api/doctest/format/<input type="number" placeholder="agencyId">/<input type="text" placeholder="classifier">/<input type="text" placeholder="bibliographicRecordId"> <input type="button" value="TEST" onclick="openLink(this.parentNode)"></div>
-        <div>api/doctest/deploy/<input type="number" placeholder="agencyId">/<input type="text" placeholder="classifier">/<input type="text" placeholder="bibliographicRecordId">?commitWithin=<input type="number" placeholder="ms"> <input type="button" value="TEST" onclick="openLink(this.parent)"></div>
+        <div>api/doctest/format/<input type="number" placeholder="agencyId">/<input type="text" placeholder="classifier">/<input type="text" placeholder="bibliographicRecordId"> <input type="button" value="FORMAT" onclick="openLink(this.parentNode)"></div>
+        <div>api/doctest/deploy/<input type="number" placeholder="agencyId">/<input type="text" placeholder="classifier">/<input type="text" placeholder="bibliographicRecordId">?commitWithin=<input type="number" placeholder="ms"> <input type="button" value="DEPLOY" onclick="openLink(this.parentNode)"></div>
         <hr>
         <div class="tiny"><a href="jolokia.html">jolokia</a></div>
     </body>

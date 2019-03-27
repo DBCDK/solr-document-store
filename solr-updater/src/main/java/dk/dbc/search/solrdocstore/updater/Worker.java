@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -32,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dk.dbc.log.LogWith.track;
+import static java.util.Collections.EMPTY_LIST;
 
 /**
  *
@@ -77,31 +77,37 @@ public class Worker {
     }
 
     private void setupWorker() {
-        this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
-                .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
-                .dataSource(dataSource)
-                .consume(config.getQueues())
-                .databaseConnectThrottle(config.getDatabaseConnectThrottle())
-                .failureThrottle(config.getFailureThrottle())
-                .emptyQueueSleep(config.getEmptyQueueSleep())
-                .window(config.getQueueWindow())
-                .rescanEvery(config.getRescanEvery())
-                .idleRescanEvery(config.getIdleRescanEvery())
-                .maxTries(config.getMaxTries())
-                .maxQueryTime(config.getMaxQueryTime())
-                .metricRegistry(metrics)
-                .build(config.getThreads(),
-                       this::makeWorker);
-        this.worker.start();
+        if (config.isWorker()) {
+            this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
+                    .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
+                    .dataSource(dataSource)
+                    .consume(config.getQueues())
+                    .databaseConnectThrottle(config.getDatabaseConnectThrottle())
+                    .failureThrottle(config.getFailureThrottle())
+                    .emptyQueueSleep(config.getEmptyQueueSleep())
+                    .window(config.getQueueWindow())
+                    .rescanEvery(config.getRescanEvery())
+                    .idleRescanEvery(config.getIdleRescanEvery())
+                    .maxTries(config.getMaxTries())
+                    .maxQueryTime(config.getMaxQueryTime())
+                    .metricRegistry(metrics)
+                    .build(config.getThreads(),
+                           this::makeWorker);
+            this.worker.start();
+        }
     }
 
     @PreDestroy
     public void destroy() {
-        this.worker.stop();
-        this.worker.awaitTermination(1, TimeUnit.MINUTES);
+        if (config.isWorker()) {
+            this.worker.stop();
+            this.worker.awaitTermination(1, TimeUnit.MINUTES);
+        }
     }
 
     public List<String> hungThreads() {
+        if (!config.isWorker())
+            return EMPTY_LIST;
         if (worker == null)
             return Collections.singletonList("consumer-not-started");
         return worker.hungThreads();

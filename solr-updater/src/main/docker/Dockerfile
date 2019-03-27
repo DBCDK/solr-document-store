@@ -3,7 +3,7 @@ FROM docker.dbc.dk/payara5-micro:latest
 ENV THREADS=1 \
     MAX_POOL_SIZE=3
 
-LABEL SOLR_URL="zk or http url of solr-collection (required)" \
+LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only inspect service - required parameters are: SOLR_DOC_STORE_URL, OPEN_AGENCY_URL, SOLR_DOC_STORE_DATABASE=any-parsable-url, MAX_POOL_SIZE=1)  (required)" \
       SOLR_DOC_STORE_URL="http url of solr-doc-store-service (required)" \
       SOLR_DOC_STORE_DATABASE="user:pass@host[:port]/database where the queue is located (required)" \
       QUEUES="Comma separated list of queues to drain (required)" \

@@ -3,6 +3,7 @@ package dk.dbc.search.solrdocstore.updater.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import java.io.IOException;
 import java.util.List;
@@ -31,6 +32,9 @@ import org.slf4j.LoggerFactory;
 public class DocTest {
 
     private static final Logger log = LoggerFactory.getLogger(DocTest.class);
+
+    @Inject
+    Config config;
 
     @Inject
     DocProducer docProducer;
@@ -68,6 +72,8 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
+            if(!config.isWorker())
+                throw new IOException("No solr configured - only format endpoint valid");
             JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
             String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);

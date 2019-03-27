@@ -62,20 +62,26 @@ public class Config {
     public final void init() {
         solrUrl = get("solrUrl", "SOLR_URL", null);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
-        queues = get("queues", "QUEUES", null);
-        databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
-        failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
-        emptyQueueSleep = Long.max(100L, milliseconds(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10s")));
-        queueWindow = Long.max(0, milliseconds(get("queueWindow", "QUEUE_WINDOW", "1s")));
-        rescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("rescanEvery", "RESCAN_EVERY", "100"), 10));
-        idleRescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("idleRescanEvery", "IDLE_RESCAN_EVERY", "5"), 10));
-        maxQueryTime = Long.max(100L, milliseconds(get("maxQueryTime", "MAX_QUERY_TIME", "100ms")));
-        threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
-        maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
+        if (isWorker()) {
+            queues = get("queues", "QUEUES", null);
+            databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
+            failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
+            emptyQueueSleep = Long.max(100L, milliseconds(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10s")));
+            queueWindow = Long.max(0, milliseconds(get("queueWindow", "QUEUE_WINDOW", "1s")));
+            rescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("rescanEvery", "RESCAN_EVERY", "100"), 10));
+            idleRescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("idleRescanEvery", "IDLE_RESCAN_EVERY", "5"), 10));
+            maxQueryTime = Long.max(100L, milliseconds(get("maxQueryTime", "MAX_QUERY_TIME", "100ms")));
+            threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
+            maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
+        }
         this.openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
         openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
+    }
+
+    public boolean isWorker() {
+        return !( "FORMAT_ONLY".equals(solrUrl) );
     }
 
     public String getSolrUrl() {
