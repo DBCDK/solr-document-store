@@ -39,6 +39,9 @@ public class HoldingsItemBean {
     @Inject
     EnqueueSupplierBean queue;
 
+    @Inject
+    EnqueueAdapter enqueueAdapter;
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -62,7 +65,7 @@ public class HoldingsItemBean {
         entityManager.merge(hi);
         Set<AgencyClassifierItemKey> affectedKeys =
                 h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
-        EnqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
+        enqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
     }
 
     private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {

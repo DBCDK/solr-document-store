@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -13,6 +14,8 @@ public class AgencyClassifierItemKey implements Serializable {
     private int agencyId;
     private String classifier;
     private String bibliographicRecordId;
+    @Transient
+    private boolean deleteMarked;
 
     public AgencyClassifierItemKey() {
     }
@@ -21,6 +24,14 @@ public class AgencyClassifierItemKey implements Serializable {
         this.agencyId = agencyId;
         this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
+        this.deleteMarked = false;
+    }
+
+    public AgencyClassifierItemKey(int agencyId, String classifier, String bibliographicRecordId, boolean deleteMarked) {
+        this.agencyId = agencyId;
+        this.classifier = classifier;
+        this.bibliographicRecordId = bibliographicRecordId;
+        this.deleteMarked = deleteMarked;
     }
 
     @Override
@@ -91,5 +102,13 @@ public class AgencyClassifierItemKey implements Serializable {
 
     public QueueJob toQueueJob(Integer commitWithin) {
         return new QueueJob(agencyId, classifier, bibliographicRecordId, commitWithin);
+    }
+
+    public boolean isDeleteMarked() {
+        return deleteMarked;
+    }
+
+    public void setDeleteMarked(boolean deleteMarked) {
+        this.deleteMarked = deleteMarked;
     }
 }

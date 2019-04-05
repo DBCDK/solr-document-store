@@ -28,6 +28,7 @@ public class Config {
     private String systemName;
     private Boolean allowNonEmptySchema;
     private int[] openAgencyValidateTime;
+    private long deleteMarkedDelay;
 
     @PostConstruct
     public void loadProperties() {
@@ -38,6 +39,7 @@ public class Config {
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
         allowNonEmptySchema = getValue(props, "allowNonEmptySchema", "ALLOW_NON_EMPTY_SCHEMA", "false", null, Boolean::parseBoolean);
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
+        deleteMarkedDelay = getValue(props, "deleteMarkedDelay", "DELETE_MARKED_DELAY", "200000", null, Long::parseUnsignedLong);
     }
 
     public String getOaURL() {
@@ -58,6 +60,10 @@ public class Config {
 
     public int[] getOpenAgencyValidateTime() {
         return openAgencyValidateTime;
+    }
+
+    public long getDeleteMarkedDelay() {
+        return deleteMarkedDelay;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {

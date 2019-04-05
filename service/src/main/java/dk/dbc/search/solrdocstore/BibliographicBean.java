@@ -53,6 +53,9 @@ public class BibliographicBean {
     @Inject
     BibliographicRetrieveBean brBean;
 
+    @Inject
+    EnqueueAdapter enqueueAdapter;
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -98,8 +101,8 @@ public class BibliographicBean {
         log.info("AddBibliographicKeys called {}-{}:{}", bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId());
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
-        affectedKeys.add(bibliographicEntity.asAgencyClassifierItemKey());
         if (dbbe == null) {
+            affectedKeys.add(bibliographicEntity.asAgencyClassifierItemKey());
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             Set<AgencyClassifierItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
             affectedKeys.addAll(updatedHoldings);
@@ -107,6 +110,10 @@ public class BibliographicBean {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
+                // TODO mark as delete
+                AgencyClassifierItemKey key = bibliographicEntity.asAgencyClassifierItemKey();
+                key.setDeleteMarked(true);
+                affectedKeys.add(key);
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
@@ -120,6 +127,7 @@ public class BibliographicBean {
                     affectedKeys.addAll(reattachedKeys);
                 }
             } else {
+                affectedKeys.add(bibliographicEntity.asAgencyClassifierItemKey());
                 // Simple update
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
             }
@@ -134,7 +142,7 @@ public class BibliographicBean {
             }
         }
 
-        EnqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
+        enqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
     }
 
     /*

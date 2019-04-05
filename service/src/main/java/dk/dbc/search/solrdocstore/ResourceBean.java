@@ -42,6 +42,9 @@ public class ResourceBean {
     @Inject
     EnqueueSupplierBean queue;
 
+    @Inject
+    EnqueueAdapter enqueueAdapter;
+
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
@@ -76,7 +79,7 @@ public class ResourceBean {
             }
             Set<AgencyClassifierItemKey> keySet = bibliographicEntities.stream()
                     .map(BibliographicEntity::asAgencyClassifierItemKey).collect(Collectors.toSet());
-            EnqueueAdapter.enqueueAll(queue, keySet, Optional.empty());
+            enqueueAdapter.enqueueAll(queue, keySet, Optional.empty());
             return Response.ok().entity(new StatusBean.Resp()).build();
         }
     }

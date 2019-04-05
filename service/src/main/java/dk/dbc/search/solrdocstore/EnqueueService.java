@@ -24,6 +24,7 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +49,19 @@ public class EnqueueService<T> {
     }
 
     public void enqueue(T t) throws SQLException {
-        enqueue(t, null);
+        enqueue(t, null, Optional.empty());
     }
 
-    public void enqueue(T t, Integer commitWithin) throws SQLException {
+    // TODO postponed option from enqueue
+    public void enqueue(T t, Integer commitWithin, Optional<Long> postponed) throws SQLException {
         QueueJob job = jobCreator.apply(t, commitWithin);
         for (String queueName : queueNames) {
             log.trace("enqueue {} to: {}", job, queueName);
-            queueSupplier.enqueue(queueName, job);
+            if (postponed.isPresent()) {
+                queueSupplier.enqueue(queueName, job, postponed.get());
+            } else {
+                queueSupplier.enqueue(queueName, job);
+            }
         }
     }
 }
