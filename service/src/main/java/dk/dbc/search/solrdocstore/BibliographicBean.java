@@ -45,9 +45,6 @@ public class BibliographicBean {
     OpenAgencyBean openAgency;
 
     @Inject
-    EnqueueSupplierBean queue;
-
-    @Inject
     HoldingsToBibliographicBean h2bBean;
 
     @Inject
@@ -146,7 +143,7 @@ public class BibliographicBean {
             }
         }
 
-        enqueueAdapter.enqueueAll(queue, affectedKeys, commitWithin);
+        enqueueAdapter.enqueueAll(affectedKeys, commitWithin);
     }
 
     /*

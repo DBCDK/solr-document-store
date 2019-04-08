@@ -21,7 +21,6 @@ public class BeanFactoryUtil {
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = em;
         bean.openAgency = openAgency;
-        bean.queue = createEnqueueSupplier(env);
         bean.h2bBean = createHoldingsToBibliographicBean(env);
         bean.brBean = createBibliographicRetrieveBean(env);
         bean.enqueueAdapter = createEnqueueAdapter(env);
@@ -40,7 +39,6 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = env.getEntityManager();
         bean.h2bBean = createHoldingsToBibliographicBean(env);
-        bean.queue = createEnqueueSupplier(env);
         bean.enqueueAdapter = createEnqueueAdapter(env);
         return bean;
     }
@@ -94,6 +92,7 @@ public class BeanFactoryUtil {
                 return 200000;
             }
         };
+        enqueueAdapter.queue = createEnqueueSupplier(env);
         return enqueueAdapter;
     }
 
@@ -164,7 +163,6 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = em;
         bean.h2bBean = h2bBean;
-        bean.queue = queue;
         return bean;
     }
 
@@ -172,7 +170,6 @@ public class BeanFactoryUtil {
         ResourceBean bean = new ResourceBean();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = env.getEntityManager();
-        bean.queue = createEnqueueSupplier(env);
         bean.openAgency = openAgency;
         bean.enqueueAdapter = createEnqueueAdapter(env);
         return bean;

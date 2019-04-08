@@ -5,22 +5,23 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import javax.ejb.Singleton;
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Stateless
 @Singleton
 public class EnqueueAdapter {
 
     @Inject
     Config config;
 
+    @Inject
+    EnqueueSupplierBean queue;
+
     private static Logger log = LoggerFactory.getLogger(EnqueueAdapter.class);
 
-    public void enqueueAll(EnqueueSupplierBean queue, Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+    public void enqueueAll(Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
         for (AgencyClassifierItemKey k : agencyItemKeys) {
             try {
                 // If delete marked, set postponed option

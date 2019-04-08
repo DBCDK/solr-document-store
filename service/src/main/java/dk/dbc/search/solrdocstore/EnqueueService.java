@@ -52,7 +52,6 @@ public class EnqueueService<T> {
         enqueue(t, null, Optional.empty());
     }
 
-    // TODO postponed option from enqueue
     public void enqueue(T t, Integer commitWithin, Optional<Long> postponed) throws SQLException {
         QueueJob job = jobCreator.apply(t, commitWithin);
         for (String queueName : queueNames) {
