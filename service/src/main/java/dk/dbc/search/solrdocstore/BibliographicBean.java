@@ -110,7 +110,6 @@ public class BibliographicBean {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
-                // TODO mark as delete
                 AgencyClassifierItemKey key = bibliographicEntity.asAgencyClassifierItemKey();
                 key.setDeleteMarked(true);
                 affectedKeys.add(key);

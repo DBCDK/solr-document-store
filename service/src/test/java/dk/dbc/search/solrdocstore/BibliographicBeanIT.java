@@ -150,7 +150,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(null, updatedB)
                 );
         assertThat(r.getStatus(), is(200));
-        // TODO
         try (Connection conn = env().getDatasource().getConnection();
              Statement statement = conn.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT dequeueafter FROM queue")) {
