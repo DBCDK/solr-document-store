@@ -14,6 +14,7 @@ public class AgencyClassifierItemKey implements Serializable {
     private int agencyId;
     private String classifier;
     private String bibliographicRecordId;
+    // Property used to communicate to enqueuer if bib entity is being deleted
     @Transient
     private boolean deleteMarked;
 

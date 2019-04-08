@@ -111,8 +111,13 @@ public class BibliographicBean {
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
                 AgencyClassifierItemKey key = bibliographicEntity.asAgencyClassifierItemKey();
-                key.setDeleteMarked(true);
-                affectedKeys.add(key);
+                // If incoming bib entity is deleted, we mark it as delete so the enqueue adapter
+                // will delay the queue job, to prevent race conditions with updates to this same
+                // bib entity
+                if (bibliographicEntity.isDeleted()) {
+                    key.setDeleteMarked(true);
+                    affectedKeys.add(key);
+                }
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());

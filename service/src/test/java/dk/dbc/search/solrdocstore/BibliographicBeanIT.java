@@ -150,12 +150,14 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(null, updatedB)
                 );
         assertThat(r.getStatus(), is(200));
+        // Record what time the bib entity was queued
+        Date now = new Date();
         try (Connection conn = env().getDatasource().getConnection();
              Statement statement = conn.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT dequeueafter FROM queue")) {
             while (resultSet.next()) {
                 Timestamp dequeueAfter = resultSet.getTimestamp(1);
-                Date now = new Date();
+                // Assert delay
                 assertThat(dequeueAfter.after(now), is(true));
             }
         }
