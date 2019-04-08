@@ -4,13 +4,13 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import javax.ejb.Singleton;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
+@Stateless
 public class EnqueueAdapter {
 
     @Inject
