@@ -71,24 +71,6 @@ public class BusinessLogic {
         }
     }
 
-    /**
-     * Find all holdings agencies and record them
-     *
-     * @param sourceDoc entire json from solr-doc-store
-     */
-    @Timed
-    public void addRecHoldingsAgencyId(JsonNode sourceDoc) {
-        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
-
-        JsonNode records = find(sourceDoc, "holdingsItemRecords");
-        for (JsonNode record : records) {
-            JsonNode holdingsIndexKeys = find(record, "indexKeys");
-            if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
-                String agencyId = find(record, "agencyId").asText();
-                addField(indexKeys, "rec.holdingsAgencyId", agencyId);
-            }
-        }
-    }
 
     /**
      * Include add agencies listed in 'partOfDanbib' in ln field
@@ -199,11 +181,10 @@ public class BusinessLogic {
      *
      * @param doc          root solr document
      * @param sourceDoc    document containing holdings
-     * @param linkId       id for linking foe solr join searches
      * @param repositoryId id of record used by
      */
     @Timed
-    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String linkId, String repositoryId) {
+    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String repositoryId) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode record : records) {
             String id = DocProducer.bibliographicShardId(sourceDoc) + "@" + find(record, "agencyId").asText() + "-" + find(record, "bibliographicRecordId").asText();
@@ -213,7 +194,6 @@ public class BusinessLogic {
                 setField(indexKeys, "rec.repositoryId", repositoryId);
                 setField(indexKeys, "id", id + "#" + i++);
                 setField(indexKeys, "t", "h"); // Holdings type
-                addField(indexKeys, "parentDocId", linkId);
                 SolrInputDocument nested = solrFields.newDocumentFromIndexKeys(indexKeys);
                 doc.addChildDocument(nested);
             }

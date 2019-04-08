@@ -78,19 +78,11 @@ public class DocProducerTest {
         assertTrue(document.containsKey("dkcclterm.po"));
         assertFalse(document.containsKey("unknown.field"));
 
-        assertEquals(3, document.get("rec.holdingsAgencyId").getValues().size());
-        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300101"));
-        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300102"));
-        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300104"));
         assertTrue(document.get("rec.repositoryId").getValues().contains("300101-katalog:23645564"));
 
         assertTrue(document.containsKey("dkcclterm.ln"));
         assertTrue(document.get("dkcclterm.ln").getValues().contains("777777"));
 
-        String linkId = document.getField("rec.childDocId").getValue().toString();
-        for (SolrInputDocument childDocument : document.getChildDocuments()) {
-            assertEquals(linkId, childDocument.getField("parentDocId").getValue().toString());
-        }
         System.out.println("OK");
     }
 

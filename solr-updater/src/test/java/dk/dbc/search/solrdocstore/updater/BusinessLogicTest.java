@@ -114,7 +114,7 @@ public class BusinessLogicTest {
                 .toArray(String[]::new);
 
         SolrInputDocument before = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(before, json, "linkId", "repoId");
+        businessLogic.addNestedHoldingsDocuments(before, json, "repoId");
         try {
             Method method = BusinessLogic.class.getMethod(name.split("[^0-9a-zA-Z]", 2)[0], JsonNode.class);
             method.invoke(businessLogic, json);
@@ -122,7 +122,7 @@ public class BusinessLogicTest {
             throw (Exception) ex.getTargetException();
         }
         SolrInputDocument after = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(after, json, "linkId", "repoId");
+        businessLogic.addNestedHoldingsDocuments(after, json, "repoId");
 
         List<String> diff = diff(before, after);
         System.out.println("diff = " + diff + "; expected = " + Arrays.asList(expected));
