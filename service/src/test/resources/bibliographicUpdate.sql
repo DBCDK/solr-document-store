@@ -74,6 +74,9 @@ VALUES (300200, 'new', FALSE, '[]' :: JSONB, 'revision', 'track');
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, HASLIVEHOLDINGS, INDEXKEYS, PRODUCERVERSION, TRACKINGID)
 VALUES (800000, 'new', FALSE, '[]' :: JSONB, 'revision', 'track');
 
+-- Values for testing proper delay on update
+INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)
+VALUES (600100, 'clazzifier', 'delay', 'id#0', FALSE, '{}' :: JSONB, '5544', 'track', 'unit:3', 'work:3');
 
 -- Values for testing proper holdings update
 INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, PRODUCERVERSION, TRACKINGID, UNIT, WORK)

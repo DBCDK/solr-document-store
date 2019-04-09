@@ -76,9 +76,9 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                 System.out.println("* no commitWithin");
                 enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "12345678"));
                 System.out.println("* commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "87654321"), 100);
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "87654321"), 100, Optional.empty());
                 System.out.println("* null commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "abc"), null);
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "abc"), null, Optional.empty());
                 System.out.println("* queueing done");
             } catch (SQLException ex) {
                 log.error("Exception: " + ex.getMessage());

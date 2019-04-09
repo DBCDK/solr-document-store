@@ -9,10 +9,9 @@ import org.junit.Test;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
@@ -140,6 +139,28 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(null, updatedD)
                 );
         assertThat(rd.getStatus(), is(200));
+    }
+
+    @Test
+    public void updateExistingBibliographicPostToDeletedIsDelayed() throws JSONBException, SQLException {
+        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "delay", "id#2", "work:delay", "unit:delay", "prod:delay", true, new HashMap<>(), "track:delay");
+        String updatedB = jsonbContext.marshall(b);
+
+        Response r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, updatedB)
+                );
+        assertThat(r.getStatus(), is(200));
+        // Record what time the bib entity was queued
+        Date now = new Date();
+        try (Connection conn = env().getDatasource().getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT dequeueafter FROM queue")) {
+            while (resultSet.next()) {
+                Timestamp dequeueAfter = resultSet.getTimestamp(1);
+                // Assert delay
+                assertThat(dequeueAfter.after(now), is(true));
+            }
+        }
     }
 
     /**

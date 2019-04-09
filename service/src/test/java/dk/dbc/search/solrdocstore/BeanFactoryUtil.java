@@ -21,9 +21,9 @@ public class BeanFactoryUtil {
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = em;
         bean.openAgency = openAgency;
-        bean.queue = createEnqueueSupplier(env);
         bean.h2bBean = createHoldingsToBibliographicBean(env);
         bean.brBean = createBibliographicRetrieveBean(env);
+        bean.enqueueAdapter = createEnqueueAdapter(env);
         return bean;
     }
 
@@ -39,7 +39,7 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = env.getEntityManager();
         bean.h2bBean = createHoldingsToBibliographicBean(env);
-        bean.queue = createEnqueueSupplier(env);
+        bean.enqueueAdapter = createEnqueueAdapter(env);
         return bean;
     }
 
@@ -82,6 +82,18 @@ public class BeanFactoryUtil {
         EntityManager entityManager = env.getEntityManager();
         bean.entityManager = entityManager;
         return bean;
+    }
+
+    public static EnqueueAdapter createEnqueueAdapter(JpaTestEnvironment env) {
+        EnqueueAdapter enqueueAdapter = new EnqueueAdapter();
+        enqueueAdapter.config = new Config() {
+            @Override
+            public long getDeleteMarkedDelay() {
+                return 200000;
+            }
+        };
+        enqueueAdapter.queue = createEnqueueSupplier(env);
+        return enqueueAdapter;
     }
 
     public static OpenAgencyBean createOpenAgencyBean() {
@@ -151,7 +163,6 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = em;
         bean.h2bBean = h2bBean;
-        bean.queue = queue;
         return bean;
     }
 
@@ -159,8 +170,8 @@ public class BeanFactoryUtil {
         ResourceBean bean = new ResourceBean();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = env.getEntityManager();
-        bean.queue = createEnqueueSupplier(env);
         bean.openAgency = openAgency;
+        bean.enqueueAdapter = createEnqueueAdapter(env);
         return bean;
     }
 }

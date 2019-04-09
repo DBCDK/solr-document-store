@@ -4,18 +4,29 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Stateless
 public class EnqueueAdapter {
+
+    @Inject
+    Config config;
+
+    @Inject
+    EnqueueSupplierBean queue;
 
     private static Logger log = LoggerFactory.getLogger(EnqueueAdapter.class);
 
-    public static void enqueueAll(EnqueueSupplierBean queue, Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+    public void enqueueAll(Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
         for (AgencyClassifierItemKey k : agencyItemKeys) {
             try {
-                queue.getManifestationEnqueueService().enqueue(k, commitWithin.orElse(null));
+                // If delete marked, set postponed option
+                Optional<Long> postponed = k.isDeleteMarked() ? Optional.of(config.getDeleteMarkedDelay()) : Optional.empty();
+                queue.getManifestationEnqueueService().enqueue(k, commitWithin.orElse(null), postponed);
             } catch (SQLException e) {
                 log.error("Error enqueuing item: " + k);
                 log.debug("Error enqueuing item: " + k, e);
