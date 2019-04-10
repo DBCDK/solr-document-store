@@ -242,7 +242,6 @@ public class DocProducer {
     public SolrInputDocument inputDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         try {
             String id = bibliographicShardId(sourceDoc);
-            String linkId = id + "-link";
 
             businessLogic.filterOutDecommissioned(sourceDoc);
 
@@ -254,9 +253,7 @@ public class DocProducer {
 
             setField(indexKeys, "id", id);
             setField(indexKeys, "t", "m"); // Manifestation type
-            addField(indexKeys, "rec.childDocId", linkId);
 
-            businessLogic.addRecHoldingsAgencyId(sourceDoc);
             businessLogic.addFromPartOfDanbib(sourceDoc);
             businessLogic.addCollectionIdentifier800000(sourceDoc);
             businessLogic.addHoldingsItemRole(sourceDoc);
@@ -264,7 +261,7 @@ public class DocProducer {
             businessLogic.attachedResources(sourceDoc);
 
             SolrInputDocument doc = solrFields.newDocumentFromIndexKeys(indexKeys);
-            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, linkId, repositoryId);
+            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, repositoryId);
 
             return doc;
         } catch (RuntimeException ex) {
