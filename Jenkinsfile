@@ -42,26 +42,46 @@ pipeline {
                 sh """
                     rm -rf \$WORKSPACE/.repo/dk/dbc
                     mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo install pmd:pmd javadoc:aggregate
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo install javadoc:aggregate org.jacoco:jacoco-maven-plugin:prepare-agent -Dsurefire.useFile=false -Dmaven.test.failure.ignore
                 """
-                //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
+                script {
+                    junit testResults: '**/target/surefire-reports/TEST-*.xml'
+
+                    def java = scanForIssues tool: [$class: 'Java']
+                    def javadoc = scanForIssues tool: [$class: 'JavaDoc']
+
+                    publishIssues issues:[java,javadoc], unstableTotalAll:1
+                }
             }
         }
 
-        stage("sonarqube") {
+        stage("analysis") {
             steps {
                 sh """
-                    if [ $BRANCH_NAME -eq "master" ]; then
-                        mvn clean \
-                            org.jacoco:jacoco-maven-plugin:prepare-agent \
-                            verify \
-                            -Dmaven.test.failure.ignore=false
-
-                        mvn sonar:sonar \
-                            -Dsonar.host.url=http://sonarqube.mcp1.dbc.dk \
-                            -Dsonar.login=d8cfb40a9c988e2875590545628605811327660a
-                    fi
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo -pl !gui pmd:pmd pmd:cpd findbugs:findbugs
                 """
+
+                script {
+                    def pmd = scanForIssues tool: [$class: 'Pmd'], pattern: '**/target/pmd.xml'
+                    publishIssues issues:[pmd], unstableTotalAll:1
+
+                    def cpd = scanForIssues tool: [$class: 'Cpd'], pattern: '**/target/cpd.xml'
+                    publishIssues issues:[cpd]
+
+                    def findbugs = scanForIssues tool: [$class: 'FindBugs'], pattern: '**/target/findbugsXml.xml'
+                    publishIssues issues:[findbugs], unstableTotalAll:1
+                }
+            }
+        }
+
+        stage("coverage") {
+            steps {
+                step([$class: 'JacocoPublisher', 
+                      execPattern: 'target/*.exec',
+                      classPattern: 'target/classes',
+                      sourcePattern: 'src/main/java',
+                      exclusionPattern: 'src/test*'
+                ])
             }
         }
 
