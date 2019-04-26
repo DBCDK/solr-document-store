@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 
 @Singleton
 @Startup
@@ -54,13 +55,15 @@ public class DatabaseMigrator {
 
     public HashSet<String> migrate() {
         HashSet<String> migrates = new HashSet<>();
-        final Flyway flyway = new Flyway();
-        flyway.setTable("schema_version");
+        FluentConfiguration flywayConfigure = Flyway.configure()
+                .table("schema_version")
+                .dataSource(dataSource);
         if (config.getAllowNonEmptySchema()) {
-            flyway.setBaselineOnMigrate(true);
-            flyway.setBaselineVersionAsString("0"); // This is needed for afterMigrate
+            flywayConfigure = flywayConfigure.baselineOnMigrate(true)
+                    .baselineVersion("0"); // This is needed for afterMigrate
         }
-        flyway.setDataSource(dataSource);
+
+        final Flyway flyway = flywayConfigure.load();
         for (MigrationInfo i : flyway.info().applied()) {
             log.info("db task {} : {} from file '{}' (applied)", i.getVersion(), i.getDescription(), i.getScript());
         }

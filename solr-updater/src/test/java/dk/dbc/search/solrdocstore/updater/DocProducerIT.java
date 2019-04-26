@@ -25,7 +25,6 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -37,9 +36,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,47 +50,33 @@ public class DocProducerIT {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducerIT.class);
 
-    private static PostgresITDataSource pg;
-    private static DataSource dataSource;
-
-    private static String payaraPort;
     private static String solrDocStoreUrl;
-
-    private static String solrPort;
     private static String solrUrl;
 
+    private static PostgresITDataSource pg;
     private static Client client;
-
     private static Config config;
-    private DocProducer docProducer;
 
-    @ClassRule
-    public static final TemporaryFolder tempSolr = new TemporaryFolder();
+    private DocProducer docProducer;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-
-        solrPort = System.getProperty("solr.port", "8983");
-        solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
+        solrUrl = System.getenv("SOLR_URL");
+        solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
 
         pg = new PostgresITDataSource("solrdocstore");
-        dataSource = pg.getDataSource();
-
         client = ClientBuilder.newClient();
-
-        initPayara();
-
         config = new Config("queues=test",
                             "solrDocStoreUrl=" + solrDocStoreUrl,
                             "solrUrl=" + solrUrl);
-
+        initPayara();
     }
 
     private static void initPayara() throws Exception {
-        payaraPort = System.getProperty("glassfish.port", "18080");
-        solrDocStoreUrl = "http://localhost:" + payaraPort + "/";
+        String evictAll = solrDocStoreUrl + "api/evict-all";
+        log.debug("evictAll = {}", evictAll);
 
-        Invocation invocation = client.target(solrDocStoreUrl + "api/evict-all")
+        Invocation invocation = client.target(evictAll)
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .buildGet();
         for (int i = 0 ; i < 1000 ; i++) {
@@ -104,12 +87,11 @@ public class DocProducerIT {
                 log.debug("Exception: ", ex);
             }
             int status = invocation.invoke().getStatus();
-            if(status == 200) {
-                log.debug("i = {}", i);
+            if (status == 200) {
+                log.debug("eviction success in n'th try ({})", i);
                 return;
             }
         }
-
         throw new IllegalStateException("solr-doc-store not ready yet");
     }
 

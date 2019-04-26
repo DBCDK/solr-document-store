@@ -27,15 +27,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,62 +45,33 @@ public class WorkerIT {
 
     private static final Logger log = LoggerFactory.getLogger(WorkerIT.class);
 
-    private static PostgresITDataSource pg;
-    private static DataSource dataSource;
 
-    private static String payaraPort;
+    private static String solrUrl;
     private static String solrDocStoreUrl;
 
-    private static String solrPort;
-    private static String solrUrl;
-
-    private static Client client;
-
+    private static PostgresITDataSource pg;
+    private static DataSource dataSource;
     private static Config config;
-    private Worker worker;
 
-    @ClassRule
-    public static final TemporaryFolder tempSolr = new TemporaryFolder();
+    private Worker worker;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
 
-        solrPort = System.getProperty("solr.port", "8983");
-        solrUrl = "http://localhost:" + solrPort + "/solr/corepo";
+        solrUrl = System.getenv("SOLR_URL");
+        solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
 
         pg = new PostgresITDataSource("solrdocstore");
         dataSource = pg.getDataSource();
         DatabaseMigrator.migrate(dataSource);
 
-        client = ClientBuilder.newClient();
-
-        initPayara();
-
         config = new Config("queues=test",
-                            "solrDocStoreUrl=NONE",
-                            "solrUrl=NONE",
+                            "solrDocStoreUrl=" + solrDocStoreUrl,
+                            "solrUrl=" + solrUrl,
                             "rescanEvery=2",
                             "idleRescanEvery=1",
                             "maxTries=1",
-                            "emptyQueueSleep=10ms") {
-            // values are not ready at object construnction time
-            @Override
-            public String getSolrDocStoreUrl() {
-                return solrDocStoreUrl;
-            }
-
-            @Override
-            public String getSolrUrl() {
-                System.out.println("solrUrl = " + solrUrl);
-                return solrUrl;
-            }
-        };
-
-    }
-
-    private static void initPayara() throws Exception {
-        payaraPort = System.getProperty("glassfish.port", "18080");
-        solrDocStoreUrl = "http://localhost:" + payaraPort + "/";
+                            "emptyQueueSleep=10ms");
     }
 
     @Before
@@ -135,7 +102,7 @@ public class WorkerIT {
         worker.docProducer.solrFields.config = config;
         worker.docProducer.solrFields.init();
         worker.docProducer.businessLogic = new BusinessLogic();
-        worker.docProducer.businessLogic.oa = new OpenAgency(){
+        worker.docProducer.businessLogic.oa = new OpenAgency() {
             @Override
             public OpenAgency.LibraryRule libraryRule(String agencyId) {
                 return new LibraryRule(true, true, true, true, false, true);
