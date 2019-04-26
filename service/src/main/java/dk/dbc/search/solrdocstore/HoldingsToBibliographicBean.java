@@ -17,7 +17,7 @@ public class HoldingsToBibliographicBean {
     private static final Logger log = LoggerFactory.getLogger(HoldingsToBibliographicBean.class);
 
     @Inject
-    OpenAgencyBean  openAgency;
+    OpenAgencyBean openAgency;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -68,6 +68,8 @@ public class HoldingsToBibliographicBean {
                     case FBSSchool:
                         keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, h2b.getBibliographicAgencyId(), LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY));
                         break;
+                    default:
+                        throw new AssertionError("Enum has unknown value" + libraryType);
                 }
             }
         }
@@ -133,14 +135,14 @@ public class HoldingsToBibliographicBean {
 
     public boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
         BibliographicEntity e = brBean.getBibliographicEntity(agencyId, bibliographicRecordId);
-        return ( ( e != null ) && ( !e.isDeleted() ) );
+        return e != null && !e.isDeleted();
     }
 
     public Set<AgencyClassifierItemKey> attachToAgency(HoldingsToBibliographicEntity expectedState) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
         Set<AgencyClassifierItemKey> affectedKeys = EnqueueAdapter.makeSet();
 
-        if (( foundEntity != null ) && !foundEntity.equals(expectedState)) {
+        if (foundEntity != null && !foundEntity.equals(expectedState)) {
             List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(foundEntity.getBibliographicAgencyId(), foundEntity.getBibliographicRecordId());
             for (BibliographicEntity entityAffected : entitiesAffected) {
                 affectedKeys.add(entityAffected.asAgencyClassifierItemKey());

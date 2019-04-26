@@ -37,14 +37,12 @@ pipeline {
                     } else {
                         println(" Building BRANCH_NAME == ${BRANCH_NAME}")
                     }
-
                 }
 
                 sh """
-                    mvn -B clean
-                    mvn -B install pmd:pmd javadoc:aggregate
-                    rm -rf ~/.m2/repositor/dk/dbc/solr-doc-store*
-
+                    rm -rf \$WORKSPACE/.repo/dk/dbc
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo install pmd:pmd javadoc:aggregate
                 """
                 //junit "**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml"
             }

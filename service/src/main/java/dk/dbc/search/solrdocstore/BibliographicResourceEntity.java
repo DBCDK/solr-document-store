@@ -33,21 +33,6 @@ public class BibliographicResourceEntity implements Serializable {
         this.value = value;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BibliographicResourceEntity that = (BibliographicResourceEntity) o;
-        return agencyId == that.agencyId &&
-               Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
-               Objects.equals(field, that.field) &&
-               Objects.equals(value, that.value);
-    }
-
     public int getAgencyId() {
         return agencyId;
     }
@@ -78,6 +63,31 @@ public class BibliographicResourceEntity implements Serializable {
 
     public void setValue(boolean value) {
         this.value = value;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 61 * hash + this.agencyId;
+        hash = 61 * hash + Objects.hashCode(this.bibliographicRecordId);
+        hash = 61 * hash + Objects.hashCode(this.field);
+        hash = 61 * hash + ( this.value ? 1 : 0 );
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BibliographicResourceEntity that = (BibliographicResourceEntity) o;
+        return agencyId == that.agencyId &&
+               Objects.equals(bibliographicRecordId, that.bibliographicRecordId) &&
+               Objects.equals(field, that.field) &&
+               Objects.equals(value, that.value);
     }
 
     @Override

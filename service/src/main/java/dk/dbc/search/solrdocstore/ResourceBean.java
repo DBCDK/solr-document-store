@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
@@ -33,7 +32,6 @@ import static dk.dbc.log.LogWith.track;
 public class ResourceBean {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceBean.class);
-    private static final ObjectMapper O = new ObjectMapper();
 
     private final JSONBContext jsonbContext = new JSONBContext();
     @Inject

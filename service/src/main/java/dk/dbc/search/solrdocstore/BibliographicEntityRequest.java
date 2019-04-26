@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class BibliographicEntityRequest extends BibliographicEntity {
 
@@ -34,6 +35,26 @@ public class BibliographicEntityRequest extends BibliographicEntity {
 
     public void setCommitWithin(Integer commitWithin) {
         this.commitWithin = commitWithin;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = 71 * hash + Objects.hashCode(this.superceds);
+        hash = 71 * hash + Objects.hashCode(this.commitWithin);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        final BibliographicEntityRequest other = (BibliographicEntityRequest) obj;
+        return super.equals(obj) &&
+               Objects.equals(this.superceds, other.superceds) &&
+               Objects.equals(this.commitWithin, other.commitWithin);
     }
 
 }

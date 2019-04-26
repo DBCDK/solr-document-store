@@ -1,8 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.ee.stats.Timed;
-import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;

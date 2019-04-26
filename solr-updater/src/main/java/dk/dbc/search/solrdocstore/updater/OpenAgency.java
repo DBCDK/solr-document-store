@@ -165,41 +165,40 @@ public class OpenAgency {
         for (JsonNode libraryRule : libraryRulesList) {
             String agencyIdText = getJsonValue(getJsonKey(libraryRule, "agencyId"));
             String agencyTypeText = getJsonValue(getJsonKey(libraryRule, "agencyType"));
-            if (!agencyId.equals(agencyIdText)) {
-                continue;
-            }
-            JsonNode rules = getJsonKey(libraryRule, "libraryRule");
+            if (agencyId.equals(agencyIdText)) {
+                JsonNode rules = getJsonKey(libraryRule, "libraryRule");
 
-            boolean use_localdata_stream = false;
-            boolean use_holdings_item = false;
-            boolean part_of_danbib = false;
-            boolean part_of_bibliotek_dk = false;
-            boolean auth_create_common_record = false;
+                boolean use_localdata_stream = false;
+                boolean use_holdings_item = false;
+                boolean part_of_danbib = false;
+                boolean part_of_bibliotek_dk = false;
+                boolean auth_create_common_record = false;
 
-            for (JsonNode rule : rules) {
-                String name = getJsonValue(getJsonKey(rule, "name"));
-                switch (name) {
-                    case "use_localdata_stream":
-                        use_localdata_stream = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    case "use_holdings_item":
-                        use_holdings_item = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    case "part_of_danbib":
-                        part_of_danbib = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    case "part_of_bibliotek_dk":
-                        part_of_bibliotek_dk = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    case "auth_create_common_record":
-                        auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    default:
-                        break;
+                for (JsonNode rule : rules) {
+                    String name = getJsonValue(getJsonKey(rule, "name"));
+                    switch (name) {
+                        case "use_localdata_stream":
+                            use_localdata_stream = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        case "use_holdings_item":
+                            use_holdings_item = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        case "part_of_danbib":
+                            part_of_danbib = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        case "part_of_bibliotek_dk":
+                            part_of_bibliotek_dk = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        case "auth_create_common_record":
+                            auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                return new LibraryRule(use_localdata_stream, use_holdings_item, part_of_danbib, part_of_bibliotek_dk,
+                                       RESEARCH_LIBRARY.equals(agencyTypeText), auth_create_common_record);
             }
-            return new LibraryRule(use_localdata_stream, use_holdings_item, part_of_danbib, part_of_bibliotek_dk,
-                                   RESEARCH_LIBRARY.equals(agencyTypeText), auth_create_common_record);
         }
         throw new IOException("Cannot find valid openagency in json for agency: " + agencyId);
     }

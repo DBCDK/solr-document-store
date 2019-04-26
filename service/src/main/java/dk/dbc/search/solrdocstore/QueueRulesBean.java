@@ -23,8 +23,6 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,8 +30,6 @@ import org.slf4j.LoggerFactory;
  */
 @Stateless
 public class QueueRulesBean {
-
-    private static final Logger log = LoggerFactory.getLogger(QueueRulesBean.class);
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;

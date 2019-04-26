@@ -119,9 +119,10 @@ public class BibliographicBean {
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
                 entityManager.flush();
-                List<HoldingsToBibliographicEntity> relatedHoldings = ( bibliographicEntity.isDeleted() ) ?
-                                                                      h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
-                                                                      h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
+                List<HoldingsToBibliographicEntity> relatedHoldings =
+                        bibliographicEntity.isDeleted() ?
+                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
+                        h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings) {
                     Set<AgencyClassifierItemKey> reattachedKeys =
                             h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId());

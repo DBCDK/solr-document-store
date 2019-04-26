@@ -4,7 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -20,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  *
@@ -90,7 +91,7 @@ public class OpenAgencyStatusBean {
      */
     String hash(int agencyId) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(( "a79befdb3d4d08625066afa9d106f970" + agencyId ).getBytes());
+        digest.update(( "a79befdb3d4d08625066afa9d106f970" + agencyId ).getBytes(UTF_8));
         return Base64.getEncoder().encodeToString(digest.digest())
                 .replaceAll("[+/=]", "-"); //uri safe
     }

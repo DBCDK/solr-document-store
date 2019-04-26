@@ -1,7 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.ee.stats.Timed;
 import dk.dbc.log.LogWith;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ import static dk.dbc.log.LogWith.track;
 @Path("")
 public class BibliographicRecordAPIBean {
 
-    private static final ObjectMapper O = new ObjectMapper();
     private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBean.class);
 
     @Inject
@@ -95,7 +93,7 @@ public class BibliographicRecordAPIBean {
                 return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
             }
 
-            String direction = ( desc ) ? "DESC" : "ASC";
+            String direction = desc ? "DESC" : "ASC";
             Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
                                                                   "FROM bibliographicsolrkeys b " +
                                                                   "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +

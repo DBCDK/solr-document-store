@@ -9,13 +9,9 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.eclipse.persistence.exceptions.JPQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Stateless
 public class BibliographicRetrieveBean {
-
-    private static final Logger log = LoggerFactory.getLogger(BibliographicRetrieveBean.class);
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -72,7 +68,7 @@ public class BibliographicRetrieveBean {
      *         included
      */
     public Query getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId, String orderBy, boolean desc) {
-        String direction = ( desc ) ? "DESC" : "ASC";
+        String direction = desc ? "DESC" : "ASC";
         if (!BibliographicEntity.sortableColumns.contains(orderBy)) {
             throw new JPQLException("Invalid order by parameter");
         }
