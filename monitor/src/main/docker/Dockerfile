@@ -6,4 +6,4 @@ ENV APPLICATION_NAME=SolrDocStoreMonitor \
 
 LABEL DOCSTORE_POSTGRES_URL="Solr DocStore database url (required: user:pass@host:port/database)"
 
-COPY *.war app.json deployments/
+COPY target/${project.build.finalName}.war target/docker/app.json deployments/
