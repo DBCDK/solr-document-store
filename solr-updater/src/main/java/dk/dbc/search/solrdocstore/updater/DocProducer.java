@@ -115,6 +115,7 @@ public class DocProducer {
      * _root_:${biblShardId}
      *
      * @param bibliographicShardId the root id of the document to purge
+     * @param ids                  id's to delete from SolR
      * @param commitWithin         then to commit
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
@@ -145,7 +146,8 @@ public class DocProducer {
      * @param sourceDoc the document from {@link  #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
      *                  }
      * @return null if deleted otherwise a expanded solr document
-     * @throws dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError
+     * @throws PostponedNonFatalQueueError if unable to communicate with
+     *                                     openagency
      */
     @Timed
     public SolrInputDocument createSolrDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
@@ -238,6 +240,8 @@ public class DocProducer {
      *
      * @param sourceDoc docstore collection
      * @return solr document
+     * @throws PostponedNonFatalQueueError if unable to communicate with
+     *                                     openagency
      */
     public SolrInputDocument inputDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         try {
@@ -271,8 +275,6 @@ public class DocProducer {
         }
     }
 
-
-
     /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
@@ -296,6 +298,5 @@ public class DocProducer {
         String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
         return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
     }
-
 
 }
