@@ -254,6 +254,7 @@ public class DocProducer {
             setField(indexKeys, "id", id);
             setField(indexKeys, "t", "m"); // Manifestation type
 
+            businessLogic.addRecHoldingsAgencyId(sourceDoc);
             businessLogic.addFromPartOfDanbib(sourceDoc);
             businessLogic.addCollectionIdentifier800000(sourceDoc);
             businessLogic.addHoldingsItemRole(sourceDoc);

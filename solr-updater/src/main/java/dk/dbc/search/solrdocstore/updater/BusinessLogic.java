@@ -73,6 +73,25 @@ public class BusinessLogic {
 
 
     /**
+     * Find all holdings agencies and record them
+     *
+     * @param sourceDoc entire json from solr-doc-store
+     */
+    @Timed
+    public void addRecHoldingsAgencyId(JsonNode sourceDoc) {
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+
+        JsonNode records = find(sourceDoc, "holdingsItemRecords");
+        for (JsonNode record : records) {
+            JsonNode holdingsIndexKeys = find(record, "indexKeys");
+            if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
+                String agencyId = find(record, "agencyId").asText();
+                addField(indexKeys, "rec.holdingsAgencyId", agencyId);
+            }
+        }
+    }
+
+    /**
      * Include add agencies listed in 'partOfDanbib' in ln field
      *
      * @param sourceDoc entire json from solr-doc-store

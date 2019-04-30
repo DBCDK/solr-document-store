@@ -58,7 +58,7 @@ public class DocProducerTest {
         docProducer.solrFields = solrFields;
 
         docProducer.businessLogic = new BusinessLogic();
-        docProducer.businessLogic.oa = new OpenAgency(){
+        docProducer.businessLogic.oa = new OpenAgency() {
             @Override
             public OpenAgency.LibraryRule libraryRule(String agencyId) {
                 return new LibraryRule(true, true, true, true, false, true);
@@ -77,6 +77,11 @@ public class DocProducerTest {
         String xml = ClientUtils.toXML(document);
         assertTrue(document.containsKey("dkcclterm.po"));
         assertFalse(document.containsKey("unknown.field"));
+
+        assertEquals(3, document.get("rec.holdingsAgencyId").getValues().size());
+        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300101"));
+        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300102"));
+        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300104"));
 
         assertTrue(document.get("rec.repositoryId").getValues().contains("300101-katalog:23645564"));
 
