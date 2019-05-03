@@ -77,10 +77,10 @@ pipeline {
         stage("coverage") {
             steps {
                 step([$class: 'JacocoPublisher', 
-                      execPattern: 'target/*.exec',
-                      classPattern: 'target/classes',
-                      sourcePattern: 'src/main/java',
-                      exclusionPattern: 'src/test*'
+                      execPattern: '**/target/*.exec',
+                      classPattern: '**/target/classes',
+                      sourcePattern: '**/src/main/java',
+                      exclusionPattern: '**/src/test*'
                 ])
             }
         }
