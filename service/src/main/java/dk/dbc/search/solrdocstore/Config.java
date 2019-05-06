@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,11 +12,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Stateless
 @Startup
@@ -59,6 +57,7 @@ public class Config {
         return allowNonEmptySchema;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public int[] getOpenAgencyValidateTime() {
         return openAgencyValidateTime;
     }
@@ -85,12 +84,6 @@ public class Config {
 
     private static <T> T getValue(Properties props, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
         return mapper.apply(getValue(props, propertyName, envName, defaultValue, error));
-    }
-
-    private static List<String> asStringList(String str) {
-        return Arrays.stream(str.split("[\\s,]+"))
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
     }
 
     private Properties findProperties(String resourceName) {

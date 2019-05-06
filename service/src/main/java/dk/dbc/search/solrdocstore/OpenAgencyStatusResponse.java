@@ -1,11 +1,13 @@
 package dk.dbc.search.solrdocstore;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 
 /**
  *
  * @author DBC {@literal <dbc.dk>}
  */
+@SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
 public class OpenAgencyStatusResponse {
 
     public static class Diag {

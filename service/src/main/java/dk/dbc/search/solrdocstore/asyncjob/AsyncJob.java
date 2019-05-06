@@ -142,7 +142,6 @@ public abstract class AsyncJob {
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
         encoder.setPattern(getLogPattern() + "%msg%n%rEx");
-        encoder.init(write);// Not really sure why this is nessecary appender.setEncoder should do that
         encoder.start();
 
         appender.setEncoder(encoder);

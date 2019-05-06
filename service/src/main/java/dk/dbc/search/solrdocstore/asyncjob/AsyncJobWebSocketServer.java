@@ -57,6 +57,8 @@ public class AsyncJobWebSocketServer {
                 case "Requesting unsubscription":
                     sessionHandler.unsubscribe(session, uuid);
                     break;
+                default:
+                    break;
             }
         }
     }

@@ -72,7 +72,7 @@ public class EnqueueBean {
     @Path("pid/ALL/{pid}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response enqueueSinglePid(@PathParam("pid") String content) {
-        return EnqueueBean.this.enqueuePids(content);
+        return enqueuePids(content);
     }
 
     private HashMap<String, String> enqueue(String content, EnqueueService<AgencyClassifierItemKey> enqueue) {
@@ -103,7 +103,7 @@ public class EnqueueBean {
     }
 
     private EnqueueService<AgencyClassifierItemKey> queueSupplierFor(String queue) {
-        Connection connection = entityManager.unwrap(java.sql.Connection.class);
+        Connection connection = entityManager.unwrap(Connection.class);
         return new EnqueueService<>(connection, Collections.singleton(queue),
                                     (key, commitWithin) -> key.toQueueJob(commitWithin));
     }

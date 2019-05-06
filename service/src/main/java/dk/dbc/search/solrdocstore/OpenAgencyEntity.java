@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -74,10 +75,12 @@ public class OpenAgencyEntity implements Serializable {
         this.authCreateCommonRecord = authCreateCommonRecord;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Timestamp getFetched() {
         return fetched;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setFetched(Timestamp fetched) {
         this.fetched = fetched;
     }

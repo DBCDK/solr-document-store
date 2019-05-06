@@ -46,11 +46,9 @@ public class OpenAgencyBean {
         OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
 
         // If someone keeps hammering with an unknown agencyid, multiple requests
-        if (entity == null || ( entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT )) {
+        if (entity == null ||
+            entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
             entity = proxy.loadOpenAgencyEntry(agencyId);
-            if (entity == null) {
-                entity = new OpenAgencyEntity(agencyId, LibraryType.Missing, false, false);
-            }
             entityManager.persist(entity);
         }
         if (entity.getLibraryType() == LibraryType.Missing) {
@@ -90,11 +88,11 @@ public class OpenAgencyBean {
 
     /**
      * Migrate open agency.
-     *
+     * <p>
      * - If live holding exists log error
-     *
+     * <p>
      * - If no live holdings exists clear h2b and old holdings
-     *
+     * <p>
      * - If no holdings exists (strange why should oa have been cached then?)
      * then just update the cache
      *

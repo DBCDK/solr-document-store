@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -28,13 +29,12 @@ public class QueueRuleEntity implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass())
             return false;
-        }
-        return queue == null ? obj == null : queue.equals(( (QueueRuleEntity) obj ).getQueue());
+        final QueueRuleEntity other = (QueueRuleEntity) obj;
+        return Objects.equals(this.queue, other.queue);
     }
 
     @Override

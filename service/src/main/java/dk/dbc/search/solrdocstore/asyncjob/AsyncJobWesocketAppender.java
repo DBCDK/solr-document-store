@@ -2,14 +2,11 @@ package dk.dbc.search.solrdocstore.asyncjob;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
 public class AsyncJobWesocketAppender extends AppenderBase<ILoggingEvent> {
 
-    private static final Logger log = LoggerFactory.getLogger(AsyncJobHandle.class);
     private final UUID uuid;
     private final AsyncJobHandle job;
     private final AsyncJobSessionHandler sessionHandler;

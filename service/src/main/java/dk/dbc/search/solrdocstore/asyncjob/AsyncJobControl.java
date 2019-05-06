@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dbc.search.solrdocstore.QueueAsyncJob;
-import dk.dbc.search.solrdocstore.queue.QueueJob;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -261,6 +261,7 @@ public class AsyncJobControl {
     }
 
     @XmlRootElement
+    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     public static class StatusResponse {
 
         public boolean running, started, canceled, completed;

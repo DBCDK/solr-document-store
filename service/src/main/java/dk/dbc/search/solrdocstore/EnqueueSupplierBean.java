@@ -39,7 +39,7 @@ public class EnqueueSupplierBean {
 
     public EnqueueService<AgencyClassifierItemKey> getManifestationEnqueueService() {
         // EclipseLink specific
-        Connection connection = entityManager.unwrap(java.sql.Connection.class);
+        Connection connection = entityManager.unwrap(Connection.class);
         return new EnqueueService<>(connection, daemon.getManifestationQueues(),
                                     (key, commitWithin) -> key.toQueueJob(commitWithin));
     }

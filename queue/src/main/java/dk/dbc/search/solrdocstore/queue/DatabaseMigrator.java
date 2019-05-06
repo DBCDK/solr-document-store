@@ -33,11 +33,13 @@ public class DatabaseMigrator {
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
     public static void migrate(DataSource dataSource) {
-        final Flyway flyway = new Flyway();
-        flyway.setTable("solr_doc_store_queue_version");
-        flyway.setBaselineOnMigrate(true);
-        flyway.setDataSource(dataSource);
-        flyway.setLocations("solr-doc-store-queue/migration");
+        Flyway flyway =
+                Flyway.configure()
+                        .table("solr_doc_store_queue_version")
+                        .baselineOnMigrate(true)
+                        .dataSource(dataSource)
+                        .locations("solr-doc-store-queue/migration")
+                        .load();
         for (MigrationInfo i : flyway.info().all()) {
             log.info("db task {} : {} from file '{}'", i.getVersion(), i.getDescription(), i.getScript());
         }

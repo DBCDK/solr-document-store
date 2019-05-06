@@ -71,7 +71,6 @@ public class BusinessLogic {
         }
     }
 
-
     /**
      * Find all holdings agencies and record them
      *
@@ -110,6 +109,8 @@ public class BusinessLogic {
      * Include add agencies listed in 'partOfDanbib' in ln field
      *
      * @param sourceDoc entire json from solr-doc-store
+     * @throws PostponedNonFatalQueueError if unable to communicate with
+     *                                     openagency
      */
     @Timed
     public void addCollectionIdentifier800000(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
@@ -157,13 +158,13 @@ public class BusinessLogic {
      * depending on if the holdings are part of bibdk/danbib holdings
      *
      * @param sourceDoc entire json from solr-doc-store
+     * @throws PostponedNonFatalQueueError if unable to communicate with
+     *                                     openagency
      */
     @Timed
     public void addHoldingsItemRole(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
         JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
         JsonNode indexKeys = find(bibliographicRecord, "indexKeys");
-//        String agencyId = find(bibliographicRecord, "agencyId").asText();
-//        OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
         String repositoryId = find(bibliographicRecord, "repositoryId").asText();
         boolean excludeFromUnionCatalogue = "true".equalsIgnoreCase(
                 getField(indexKeys, "rec.excludeFromUnionCatalogue")

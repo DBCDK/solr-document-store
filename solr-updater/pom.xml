@@ -7,14 +7,11 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>dk.dbc</groupId>
     <artifactId>solr-doc-store-updater</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <solr.version>8.0.0</solr.version>
     </properties>
     
     <dependencies>
@@ -23,6 +20,7 @@
             <artifactId>${project.parent.artifactId}-queue</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>pg-queue-common</artifactId>
@@ -33,70 +31,51 @@
             <artifactId>pg-queue-consumer</artifactId>
             <version>${pg-queue.version}</version>
         </dependency>
-        <dependency>
-            <groupId>dk.dbc</groupId>
-            <artifactId>ee-stats</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>provided</scope>
-            <type>jar</type>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
-            <version>7.7.0</version>
-            <type>jar</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>stax2-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>woodstox-core-asl</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jaxb-annotations</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
-            <type>jar</type>
+            <version>${solr.version}</version>
         </dependency>
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-graceful-cache</artifactId>
             <version>1.3-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.jodah</groupId>
-            <artifactId>failsafe</artifactId>
-            <version>1.0.4</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-log</artifactId>
             <version>1.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>ee-stats</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
+            <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>failsafe</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -105,7 +84,27 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc.commoms.testutils</groupId>
+            <artifactId>dbc-commons-testutil-postgres-connection</artifactId>
+            <version>1.3-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>pg-queue-supplier</artifactId>
@@ -115,29 +114,15 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>2.26</version>
+            <version>${jersey.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-            <version>2.26</version>
+            <version>2.28</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>dk.dbc.commoms.testutils</groupId>
-            <artifactId>dbc-commons-testutil-postgres-connection</artifactId>
-            <version>1.3-SNAPSHOT</version>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.1.4</version>
-            <scope>test</scope>
-        </dependency>
-
 
     </dependencies>
 
@@ -155,165 +140,9 @@
                 
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <compilerArguments>
-                        <endorseddirs>${endorsed.dir}</endorseddirs>
-                    </compilerArguments>
-                </configuration>
-            </plugin>
-
-            <plugin> 
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.3.0</version>
-                <executions>
-                    <execution>
-                        <id>install-solr</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://is.dbc.dk/job/opensearch-3rd-party-dependencies/lastSuccessfulBuild/artifact/trunk/ARTIFACTS/apache-solr-7.2.1/apache-solr-7.2.1.zip</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/solr</outputDirectory>
-                            <md5>${test.solr.md5}</md5>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${endorsed.dir}</outputDirectory>
-                            <silent>true</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>javax</groupId>
-                                    <artifactId>javaee-endorsed-api</artifactId>
-                                    <version>7.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy service.war</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                            <silent>true</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.postgresql</groupId>
-                                    <artifactId>postgresql</artifactId>
-                                    <version>42.1.4</version>
-                                    <type>jar</type>
-                                    <destFileName>postgresql.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>solr config</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/test-classes/solr/corepo/conf</outputDirectory>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>dk.dbc</groupId>
-                                    <artifactId>corepo-indexer-solr</artifactId>
-                                    <version>1.1-SNAPSHOT</version>S
-                                    <classifier>no-stored</classifier>
-                                    <type>zip</type>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>solr-jetty-jars</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>io.dropwizard.metrics</groupId>
-                                    <artifactId>metrics-jvm</artifactId>
-                                    <version>3.2.2</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.dropwizard.metrics</groupId>
-                                    <artifactId>metrics-core</artifactId>
-                                    <version>3.2.2</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-logging</groupId>
-                                    <artifactId>commons-logging</artifactId>
-                                    <version>1.2</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-api</artifactId>
-                                    <version>1.7.25</version>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-log4j12</artifactId>
-                                    <version>1.7.25</version>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>log4j</groupId>
-                                    <artifactId>log4j</artifactId>
-                                    <version>1.2.17</version>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}/solr/solr-7.2.1/server/solr-webapp/webapp/WEB-INF/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>reserve-network-port</id>
@@ -335,9 +164,80 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin> 
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-service-war-dependencies</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <includeArtifactIds>slf4j-api,logback-classic,logback-core,postgresql</includeArtifactIds>
+                            <stripClassifier>true</stripClassifier>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.build.directory}/provided-jars</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>solr-exec</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>dk.dbc</groupId>
+                                    <artifactId>dbc-solr8-base</artifactId>
+                                    <version>${solr.version}-SNAPSHOT</version>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>solr-config</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/solr/server/solr/corepo/conf</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>dk.dbc</groupId>
+                                    <artifactId>corepo-indexer-solr</artifactId>
+                                    <version>1.1-SNAPSHOT</version>S
+                                    <classifier>no-stored</classifier>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>uk.co.automatictester</groupId>
                 <artifactId>wiremock-maven-plugin</artifactId>          
-                <version>2.12.0</version>
+                <version>2.14.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -351,61 +251,6 @@
                 </executions>
             </plugin>   
 
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.8.v20171121</version>
-                <configuration>
-                    <stopPort>${solr.port.shutdown}</stopPort>
-                    <stopKey>stop</stopKey>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-jetty</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>deploy-war</goal>
-                        </goals>
-                        <configuration>
-                            <detail>false</detail>
-                            <dumpOnStart>false</dumpOnStart>
-                            <war>${project.build.directory}/solr/solr-7.2.1/server/solr-webapp/webapp</war>
-                            <webApp>
-                                <contextPath>/solr</contextPath>
-                            </webApp>
-                            <httpConnector>
-                                <port>${solr.port}</port>
-                            </httpConnector>
-                            <requestLog implementation="org.eclipse.jetty.server.NCSARequestLog">
-                                <filename>${project.build.directory}/solr-request.log</filename>
-                            </requestLog>
-                            <daemon>true</daemon>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>solr.solr.home</name>
-                                    <value>${project.build.directory}/test-classes/solr/</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>solr.log.dir</name>
-                                    <value>${project.build.directory}/solr/logs/</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>log4j.configuration</name>
-                                    <value>file:///${project.build.directory}/test-classes/solr/log4j_solr.xml</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>stop-jetty</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            
             <plugin>
                 <groupId>dk.dbc</groupId>
                 <artifactId>postgresql-maven-plugin</artifactId>
@@ -425,6 +270,7 @@
                             </pgDbScripts>
                         </configuration>
                     </execution>
+   
                     <execution>
                         <id>stop-postgresql</id>
                         <phase>post-integration-test</phase>
@@ -442,7 +288,7 @@
                 <configuration>
                     <useUberJar>false</useUberJar>
                     <daemon>true</daemon>
-                    <payaraVersion>4.1.2.181</payaraVersion>
+                    <payaraVersion>${payara.version}</payaraVersion>
                     <commandLineOptions>
                         <option>
                             <key>--disablephonehome</key>
@@ -456,7 +302,7 @@
                         </option>
                         <option>
                             <key>--addjars</key>
-                            <value>${basedir}/target/postgresql.jar</value>
+                            <value>${basedir}/target/provided-jars/postgresql.jar:${basedir}/target/provided-jars/slf4j-api.jar:${basedir}/target/provided-jars/logback-classic.jar:${basedir}/target/provided-jars/logback-core.jar</value>
                         </option>
                         <option>
                             <key>--port</key>
@@ -474,7 +320,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>payara-micro - service</id>
+                        <id>payara-micro-service</id>
                         <phase>pre-integration-test</phase>
                         <goals>
                             <goal>start</goal>
@@ -492,12 +338,42 @@
                 </executions>
             </plugin>
 
-            <!-- FIX FOR MISSING "jps" -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <executions>
+                    <execution>
+                        <id>start-solr</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>-ce</argument>
+                                <argument>echo name=corepo > ${project.build.directory}/solr/server/solr/corepo/core.properties; SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr start -p ${solr.port}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>stop-solr</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>-ce</argument>
+                                <argument>SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr stop -p ${solr.port}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    
+                    <!-- FIX FOR MISSING "jps" -->
                     <execution>
                         <id>Terminate payara-micro</id>
                         <phase>post-integration-test</phase>
@@ -505,9 +381,9 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>bash</executable>
+                            <executable>sh</executable>
                             <arguments>
-                                <argument>-c</argument>
+                                <argument>-ce</argument>
                                 <argument>if [ -e ${basedir}/target/payara-micro-runtime/config/pid ]; then kill `cat ${basedir}/target/payara-micro-runtime/config/pid`; fi</argument>
                             </arguments>
                         </configuration>
@@ -518,15 +394,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.1</version>
                 <configuration>
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
-                    <!--<redirectTestOutputToFile>true</redirectTestOutputToFile>-->
                     <systemPropertyVariables>
                         <postgresql.port>${postgresql.port}</postgresql.port>
-                        <solr.port>${solr.port}</solr.port>
-                        <glassfish.port>${glassfish.port}</glassfish.port>
                     </systemPropertyVariables>
                     <environmentVariables>
+                        <SOLR_URL>http://localhost:${solr.port}/solr/corepo</SOLR_URL>
+                        <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
                         <OPEN_AGENCY_URL>http://localhost:${wiremock.port}/</OPEN_AGENCY_URL>
                     </environmentVariables>
                 </configuration>

@@ -23,4 +23,4 @@ LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only insp
       OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)" \
       JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)"
 
-ADD *.war app.json deployments/
+COPY target/${project.build.finalName}.war target/docker/app.json deployments/

@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +45,7 @@ public class StatusBean {
              Statement stmt = connection.createStatement() ;
              ResultSet resultSet = stmt.executeQuery("SELECT NOW()")) {
             if (resultSet.next()) {
-                Timestamp now = resultSet.getTimestamp(1);
-
+                resultSet.getTimestamp(1);
                 return Response.ok().entity(new Resp()).build();
             }
             return Response.ok().entity(new Resp("No rows when communicating with database")).build();

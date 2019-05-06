@@ -91,39 +91,38 @@ public class OpenAgencyProxyBean {
         for (JsonNode libraryRule : libraryRules) {
             String agencyIdText = getJsonValue(getJsonKey(libraryRule, "agencyId"));
             String agencyTypeText = getJsonValue(getJsonKey(libraryRule, "agencyType"));
-            if (agencyIdText == null) {
-                continue;
-            }
-            int agencyId = Integer.parseUnsignedInt(agencyIdText, 10);
-            JsonNode rules = getJsonKey(libraryRule, "libraryRule");
-            boolean auth_create_common_record = false;
-            boolean part_of_danbib = false;
-            boolean use_enrichments = false;
-            for (JsonNode rule : rules) {
-                String name = getJsonValue(getJsonKey(rule, "name"));
-                switch (name) {
-                    case "auth_create_common_record":
-                        auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    case "part_of_danbib":
-                        part_of_danbib = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    case "use_enrichments":
-                        use_enrichments = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                        break;
-                    default:
-                        break;
+            if (agencyIdText != null) {
+                int agencyId = Integer.parseUnsignedInt(agencyIdText, 10);
+                JsonNode rules = getJsonKey(libraryRule, "libraryRule");
+                boolean auth_create_common_record = false;
+                boolean part_of_danbib = false;
+                boolean use_enrichments = false;
+                for (JsonNode rule : rules) {
+                    String name = getJsonValue(getJsonKey(rule, "name"));
+                    switch (name) {
+                        case "auth_create_common_record":
+                            auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        case "part_of_danbib":
+                            part_of_danbib = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        case "use_enrichments":
+                            use_enrichments = getJsonValue(getJsonKey(rule, "bool")).equals("1");
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
-            LibraryType agencyType = LibraryType.NonFBS;
-            if (use_enrichments) {
-                if (SCHOOLLIBRARY.equals(agencyTypeText)) {
-                    agencyType = LibraryType.FBSSchool;
-                } else {
-                    agencyType = LibraryType.FBS;
+                LibraryType agencyType = LibraryType.NonFBS;
+                if (use_enrichments) {
+                    if (SCHOOLLIBRARY.equals(agencyTypeText)) {
+                        agencyType = LibraryType.FBSSchool;
+                    } else {
+                        agencyType = LibraryType.FBS;
+                    }
                 }
+                return new OpenAgencyEntity(agencyId, agencyType, auth_create_common_record, part_of_danbib);
             }
-            return new OpenAgencyEntity(agencyId, agencyType, auth_create_common_record, part_of_danbib);
         }
         throw new EJBException("Cannot find valid openagency");
     }
