@@ -22,8 +22,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import dk.dbc.search.solrdocstore.updater.profile.Profile;
+import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
@@ -37,6 +41,7 @@ import static org.junit.Assert.*;
 public class DocProducerTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Client CLIENT = ClientBuilder.newClient();
 
     /**
      * Test of init method, of class DocProducer.
@@ -44,6 +49,19 @@ public class DocProducerTest {
     @Test
     public void test() throws Exception {
         System.out.println("test");
+
+        Config config = new Config("solrUrl=Not-Relevant",
+                                   "profileServiceUrl=Not-Relevant",
+                                   "solrDocStoreUrl=Not-Relevant",
+                                   "queues=Not-Relevant",
+                                   "openAgencyUrl=Not-Relevant",
+                                   "scanProfiles=102030-magic,123456-basic",
+                                   "scanDefaultFields=abc,def") {
+            @Override
+            public Client getClient() {
+                return CLIENT;
+            }
+        };
 
         DocProducer docProducer = new DocProducer() {
             @Override
@@ -64,7 +82,22 @@ public class DocProducerTest {
                 return new LibraryRule(true, true, true, true, false, true);
             }
         };
+        docProducer.businessLogic.config = config;
+
         docProducer.businessLogic.solrFields = solrFields;
+        docProducer.businessLogic.profileService = new ProfileServiceBean() {
+            @Override
+            public Profile getProfile(String agencyId, String profile) {
+                switch (agencyId + "-" + profile) {
+                    case "102030-magic":
+                        return new Profile(true, "220000-katalog");
+                    case "123456-basic":
+                        return new Profile(false, "220000-katalog");
+                    default:
+                        throw new AssertionError();
+                }
+            }
+        };
 
         JsonNode node = docProducer.fetchSourceDoc(new QueueJob(300101, "clazzifier", "23645564"));
 

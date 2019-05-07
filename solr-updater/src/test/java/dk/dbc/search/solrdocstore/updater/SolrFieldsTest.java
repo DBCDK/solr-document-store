@@ -56,8 +56,10 @@ public class SolrFieldsTest {
         solrFields.config = new Config("queues=NONE",
                                        "solrDocStoreUrl=NONE",
                                        "solrUrl=" + url,
-                                       "openAgencyUrl=Not-Relevant");
-
+                                       "openAgencyUrl=Not-Relevant",
+                                       "profileServiceUrl=Not-Relevant",
+                                       "scanDefaultFields=",
+                                       "scanProfiles=");
         solrFields.init();
 
         return solrFields;
@@ -74,7 +76,13 @@ public class SolrFieldsTest {
         String solrUrl = "zk://[hosts]/[chroot]/[collection]";
 
         SolrFields solrFields = new SolrFields();
-        solrFields.config = new Config("solrUrl=" + solrUrl);
+        solrFields.config = new Config("queues=NONE",
+                                       "solrDocStoreUrl=NONE",
+                                       "solrUrl=" + solrUrl,
+                                       "openAgencyUrl=Not-Relevant",
+                                       "profileServiceUrl=Not-Relevant",
+                                       "scanDefaultFields=",
+                                       "scanProfiles=");
 
         solrFields.init();
 

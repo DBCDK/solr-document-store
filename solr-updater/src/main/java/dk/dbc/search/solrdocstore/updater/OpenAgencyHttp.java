@@ -36,8 +36,6 @@ public class OpenAgencyHttp {
     @Inject
     Config config;
 
-    private Client client;
-
     private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
             .withDelay(250, TimeUnit.MILLISECONDS)
             .retryOn(Exception.class)
@@ -46,17 +44,13 @@ public class OpenAgencyHttp {
     public OpenAgencyHttp() {
     }
 
-    @PostConstruct
-    public void init() {
-        this.client = ClientBuilder.newBuilder().build();
-    }
 
     public ObjectNode fetchJson(URI uri) throws IOException {
         return Failsafe.with(RETRY_POLICY).get(() -> fetchJsonImpl(uri));
     }
 
     private ObjectNode fetchJsonImpl(URI uri) throws IOException {
-        Response response = client.target(uri)
+        Response response = config.getClient().target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .buildGet()
                 .invoke();

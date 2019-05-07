@@ -37,6 +37,7 @@ import java.util.concurrent.TimeoutException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @Startup
+@DependsOn(value = "DatabaseMigrator")
 public class QueueRulesDaemon {
 
     private static final Logger log = LoggerFactory.getLogger(QueueRulesDaemon.class);

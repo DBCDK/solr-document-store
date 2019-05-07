@@ -1,0 +1,8 @@
+[
+    "+scan.lti_102030_magic:foo",
+    "+scan.lfo_102030_magic:bar",
+    "+scan.nope_102030_magic:nah",
+    "+scan.lti_102030_self:foo",
+    "+scan.lfo_102030_self:bar",
+    "+scan.nope_102030_self:nah"
+]

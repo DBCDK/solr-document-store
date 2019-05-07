@@ -1,0 +1,15 @@
+{
+  "id" : "c5adf921-8d30-3310-ae3f-ce5566cd68f7",
+  "request" : {
+    "url" : "/profile-service/api/profile/123456/basic",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-123456-basic.json",
+    "headers" : {
+      "Content-Type" : "application/json"
+    }
+  },
+  "uuid" : "c5adf921-8d30-3310-ae3f-ce5566cd68f7"
+}
