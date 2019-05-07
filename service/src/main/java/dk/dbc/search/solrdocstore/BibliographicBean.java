@@ -113,8 +113,8 @@ public class BibliographicBean {
                 // bib entity
                 if (bibliographicEntity.isDeleted()) {
                     key.setDeleteMarked(true);
-                    affectedKeys.add(key);
                 }
+                affectedKeys.add(key);
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());

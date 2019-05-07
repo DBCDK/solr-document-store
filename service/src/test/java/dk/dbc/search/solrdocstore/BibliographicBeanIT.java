@@ -13,12 +13,16 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
+
+    private static final Logger log = LoggerFactory.getLogger(BibliographicBeanIT.class);
 
     private BibliographicBean bean;
     private EntityManager em;
@@ -152,8 +156,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         // Record what time the bib entity was queued
         Date now = new Date();
-        try (Connection conn = env().getDatasource().getConnection();
-             Statement statement = conn.createStatement();
+        try (Connection conn = env().getDatasource().getConnection() ;
+             Statement statement = conn.createStatement() ;
              ResultSet resultSet = statement.executeQuery("SELECT dequeueafter FROM queue")) {
             while (resultSet.next()) {
                 Timestamp dequeueAfter = resultSet.getTimestamp(1);
@@ -480,6 +484,65 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 });
 
         Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b", true), h2bAfter);
+    }
+
+    @Test(timeout = 2_000L)
+    public void resurrectRecord() throws Exception {
+        System.out.println("resurrectRecord");
+
+        evictAll();
+
+        long pre = countAndClearQueue();
+        System.out.println("pre = " + pre);
+
+        Response r;
+        String a870970d = makeBibliographicRequestJson(
+                870970, e -> {
+            e.setDeleted(true);
+        });
+        String a870970 = makeBibliographicRequestJson(
+                870970, e -> {
+            e.setDeleted(false);
+        });
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, a870970d));
+        assertThat(r.getStatus(), is(200));
+
+        long postDelete = countAndClearQueue();
+        System.out.println("postDelete = " + postDelete);
+        assertThat(postDelete, is(1L));
+
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, a870970));
+        assertThat(r.getStatus(), is(200));
+
+        long postResurrect = countAndClearQueue();
+        System.out.println("postResurrect = " + postResurrect);
+        assertThat(postResurrect, is(1L));
+    }
+
+    private void evictAll() throws SQLException {
+        try (Connection connection = env().getDatasource().getConnection() ;
+             Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate("TRUNCATE bibliographictobibliographic CASCADE");
+            stmt.executeUpdate("TRUNCATE bibliographicsolrkeys CASCADE");
+            stmt.executeUpdate("TRUNCATE holdingstobibliographic CASCADE");
+            stmt.executeUpdate("TRUNCATE holdingsitemssolrkeys CASCADE");
+        }
+        em.getEntityManagerFactory().getCache().evictAll();
+    }
+
+    private long countAndClearQueue() throws SQLException {
+        long rows = -1;
+        try (Connection connection = env().getDatasource().getConnection() ;
+             Statement stmt = connection.createStatement() ;
+             ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) FROM queue")) {
+            if (resultSet.next()) {
+                rows = resultSet.getLong(1);
+            }
+            stmt.executeUpdate("TRUNCATE QUEUE");
+        }
+        return rows;
     }
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
