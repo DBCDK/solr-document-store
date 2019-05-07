@@ -68,12 +68,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.1.4</version>
             <scope>provided</scope>
         </dependency>
 
@@ -94,7 +92,6 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <version>2.7.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- includes js bundle in build so html can load it -->
