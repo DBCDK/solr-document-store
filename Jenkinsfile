@@ -42,7 +42,7 @@ pipeline {
                 sh """
                     rm -rf \$WORKSPACE/.repo/dk/dbc
                     mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false -Dmaven.test.failure.ignore
+                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
                 """
                 script {
                     junit testResults: '**/target/surefire-reports/TEST-*.xml'
