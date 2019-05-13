@@ -11,7 +11,7 @@
         "clusterName": "solr-updater-${SCOPE}",
         "cacheConfig": {
             "*": {
-                "timeout": "$CACHE_TIMEOUT",
+                "timeout": "${CACHE_TIMEOUT}",
                 "timeUnit": "Seconds"
             }
         }
