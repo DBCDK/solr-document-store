@@ -131,7 +131,7 @@ public class Config {
     }
 
     public String[] getQueues() {
-        return queues;
+        return Arrays.copyOf(queues, queues.length);
     }
 
     public String getDatabaseConnectThrottle() {

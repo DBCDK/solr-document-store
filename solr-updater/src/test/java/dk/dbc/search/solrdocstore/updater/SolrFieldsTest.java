@@ -70,8 +70,8 @@ public class SolrFieldsTest {
      * <p>
      * Setting up a solr cloud for integration testing is overkill
      */
-    @Test
-    @Ignore
+//    @Test
+//    @Ignore
     public void testZkUrl() {
         String solrUrl = "zk://[hosts]/[chroot]/[collection]";
 
