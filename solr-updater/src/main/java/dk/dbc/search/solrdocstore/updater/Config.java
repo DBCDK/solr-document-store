@@ -78,7 +78,7 @@ public class Config {
     }
 
     @PostConstruct
-    public final void init() {
+    public void init() {
         solrUrl = get("solrUrl", "SOLR_URL", null);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
         if (isWorker()) {
