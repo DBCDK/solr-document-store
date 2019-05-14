@@ -74,11 +74,15 @@ public class Config {
             String[] kv = config.split("=", 2);
             props.setProperty(kv[0], kv[1]);
         }
-        init();
+        processVars();
     }
 
     @PostConstruct
     public void init() {
+        processVars();
+    }
+
+    private void processVars() throws NumberFormatException {
         solrUrl = get("solrUrl", "SOLR_URL", null);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
         if (isWorker()) {
@@ -115,7 +119,6 @@ public class Config {
                 .register((ClientRequestFilter) (ClientRequestContext context) -> {
                     context.getHeaders().putSingle("User-Agent", userAgent);
                 }).build();
-
     }
 
     public boolean isWorker() {
