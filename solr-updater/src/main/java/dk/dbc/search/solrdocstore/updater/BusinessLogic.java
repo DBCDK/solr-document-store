@@ -330,7 +330,7 @@ public class BusinessLogic {
 
     private HashSet<String> scanProfileCollectionIdentifiers(JsonNode indexKeys) {
         HashSet<String> collectionIdentifiers = new HashSet<>();
-        JsonNode collectionIndentifiersNode = indexKeys.get("collectionIdentifier");
+        JsonNode collectionIndentifiersNode = indexKeys.get(COLLECTION_IDENTIFIER_FIELD);
         if (collectionIndentifiersNode != null)
             collectionIndentifiersNode
                     .forEach(n -> collectionIdentifiers.add(n.asText()));
