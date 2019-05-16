@@ -18,18 +18,14 @@
  */
 package dk.dbc.search.solrdocstore.updater.rest;
 
-import com.hazelcast.cache.HazelcastCacheManager;
 import com.hazelcast.cache.impl.HazelcastServerCacheManager;
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.core.Cluster;
-import com.hazelcast.core.HazelcastInstance;
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.cache.CacheManager;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,32 +40,29 @@ import static javax.ejb.LockType.READ;
 public class HazelCastStatus {
 
     private static final Logger log = LoggerFactory.getLogger(HazelCastStatus.class);
-    private Cluster cluster;
+
+    @Resource(name = "payara/CacheManager")
+    CacheManager manager;
+
+    Cluster cluster;
 
     @PostConstruct
     public void init() {
         log.info("Initlializing hazelcast monitor");
-        try {
-            Context ctx = new InitialContext();
-            CacheManager manager = (CacheManager) ctx.lookup("payara/CacheManager");
-
-            HazelcastCacheManager obj = manager.unwrap(HazelcastServerCacheManager.class);
-            HazelcastInstance instance = obj.getHazelcastInstance();
-            cluster = instance.getCluster();
-        } catch (NamingException ex) {
-        }
+        cluster = manager.unwrap(HazelcastServerCacheManager.class)
+                .getHazelcastInstance()
+                .getCluster();
     }
 
     private ClusterState getClusterState() {
         if (cluster == null)
             return ClusterState.FROZEN;
-        return cluster.getClusterState();
+        ClusterState clusterState = cluster.getClusterState();
+        log.debug("clusterState = {}", clusterState);
+        return clusterState;
     }
 
     public boolean good() {
-        ClusterState clusterState = getClusterState();
-        log.debug("clusterState = {}", clusterState);
-        return true;
+        return getClusterState() != ClusterState.FROZEN;
     }
-
 }

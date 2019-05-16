@@ -53,6 +53,8 @@ public class Status {
     public Response getStatus() {
         log.info("getStatus called");
 
+        if (!hzStatus.good())
+            return fail("Hazelcast is in bad state");
         if (!config.isWorker())
             return Response.ok(StatusResponse.ok()).build();
         try (Connection connection = dataSource.getConnection() ;
@@ -64,8 +66,6 @@ public class Status {
             List<String> hungThreads = worker.hungThreads();
             if (!hungThreads.isEmpty())
                 return fail("Hung threads: " + hungThreads);
-            if(!hzStatus.good())
-                return fail("Hazelcast is in bad state");
             return Response.ok(StatusResponse.ok()).build();
         } catch (SQLException ex) {
             log.error("Error accessing database by status(rest): {}", ex.getMessage());
