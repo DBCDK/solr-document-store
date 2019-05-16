@@ -156,9 +156,11 @@ public class BusinessLogic {
             }
         }
         if (addBibDk && !hasBibDk) {
+            log.trace("adding 800000-bibdk");
             addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-bibdk");
         }
         if (addDanbib && !hasDanbib) {
+            log.trace("adding 800000-danbib");
             addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-danbib");
         }
     }
@@ -307,8 +309,13 @@ public class BusinessLogic {
             profiles.forEach(profile -> {
                 log.trace("testing profile: {}-{}", agencyId, profile);
                 Profile p = profileService.getProfile(agencyId, profile);
-                if (p.includeOwnHoldings && holdingsAgencies.contains(agencyId) ||
-                    p.search.stream().anyMatch(collectionIdentifiers::contains)) {
+                boolean hasOwnHolding = p.includeOwnHoldings && holdingsAgencies.contains(agencyId);
+                log.trace("hasOwnHolding = {}", hasOwnHolding);
+                boolean matchesCollectionIdentifier = p.search.stream().anyMatch(collectionIdentifiers::contains);
+                log.trace("pprofileCollectionIdentifiers = {}", p.search);
+                log.trace("matchesCollectionIdentifier = {}", matchesCollectionIdentifier);
+                if (hasOwnHolding ||
+                    matchesCollectionIdentifier) {
                     log.debug("Adding scan keys for: {}-{}", agencyId, profile);
                     String postfix = "_" + agencyId + "_" + profile;
                     addScanKeys(indexKeys, postfix, fields);

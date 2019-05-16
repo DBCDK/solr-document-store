@@ -1,5 +1,5 @@
 {
-    "appName": "solr-docstore-updater",
+    "appName": "solr-doc-store-updater",
     "jdbc": {
         "jdbc/solr-doc-store": {
             "xa": false,
@@ -8,7 +8,7 @@
         }
     },
     "hazelcast": {
-        "clusterName": "solr-updater-${SCOPE}",
+        "clusterName": "solr-updater-${SCOPE}-${COLLECTION}",
         "cacheConfig": {
             "*": {
                 "timeout": "${CACHE_TIMEOUT}",

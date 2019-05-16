@@ -29,6 +29,7 @@ LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only insp
       SCAN_PROFILES="Comma separated list of {agency}-{profile}, that can scan (required)" \
       SCAN_DEFAULT_FIELDS="COmma separated list of scan.field that scan.ddefault covers (required)" \
       USER_AGENT="Useragent string to use for http-client" \
-      SCOPE="Name of service (for cache identification)"
+      SCOPE="Name of service (for cache identification)" \
+      COLLECTION="Name of collection (for cache identification)"
 
 COPY target/${project.build.finalName}.war target/docker/app.json deployments/
