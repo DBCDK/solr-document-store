@@ -21,6 +21,7 @@
             "agencyId": 300102,
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
+            "hasLiveHoldings": true,
             "indexKeys": [{
                     "holdingsitem.agencyId": ["300102"],
                     "holdingsitem.status": ["OnOrder"]
@@ -31,6 +32,7 @@
             "agencyId": 300101,
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
+            "hasLiveHoldings": true,
             "indexKeys": [{
                     "holdingsitem.agencyId": ["300102"],
                     "holdingsitem.status": ["OnLoan", "OnShelf"]
@@ -41,6 +43,7 @@
             "agencyId": 300103,
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
+            "hasLiveHoldings": false,
             "indexKeys": [{
                     "holdingsitem.agencyId": ["300103"],
                     "holdingsitem.status": ["Decommissioned"]
@@ -51,6 +54,7 @@
             "agencyId": 300104,
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
+            "hasLiveHoldings": true,
             "indexKeys": [{
                     "holdingsitem.agencyId": ["300104"],
                     "holdingsitem.status": ["OnLoan", "OnShelf", "Decommissioned"]
@@ -61,6 +65,7 @@
             "agencyId": 300102,
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
+            "hasLiveHoldings": false,
             "indexKeys": [],
             "trackingId": "",
             "commitWithin": 0

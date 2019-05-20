@@ -23,10 +23,13 @@ import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.Before;
@@ -44,7 +47,7 @@ import static org.junit.Assert.*;
 public class WorkerIT {
 
     private static final Logger log = LoggerFactory.getLogger(WorkerIT.class);
-
+    private static final Client CLIENT = ClientBuilder.newClient();
 
     private static String solrUrl;
     private static String solrDocStoreUrl;
@@ -66,12 +69,18 @@ public class WorkerIT {
         DatabaseMigrator.migrate(dataSource);
 
         config = new Config("queues=test",
-                            "solrDocStoreUrl=" + solrDocStoreUrl,
-                            "solrUrl=" + solrUrl,
                             "rescanEvery=2",
                             "idleRescanEvery=1",
                             "maxTries=1",
-                            "emptyQueueSleep=10ms");
+                            "emptyQueueSleep=10ms",
+                            "scanProfiles=102030-magic,123456-basic",
+                            "scanDefaultFields=scan.abc,scan.def") {
+            @Override
+            public Client getClient() {
+                return CLIENT;
+            }
+
+        };
     }
 
     @Before
@@ -102,12 +111,15 @@ public class WorkerIT {
         worker.docProducer.solrFields.config = config;
         worker.docProducer.solrFields.init();
         worker.docProducer.businessLogic = new BusinessLogic();
+        worker.docProducer.businessLogic.config = config;
         worker.docProducer.businessLogic.oa = new OpenAgency() {
             @Override
             public OpenAgency.LibraryRule libraryRule(String agencyId) {
                 return new LibraryRule(true, true, true, true, false, true);
             }
         };
+        worker.docProducer.businessLogic.profileService = new ProfileServiceBean();
+        worker.docProducer.businessLogic.profileService.config = config;
         worker.docProducer.businessLogic.solrFields = solrFields;
         worker.docProducer.init();
         worker.metrics = new MetricRegistry();

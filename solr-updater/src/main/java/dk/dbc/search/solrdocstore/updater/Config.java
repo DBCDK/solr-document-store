@@ -1,15 +1,29 @@
 package dk.dbc.search.solrdocstore.updater;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author DBC {@literal <dbc.dk>}
  */
+@ApplicationScoped
 @Singleton
 @Lock(LockType.READ)
 @Startup
@@ -30,7 +45,7 @@ public class Config {
     private String solrUrl;
     private String solrDocStoreUrl;
 
-    private String queues;
+    private String[] queues;
     private String databaseConnectThrottle;
     private String failureThrottle;
     private long emptyQueueSleep;
@@ -44,6 +59,10 @@ public class Config {
     private long openAgencyTimeout;
     private long openAgencyAge;
     private long openAgencyFailureAge;
+    private UriBuilder profileService;
+    private Map<String, Set<String>> scanProfiles;
+    private Set<String> scanDefaultFields;
+    private Client client;
 
     public Config() {
         props = findProperties("solr-doc-store-updater");
@@ -55,15 +74,19 @@ public class Config {
             String[] kv = config.split("=", 2);
             props.setProperty(kv[0], kv[1]);
         }
-        init();
+        processVars();
     }
 
     @PostConstruct
-    public final void init() {
+    public void init() {
+        processVars();
+    }
+
+    private void processVars() throws NumberFormatException {
         solrUrl = get("solrUrl", "SOLR_URL", null);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
         if (isWorker()) {
-            queues = get("queues", "QUEUES", null);
+            queues = toCollection(get("queues", "QUEUES", null)).toArray(String[]::new);
             databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
             failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
             emptyQueueSleep = Long.max(100L, milliseconds(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10s")));
@@ -74,10 +97,28 @@ public class Config {
             threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
             maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
         }
-        this.openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
+        openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
         openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
+        profileService = UriBuilder.fromUri(get("profileServiceUrl", "PROFILE_SERVICE_URL", null))
+                .path("api").path("profile").path("{agencyId}").path("{profile}");
+        scanProfiles = Arrays.stream(get("scanProfiles", "SCAN_PROFILES", null).split("\\s*,\\s*"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(s -> s.split("-", 2))
+                .collect(Collectors.groupingBy(a -> a[0],
+                                               Collectors.mapping(a -> a[1],
+                                                                  Collectors.toSet())));
+        scanDefaultFields = toCollection(get("scanDefaultFields", "SCAN_DEFAULT_FIELDS", null),
+                                         Collectors.toSet(),
+                                         Collections::unmodifiableSet);
+        String userAgent = get("userAgent", "USER_AGENT", "Unknown/0.0");
+        log.debug("Using: {} as HttpUserAgent", userAgent);
+        client = ClientBuilder.newBuilder()
+                .register((ClientRequestFilter) (ClientRequestContext context) -> {
+                    context.getHeaders().putSingle("User-Agent", userAgent);
+                }).build();
     }
 
     public boolean isWorker() {
@@ -93,7 +134,7 @@ public class Config {
     }
 
     public String[] getQueues() {
-        return queues.split(",");
+        return Arrays.copyOf(queues, queues.length);
     }
 
     public String getDatabaseConnectThrottle() {
@@ -146,6 +187,22 @@ public class Config {
 
     public long getOpenAgencyTimeout() {
         return openAgencyTimeout;
+    }
+
+    public UriBuilder getProfileServiceUrl() {
+        return profileService.clone();
+    }
+
+    public Map<String, Set<String>> getScanProfiles() {
+        return scanProfiles;
+    }
+
+    public Set<String> getScanDefaultFields() {
+        return scanDefaultFields;
+    }
+
+    public Client getClient() {
+        return client;
     }
 
     private Properties findProperties(String resourceName) {
@@ -206,6 +263,21 @@ public class Config {
             }
         }
         throw new IllegalArgumentException("Invalid time spec: " + spec);
+    }
+
+    private static <T> T toCollection(String source, Collector<String, ?, T> collector, Function<T, T> unmodifiable) {
+        return unmodifiable.apply(toCollection(source, collector));
+    }
+
+    private static <T> T toCollection(String source, Collector<String, ?, T> collector) {
+        return toCollection(source)
+                .collect(collector);
+    }
+
+    private static Stream<String> toCollection(String source) {
+        return Arrays.stream(source.split("\\s*,\\s*"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty());
     }
 
 }

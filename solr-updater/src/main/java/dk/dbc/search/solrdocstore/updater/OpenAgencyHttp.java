@@ -6,14 +6,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import net.jodah.failsafe.Failsafe;
@@ -36,8 +33,6 @@ public class OpenAgencyHttp {
     @Inject
     Config config;
 
-    private Client client;
-
     private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
             .withDelay(250, TimeUnit.MILLISECONDS)
             .retryOn(Exception.class)
@@ -46,17 +41,13 @@ public class OpenAgencyHttp {
     public OpenAgencyHttp() {
     }
 
-    @PostConstruct
-    public void init() {
-        this.client = ClientBuilder.newBuilder().build();
-    }
 
     public ObjectNode fetchJson(URI uri) throws IOException {
         return Failsafe.with(RETRY_POLICY).get(() -> fetchJsonImpl(uri));
     }
 
     private ObjectNode fetchJsonImpl(URI uri) throws IOException {
-        Response response = client.target(uri)
+        Response response = config.getClient().target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .buildGet()
                 .invoke();

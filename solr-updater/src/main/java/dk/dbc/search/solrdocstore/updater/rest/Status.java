@@ -39,6 +39,9 @@ public class Status {
     @Inject
     Config config;
 
+    @Inject
+    HazelCastStatus hzStatus;
+
     @EJB
     Worker worker;
 
@@ -50,6 +53,8 @@ public class Status {
     public Response getStatus() {
         log.info("getStatus called");
 
+        if (!hzStatus.good())
+            return fail("Hazelcast is in bad state");
         if (!config.isWorker())
             return Response.ok(StatusResponse.ok()).build();
         try (Connection connection = dataSource.getConnection() ;

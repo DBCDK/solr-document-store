@@ -1,19 +1,26 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import dk.dbc.ee.stats.Timed;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
+import dk.dbc.search.solrdocstore.updater.profile.Profile;
+import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
@@ -25,6 +32,7 @@ import static dk.dbc.search.solrdocstore.updater.DocHelpers.*;
  *
  * @author DBC {@literal <dbc.dk>}
  */
+@ApplicationScoped
 @Singleton
 @Lock(LockType.READ)
 public class BusinessLogic {
@@ -38,6 +46,12 @@ public class BusinessLogic {
 
     @Inject
     SolrFields solrFields;
+
+    @Inject
+    Config config;
+
+    @Inject
+    ProfileServiceBean profileService;
 
     @Timed
     public void filterOutDecommissioned(JsonNode sourceDoc) {
@@ -142,9 +156,11 @@ public class BusinessLogic {
             }
         }
         if (addBibDk && !hasBibDk) {
+            log.trace("adding 800000-bibdk");
             addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-bibdk");
         }
         if (addDanbib && !hasDanbib) {
+            log.trace("adding 800000-danbib");
             addField(indexKeys, COLLECTION_IDENTIFIER_FIELD, "800000-danbib");
         }
     }
@@ -239,6 +255,107 @@ public class BusinessLogic {
         }
     }
 
+    /**
+     * Add special profile specific scan fields, depending upon profile match
+     *
+     * @param sourceDoc entire json from solr-doc-store
+     * @throws RuntimeException If there's problems with the profile-service
+     */
+    @Timed
+    public void addScan(JsonNode sourceDoc) {
+        scanDefault(sourceDoc);
+        scanAny(sourceDoc);
+        scanProfiles(sourceDoc);
+    }
+
+    public void scanAny(JsonNode sourceDoc) {
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+        Set<String> collected = new HashSet<>();
+        for (Iterator<Entry<String, JsonNode>> i = indexKeys.fields() ; i.hasNext() ;) {
+            Entry<String, JsonNode> entry = i.next();
+            if (entry.getKey().equals("scan.any"))
+                throw new IllegalStateException("scan.any is already defined");
+            if (entry.getKey().startsWith("scan.") &&
+                entry.getValue().isArray()) {
+                entry.getValue().forEach(e -> collected.add(e.asText()));
+            }
+        }
+        collected.forEach(v -> addField(indexKeys, "scan.any", v));
+    }
+
+    public void scanDefault(JsonNode sourceDoc) {
+        Set<String> fields = config.getScanDefaultFields();
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+        HashSet<String> collected = new HashSet<>();
+        for (Iterator<Entry<String, JsonNode>> i = indexKeys.fields() ; i.hasNext() ;) {
+            Entry<String, JsonNode> entry = i.next();
+            if (entry.getKey().equals("scan.default"))
+                throw new IllegalStateException("scan.default is already defined");
+            if (fields.contains(entry.getKey()) &&
+                entry.getValue().isArray()) {
+                entry.getValue().forEach(e -> collected.add(e.asText()));
+            }
+        }
+        collected.forEach(v -> addField(indexKeys, "scan.default", v));
+    }
+
+    public void scanProfiles(JsonNode sourceDoc) {
+        Map<String, Set<String>> scanProfiles = config.getScanProfiles();
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+        HashSet<String> holdingsAgencies = scanProfileHoldingAgencies(sourceDoc);
+        HashSet<String> collectionIdentifiers = scanProfileCollectionIdentifiers(indexKeys);
+        HashSet<String> fields = scanProfileScanFieldNames(indexKeys);
+        scanProfiles.forEach((agencyId, profiles) -> {
+            profiles.forEach(profile -> {
+                log.trace("testing profile: {}-{}", agencyId, profile);
+                Profile p = profileService.getProfile(agencyId, profile);
+                boolean hasOwnHolding = p.includeOwnHoldings && holdingsAgencies.contains(agencyId);
+                log.trace("hasOwnHolding = {}", hasOwnHolding);
+                boolean matchesCollectionIdentifier = p.search.stream().anyMatch(collectionIdentifiers::contains);
+                log.trace("pprofileCollectionIdentifiers = {}", p.search);
+                log.trace("matchesCollectionIdentifier = {}", matchesCollectionIdentifier);
+                if (hasOwnHolding ||
+                    matchesCollectionIdentifier) {
+                    log.debug("Adding scan keys for: {}-{}", agencyId, profile);
+                    String postfix = "_" + agencyId + "_" + profile;
+                    addScanKeys(indexKeys, postfix, fields);
+                }
+            });
+        });
+    }
+
+    private HashSet<String> scanProfileHoldingAgencies(JsonNode sourceDoc) {
+        HashSet<String> holdingsAgencies = new HashSet<>();
+        find(sourceDoc, "holdingsItemRecords")
+                .forEach(n -> {
+                    if (n.get("hasLiveHoldings").asBoolean())
+                        holdingsAgencies.add(find(n, "agencyId").asText());
+                });
+        log.trace("holdingsAgencies = {}", holdingsAgencies);
+        return holdingsAgencies;
+    }
+
+    private HashSet<String> scanProfileCollectionIdentifiers(JsonNode indexKeys) {
+        HashSet<String> collectionIdentifiers = new HashSet<>();
+        JsonNode collectionIndentifiersNode = indexKeys.get(COLLECTION_IDENTIFIER_FIELD);
+        if (collectionIndentifiersNode != null)
+            collectionIndentifiersNode
+                    .forEach(n -> collectionIdentifiers.add(n.asText()));
+        log.trace("collectionIdentifiers = {}", collectionIdentifiers);
+        return collectionIdentifiers;
+    }
+
+    private HashSet<String> scanProfileScanFieldNames(JsonNode indexKeys) {
+        HashSet<String> fields = new HashSet<>();
+        indexKeys.fieldNames()
+                .forEachRemaining(s -> {
+                    if (s.startsWith("scan."))
+                        fields.add(s);
+                });
+        log.trace("fields = {}", fields);
+        return fields;
+    }
+
     private void anyTrueSet(JsonNode indexKeys, String key, JsonNode values, boolean setFalseOverrideExisting) {
         Optional<String> isTrue = fieldsStream(values)
                 .filter(e -> e.getValue().asBoolean(false))
@@ -264,6 +381,14 @@ public class BusinessLogic {
             }
         } else {
             setField(indexKeys, key, "true");
+        }
+    }
+
+    private void addScanKeys(JsonNode indexKeys, String postfix, HashSet<String> fields) {
+        for (String field : fields) {
+            ArrayNode target = (ArrayNode) indexKeys.withArray(field + postfix);
+            indexKeys.get(field)
+                    .forEach(n -> target.add(n.asText()));
         }
     }
 

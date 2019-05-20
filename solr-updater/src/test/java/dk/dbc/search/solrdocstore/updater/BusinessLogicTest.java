@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.search.solrdocstore.updater.profile.Profile;
+import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -30,9 +32,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -94,6 +94,31 @@ public class BusinessLogicTest {
                 } catch (IOException ex) {
                     System.err.println("ex = " + ex);
                     throw new RuntimeException(ex);
+                }
+            }
+        };
+        businessLogic.config = new Config("solrUrl=Not-Relevant",
+                                          "profileServiceUrl=Not-Relevant",
+                                          "solrDocStoreUrl=Not-Relevant",
+                                          "queues=Not-Relevant",
+                                          "openAgencyUrl=Not-Relevant",
+                                          "scanProfiles=102030-magic,102030-self,123456-basic,876543-self",
+                                          "scanDefaultFields=scan.lti,scan.lfo");
+
+        businessLogic.profileService = new ProfileServiceBean() {
+            @Override
+            public Profile getProfile(String agencyId, String profile) {
+                switch (agencyId+"-"+profile) {
+                    case "102030-self":
+                        return new Profile(true);
+                    case "102030-magic":
+                        return new Profile(true, "110000-foobar", "220000-katalog");
+                    case "123456-basic":
+                        return new Profile(false, "110000-foobar", "220000-katalog");
+                    case "876543-self":
+                        return new Profile(true);
+                    default:
+                        throw new AssertionError();
                 }
             }
         };

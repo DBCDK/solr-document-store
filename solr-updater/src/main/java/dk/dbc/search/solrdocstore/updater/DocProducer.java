@@ -263,6 +263,8 @@ public class DocProducer {
             businessLogic.addCollectionIdentifier800000(sourceDoc);
             businessLogic.addHoldingsItemRole(sourceDoc);
 
+            businessLogic.addScan(sourceDoc);
+
             businessLogic.attachedResources(sourceDoc);
 
             SolrInputDocument doc = solrFields.newDocumentFromIndexKeys(indexKeys);

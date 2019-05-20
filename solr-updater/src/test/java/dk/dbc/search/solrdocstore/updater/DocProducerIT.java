@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -49,6 +50,7 @@ import static org.junit.Assert.*;
 public class DocProducerIT {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducerIT.class);
+    private static final Client CLIENT = ClientBuilder.newClient();
 
     private static String solrDocStoreUrl;
     private static String solrUrl;
@@ -67,8 +69,14 @@ public class DocProducerIT {
         pg = new PostgresITDataSource("solrdocstore");
         client = ClientBuilder.newClient();
         config = new Config("queues=test",
-                            "solrDocStoreUrl=" + solrDocStoreUrl,
-                            "solrUrl=" + solrUrl);
+                            "scanProfiles=102030-magic,123456-basic",
+                            "scanDefaultFields=abc,def") {
+            @Override
+            public Client getClient() {
+                return CLIENT;
+            }
+
+        };
         initPayara();
     }
 
@@ -113,6 +121,9 @@ public class DocProducerIT {
         docProducer.solrFields.config = config;
         docProducer.solrFields.init();
         docProducer.businessLogic = new BusinessLogic();
+        docProducer.businessLogic.config = config;
+        docProducer.businessLogic.profileService = new ProfileServiceBean();
+        docProducer.businessLogic.profileService.config = config;
         docProducer.businessLogic.oa = new OpenAgency() {
             @Override
             public OpenAgency.LibraryRule libraryRule(String agencyId) {

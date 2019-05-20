@@ -1,7 +1,9 @@
 FROM docker.dbc.dk/payara5-micro:latest
 
 ENV THREADS=1 \
-    MAX_POOL_SIZE=3
+    MAX_POOL_SIZE=3 \
+    CACHE_TIMEOUT=60 \
+    USER_AGENT="solr-doc-store-solr-updater/1.1"
 
 LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only inspect service - required parameters are: SOLR_DOC_STORE_URL, OPEN_AGENCY_URL, SOLR_DOC_STORE_DATABASE=any-parsable-url, MAX_POOL_SIZE=1)  (required)" \
       SOLR_DOC_STORE_URL="http url of solr-doc-store-service (required)" \
@@ -21,6 +23,13 @@ LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only insp
       OPEN_AGENCY_AGE="Caching of successful openagency call (default: 4h)" \
       OPEN_AGENCY_FAILURE_AGE="Caching of unsuccessful result (default: 5m)"\
       OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)" \
-      JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)"
+      JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)" \
+      CACHE_TIMEOUT="profile-service cache timeout in seconds (default: 60)" \
+      PROFILE_SERVICE_URL="Address of the profile-service (required)" \
+      SCAN_PROFILES="Comma separated list of {agency}-{profile}, that can scan (required)" \
+      SCAN_DEFAULT_FIELDS="COmma separated list of scan.field that scan.ddefault covers (required)" \
+      USER_AGENT="Useragent string to use for http-client" \
+      SCOPE="Name of service (for cache identification)" \
+      COLLECTION="Name of collection (for cache identification)"
 
 COPY target/${project.build.finalName}.war target/docker/app.json deployments/
