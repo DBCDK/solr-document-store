@@ -227,6 +227,7 @@ describe("RelatedHoldingsExplorer properly displays based on global state", () =
   test("Displays error if related holdings error happened", () => {
     let errorMessage = "HUGE ERROR!";
     sagaTester.dispatch(pullFailed(new Error(errorMessage)));
+    wrapper.update();
     expect(wrapper.text()).toContain(errorMessage);
   });
   test("Displays loading component when selecting a bib record", () => {

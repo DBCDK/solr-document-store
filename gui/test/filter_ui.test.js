@@ -66,33 +66,36 @@ describe("SearchField interactions properly updates global state", () => {
       })
     );
     sagaTester.dispatch(filterActions.applyFilter());
+    wrapper.update();
     let parents = wrapper.find(FilterHeader);
     let parentElements = wrapper.find(FilterParentElement);
     // Unmounted react components (which are not displayed) still exists in the DOM tree
-    expect(
-      parents.filterWhere(parent => parent.html() !== null)
-    ).toHaveProperty("length", 1);
+    expect(parents.filterWhere(parent => parent.html() !== "")).toHaveProperty(
+      "length",
+      1
+    );
     expect(
       parentElements.filterWhere(parentElement => parentElement.html() !== null)
     ).toHaveProperty("length", 2);
   });
   test("Clicking whitelist and apply applies white listing in global state and show appropriate elements", () => {
-    let parents = wrapper.find(FilterHeader);
     expect(
-      parents.filterWhere(parent => parent.html() !== null)
+      wrapper.find(FilterHeader).filterWhere(parent => parent.html() !== null)
     ).toHaveProperty("length", 3);
     let whitelistPendingButton = wrapper
       .find(".whitelist-button-header")
       .first();
     whitelistPendingButton.simulate("click");
+    wrapper.update();
     // TODO make this more refactor agnostic
     let applyFilterButton = wrapper
       .find(BibliographicExplorer)
       .find("button")
       .first();
     applyFilterButton.simulate("click");
+    wrapper.update();
     expect(
-      parents.filterWhere(parent => parent.html() !== null)
+      wrapper.find(FilterHeader).filterWhere(parent => parent.html() !== "")
     ).toHaveProperty("length", 1);
   });
   test("Clearing filter by clicking should show all elements", () => {
@@ -105,11 +108,10 @@ describe("SearchField interactions properly updates global state", () => {
       })
     );
     sagaTester.dispatch(filterActions.applyFilter());
-    let parents = wrapper.find(FilterHeader);
-    let parentElements = wrapper.find(FilterParentElement);
+    wrapper.update();
     // Check items where filtered, so they can come back
     expect(
-      parents.filterWhere(parent => parent.html() !== null)
+      wrapper.find(FilterHeader).filterWhere(parent => parent.html() !== "")
     ).toHaveProperty("length", 1);
     // TODO make this more refactor agnostic
     let clearFilterButton = wrapper
@@ -117,10 +119,10 @@ describe("SearchField interactions properly updates global state", () => {
       .find("button")
       .at(1);
     clearFilterButton.simulate("click");
+    wrapper.update();
     // Check items are rendered again
     expect(
-      parents.filterWhere(parent => parent.html() !== null)
+      wrapper.find(FilterHeader).filterWhere(parent => parent.html() !== "")
     ).toHaveProperty("length", 3);
   });
-  // TODO test filtering of individual elements in parents
 });
