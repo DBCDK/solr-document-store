@@ -487,6 +487,20 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test(timeout = 2_000L)
+    public void inconsistentDeletedStatus() throws Exception {
+        System.out.println("inconsistentDeletedStatus");
+        String a870970 = makeBibliographicRequestJson(
+                870970, e -> {
+                    e.setDeleted(false);
+                    e.setIndexKeys(null);
+                });
+
+        Response r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(null, a870970));
+        assertThat(r.getStatus(), not(is(200)));
+    }
+
+    @Test(timeout = 2_000L)
     public void resurrectRecord() throws Exception {
         System.out.println("resurrectRecord");
 
