@@ -40,7 +40,7 @@ public class DocTest {
     DocProducer docProducer;
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_XML)
     @Path("format/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
     public Response format(@PathParam("agencyId") int agencyId,
                            @PathParam("classifier") String classifier,
@@ -65,14 +65,23 @@ public class DocTest {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("formatPid/{agencyId : \\d+}-{classifier}:{bibliographicRecordId : .*$}")
+    public Response formatPid(@PathParam("agencyId") int agencyId,
+                              @PathParam("classifier") String classifier,
+                              @PathParam("bibliographicRecordId") String bibliographicRecordId) throws InterruptedException, ExecutionException, IOException {
+        return format(agencyId, classifier, bibliographicRecordId);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
     @Path("deploy/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
     public Response deploy(@PathParam("agencyId") int agencyId,
                            @PathParam("classifier") String classifier,
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            if(!config.isWorker())
+            if (!config.isWorker())
                 throw new IOException("No solr configured - only format endpoint valid");
             JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
