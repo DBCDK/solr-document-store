@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.inject.Inject;

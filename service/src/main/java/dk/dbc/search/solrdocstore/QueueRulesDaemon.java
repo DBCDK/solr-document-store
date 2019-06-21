@@ -18,8 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,8 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -46,7 +42,6 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.sql.DataSource;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,35 +171,6 @@ public class QueueRulesDaemon {
             }
         }
         return false;
-    }
-
-    /**
-     * UGLY!!!
-     * <p>
-     * Since com.sun.gjc.spi.jdbc40.ConnectionWrapper40 from fish.payara,
-     * somehow crashed the compile phase of maven The reflection hack is needed.
-     *
-     * @param connection connection from datasource
-     * @return postgres connection
-     */
-    private PGConnection untanglePostgresConnection(Connection connection) {
-        while (!( connection instanceof PGConnection )) {
-            Class<? extends Connection> clazz = connection.getClass();
-            try {
-                Method method1 = clazz.getMethod("getConnection");
-                if (method1 != null) {
-                    Object c1 = method1.invoke(connection);
-                    if (c1 == null) {
-                        throw new RuntimeException("Cannot unwrap to postgresql connection");
-                    }
-                    connection = (Connection) c1;
-                }
-            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                log.error("Exception: {}", ex.getMessage());
-                log.debug("Exception: ", ex);
-            }
-        }
-        return (PGConnection) connection;
     }
 
     private void readQueueRules(Connection connection) throws SQLException {
