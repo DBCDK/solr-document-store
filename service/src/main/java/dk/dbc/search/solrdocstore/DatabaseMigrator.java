@@ -24,7 +24,7 @@ public class DatabaseMigrator {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
-    @Resource(lookup = "jdbc/solr-doc-store-nt")
+    @Resource(lookup = "jdbc/solr-doc-store")
     DataSource dataSource;
 
     @Inject

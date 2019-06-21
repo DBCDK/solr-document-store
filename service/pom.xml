@@ -53,6 +53,11 @@
             <version>1.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
+<!--        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>webservices-api</artifactId>
+            <version>2.0</version>
+        </dependency>-->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
@@ -211,7 +216,10 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.1</version>
                 <configuration>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <environmentVariables>
+                        <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/docstore</DOCSTORE_POSTGRES_URL>
+                    </environmentVariables>
                     <systemPropertyVariables>
                         <postgresql.port>${postgresql.port}</postgresql.port>
                     </systemPropertyVariables>

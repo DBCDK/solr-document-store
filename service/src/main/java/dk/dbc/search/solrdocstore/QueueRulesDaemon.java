@@ -34,6 +34,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -44,6 +46,7 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.sql.DataSource;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
+import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,6 @@ public class QueueRulesDaemon {
     @Resource(type = ManagedExecutorService.class)
     ExecutorService mes;
 
-    @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
     private Future<?> future;
@@ -72,6 +74,7 @@ public class QueueRulesDaemon {
     @PostConstruct
     public void init() {
         future = mes.submit(this::monitorMain);
+        dataSource = UnpooledDataSource.dataSourceOf("queueDaemon");
     }
 
     @PreDestroy
@@ -119,14 +122,14 @@ public class QueueRulesDaemon {
     private void monitorLoop() {
         int throttle_pos = 0;
         while (alive()) {
+
             try (Connection connection = dataSource.getConnection() ;
                  Statement stmt = connection.createStatement()) {
-                PGConnection pgConnection = untanglePostgresConnection(connection);
                 stmt.executeUpdate("LISTEN queueNotify");
                 readQueueRules();
 
                 while (alive()) {
-                    if (pollNotification(pgConnection)) {
+                    if (pollNotification((PGConnection) connection)) {
                         readQueueRules();
                     }
                     throttle_pos = 0;
