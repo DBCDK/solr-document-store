@@ -69,7 +69,7 @@ public class BibliographicBean {
                     .pid(request.getRepositoryId())) {
                 if (request.getIndexKeys() == null && !request.isDeleted()) {
                     log.warn("Got a request which wasn't deleted but had no indexkeys");
-                    return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys then deleted is false\" }").build();
+                    return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
                 }
                 addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
                 return Response.ok().entity("{ \"ok\": true }").build();
