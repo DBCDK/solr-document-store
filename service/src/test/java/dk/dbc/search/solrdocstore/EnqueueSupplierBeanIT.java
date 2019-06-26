@@ -345,13 +345,13 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) {
         List<String> superseedList = superseed.orElse(Collections.emptyList());
         BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
-        bibliographicBean.addBibliographicKeys(e, superseedList, commitWithin);
+        bibliographicBean.addBibliographicKeys(e, superseedList, commitWithin, true);
         return e;
     }
 
     private void deleteBibliographic(BibliographicEntity ownRecord) {
         ownRecord.setDeleted(true);
-        bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), Optional.empty());
+        bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), Optional.empty(), true);
     }
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {

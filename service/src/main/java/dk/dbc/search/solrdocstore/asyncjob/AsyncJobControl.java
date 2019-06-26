@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlRootElement;
+//import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dbc.search.solrdocstore.QueueAsyncJob;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -260,7 +260,7 @@ public class AsyncJobControl {
         return Response.ok().entity(new StatusResponse(job, id)).build();
     }
 
-    @XmlRootElement
+//    @XmlRootElement
     @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     public static class StatusResponse {
 

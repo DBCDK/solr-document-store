@@ -42,7 +42,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b870970 = makeBibliographicRequestJson(870970);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, b870970)
+                .run(() -> bean.addBibliographicKeys(false, b870970)
                 );
 
         assertThat(r.getStatus(), is(200));
@@ -59,7 +59,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b700000 = makeBibliographicRequestJson(700000);
 
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, b700000)
+                .run(() -> bean.addBibliographicKeys(false, b700000)
                 );
 
         assertThat(r.getStatus(), is(200));
@@ -76,7 +76,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b300100 = makeBibliographicRequestJson(300100);
 
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, b300100)
+                .run(() -> bean.addBibliographicKeys(false, b300100)
                 );
         assertThat(r.getStatus(), is(200));
 
@@ -91,7 +91,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b300000 = makeBibliographicRequestJson(300000);
 
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, b300000)
+                .run(() -> bean.addBibliographicKeys(false, b300000)
                 );
         assertThat(r.getStatus(), is(200));
 
@@ -110,7 +110,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, updatedB)
+                .run(() -> bean.addBibliographicKeys(false, updatedB)
                 );
         assertThat(r.getStatus(), is(200));
 
@@ -132,7 +132,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, updatedB)
+                .run(() -> bean.addBibliographicKeys(false, updatedB)
                 );
         assertThat(r.getStatus(), is(200));
 
@@ -140,7 +140,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedD = jsonbContext.marshall(d);
 
         Response rd = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, updatedD)
+                .run(() -> bean.addBibliographicKeys(false, updatedD)
                 );
         assertThat(rd.getStatus(), is(200));
     }
@@ -151,7 +151,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, updatedB)
+                .run(() -> bean.addBibliographicKeys(false, updatedB)
                 );
         assertThat(r.getStatus(), is(200));
         // Record what time the bib entity was queued
@@ -376,7 +376,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String json = makeBibliographicRequestJson(800000);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, json)
+                .run(() -> bean.addBibliographicKeys(false, json)
                 );
 
         assertThat(r.getStatus(), is(200));
@@ -391,7 +391,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String json = makeBibliographicRequestJson(888000);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, json)
+                .run(() -> bean.addBibliographicKeys(false, json)
                 );
 
         assertThat(r.getStatus(), is(200));
@@ -411,7 +411,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, json));
+                .run(() -> bean.addBibliographicKeys(false, json));
         assertThat(r.getStatus(), is(200));
         List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
 
@@ -429,7 +429,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setBibliographicRecordId("a");
         });
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, a870970));
+                .run(() -> bean.addBibliographicKeys(false, a870970));
         assertThat(r.getStatus(), is(200));
 
         // Setup holding pointint to 870970:a
@@ -448,7 +448,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setSuperceds(Arrays.asList("a"));
         });
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, b870970));
+                .run(() -> bean.addBibliographicKeys(false, b870970));
         assertThat(r.getStatus(), is(200));
 
         // Not really nessecary
@@ -458,7 +458,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setBibliographicRecordId("a");
         });
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, a870970d));
+                .run(() -> bean.addBibliographicKeys(false, a870970d));
         assertThat(r.getStatus(), is(200));
 
         HoldingsToBibliographicEntity h2bBefore = env().getPersistenceContext()
@@ -474,7 +474,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setBibliographicRecordId("b");
         });
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, b70000));
+                .run(() -> bean.addBibliographicKeys(false, b70000));
         assertThat(r.getStatus(), is(200));
 
         HoldingsToBibliographicEntity h2bAfter = env().getPersistenceContext()
@@ -491,12 +491,12 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("inconsistentDeletedStatus");
         String a870970 = makeBibliographicRequestJson(
                 870970, e -> {
-                    e.setDeleted(false);
-                    e.setIndexKeys(null);
-                });
+            e.setDeleted(false);
+            e.setIndexKeys(null);
+        });
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, a870970));
+                .run(() -> bean.addBibliographicKeys(false, a870970));
         assertThat(r.getStatus(), not(is(200)));
     }
 
@@ -519,7 +519,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setDeleted(false);
         });
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, a870970d));
+                .run(() -> bean.addBibliographicKeys(false, a870970d));
         assertThat(r.getStatus(), is(200));
 
         long postDelete = countAndClearQueue();
@@ -527,12 +527,77 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(postDelete, is(1L));
 
         r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, a870970));
+                .run(() -> bean.addBibliographicKeys(false, a870970));
         assertThat(r.getStatus(), is(200));
 
         long postResurrect = countAndClearQueue();
         System.out.println("postResurrect = " + postResurrect);
         assertThat(postResurrect, is(1L));
+    }
+
+    @Test(timeout = 2_000L)
+    public void skipQueueParameter() throws Exception {
+        System.out.println("skipQueueParameter");
+
+        Response r;
+
+        long pre = countAndClearQueue();
+        System.out.println("pre = " + pre);
+
+        // live holdings
+        env().getPersistenceContext()
+                .run(() -> env().getEntityManager().merge(
+                        new HoldingsItemEntity(700000, "new", "any",
+                                               new ArrayList<Map<String, List<String>>>() {{
+                                               add(new HashMap<String, List<String>>() {{
+                                                       put("holdingsitem.status", Arrays.asList("OnShelf"));
+                                                   }});
+                                           }}, "test")));
+
+        String a870970 = makeBibliographicRequestJson(
+                870970, e -> {
+        });
+        String a870970d = makeBibliographicRequestJson(
+                870970, e -> {
+                    e.setDeleted(true);
+        });
+        String a700000 = makeBibliographicRequestJson(
+                700000, e -> {
+        });
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(true, a870970));
+        assertThat(r.getStatus(), is(200));
+
+        long postCreate = countAndClearQueue();
+        System.out.println("postCreate = " + postCreate);
+        assertThat(postCreate, is(1L));
+
+        // No changes in structire - nothing queued
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(true, a870970));
+        assertThat(r.getStatus(), is(200));
+
+        long postUpdate = countAndClearQueue();
+        System.out.println("postUpdate = " + postUpdate);
+        assertThat(postUpdate, is(0L));
+
+        // Change in structure
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(true, a700000));
+        assertThat(r.getStatus(), is(200));
+
+        long postMovedHoldings = countAndClearQueue();
+        System.out.println("postMovedHoldings = " + postMovedHoldings);
+        assertThat(postMovedHoldings, is(2L));
+
+        // Delete - change in structure
+        r = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(true, a870970d));
+        assertThat(r.getStatus(), is(200));
+
+        long postDelete = countAndClearQueue();
+        System.out.println("postDelete = " + postDelete);
+        assertThat(postDelete, is(1L));
     }
 
     private void evictAll() throws SQLException {
@@ -564,7 +629,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String deletedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(null, deletedB)
+                .run(() -> bean.addBibliographicKeys(false, deletedB)
                 );
         assertThat(r.getStatus(), is(200));
     }
