@@ -18,8 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -61,7 +59,6 @@ public class QueueRulesDaemon {
     @Resource(type = ManagedExecutorService.class)
     ExecutorService mes;
 
-    @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
     private Future<?> future;
@@ -72,6 +69,7 @@ public class QueueRulesDaemon {
     @PostConstruct
     public void init() {
         future = mes.submit(this::monitorMain);
+        dataSource = UnpooledDataSource.dataSourceOf("queueDaemon");
     }
 
     @PreDestroy
@@ -119,14 +117,14 @@ public class QueueRulesDaemon {
     private void monitorLoop() {
         int throttle_pos = 0;
         while (alive()) {
+
             try (Connection connection = dataSource.getConnection() ;
                  Statement stmt = connection.createStatement()) {
-                PGConnection pgConnection = untanglePostgresConnection(connection);
                 stmt.executeUpdate("LISTEN queueNotify");
                 readQueueRules();
 
                 while (alive()) {
-                    if (pollNotification(pgConnection)) {
+                    if (pollNotification((PGConnection) connection)) {
                         readQueueRules();
                     }
                     throttle_pos = 0;
@@ -173,35 +171,6 @@ public class QueueRulesDaemon {
             }
         }
         return false;
-    }
-
-    /**
-     * UGLY!!!
-     * <p>
-     * Since com.sun.gjc.spi.jdbc40.ConnectionWrapper40 from fish.payara,
-     * somehow crashed the compile phase of maven The reflection hack is needed.
-     *
-     * @param connection connection from datasource
-     * @return postgres connection
-     */
-    private PGConnection untanglePostgresConnection(Connection connection) {
-        while (!( connection instanceof PGConnection )) {
-            Class<? extends Connection> clazz = connection.getClass();
-            try {
-                Method method1 = clazz.getMethod("getConnection");
-                if (method1 != null) {
-                    Object c1 = method1.invoke(connection);
-                    if (c1 == null) {
-                        throw new RuntimeException("Cannot unwrap to postgresql connection");
-                    }
-                    connection = (Connection) c1;
-                }
-            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                log.error("Exception: {}", ex.getMessage());
-                log.debug("Exception: ", ex);
-            }
-        }
-        return (PGConnection) connection;
     }
 
     private void readQueueRules(Connection connection) throws SQLException {

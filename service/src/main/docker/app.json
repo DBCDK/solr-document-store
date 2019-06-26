@@ -5,11 +5,6 @@
             "xa": false,
             "url": "${DOCSTORE_POSTGRES_URL}",
             "maxSize": "${MAX_POOL_SIZE}"
-        },
-        "jdbc/solr-doc-store-nt": {
-            "xa": true,
-            "url": "${DOCSTORE_POSTGRES_URL}",
-            "maxSize": 3
         }
     }
 }

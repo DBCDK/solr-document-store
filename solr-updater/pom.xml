@@ -211,11 +211,30 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
                             <includeArtifactIds>slf4j-api,logback-classic,logback-core,postgresql</includeArtifactIds>
                             <stripClassifier>true</stripClassifier>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.build.directory}/provided-jars</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>payara-micro-jar</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>fish.payara.extras</groupId>
+                                    <artifactId>payara-micro</artifactId>
+                                    <version>${payara.major.minor.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <stripClassifier>true</stripClassifier>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.build.directory}/payara-micro/</outputDirectory>
                         </configuration>
                     </execution>
 
@@ -309,71 +328,43 @@
             </plugin>
 
             <plugin>
-                <groupId>fish.payara.maven.plugins</groupId>
-                <artifactId>payara-micro-maven-plugin</artifactId>
-                <version>1.0.1</version>
-                <configuration>
-                    <useUberJar>false</useUberJar>
-                    <daemon>true</daemon>
-                    <payaraVersion>${payara.version}</payaraVersion>
-                    <commandLineOptions>
-                        <option>
-                            <key>--disablephonehome</key>
-                        </option>
-                        <option>
-                            <key>--nocluster</key>
-                        </option>
-                        <option>
-                            <key>--rootdir</key>
-                            <value>${basedir}/target/payara-micro-runtime</value>
-                        </option>
-                        <option>
-                            <key>--addjars</key>
-                            <value>${basedir}/target/provided-jars/postgresql.jar:${basedir}/target/provided-jars/slf4j-api.jar:${basedir}/target/provided-jars/logback-classic.jar:${basedir}/target/provided-jars/logback-core.jar</value>
-                        </option>
-                        <option>
-                            <key>--port</key>
-                            <value>${glassfish.port}</value>
-                        </option>
-                        <option>
-                            <key>--postbootcommandfile</key>
-                            <value>${basedir}/target/test-classes/payara-setup/postbootcommandfile.txt</value>
-                        </option>
-                        <option>
-                            <key>--logtofile</key>
-                            <value>${basedir}/target/test-classes/payara-setup/micro.log</value>
-                        </option>
-                        <option>
-                            <key>--deploy</key>
-                            <value>${basedir}/../service/target/solr-doc-store-service-1.0-SNAPSHOT.war</value>
-                        </option>
-                    </commandLineOptions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>payara-micro-service</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <!-- DEPENDS ON "jps" - NOT AVAILABLE ON LINUX WITH ORACLE JDK
-                    <execution>
-                        <id>payara-micro - service - stop</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                    -->
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <executions>
+                    <execution>
+                        <id>start-payara</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <async>true</async>
+                            <environmentVariables>
+                                <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/solrdocstore</DOCSTORE_POSTGRES_URL>
+                            </environmentVariables>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>${basedir}/target/payara-micro/payara-micro.jar</argument>
+                                <argument>--disablephonehome</argument>
+                                <argument>--nocluster</argument>
+                                <argument>--addjars</argument>
+                                <argument>${basedir}/target/provided-jars/postgresql.jar:${basedir}/target/provided-jars/slf4j-api.jar:${basedir}/target/provided-jars/logback-classic.jar:${basedir}/target/provided-jars/logback-core.jar</argument>
+                                <argument>--port</argument>
+                                <argument>${glassfish.port}</argument>
+                                <argument>--postbootcommandfile</argument>
+                                <argument>${basedir}/target/test-classes/payara-setup/postbootcommandfile.txt</argument>
+                                <argument>--logtofile</argument>
+                                <argument>${basedir}/target/test-classes/payara-setup/micro.log</argument>
+                                <argument>--contextroot</argument>
+                                <argument>/</argument>
+                                <argument>--deploy</argument>
+                                <argument>${basedir}/../service/target/solr-doc-store-service-1.0-SNAPSHOT.war</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
                     <execution>
                         <id>start-solr</id>
                         <phase>pre-integration-test</phase>
@@ -400,22 +391,6 @@
                             <arguments>
                                 <argument>-ce</argument>
                                 <argument>SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr stop -p ${solr.port}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    
-                    <!-- FIX FOR MISSING "jps" -->
-                    <execution>
-                        <id>Terminate payara-micro</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>-ce</argument>
-                                <argument>if [ -e ${basedir}/target/payara-micro-runtime/config/pid ]; then kill `cat ${basedir}/target/payara-micro-runtime/config/pid`; fi</argument>
                             </arguments>
                         </configuration>
                     </execution>

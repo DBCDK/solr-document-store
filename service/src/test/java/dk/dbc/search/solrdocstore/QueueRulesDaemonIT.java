@@ -24,9 +24,7 @@ import java.sql.Statement;
 import java.util.concurrent.Executors;
 import javax.sql.DataSource;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -41,18 +39,6 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
     private QueueRulesDaemon daemon;
     private DataSource datasource;
 
-    public QueueRulesDaemonIT() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
     @Before
     public void setUp() throws SQLException {
         datasource = jpaTestEnvironment.getDatasource();
@@ -62,7 +48,7 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         daemon = new QueueRulesDaemon();
-        daemon.dataSource = datasource;
+        daemon.dataSource = null; // set from environment in init()
         daemon.mes = Executors.newCachedThreadPool();
         daemon.init();
     }
@@ -96,6 +82,5 @@ public class QueueRulesDaemonIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("queues = " + daemon.getManifestationQueues());
         assertThat("After notify queuerule is no longer empty", daemon.getManifestationQueues().size(), is(1));
         assertThat(daemon.getManifestationQueues().iterator().next(), is("myQueue"));
-
     }
 }

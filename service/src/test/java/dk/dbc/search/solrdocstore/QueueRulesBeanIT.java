@@ -26,9 +26,7 @@ import java.util.concurrent.Executors;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -42,21 +40,7 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private QueueRulesBean bean;
     private QueueRulesDaemon daemon;
-    private BibliographicBean bibl;
     private EntityManager em;
-    private DataSource dataSource;
-
-    public QueueRulesBeanIT() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
 
     @Before
     public void setUp() throws SQLException {
@@ -67,17 +51,14 @@ public class QueueRulesBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         em = env().getEntityManager();
-        dataSource = jpaTestEnvironment.getDatasource();
 
         daemon = new QueueRulesDaemon();
-        daemon.dataSource = datasource;
+        daemon.dataSource = null; // set from environment in init()
         daemon.mes = Executors.newCachedThreadPool();
         daemon.init();
 
-        bibl = BeanFactoryUtil.createBibliographicBean(env());
         bean = new QueueRulesBean();
         bean.entityManager = em;
-
     }
 
     @After

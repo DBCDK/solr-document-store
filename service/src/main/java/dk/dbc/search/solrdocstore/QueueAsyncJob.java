@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Supplier;
-import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
@@ -46,11 +46,15 @@ import static javax.ejb.LockType.READ;
 @Lock(READ)
 public class QueueAsyncJob {
 
-    @Resource(lookup = "jdbc/solr-doc-store-nt")
     DataSource dataSource;
 
     @Inject
     AsyncJobRunner runner;
+
+    @PostConstruct
+    public void init() {
+        dataSource = UnpooledDataSource.dataSourceOf("asyncJob");
+    }
 
     /**
      * Queue everything

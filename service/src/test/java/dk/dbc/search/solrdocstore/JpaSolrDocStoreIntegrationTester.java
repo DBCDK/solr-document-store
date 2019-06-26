@@ -2,7 +2,6 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.commons.persistence.JpaIntegrationTest;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
-import dk.dbc.commons.persistence.TransactionScopedPersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -11,7 +10,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 
 public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
