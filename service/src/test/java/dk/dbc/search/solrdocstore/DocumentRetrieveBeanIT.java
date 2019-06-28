@@ -52,7 +52,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         hold = createHoldingsItemBean(env);
         h2b = createHoldingsToBibliographicBean(env);
         env().getPersistenceContext().run(() -> {
-            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"));
+            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), true);
         });
     }
 
@@ -173,7 +173,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         private Build record(Map<String, List<String>> content) {
-            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST);
+            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST, true);
             return this;
         }
     }

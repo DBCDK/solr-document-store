@@ -139,13 +139,13 @@ public class QueueAsyncJobIT extends JpaSolrDocStoreIntegrationTester {
     private void setupData() {
         env().getPersistenceContext().run(() -> {
             for (int i = 0 ; i < 10 ; i++) {
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST);
+                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST, true);
+                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST, true);
+                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST, true);
             }
             BibliographicEntity entity = makeBiblEntity(700001, "dd");
             entity.setDeleted(true);
-            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST);
+            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST, true);
         });
         clearQueue(dataSource);
     }

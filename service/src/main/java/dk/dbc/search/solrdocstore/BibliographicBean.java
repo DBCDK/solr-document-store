@@ -18,13 +18,13 @@ import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +57,31 @@ public class BibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    /**
+     * Add bibliographic SolR keys and reorganize related holdings
+     * <p>
+     * It enqueues all affected documents, fx. if a holding has been moved from
+     * another bibliographic record to this.
+     * <p>
+     * If skipQueue is set to true, then don't add the record to the queue,
+     * unless, holdings has been moved (ie. if only this record is to be queued
+     * then don't queue it). This is usefull if you have added a new fiels to
+     * the SolR keys, that the current systems doesn't know about. So that from
+     * their perspective nothing has changed. This is to avoid unnecessary load
+     * on the downstream systems.
+     *
+     * @param skipQueue   Don't queue unless necessary
+     * @param jsonContent The json request (see
+     *                    {@link BibliographicEntityRequest})
+     * @return Json with ok: true/false
+     * @throws Exception If database is unavailable or the JSON cannot be created
+     */
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
-    public Response addBibliographicKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
+    public Response addBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
+                                         String jsonContent) throws Exception {
 
         try {
             BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
@@ -71,7 +91,7 @@ public class BibliographicBean {
                     log.warn("Got a request which wasn't deleted but had no indexkeys");
                     return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
                 }
-                addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()));
+                addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()), !skipQueue);
                 return Response.ok().entity("{ \"ok\": true }").build();
             }
         } catch (RuntimeException ex) {
@@ -90,11 +110,11 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds) {
-        addBibliographicKeys(bibliographicEntity, superceds, Optional.empty());
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, boolean queueAll) {
+        addBibliographicKeys(bibliographicEntity, superceds, Optional.empty(), queueAll);
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin) {
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin, boolean queueAll) {
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
         if (bibliographicEntity.getClassifier() == null) {
@@ -109,10 +129,14 @@ public class BibliographicBean {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             Set<AgencyClassifierItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
             affectedKeys.addAll(updatedHoldings);
+            // Record creates queue even id said not to
+            queueAll = true;
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
+                // Record changed deleted stats queue even id said not to
+                queueAll = true;
                 AgencyClassifierItemKey key = bibliographicEntity.asAgencyClassifierItemKey();
                 // If incoming bib entity is deleted, we mark it as delete so the enqueue adapter
                 // will delay the queue job, to prevent race conditions with updates to this same
@@ -149,8 +173,10 @@ public class BibliographicBean {
                 affectedKeys.addAll(recalculatedKeys);
             }
         }
-
-        enqueueAdapter.enqueueAll(affectedKeys, commitWithin);
+        log.debug("queueAll = {}", queueAll);
+        log.debug("affectedKeys = {}", affectedKeys);
+        if (queueAll || affectedKeys.size() > 1)
+            enqueueAdapter.enqueueAll(affectedKeys, commitWithin);
     }
 
     /*
