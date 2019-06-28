@@ -57,6 +57,25 @@ public class BibliographicBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
+    /**
+     * Add bibliographic SolR keys and reorganize related holdings
+     * <p>
+     * It enqueues all affected documents, fx. if a holding has been moved from
+     * another bibliographic record to this.
+     * <p>
+     * If skipQueue is set to true, then don't add the record to the queue,
+     * unless, holdings has been moved (ie. if only this record is to be queued
+     * then don't queue it). This is usefull if you have added a new fiels to
+     * the SolR keys, that the current systems doesn't know about. So that from
+     * their perspective nothing has changed. This is to avoid unnecessary load
+     * on the downstream systems.
+     *
+     * @param skipQueue   Don't queue unless necessary
+     * @param jsonContent The json request (see
+     *                    {@link BibliographicEntityRequest})
+     * @return Json with ok: true/false
+     * @throws Exception If database is unavailable or the JSON cannot be created
+     */
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
