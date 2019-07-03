@@ -81,6 +81,7 @@ public class StatusBean {
         public Resp(String diag) {
             this.ok = false;
             this.text = diag;
+            log.error("Answering with diag: {}", diag);
         }
     }
 
