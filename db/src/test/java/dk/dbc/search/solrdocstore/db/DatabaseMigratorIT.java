@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.db;
 
 import org.junit.Test;
 
@@ -37,14 +37,7 @@ public class DatabaseMigratorIT {
                 stmt.executeUpdate(sql);
             }
         }
-        DatabaseMigrator databaseMigrator = new DatabaseMigrator(datasource);
-        databaseMigrator.config = new Config() {
-            @Override
-            public Boolean getAllowNonEmptySchema() {
-                return true;
-            }
-        };
-        HashSet<String> migrated = databaseMigrator.migrate();
+        HashSet<String> migrated = DatabaseMigrator.migrate(datasource, true);
         System.out.println("migrated = " + migrated);
 
         try (Connection connection = datasource.getConnection() ;
