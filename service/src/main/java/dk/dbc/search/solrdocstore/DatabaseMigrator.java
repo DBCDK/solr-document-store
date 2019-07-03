@@ -2,8 +2,6 @@ package dk.dbc.search.solrdocstore;
 
 import java.util.HashSet;
 import java.util.List;
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.MigrationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +14,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
-import org.flywaydb.core.api.configuration.FluentConfiguration;
 
 @Singleton
 @Startup
