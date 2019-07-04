@@ -41,20 +41,27 @@ public class StatusBean {
     public Response getStatus() {
         log.info("getStatus called ");
 
-        try (Connection connection = dataSource.getConnection() ;
+        try (Connection connection = getConnection() ;
              Statement stmt = connection.createStatement() ;
              ResultSet resultSet = stmt.executeQuery("SELECT NOW()")) {
             if (resultSet.next()) {
                 resultSet.getTimestamp(1);
+                log.info("status - ok");
                 return Response.ok().entity(new Resp()).build();
             }
-            return Response.ok().entity(new Resp("No rows when communicating with database")).build();
+            return Response.serverError().entity(new Resp("No rows when communicating with database")).build();
 
         } catch (SQLException ex) {
             log.error("Error getting connection for status: {}", ex.getMessage());
             log.debug("Error getting connection for status: ", ex);
-            return Response.ok().entity(new Resp("SQL Exception: " + ex.getMessage())).build();
+            return Response.serverError().entity(new Resp("SQL Exception: " + ex.getMessage())).build();
         }
+    }
+
+    private Connection getConnection() throws SQLException {
+        Connection connection = dataSource.getConnection();
+        log.debug("Got connection");
+        return connection;
     }
 
     @GET
