@@ -2,8 +2,6 @@ package dk.dbc.search.solrdocstore;
 
 import java.util.HashSet;
 import java.util.List;
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.MigrationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +14,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
-import org.flywaydb.core.api.configuration.FluentConfiguration;
 
 @Singleton
 @Startup
@@ -39,7 +36,7 @@ public class DatabaseMigrator {
     @PostConstruct
     public void init() {
         log.info("Running database migration");
-        HashSet<String> migrated = migrate();
+        HashSet<String> migrated = dk.dbc.search.solrdocstore.db.DatabaseMigrator.migrate(dataSource, config.getAllowNonEmptySchema());
         log.debug("migrated = {}", migrated);
 
         boolean has_logged = false;
@@ -51,29 +48,6 @@ public class DatabaseMigrator {
         if (has_logged) {
             log.info("---------------------------------------------------------------");
         }
-    }
-
-    public HashSet<String> migrate() {
-        HashSet<String> migrates = new HashSet<>();
-        FluentConfiguration flywayConfigure = Flyway.configure()
-                .table("schema_version")
-                .dataSource(dataSource);
-        if (config.getAllowNonEmptySchema()) {
-            flywayConfigure = flywayConfigure.baselineOnMigrate(true)
-                    .baselineVersion("0"); // This is needed for afterMigrate
-        }
-
-        final Flyway flyway = flywayConfigure.load();
-        for (MigrationInfo i : flyway.info().applied()) {
-            log.info("db task {} : {} from file '{}' (applied)", i.getVersion(), i.getDescription(), i.getScript());
-        }
-        for (MigrationInfo i : flyway.info().pending()) {
-            migrates.add(i.getVersion().getVersion());
-            log.info("db task {} : {} from file '{}' (pending)", i.getVersion(), i.getDescription(), i.getScript());
-        }
-        flyway.migrate();
-        dk.dbc.search.solrdocstore.queue.DatabaseMigrator.migrate(dataSource);
-        return migrates;
     }
 
     public DatabaseMigrator() {
