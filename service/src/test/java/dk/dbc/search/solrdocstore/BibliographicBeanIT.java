@@ -420,6 +420,62 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
     }
 
+    @Test(timeout = 2_000L)
+    public void supercedsReverted() throws Exception {
+        System.out.println("supercedsReverted");
+
+        try (Connection conn = env().getDatasource().getConnection() ;
+             Statement statement = conn.createStatement()) {
+            statement.executeUpdate("TRUNCATE bibliographicToBibliographic");
+        }
+
+        { // a dead  b live
+
+            String json = makeBibliographicRequestJson(
+                    870970,
+                    e -> {
+                e.setBibliographicRecordId("b");
+                e.setSuperceds(Arrays.asList("a"));
+            });
+
+            Response r = env().getPersistenceContext()
+                    .run(() -> bean.addBibliographicKeys(false, json));
+            assertThat(r.getStatus(), is(200));
+
+            List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
+            System.out.println("l = " + l);
+            assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("a", "b")));
+        }
+        { // a live, b dead & b deleted
+
+            String json1 = makeBibliographicRequestJson(
+                    870970,
+                    e -> {
+                e.setBibliographicRecordId("a");
+                e.setSuperceds(Arrays.asList("b"));
+            });
+
+            Response r1 = env().getPersistenceContext()
+                    .run(() -> bean.addBibliographicKeys(false, json1));
+            assertThat(r1.getStatus(), is(200));
+            String json2 = makeBibliographicRequestJson(
+                    870970,
+                    e -> {
+                e.setBibliographicRecordId("b");
+                e.setDeleted(true);
+                e.setSuperceds(Arrays.asList("a"));
+            });
+
+            Response r2 = env().getPersistenceContext()
+                    .run(() -> bean.addBibliographicKeys(false, json2));
+            assertThat(r2.getStatus(), is(200));
+
+            List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
+            System.out.println("l = " + l);
+            assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("b", "a")));
+        }
+    }
+
     @Test
     public void newRecordWhereSuperceedsIsAlreadySet() throws Exception {
 
@@ -548,18 +604,22 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext()
                 .run(() -> env().getEntityManager().merge(
                         new HoldingsItemEntity(700000, "new", "any",
-                                               new ArrayList<Map<String, List<String>>>() {{
-                                               add(new HashMap<String, List<String>>() {{
+                                               new ArrayList<Map<String, List<String>>>() {
+                                           {
+                                               add(new HashMap<String, List<String>>() {
+                                                   {
                                                        put("holdingsitem.status", Arrays.asList("OnShelf"));
-                                                   }});
-                                           }}, "test")));
+                                                   }
+                                               });
+                                           }
+                                       }, "test")));
 
         String a870970 = makeBibliographicRequestJson(
                 870970, e -> {
         });
         String a870970d = makeBibliographicRequestJson(
                 870970, e -> {
-                    e.setDeleted(true);
+            e.setDeleted(true);
         });
         String a700000 = makeBibliographicRequestJson(
                 700000, e -> {

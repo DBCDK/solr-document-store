@@ -74,7 +74,8 @@ public class BibliographicBean {
      * @param jsonContent The json request (see
      *                    {@link BibliographicEntityRequest})
      * @return Json with ok: true/false
-     * @throws Exception If database is unavailable or the JSON cannot be created
+     * @throws Exception If database is unavailable or the JSON cannot be
+     *                   created
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
@@ -143,12 +144,14 @@ public class BibliographicBean {
                 // bib entity
                 if (bibliographicEntity.isDeleted()) {
                     key.setDeleteMarked(true);
+                    deleteSuperceded(bibliographicEntity.getBibliographicRecordId());
                 }
                 affectedKeys.add(key);
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
                 entityManager.flush();
+
                 List<HoldingsToBibliographicEntity> relatedHoldings =
                         bibliographicEntity.isDeleted() ?
                         h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
@@ -165,7 +168,7 @@ public class BibliographicBean {
             }
         }
 
-        if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
+        if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY && !bibliographicEntity.isDeleted()) {
             Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
             if (supersededRecordIds.size() > 0) {
                 Set<AgencyClassifierItemKey> recalculatedKeys =
@@ -283,6 +286,21 @@ public class BibliographicBean {
                 holdingsAgency, recordId, agency, bibliographicRecordId, isCommonDerived
         );
         return h2bBean.attachToAgency(h2b);
+    }
+
+    private void deleteSuperceded(String bibliographicRecordId) {
+        log.warn("XXXXX");
+        List<BibliographicToBibliographicEntity> resultList =
+                entityManager.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity AS b2b" +
+                                          " WHERE b2b.liveBibliographicRecordId = :bibliographicRecordId",
+                                          BibliographicToBibliographicEntity.class)
+                        .setParameter("bibliographicRecordId", bibliographicRecordId)
+                        .getResultList();
+        for (BibliographicToBibliographicEntity b2b : resultList) {
+            String deadBibliographicRecordId = b2b.getDeadBibliographicRecordId();
+            log.info("Removing reference from dead bibliographicrecordid({}) to this", deadBibliographicRecordId);
+            entityManager.remove(b2b);
+        }
     }
 
     private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {

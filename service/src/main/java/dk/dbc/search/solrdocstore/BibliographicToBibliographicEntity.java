@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -38,6 +39,28 @@ public class BibliographicToBibliographicEntity implements Serializable {
 
     public void setDeadBibliographicRecordId(String deadBibliographicRecordId) {
         this.deadBibliographicRecordId = deadBibliographicRecordId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.deadBibliographicRecordId,
+                            this.liveBibliographicRecordId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        final BibliographicToBibliographicEntity other = (BibliographicToBibliographicEntity) obj;
+        return Objects.equals(this.deadBibliographicRecordId, other.deadBibliographicRecordId) &&
+               Objects.equals(this.liveBibliographicRecordId, other.liveBibliographicRecordId);
+    }
+
+    @Override
+    public String toString() {
+        return "BibliographicToBibliographicEntity{" + "deadBibliographicRecordId=" + deadBibliographicRecordId + ", liveBibliographicRecordId=" + liveBibliographicRecordId + '}';
     }
 
 }
