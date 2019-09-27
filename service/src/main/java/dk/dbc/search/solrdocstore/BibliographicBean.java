@@ -144,7 +144,9 @@ public class BibliographicBean {
                 // bib entity
                 if (bibliographicEntity.isDeleted()) {
                     key.setDeleteMarked(true);
-                    deleteSuperceded(bibliographicEntity.getBibliographicRecordId());
+                    if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
+                        deleteSuperceded(bibliographicEntity.getBibliographicRecordId());
+                    }
                 }
                 affectedKeys.add(key);
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
