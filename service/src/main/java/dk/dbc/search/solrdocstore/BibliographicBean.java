@@ -291,7 +291,6 @@ public class BibliographicBean {
     }
 
     private void deleteSuperceded(String bibliographicRecordId) {
-        log.warn("XXXXX");
         List<BibliographicToBibliographicEntity> resultList =
                 entityManager.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity AS b2b" +
                                           " WHERE b2b.liveBibliographicRecordId = :bibliographicRecordId",
