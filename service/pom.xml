@@ -214,6 +214,7 @@
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
                     <environmentVariables>
                         <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/docstore</DOCSTORE_POSTGRES_URL>
+                        <OPEN_AGENCY_URL>http://localhost:8888/openagency/</OPEN_AGENCY_URL>
                     </environmentVariables>
                     <systemPropertyVariables>
                         <postgresql.port>${postgresql.port}</postgresql.port>

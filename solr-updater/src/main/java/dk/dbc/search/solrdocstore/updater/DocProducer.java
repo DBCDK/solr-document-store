@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
@@ -96,16 +97,15 @@ public class DocProducer {
                 }
                 log.trace("doc = {}", doc);
             }
-            if (commitWithin == null || commitWithin <= 0) {
-                UpdateResponse resp = solrClient.add(doc);
-                if (resp.getStatus() != 0) {
-                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
-                }
-            } else {
-                UpdateResponse resp = solrClient.add(doc, commitWithin);
-                if (resp.getStatus() != 0) {
-                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
-                }
+            UpdateRequest updateRequest = new UpdateRequest();
+            updateRequest.add(doc);
+            updateRequest.setParam("appId", config.getAppId());
+            if (commitWithin != null && commitWithin > 0) {
+                updateRequest.setCommitWithin(commitWithin);
+            }
+            UpdateResponse resp = updateRequest.process(solrClient);
+            if (resp.getStatus() != 0) {
+                throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
             }
         }
     }
@@ -124,16 +124,15 @@ public class DocProducer {
     @Timed
     public void deleteSolrDocuments(String bibliographicShardId, List<String> ids, Integer commitWithin) throws IOException, SolrServerException {
         if (!ids.isEmpty()) {
-            if (commitWithin == null || commitWithin <= 0) {
-                UpdateResponse resp = solrClient.deleteById(ids);
-                if (resp.getStatus() != 0) {
-                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
-                }
-            } else {
-                UpdateResponse resp = solrClient.deleteById(ids, commitWithin);
-                if (resp.getStatus() != 0) {
-                    throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
-                }
+            UpdateRequest updateRequest = new UpdateRequest();
+            updateRequest.deleteById(ids);
+            updateRequest.setParam("appId", config.getAppId());
+            if (commitWithin != null && commitWithin > 0) {
+                updateRequest.setCommitWithin(commitWithin);
+            }
+            UpdateResponse resp = updateRequest.process(solrClient);
+            if (resp.getStatus() != 0) {
+                throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
             }
         }
         log.debug("Ids deleted: {}", ids);
@@ -170,6 +169,7 @@ public class DocProducer {
         SolrQuery req = new SolrQuery(query);
         req.setFields("id");
         req.setRows(MAX_ROWS_OF_SHARDED_SOLR);
+        req.set("appId", config.getAppId());
         req.setStart(0);
         ArrayList<String> list = new ArrayList<>();
         list.add(id);

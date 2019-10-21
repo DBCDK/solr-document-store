@@ -63,6 +63,7 @@ public class Config {
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
     private Client client;
+    private String appId;
 
     public Config() {
         props = findProperties("solr-doc-store-updater");
@@ -96,6 +97,7 @@ public class Config {
             maxQueryTime = Long.max(100L, milliseconds(get("maxQueryTime", "MAX_QUERY_TIME", "100ms")));
             threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
             maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
+            appId = get("solrAppId", "SOLR_APPID", null);
         }
         openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
@@ -123,6 +125,10 @@ public class Config {
 
     public boolean isWorker() {
         return !( "FORMAT_ONLY".equals(solrUrl) );
+    }
+
+    public String getAppId() {
+        return appId;
     }
 
     public String getSolrUrl() {
