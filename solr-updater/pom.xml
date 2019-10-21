@@ -389,7 +389,8 @@
                         <configuration>
                             <executable>sh</executable>
                             <arguments>
-                                <argument>-ce</argument>
+                                <argument>-c</argument>
+                                <!-- wait for line containing "#badassmicrofish" which is logged after deployment -->
                                 <argument><![CDATA[
 for i in 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
     if grep -q badassmicrofish ${basedir}/target/test-classes/payara-setup/micro.log*; then
@@ -436,7 +437,7 @@ exit 1
                         <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
                         <OPEN_AGENCY_URL>http://localhost:${wiremock.port}/openagency/</OPEN_AGENCY_URL>
                         <PROFILE_SERVICE_URL>http://localhost:${wiremock.port}/profile-service/</PROFILE_SERVICE_URL>
-                        <SOLR_APPID>solr-doc-sture-updater</SOLR_APPID>
+                        <SOLR_APPID>solr-doc-store-updater</SOLR_APPID>
                     </environmentVariables>
                 </configuration>
                 <executions>
