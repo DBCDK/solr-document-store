@@ -74,6 +74,7 @@ public class SolrFields {
             URI uri = UriBuilder.fromPath(getUrl())
                     .path("admin/file")
                     .queryParam("file", "schema.xml")
+                    .queryParam("appId", config.getAppId())
                     .build();
             log.debug("fetching: uri = {}", uri);
             httpClient = ClientBuilder.newClient();

@@ -100,6 +100,7 @@ public class BusinessLogicTest {
         businessLogic.config = new Config("solrUrl=Not-Relevant",
                                           "profileServiceUrl=Not-Relevant",
                                           "solrDocStoreUrl=Not-Relevant",
+                                          "solrAppId=Not-Relevant",
                                           "queues=Not-Relevant",
                                           "openAgencyUrl=Not-Relevant",
                                           "scanProfiles=102030-magic,102030-self,123456-basic,876543-self",
@@ -108,7 +109,7 @@ public class BusinessLogicTest {
         businessLogic.profileService = new ProfileServiceBean() {
             @Override
             public Profile getProfile(String agencyId, String profile) {
-                switch (agencyId+"-"+profile) {
+                switch (agencyId + "-" + profile) {
                     case "102030-self":
                         return new Profile(true);
                     case "102030-magic":

@@ -11,7 +11,7 @@
     <packaging>war</packaging>
 
     <properties>
-        <solr.version>8.0.0</solr.version>
+        <solr.version>8.2.0</solr.version>
     </properties>
     
     <dependencies>
@@ -381,6 +381,32 @@
                     </execution>
 
                     <execution>
+                        <id>wait-for-payara</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <!-- wait for line containing "#badassmicrofish" which is logged after deployment -->
+                                <argument><![CDATA[
+for i in 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
+    if grep -q badassmicrofish ${basedir}/target/test-classes/payara-setup/micro.log*; then
+        exit 0
+    fi
+    echo "waiting - $i"
+    sleep 1
+done
+exit 1
+]]></argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+
+                    <execution>
                         <id>stop-solr</id>
                         <phase>post-integration-test</phase>
                         <goals>
@@ -411,6 +437,7 @@
                         <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
                         <OPEN_AGENCY_URL>http://localhost:${wiremock.port}/openagency/</OPEN_AGENCY_URL>
                         <PROFILE_SERVICE_URL>http://localhost:${wiremock.port}/profile-service/</PROFILE_SERVICE_URL>
+                        <SOLR_APPID>solr-doc-store-updater</SOLR_APPID>
                     </environmentVariables>
                 </configuration>
                 <executions>

@@ -53,6 +53,7 @@ public class DocProducerTest {
         Config config = new Config("solrUrl=Not-Relevant",
                                    "profileServiceUrl=Not-Relevant",
                                    "solrDocStoreUrl=Not-Relevant",
+                                   "solrAppId=Not-Relevant",
                                    "queues=Not-Relevant",
                                    "openAgencyUrl=Not-Relevant",
                                    "scanProfiles=102030-magic,123456-basic",
