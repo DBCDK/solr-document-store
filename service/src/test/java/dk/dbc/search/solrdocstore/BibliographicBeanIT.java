@@ -673,6 +673,11 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 );
         assertThat(rYoung.getStatus(), is(200));
 
+        Response rYoungAgain = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(false, updatedYoung)
+                );
+        assertThat(rYoungAgain.getStatus(), is(200));
+
         BibliographicEntity bOld = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", "prod:v0", true, makeIndexKeys("rec.fedoraStreamDate=2019-01-01T00:00:00Z"), "track:too-old");
         String updatedOld = jsonbContext.marshall(bOld);
 
