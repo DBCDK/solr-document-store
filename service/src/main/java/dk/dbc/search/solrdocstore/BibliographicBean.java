@@ -138,7 +138,7 @@ public class BibliographicBean {
 
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
-            if(reqTime != null &&dbTime != null && dbTime.isAfter(reqTime)) {
+            if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
                 throw new IllegalStateException("Cannot update to an older stream date");
             }
             // If we delete or re-create, related holdings must be moved appropriately
@@ -192,7 +192,7 @@ public class BibliographicBean {
     }
 
     private Instant extractFedoraStreamDate(BibliographicEntity entity) {
-        if(entity == null)
+        if (entity == null)
             return null;
         List<String> dates = entity.getIndexKeys().get("rec.fedoraStreamDate");
         if (dates == null || dates.size() != 1)
