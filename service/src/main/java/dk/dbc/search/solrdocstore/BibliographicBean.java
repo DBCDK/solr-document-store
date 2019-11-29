@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.ejb.Stateless;
@@ -194,7 +195,10 @@ public class BibliographicBean {
     private Instant extractFedoraStreamDate(BibliographicEntity entity) {
         if (entity == null)
             return null;
-        List<String> dates = entity.getIndexKeys().get("rec.fedoraStreamDate");
+        Map<String, List<String>> indexKeys = entity.getIndexKeys();
+        if(indexKeys == null)
+            return null;
+        List<String> dates = indexKeys.get("rec.fedoraStreamDate");
         if (dates == null || dates.size() != 1)
             return null;
         return Instant.parse(dates.get(0));
