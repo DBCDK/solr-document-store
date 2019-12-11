@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.ee.stats.Timed;
 import dk.dbc.log.LogWith;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,6 +109,7 @@ public class BibliographicBean {
             }
             ObjectNode err = O.createObjectNode();
             err.put("ok", false);
+            err.put("intermittent", ex instanceof IntermittentErrorException);
             err.put("message", message);
             return Response.serverError().entity(O.writeValueAsString(err)).build();
         }
@@ -140,8 +142,8 @@ public class BibliographicBean {
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
             if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
-                throw new IllegalStateException("Cannot update to an older stream date");
-            }
+                throw new IntermittentErrorException("Cannot update to an older stream date");
+            } 
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
                 // Record changed deleted stats queue even id said not to
@@ -196,7 +198,7 @@ public class BibliographicBean {
         if (entity == null)
             return null;
         Map<String, List<String>> indexKeys = entity.getIndexKeys();
-        if(indexKeys == null)
+        if (indexKeys == null)
             return null;
         List<String> dates = indexKeys.get("rec.fedoraStreamDate");
         if (dates == null || dates.size() != 1)

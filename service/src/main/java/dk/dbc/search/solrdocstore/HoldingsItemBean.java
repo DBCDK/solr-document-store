@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.ee.stats.Timed;
 import dk.dbc.log.LogWith;
@@ -30,6 +32,7 @@ import static dk.dbc.log.LogWith.track;
 public class HoldingsItemBean {
 
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
+    private static final ObjectMapper O = new ObjectMapper();
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
@@ -54,6 +57,20 @@ public class HoldingsItemBean {
             setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.getCommitWithin()));
 
             return Response.ok().entity("{ \"ok\": true }").build();
+        } catch (RuntimeException ex) {
+            log.error("setHoldingsKeys error: {}", ex.getMessage());
+            log.debug("setHoldingsKeys error: ", ex);
+            String message = null;
+            Throwable tw = ex;
+            while (tw != null && message == null) {
+                message = tw.getMessage();
+                tw = tw.getCause();
+            }
+            ObjectNode err = O.createObjectNode();
+            err.put("ok", false);
+            err.put("intermittent", ex instanceof IntermittentErrorException);
+            err.put("message", message);
+            return Response.serverError().entity(O.writeValueAsString(err)).build();
         }
     }
 
