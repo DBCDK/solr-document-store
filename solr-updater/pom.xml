@@ -390,10 +390,10 @@
                             <executable>sh</executable>
                             <arguments>
                                 <argument>-c</argument>
-                                <!-- wait for line containing "#badassmicrofish" which is logged after deployment -->
+                                <!-- wait for status endpoint to respond with 200 -->
                                 <argument><![CDATA[
 for i in 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
-    if grep -q badassmicrofish ${basedir}/target/test-classes/payara-setup/micro.log*; then
+    if ! curl -sf http://localhost:${glassfish.port}/api/status; then
         exit 0
     fi
     echo "waiting - $i"
