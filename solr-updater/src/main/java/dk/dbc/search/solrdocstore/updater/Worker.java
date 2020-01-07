@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.log.LogWith;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
@@ -27,6 +26,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class Worker {
 
     private void setupWorker() {
         if (config.isWorker()) {
-            this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
+            QueueWorker.Builder<QueueJob> builder = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                     .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
                     .dataSource(dataSource)
                     .consume(config.getQueues())
@@ -89,10 +89,11 @@ public class Worker {
                     .rescanEvery(config.getRescanEvery())
                     .idleRescanEvery(config.getIdleRescanEvery())
                     .maxTries(config.getMaxTries())
-                    .maxQueryTime(config.getMaxQueryTime())
-                    .metricRegistry(metrics)
-                    .build(config.getThreads(),
-                           this::makeWorker);
+                    .maxQueryTime(config.getMaxQueryTime());
+            if (metrics != null)
+                builder.metricRegistryMicroProfile(metrics);
+            this.worker = builder.build(config.getThreads(),
+                                        this::makeWorker);
             this.worker.start();
         }
     }

@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
-import com.codahale.metrics.MetricRegistry;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
@@ -32,6 +31,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -122,7 +122,7 @@ public class WorkerIT {
         worker.docProducer.businessLogic.profileService.config = config;
         worker.docProducer.businessLogic.solrFields = solrFields;
         worker.docProducer.init();
-        worker.metrics = new MetricRegistry();
+        worker.metrics = null;
         worker.init();
     }
 
