@@ -1,12 +1,12 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.ee.stats.Timed;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import org.eclipse.persistence.exceptions.JPQLException;
 

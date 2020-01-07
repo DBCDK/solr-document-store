@@ -29,11 +29,11 @@
             <artifactId>pg-queue-supplier</artifactId>
             <version>${pg-queue.version}</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>ee-stats</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>dk.dbc.commoms.testutils</groupId>
             <artifactId>dbc-commons-testutil-postgres-connection</artifactId>
@@ -52,6 +52,11 @@
             <artifactId>dbc-commons-log</artifactId>
             <version>1.3-SNAPSHOT</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.metrics</groupId>
+            <artifactId>microprofile-metrics-api</artifactId>
+            <version>${microprofile.version}</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -145,6 +150,31 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>docker-payara-utils</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>dk.dbc</groupId>
+                                    <artifactId>payara-utils-runtime</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <outputDirectory>${project.build.directory}/docker/</outputDirectory>
+                                    <destFileName>payara-utils-runtime.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

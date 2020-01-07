@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.ee.stats.Timed;
 import dk.dbc.log.LogWith;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

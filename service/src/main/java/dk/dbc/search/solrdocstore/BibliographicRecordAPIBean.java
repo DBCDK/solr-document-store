@@ -1,7 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dk.dbc.ee.stats.Timed;
 import dk.dbc.log.LogWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import static dk.dbc.log.LogWith.track;
 
