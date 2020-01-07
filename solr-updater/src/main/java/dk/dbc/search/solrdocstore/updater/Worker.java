@@ -78,7 +78,7 @@ public class Worker {
 
     private void setupWorker() {
         if (config.isWorker()) {
-            QueueWorker.Builder<QueueJob> builder = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
+            this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                     .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
                     .dataSource(dataSource)
                     .consume(config.getQueues())
@@ -89,11 +89,10 @@ public class Worker {
                     .rescanEvery(config.getRescanEvery())
                     .idleRescanEvery(config.getIdleRescanEvery())
                     .maxTries(config.getMaxTries())
-                    .maxQueryTime(config.getMaxQueryTime());
-            if (metrics != null)
-                builder.metricRegistryMicroProfile(metrics);
-            this.worker = builder.build(config.getThreads(),
-                                        this::makeWorker);
+                    .maxQueryTime(config.getMaxQueryTime())
+                    .metricRegistryMicroProfile(metrics)
+                    .build(config.getThreads(),
+                           this::makeWorker);
             this.worker.start();
         }
     }
