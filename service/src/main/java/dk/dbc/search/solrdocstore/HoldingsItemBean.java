@@ -3,10 +3,10 @@ package dk.dbc.search.solrdocstore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.ee.stats.Timed;
 import dk.dbc.log.LogWith;
 import java.util.Optional;
 import java.util.Set;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

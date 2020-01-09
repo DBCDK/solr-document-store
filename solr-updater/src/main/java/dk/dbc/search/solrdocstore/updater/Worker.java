@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.log.LogWith;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -22,11 +20,11 @@ import javax.ejb.DependsOn;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,22 +59,8 @@ public class Worker {
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
 
-    @Resource(type = ManagedScheduledExecutorService.class)
-    ScheduledExecutorService ses;
-
     @PostConstruct
     public void init() {
-        if (ses == null) {
-            setupWorker();
-        } else {
-            ses.schedule(() -> {
-                log.info("Starting consumer");
-                setupWorker();
-            }, 10, TimeUnit.SECONDS);
-        }
-    }
-
-    private void setupWorker() {
         if (config.isWorker()) {
             this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                     .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
@@ -90,7 +74,7 @@ public class Worker {
                     .idleRescanEvery(config.getIdleRescanEvery())
                     .maxTries(config.getMaxTries())
                     .maxQueryTime(config.getMaxQueryTime())
-                    .metricRegistry(metrics)
+                    .metricRegistryMicroProfile(metrics)
                     .build(config.getThreads(),
                            this::makeWorker);
             this.worker.start();

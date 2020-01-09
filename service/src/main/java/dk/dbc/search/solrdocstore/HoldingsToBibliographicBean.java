@@ -1,7 +1,11 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.ee.stats.Timed;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
