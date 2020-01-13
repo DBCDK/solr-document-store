@@ -69,24 +69,22 @@ public class SolrFields {
 
     @PostConstruct
     public void init() {
-        if (config.isWorker()) {
-            log.info("Getting solr fields");
-            URI uri = UriBuilder.fromPath(getUrl())
-                    .path("admin/file")
-                    .queryParam("file", "schema.xml")
-                    .queryParam("appId", config.getAppId())
-                    .build();
-            log.debug("fetching: uri = {}", uri);
-            httpClient = ClientBuilder.newClient();
-            Object entity = getSchemaXml(uri);
-            Document doc;
-            try {
-                doc = DOCUMENT_BUILDER.parse((InputStream) entity);
-            } catch (SAXException | IOException ex) {
-                throw new EJBException("Error parsing response from: " + uri, ex);
-            }
-            processDoc(doc);
+        log.info("Getting solr fields");
+        URI uri = UriBuilder.fromPath(getUrl())
+                .path("admin/file")
+                .queryParam("file", "schema.xml")
+                .queryParam("appId", config.getAppId())
+                .build();
+        log.debug("fetching: uri = {}", uri);
+        httpClient = ClientBuilder.newClient();
+        Object entity = getSchemaXml(uri);
+        Document doc;
+        try {
+            doc = DOCUMENT_BUILDER.parse((InputStream) entity);
+        } catch (SAXException | IOException ex) {
+            throw new EJBException("Error parsing response from: " + uri, ex);
         }
+        processDoc(doc);
     }
 
     /**
@@ -132,8 +130,7 @@ public class SolrFields {
      * @return is it known by the solr
      */
     public boolean isKnownField(String name) {
-        return !config.isWorker() || // If not worker (format service) everything is known
-               knownFields.computeIfAbsent(name, this::getKnownDynamicField);
+        return knownFields.computeIfAbsent(name, this::getKnownDynamicField);
     }
 
     /**

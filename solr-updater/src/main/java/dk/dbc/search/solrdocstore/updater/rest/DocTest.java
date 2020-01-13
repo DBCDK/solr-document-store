@@ -80,8 +80,6 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("commitWithin") Integer commitWithin) throws InterruptedException, ExecutionException, IOException {
         try {
-            if (!config.isWorker())
-                throw new IOException("No solr configured - only format endpoint valid");
             JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
             String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);

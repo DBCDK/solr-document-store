@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dk.dbc.log.LogWith.track;
-import static java.util.Collections.EMPTY_LIST;
 
 /**
  *
@@ -61,37 +60,31 @@ public class Worker {
 
     @PostConstruct
     public void init() {
-        if (config.isWorker()) {
-            this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
-                    .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
-                    .dataSource(dataSource)
-                    .consume(config.getQueues())
-                    .databaseConnectThrottle(config.getDatabaseConnectThrottle())
-                    .failureThrottle(config.getFailureThrottle())
-                    .emptyQueueSleep(config.getEmptyQueueSleep())
-                    .window(config.getQueueWindow())
-                    .rescanEvery(config.getRescanEvery())
-                    .idleRescanEvery(config.getIdleRescanEvery())
-                    .maxTries(config.getMaxTries())
-                    .maxQueryTime(config.getMaxQueryTime())
-                    .metricRegistryMicroProfile(metrics)
-                    .build(config.getThreads(),
-                           this::makeWorker);
-            this.worker.start();
-        }
+        this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
+                .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
+                .dataSource(dataSource)
+                .consume(config.getQueues())
+                .databaseConnectThrottle(config.getDatabaseConnectThrottle())
+                .failureThrottle(config.getFailureThrottle())
+                .emptyQueueSleep(config.getEmptyQueueSleep())
+                .window(config.getQueueWindow())
+                .rescanEvery(config.getRescanEvery())
+                .idleRescanEvery(config.getIdleRescanEvery())
+                .maxTries(config.getMaxTries())
+                .maxQueryTime(config.getMaxQueryTime())
+                .metricRegistryMicroProfile(metrics)
+                .build(config.getThreads(),
+                       this::makeWorker);
+        this.worker.start();
     }
 
     @PreDestroy
     public void destroy() {
-        if (config.isWorker()) {
-            this.worker.stop();
-            this.worker.awaitTermination(1, TimeUnit.MINUTES);
-        }
+        this.worker.stop();
+        this.worker.awaitTermination(1, TimeUnit.MINUTES);
     }
 
     public List<String> hungThreads() {
-        if (!config.isWorker())
-            return EMPTY_LIST;
         if (worker == null)
             return Collections.singletonList("consumer-not-started");
         return worker.hungThreads();

@@ -55,8 +55,6 @@ public class Status {
 
         if (!hzStatus.good())
             return fail("Hazelcast is in bad state");
-        if (!config.isWorker())
-            return Response.ok(StatusResponse.ok()).build();
         try (Connection connection = dataSource.getConnection() ;
              PreparedStatement stmt = connection.prepareStatement("SELECT clock_timestamp()") ;
              ResultSet resultSet = stmt.executeQuery()) {
