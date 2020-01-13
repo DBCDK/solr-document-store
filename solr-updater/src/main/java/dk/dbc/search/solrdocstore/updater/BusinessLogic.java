@@ -45,9 +45,6 @@ public class BusinessLogic {
     OpenAgency oa;
 
     @Inject
-    SolrFields solrFields;
-
-    @Inject
     Config config;
 
     @Inject
@@ -220,7 +217,7 @@ public class BusinessLogic {
      * @param repositoryId id of record used by
      */
     @Timed
-    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String repositoryId) {
+    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, SolrFields solrFields, String repositoryId) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         int i = 0;
         for (JsonNode record : records) {

@@ -5,34 +5,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import javax.ejb.EJBException;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.cloud.ClusterState;
-import org.apache.solr.common.cloud.Replica;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +27,6 @@ import org.xml.sax.SAXException;
  *
  * @author DBC {@literal <dbc.dk>}
  */
-@Singleton
-@Lock(LockType.READ)
 public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(SolrFields.class);
@@ -57,69 +37,23 @@ public class SolrFields {
     private final ConcurrentHashMap<String, Boolean> knownFields;
     private final ArrayList<String[]> dynamicFieldSpecs;
 
-    @Inject
-    Config config;
-
-    Client httpClient;
-
-    public SolrFields() {
+    SolrFields() {
         this.knownFields = new ConcurrentHashMap<>();
         this.dynamicFieldSpecs = new ArrayList<>();
     }
 
-    @PostConstruct
-    public void init() {
+    public SolrFields(SolrClient solrClient, SolrFieldsBean bean) {
+        this.knownFields = new ConcurrentHashMap<>();
+        this.dynamicFieldSpecs = new ArrayList<>();
+
         log.info("Getting solr fields");
-        URI uri = UriBuilder.fromPath(getUrl())
-                .path("admin/file")
-                .queryParam("file", "schema.xml")
-                .queryParam("appId", config.getAppId())
-                .build();
-        log.debug("fetching: uri = {}", uri);
-        httpClient = ClientBuilder.newClient();
-        Object entity = getSchemaXml(uri);
-        Document doc;
+        InputStream entity = bean.getSchemaXml(solrClient);
         try {
-            doc = DOCUMENT_BUILDER.parse((InputStream) entity);
+            Document doc = DOCUMENT_BUILDER.parse(entity);
+            processDoc(doc);
         } catch (SAXException | IOException ex) {
-            throw new EJBException("Error parsing response from: " + uri, ex);
+            throw new EJBException("Error parsing response from solr: ", ex);
         }
-        processDoc(doc);
-    }
-
-    /**
-     * Find an url for any solr client, that should provide a schema.xml
-     *
-     * @return url as string
-     */
-    String getUrl() {
-        SolrClient client = SolrApi.makeSolrClient(config.getSolrUrl());
-        if (client instanceof HttpSolrClient) {
-            return config.getSolrUrl();
-        }
-        if (client instanceof CloudSolrClient) {
-            CloudSolrClient cloud = (CloudSolrClient) client;
-
-            String collectionName = cloud.getDefaultCollection();
-            ClusterState state = cloud.getZkStateReader().getClusterState();
-            Set<String> nodes = state.getLiveNodes();
-            if (nodes.isEmpty()) {
-                throw new IllegalArgumentException("Zookeeper don't know about live nodes");
-            }
-
-            List<Replica> liveReplicas = state.getCollection(collectionName)
-                    .getReplicas()
-                    .stream()
-                    .filter(r -> nodes.contains(r.getNodeName()))
-                    .collect(Collectors.toList());
-            if (liveReplicas.isEmpty()) {
-                throw new IllegalArgumentException("Zookeeper don't know any live replicas");
-            }
-
-            Replica replica = liveReplicas.get((int) Math.floor(Math.random() * liveReplicas.size()));
-            return replica.getBaseUrl() + "/" + collectionName;
-        }
-        throw new IllegalStateException("Don't know about this solr client type: " + client.getClass().getSimpleName());
     }
 
     /**
@@ -155,31 +89,6 @@ public class SolrFields {
             }
         }
         return false;
-    }
-
-    /**
-     * Get inputstream of schema xml url
-     *
-     * @param uri where schema xml is sopposed to be found
-     * @return content stream
-     */
-    InputStream getSchemaXml(URI uri) {
-        Response response = httpClient
-                .target(uri)
-                .request(MediaType.APPLICATION_XML_TYPE)
-                .get();
-        Response.StatusType status = response.getStatusInfo();
-        if (status.getStatusCode() != 200) {
-            throw new EJBException("Cannot get " + uri + ": " + status);
-        }
-        if (!response.bufferEntity()) {
-            throw new EJBException("Response from " + uri + " is not a buffer entity");
-        }
-        Object entity = response.getEntity();
-        if (!( entity instanceof InputStream )) {
-            throw new EJBException("Response from " + uri + " is not an InputStream");
-        }
-        return (InputStream) entity;
     }
 
     /**

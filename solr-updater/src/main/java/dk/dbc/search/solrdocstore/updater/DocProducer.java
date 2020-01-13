@@ -17,7 +17,6 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -25,6 +24,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
@@ -44,30 +44,24 @@ public class DocProducer {
     private static final Logger log = LoggerFactory.getLogger(DocProducer.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final int MAX_ROWS_OF_SHARDED_SOLR = 10000;
 
     @Inject
     Config config;
-
-    @Inject
-    SolrFields solrFields;
 
     @Inject
     BusinessLogic businessLogic;
 
     private Client client;
     private UriBuilder uriTemplate;
-    SolrClient solrClient;
 
     @PostConstruct
     public void init() {
         log.info("Building DocProducer");
-        this.client = ClientBuilder.newClient();
+        this.client = config.getClient();
         String solrDocStoreUrl = config.getSolrDocStoreUrl();
         log.debug("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.uriTemplate = UriBuilder.fromUri(solrDocStoreUrl)
                 .path("api/retrieve/combined/{agencyId}/{classifier}/{bibliographicRecordId}");
-        this.solrClient = SolrApi.makeSolrClient(config.getSolrUrl());
     }
 
     /**
@@ -77,13 +71,14 @@ public class DocProducer {
      *
      * @param doc          The document to post to the solr (null if no
      *                     documents)
+     * @param solrClient   collection to solr collection
      * @param commitWithin optional - number of milliseconds before a
      *                     commit should occur
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
     @Timed
-    public void deploy(SolrInputDocument doc, Integer commitWithin) throws IOException, SolrServerException {
+    public void deploy(SolrInputDocument doc, SolrClient solrClient, Integer commitWithin) throws IOException, SolrServerException {
 
         if (doc != null) {
             if (log.isDebugEnabled()) {
@@ -116,13 +111,13 @@ public class DocProducer {
      *
      * @param bibliographicShardId the root id of the document to purge
      * @param netstedDocumentCount id's to delete from SolR
+     * @param solrClient           collection to solr collection
      * @param commitWithin         then to commit
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
-    //! Todo: add another n sub documents pr holdingid if more has been addad before last commit, also take into account the known subdocument ids from sourceDoc
     @Timed
-    public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, Integer commitWithin) throws IOException, SolrServerException {
+    public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, SolrClient solrClient, Integer commitWithin) throws IOException, SolrServerException {
         int deleteCount = netstedDocumentCount * 2 + 100; // Ensure all old documents gets deleted, even if an uncommitted request has many more than is currently searchable
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.setParam("appId", config.getAppId());
@@ -146,37 +141,41 @@ public class DocProducer {
      * Create the solr document with only the known field, inlining holdingitems
      * and synthesize fields
      *
-     * @param sourceDoc the document from {@link  #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
-     *                  }
+     * @param sourceDoc  the document from {@link  #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
+     *                   }
+     * @param solrFields description of known fields in the solr collection
      * @return null if deleted otherwise a expanded solr document
      * @throws PostponedNonFatalQueueError if unable to communicate with
      *                                     openagency
      */
     @Timed
-    public SolrInputDocument createSolrDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
+    public SolrInputDocument createSolrDocument(JsonNode sourceDoc, SolrFields solrFields) throws PostponedNonFatalQueueError {
         boolean deleted = isDeleted(sourceDoc);
         log.trace("deleted = {}", deleted);
         SolrInputDocument doc = null;
         if (!deleted) {
-            doc = inputDocument(sourceDoc);
+            doc = inputDocument(sourceDoc, solrFields);
         }
         return doc;
     }
 
     @Timed
-    public int getNestedDocumentCount(String id) throws IOException, SolrServerException {
+    public int getNestedDocumentCount(String id, SolrClient solrClient) throws IOException, SolrServerException {
         // Delete by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
         // Converted to nested to delete subdocuments only, then delete owner by id
         String query = "{!child of=\"t:m\"}id:" + ClientUtils.escapeQueryChars(id);
-        log.debug("Delete by Query - Select: {}", query);
+        log.debug("Find nested count - Select: count({})", query);
         SolrQuery req = new SolrQuery(query);
         req.setFields("id");
         req.setRows(0);
         req.set("appId", config.getAppId());
         req.setStart(0);
-        int nestedDocumentCount = (int) solrClient.query(req).getResults()
-                .getNumFound();
+        QueryResponse resp = solrClient.query(req);
+        if (resp.getStatus() != 0) {
+            throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on count nested");
+        }
+        int nestedDocumentCount = (int) resp.getResults().getNumFound();
         log.debug("nestedDocumentCount = {}", nestedDocumentCount);
         return nestedDocumentCount;
     }
@@ -240,12 +239,13 @@ public class DocProducer {
     /**
      * Construct a solr input document from solr-doc-store content
      *
-     * @param sourceDoc docstore collection
+     * @param sourceDoc  docstore collection
+     * @param solrFields description of known fields in the solr collection
      * @return solr document
      * @throws PostponedNonFatalQueueError if unable to communicate with
      *                                     openagency
      */
-    public SolrInputDocument inputDocument(JsonNode sourceDoc) throws PostponedNonFatalQueueError {
+    public SolrInputDocument inputDocument(JsonNode sourceDoc, SolrFields solrFields) throws PostponedNonFatalQueueError {
         try {
             String id = bibliographicShardId(sourceDoc);
 
@@ -270,7 +270,7 @@ public class DocProducer {
             businessLogic.attachedResources(sourceDoc);
 
             SolrInputDocument doc = solrFields.newDocumentFromIndexKeys(indexKeys);
-            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, repositoryId);
+            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, solrFields, repositoryId);
 
             return doc;
         } catch (RuntimeException ex) {

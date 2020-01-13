@@ -98,6 +98,7 @@ public class BusinessLogicTest {
             }
         };
         businessLogic.config = new Config("solrUrl=Not-Relevant",
+                                          "zookeeperUrl=",
                                           "profileServiceUrl=Not-Relevant",
                                           "solrDocStoreUrl=Not-Relevant",
                                           "solrAppId=Not-Relevant",
@@ -124,9 +125,7 @@ public class BusinessLogicTest {
             }
         };
 
-        DocProducer dp = new DocProducer() {
-        };
-        businessLogic.solrFields = dp.solrFields = new SolrFields() {
+        SolrFields solrFields = new SolrFields() {
             @Override
             public boolean isKnownField(String name) {
                 return true;
@@ -139,16 +138,16 @@ public class BusinessLogicTest {
                 .map(JsonNode::asText)
                 .toArray(String[]::new);
 
-        SolrInputDocument before = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(before, json, "repoId");
+        SolrInputDocument before = solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        businessLogic.addNestedHoldingsDocuments(before, json, solrFields, "repoId");
         try {
             Method method = BusinessLogic.class.getMethod(name.split("[^0-9a-zA-Z]", 2)[0], JsonNode.class);
             method.invoke(businessLogic, json);
         } catch (InvocationTargetException ex) {
             throw (Exception) ex.getTargetException();
         }
-        SolrInputDocument after = dp.solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(after, json, "repoId");
+        SolrInputDocument after = solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        businessLogic.addNestedHoldingsDocuments(after, json, solrFields, "repoId");
 
         List<String> diff = diff(before, after);
         System.out.println("diff = " + diff + "; expected = " + Arrays.asList(expected));

@@ -55,10 +55,16 @@ public class DocProducerIT {
     private static String solrUrl;
 
     private static PostgresITDataSource pg;
-    private static Client client;
     private static Config config;
 
     private DocProducer docProducer;
+
+    private final SolrFields solrFields = new SolrFields() {
+        @Override
+        public boolean isKnownField(String name) {
+            return true;
+        }
+    };
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -66,7 +72,6 @@ public class DocProducerIT {
         solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
 
         pg = new PostgresITDataSource("solrdocstore");
-        client = ClientBuilder.newClient();
         config = new Config("queues=test",
                             "scanProfiles=102030-magic,123456-basic",
                             "scanDefaultFields=abc,def") {
@@ -83,7 +88,7 @@ public class DocProducerIT {
         String evictAll = solrDocStoreUrl + "api/evict-all";
         log.debug("evictAll = {}", evictAll);
 
-        Invocation invocation = client.target(evictAll)
+        Invocation invocation = CLIENT.target(evictAll)
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .buildGet();
         for (int i = 0 ; i < 1000 ; i++) {
@@ -109,16 +114,13 @@ public class DocProducerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
-        solrClient.deleteByQuery("*:*");
-        solrClient.commit();
+        for (SolrClient solrClient : config.getSolrUrls().values()) {
+            solrClient.deleteByQuery("*:*");
+            solrClient.commit();
+        }
 
         docProducer = new DocProducer();
         docProducer.config = config;
-        SolrFields solrFields = new SolrFields();
-        docProducer.solrFields = solrFields;
-        docProducer.solrFields.config = config;
-        docProducer.solrFields.init();
         docProducer.businessLogic = new BusinessLogic();
         docProducer.businessLogic.config = config;
         docProducer.businessLogic.profileService = new ProfileServiceBean();
@@ -129,58 +131,60 @@ public class DocProducerIT {
                 return new LibraryRule(true, true, true, true, false, true);
             }
         };
-        docProducer.businessLogic.solrFields = solrFields;
         docProducer.init();
     }
 
     @Test
     public void loadAndDelete() throws Exception {
         System.out.println("loadAndDelete");
+        SolrClient solrClient = config.getSolrUrls().values().iterator().next();
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, 3);
+        deployAndSearch(300000, docProducer, solrClient, 3);
 
         Requests.load("test1-part2", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, 0);
+        deployAndSearch(300000, docProducer, solrClient, 0);
     }
 
     @Test
     public void loadAndFewerHolding() throws Exception {
         System.out.println("loadAndFewerHolding");
+        SolrClient solrClient = config.getSolrUrls().values().iterator().next();
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, 3);
+        deployAndSearch(300000, docProducer, solrClient, 3);
 
         Requests.load("test1-part3", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, 2);
+        deployAndSearch(300000, docProducer, solrClient, 2);
     }
 
     @Test
     public void creatAndDeleteWithoutHoldings() throws Exception {
         System.out.println("creatAndDeleteWithoutHoldings");
+        SolrClient solrClient = config.getSolrUrls().values().iterator().next();
 
         Requests.load("test2-part1", solrDocStoreUrl);
 
-        deployAndSearch(300010, docProducer, 1);
+        deployAndSearch(300010, docProducer, solrClient, 1);
 
         Requests.load("test2-part2", solrDocStoreUrl);
 
-        deployAndSearch(300010, docProducer, 0);
+        deployAndSearch(300010, docProducer, solrClient, 0);
     }
 
-    private void deployAndSearch(int agencyId, DocProducer docProducer, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
+    private void deployAndSearch(int agencyId, DocProducer docProducer, SolrClient solrClient, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
         JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, "clazzifier", "23645564"));
-        SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
+        SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc, solrFields);
         String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-        int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId);
-        docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, 0);
-        docProducer.deploy(doc, 0);
-        docProducer.solrClient.commit(true, true);
-        QueryResponse response = docProducer.solrClient.query(new SolrQuery("*:*"));
+        int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, solrClient);
+        docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, solrClient, 0);
+        docProducer.deploy(doc, solrClient, 0);
+        solrClient.commit(true, true);
+        QueryResponse response = solrClient.query(new SolrQuery("*:*"));
         System.out.println("response = " + response);
         assertEquals(expected, response.getResults().getNumFound());
     }

@@ -397,7 +397,8 @@
                                 <argument>
 <![CDATA[
 SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr start -p ${solr.port} -a "-DzkRun=localhost:${solr.port.zk}"
-${project.build.directory}/solr/bin/solr create_collection -c corepo -d ${project.build.directory}/solr/corepo-config -p ${solr.port}
+${project.build.directory}/solr/bin/solr create_collection -c corepo-a -d ${project.build.directory}/solr/corepo-config -p ${solr.port}
+${project.build.directory}/solr/bin/solr create_collection -c corepo-b -d ${project.build.directory}/solr/corepo-config -p ${solr.port}
 ]]></argument>
                             </arguments>
                         </configuration>
@@ -416,10 +417,10 @@ ${project.build.directory}/solr/bin/solr create_collection -c corepo -d ${projec
                                 <!-- wait for status endpoint to respond with 200 -->
                                 <argument><![CDATA[
 for i in 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
-    if ! curl -sf http://localhost:${glassfish.port}/api/status; then
+    if curl -sf http://localhost:${glassfish.port}/api/status; then
         exit 0
     fi
-    echo "waiting - $i"
+    echo "waiting for payara status endpoint - $i ($?)"
     sleep 1
 done
 exit 1
@@ -456,7 +457,9 @@ exit 1
                         <postgresql.port>${postgresql.port}</postgresql.port>
                     </systemPropertyVariables>
                     <environmentVariables>
-                        <SOLR_URL>http://localhost:${solr.port}/solr/corepo</SOLR_URL>
+                        <SOLR_URL>http://localhost:${solr.port}/solr/corepo-a</SOLR_URL>
+                        <ZOOKEEPER_URL>zk://localhost:${solr.port.zk}/</ZOOKEEPER_URL>
+                        <ZOOKEEPER_COLLECTIONS>corepo-b</ZOOKEEPER_COLLECTIONS>
                         <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
                         <OPEN_AGENCY_URL>http://localhost:${wiremock.port}/openagency/</OPEN_AGENCY_URL>
                         <PROFILE_SERVICE_URL>http://localhost:${wiremock.port}/profile-service/</PROFILE_SERVICE_URL>

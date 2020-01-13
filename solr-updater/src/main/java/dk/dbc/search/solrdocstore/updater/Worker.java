@@ -1,18 +1,27 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hazelcast.util.executor.ManagedExecutorService;
+import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.log.LogWith;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
 import dk.dbc.pgqueue.consumer.JobConsumer;
 import dk.dbc.pgqueue.consumer.JobMetaData;
 import dk.dbc.pgqueue.consumer.NonFatalQueueError;
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.pgqueue.consumer.QueueWorker;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -22,6 +31,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.eclipse.microprofile.metrics.MetricRegistry;
@@ -50,6 +60,9 @@ public class Worker {
     DocProducer docProducer;
 
     @Inject
+    SolrFieldsBean solrFields;
+
+    @Inject
     DocStasher docStasher;
 
     @Inject
@@ -58,8 +71,14 @@ public class Worker {
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
 
+    @Resource(type = ManagedExecutorService.class)
+    ExecutorService es;
+
+    private Map<String, SolrClient> solrUrls;
+
     @PostConstruct
     public void init() {
+        this.solrUrls = config.getSolrUrls();
         this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                 .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
                 .dataSource(dataSource)
@@ -94,25 +113,64 @@ public class Worker {
         return (Connection connection, QueueJob job, JobMetaData metaData) -> {
             try (LogWith logWith = track(null)) {
                 log.info("job = {}, metadata = {}", job, metaData);
-                JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
-                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
-                String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-                int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId);
 
-                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, job.getCommitwithin());
-
-                docProducer.deploy(solrDocument, job.getCommitwithin());
-                StringBuilder pid = new StringBuilder();
-                pid.append(job.getAgencyId())
+                String pid = new StringBuilder()
+                        .append(job.getAgencyId())
                         .append('-')
                         .append(job.getClassifier())
                         .append(':')
-                        .append(job.getBibliographicRecordId());
-                int count = 1;
-                if (solrDocument != null && solrDocument.hasChildDocuments())
-                    count += solrDocument.getChildDocumentCount();
-                log.info("Deleted {} record(s) and added {} to SolR", nestedDocumentCount + 1, count);
-                docStasher.store(pid.toString(), solrDocument);
+                        .append(job.getBibliographicRecordId())
+                        .toString();
+
+                JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
+
+                sourceDoc.deepCopy();
+                List<Runnable> tasks = solrUrls.entrySet().stream()
+                        .map(e -> {
+                            String solrUrl = e.getKey();
+                            SolrClient solrClient = e.getValue();
+                            SolrFields fields = solrFields.getFieldsFor(solrUrl);
+                            String solrCollection = solrUrl.substring(solrUrl.lastIndexOf('/') + 1);
+                            return processForOneCollection(sourceDoc.deepCopy(), solrClient, fields, pid, job.getCommitwithin(), solrCollection);
+                        })
+                        .collect(Collectors.toList());
+                try {
+                    switch (tasks.size()) {
+                        case 0:
+                            throw new AssertionError();
+                        case 1:
+                            tasks.get(0).run();
+                        default: {
+                            RuntimeException rex = null;
+                            List<Future<?>> futures = tasks.stream()
+                                    .map(es::submit)
+                                    .collect(Collectors.toList());
+                            for (Future<?> future : futures) {
+                                try {
+                                    future.get();
+                                } catch (InterruptedException ex) {
+                                    rex = new RuntimeException(ex);
+                                } catch (ExecutionException ex) {
+                                    Throwable cause = ex.getCause();
+                                    if (cause instanceof RuntimeException) {
+                                        rex = (RuntimeException) cause;
+                                    } else {
+                                        rex = new RuntimeException(cause);
+                                    }
+                                } catch (CancellationException ex) {
+                                    rex = ex;
+                                }
+                            }
+                            if (rex != null)
+                                throw rex;
+                        }
+                        throw new AssertionError();
+                    }
+                } catch (RethrowableException ex) {
+                    ex.throwAs(IOException.class);
+                    ex.throwAs(SolrServerException.class);
+                    throw new FatalQueueError(ex);
+                }
             } catch (IOException ex) {
                 throw new NonFatalQueueError(ex);
             } catch (SolrServerException ex) {
@@ -121,4 +179,26 @@ public class Worker {
         };
     }
 
+    public Runnable processForOneCollection(JsonNode sourceDoc, SolrClient solrClient, SolrFields solrFields, String pid, Integer commitWithin, String solrCollection) {
+        return () -> {
+            try (DBCTrackedLogContext logContext = new DBCTrackedLogContext()
+                    .with("pid", pid)
+                    .with("solrCollection", solrCollection)) {
+                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, solrFields);
+                String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
+                int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, solrClient);
+
+                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, solrClient, commitWithin);
+
+                docProducer.deploy(solrDocument, solrClient, commitWithin);
+                int count = 1;
+                if (solrDocument != null && solrDocument.hasChildDocuments())
+                    count += solrDocument.getChildDocumentCount();
+                log.info("Deleted {} record(s) and added {} to SolR", nestedDocumentCount + 1, count);
+                docStasher.store(pid, solrDocument);
+            } catch (PostponedNonFatalQueueError | IOException | SolrServerException ex) {
+                throw new RethrowableException(ex);
+            }
+        };
+    }
 }

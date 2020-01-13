@@ -21,7 +21,7 @@ package dk.dbc.search.solrdocstore.updater;
 import java.io.InputStream;
 import java.net.URI;
 import javax.ejb.EJBException;
-import org.junit.Ignore;
+import org.apache.solr.client.solrj.SolrClient;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -47,23 +47,23 @@ public class SolrFieldsTest {
     }
 
     public static SolrFields newSolrFields(String schemaXmlLocation, String url) {
-        SolrFields solrFields = new SolrFields() {
+        SolrFieldsBean solrFieldsBean = new SolrFieldsBean() {
             @Override
-            InputStream getSchemaXml(URI uri) throws EJBException {
+            public InputStream getSchemaXml(SolrClient solrClient) throws EJBException {
                 return SolrFieldsTest.class.getClassLoader().getResourceAsStream(schemaXmlLocation);
             }
         };
-        solrFields.config = new Config("queues=NONE",
-                                       "solrDocStoreUrl=NONE",
-                                       "solrUrl=" + url,
-                                       "solrAppId=Not-Relevant",
-                                       "openAgencyUrl=Not-Relevant",
-                                       "profileServiceUrl=Not-Relevant",
-                                       "scanDefaultFields=",
-                                       "scanProfiles=");
-        solrFields.init();
+        solrFieldsBean.config = new Config("queues=NONE",
+                                           "solrDocStoreUrl=NONE",
+                                           "solrUrl=" + url,
+                                           "solrAppId=Not-Relevant",
+                                           "openAgencyUrl=Not-Relevant",
+                                           "profileServiceUrl=Not-Relevant",
+                                           "scanDefaultFields=",
+                                           "scanProfiles=");
+        solrFieldsBean.init();
 
-        return solrFields;
+        return solrFieldsBean.getFieldsFor(url);
     }
 
     /**
@@ -76,7 +76,7 @@ public class SolrFieldsTest {
     public void testZkUrl() {
         String solrUrl = "zk://[hosts]/[chroot]/[collection]";
 
-        SolrFields solrFields = new SolrFields();
+        SolrFieldsBean solrFields = new SolrFieldsBean();
         solrFields.config = new Config("queues=NONE",
                                        "solrDocStoreUrl=NONE",
                                        "solrUrl=" + solrUrl,

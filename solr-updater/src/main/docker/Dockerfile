@@ -7,7 +7,9 @@ ENV THREADS=1 \
     CACHE_TIMEOUT=60 \
     USER_AGENT="solr-doc-store-solr-updater/1.1"
 
-LABEL SOLR_URL="zk or http url of solr-collection (required)" \
+LABEL SOLR_URL="zk or http url(s) (comma seperated) of solr-collection (required see also ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS)" \
+      ZOOKEEPER_URL="zk:// type url for tghe zookeeper" \
+      ZOOKEEPER_COLLECTIONS="collections in the zookeeper (this is shorthand for SOLR_URL+=',$ZOOEEPER_URL/$ZOOEEPER_COLLECTION...')" \
       SOLR_APPID="Application ID pass to SOLR, for logging in SOLR (Required)" \
       SOLR_DOC_STORE_URL="http url of solr-doc-store-service (required)" \
       SOLR_DOC_STORE_DATABASE="user:pass@host[:port]/database where the queue is located (required)" \

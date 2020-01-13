@@ -51,6 +51,7 @@ public class DocProducerTest {
         System.out.println("test");
 
         Config config = new Config("solrUrl=Not-Relevant",
+                                   "zookeeperUrl=",
                                    "profileServiceUrl=Not-Relevant",
                                    "solrDocStoreUrl=Not-Relevant",
                                    "solrAppId=Not-Relevant",
@@ -74,7 +75,6 @@ public class DocProducerTest {
             }
         };
         SolrFields solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
-        docProducer.solrFields = solrFields;
 
         docProducer.businessLogic = new BusinessLogic();
         docProducer.businessLogic.oa = new OpenAgency() {
@@ -85,7 +85,6 @@ public class DocProducerTest {
         };
         docProducer.businessLogic.config = config;
 
-        docProducer.businessLogic.solrFields = solrFields;
         docProducer.businessLogic.profileService = new ProfileServiceBean() {
             @Override
             public Profile getProfile(String agencyId, String profile) {
@@ -106,9 +105,8 @@ public class DocProducerTest {
 
         assertFalse(docProducer.isDeleted(node));
 
-        SolrInputDocument document = docProducer.inputDocument(node);
+        SolrInputDocument document = docProducer.inputDocument(node, solrFields);
         System.out.println("document = " + document);
-        String xml = ClientUtils.toXML(document);
         assertTrue(document.containsKey("dkcclterm.po"));
         assertFalse(document.containsKey("unknown.field"));
 
