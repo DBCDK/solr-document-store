@@ -181,6 +181,7 @@
                             <portNames>
                                 <portName>postgresql.port</portName>
                                 <portName>solr.port</portName>
+                                <portName>solr.port.zk</portName>
                                 <portName>solr.port.shutdown</portName>
                                 <portName>glassfish.port</portName>
                                 <portName>wiremock.port</portName>
@@ -265,7 +266,7 @@
                             <goal>unpack</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/solr/server/solr/corepo/conf</outputDirectory>
+                            <outputDirectory>${project.build.directory}/solr/corepo-config</outputDirectory>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>dk.dbc</groupId>
@@ -393,7 +394,11 @@
                             <executable>sh</executable>
                             <arguments>
                                 <argument>-ce</argument>
-                                <argument>echo name=corepo > ${project.build.directory}/solr/server/solr/corepo/core.properties; SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr start -p ${solr.port}</argument>
+                                <argument>
+<![CDATA[
+SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr start -p ${solr.port} -a "-DzkRun=localhost:${solr.port.zk}"
+${project.build.directory}/solr/bin/solr create_collection -c corepo -d ${project.build.directory}/solr/corepo-config -p ${solr.port}
+]]></argument>
                             </arguments>
                         </configuration>
                     </execution>
