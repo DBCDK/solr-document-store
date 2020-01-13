@@ -214,6 +214,7 @@ public class BusinessLogic {
      *
      * @param doc          root solr document
      * @param sourceDoc    document containing holdings
+     * @param solrFields   Which fields the collection knows about
      * @param repositoryId id of record used by
      */
     @Timed
