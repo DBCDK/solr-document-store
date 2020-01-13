@@ -31,7 +31,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

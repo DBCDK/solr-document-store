@@ -6,7 +6,6 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -86,8 +85,8 @@ public class DocTest {
             JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
             String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-            List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
-            docProducer.deleteSolrDocuments(bibliographicShardId, ids, 0);
+            int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId);
+            docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, 0);
             docProducer.deploy(doc, commitWithin);
             return Response.ok("{\"ok\":true}", MediaType.APPLICATION_XML_TYPE).build();
         } catch (SolrServerException | IOException | PostponedNonFatalQueueError ex) {

@@ -25,7 +25,6 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -177,13 +176,13 @@ public class DocProducerIT {
         JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, "clazzifier", "23645564"));
         SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc);
         String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-        List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
-        docProducer.deleteSolrDocuments(bibliographicShardId, ids, 0);
+        int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId);
+        docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, 0);
         docProducer.deploy(doc, 0);
         docProducer.solrClient.commit(true, true);
-        QueryResponse response1 = docProducer.solrClient.query(new SolrQuery("*:*"));
-        System.out.println("response = " + response1);
-        assertEquals(expected, response1.getResults().getNumFound());
+        QueryResponse response = docProducer.solrClient.query(new SolrQuery("*:*"));
+        System.out.println("response = " + response);
+        assertEquals(expected, response.getResults().getNumFound());
     }
 
 }

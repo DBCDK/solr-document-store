@@ -222,13 +222,13 @@ public class BusinessLogic {
     @Timed
     public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, String repositoryId) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
+        int i = 0;
         for (JsonNode record : records) {
-            String id = DocProducer.bibliographicShardId(sourceDoc) + "@" + find(record, "agencyId").asText() + "-" + find(record, "bibliographicRecordId").asText();
+            String id = DocProducer.bibliographicShardId(sourceDoc) + "@";
             JsonNode indexKeyList = find(record, "indexKeys");
-            int i = 0;
             for (JsonNode indexKeys : indexKeyList) {
                 setField(indexKeys, "rec.repositoryId", repositoryId);
-                setField(indexKeys, "id", id + "#" + i++);
+                setField(indexKeys, "id", id + ++i);
                 setField(indexKeys, "t", "h"); // Holdings type
                 SolrInputDocument nested = solrFields.newDocumentFromIndexKeys(indexKeys);
                 doc.addChildDocument(nested);

@@ -104,9 +104,9 @@ public class Worker {
                 JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
                 SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc);
                 String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-                List<String> ids = docProducer.documentsIdsByRoot(bibliographicShardId);
+                int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId);
 
-                docProducer.deleteSolrDocuments(bibliographicShardId, ids, job.getCommitwithin());
+                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, job.getCommitwithin());
 
                 docProducer.deploy(solrDocument, job.getCommitwithin());
                 StringBuilder pid = new StringBuilder();
@@ -118,7 +118,7 @@ public class Worker {
                 int count = 1;
                 if (solrDocument != null && solrDocument.hasChildDocuments())
                     count += solrDocument.getChildDocumentCount();
-                log.info("Deleted {} record(s) and added {} to SolR", ids.size(), count);
+                log.info("Deleted {} record(s) and added {} to SolR", nestedDocumentCount + 1, count);
                 docStasher.store(pid.toString(), solrDocument);
             } catch (IOException ex) {
                 throw new NonFatalQueueError(ex);

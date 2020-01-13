@@ -115,27 +115,31 @@ public class DocProducer {
      * _root_:${biblShardId}
      *
      * @param bibliographicShardId the root id of the document to purge
-     * @param ids                  id's to delete from SolR
+     * @param netstedDocumentCount id's to delete from SolR
      * @param commitWithin         then to commit
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
     //! Todo: add another n sub documents pr holdingid if more has been addad before last commit, also take into account the known subdocument ids from sourceDoc
     @Timed
-    public void deleteSolrDocuments(String bibliographicShardId, List<String> ids, Integer commitWithin) throws IOException, SolrServerException {
-        if (!ids.isEmpty()) {
-            UpdateRequest updateRequest = new UpdateRequest();
-            updateRequest.deleteById(ids);
-            updateRequest.setParam("appId", config.getAppId());
-            if (commitWithin != null && commitWithin > 0) {
-                updateRequest.setCommitWithin(commitWithin);
-            }
-            UpdateResponse resp = updateRequest.process(solrClient);
-            if (resp.getStatus() != 0) {
-                throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
-            }
+    public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, Integer commitWithin) throws IOException, SolrServerException {
+        int deleteCount = netstedDocumentCount * 2 + 100; // Ensure all old documents gets deleted, even if an uncommitted request has many more than is currently searchable
+        UpdateRequest updateRequest = new UpdateRequest();
+        updateRequest.setParam("appId", config.getAppId());
+        if (commitWithin != null && commitWithin > 0) {
+            updateRequest.setCommitWithin(commitWithin);
         }
-        log.debug("Ids deleted: {}", ids);
+        ArrayList<String> docIdList = new ArrayList<>(deleteCount + 1);
+        docIdList.add(bibliographicShardId);
+        for (int i = 0 ; i < deleteCount ; i++) {
+            docIdList.add(bibliographicShardId + "@" + i);
+        }
+        updateRequest.deleteById(docIdList);
+
+        UpdateResponse resp = updateRequest.process(solrClient);
+        if (resp.getStatus() != 0) {
+            throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on delete");
+        }
     }
 
     /**
@@ -160,7 +164,7 @@ public class DocProducer {
     }
 
     @Timed
-    public List<String> documentsIdsByRoot(String id) throws IOException, SolrServerException {
+    public int getNestedDocumentCount(String id) throws IOException, SolrServerException {
         // Delete by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
         // Converted to nested to delete subdocuments only, then delete owner by id
@@ -168,15 +172,13 @@ public class DocProducer {
         log.debug("Delete by Query - Select: {}", query);
         SolrQuery req = new SolrQuery(query);
         req.setFields("id");
-        req.setRows(MAX_ROWS_OF_SHARDED_SOLR);
+        req.setRows(0);
         req.set("appId", config.getAppId());
         req.setStart(0);
-        ArrayList<String> list = new ArrayList<>();
-        list.add(id);
-        solrClient.query(req).getResults().stream()
-                .map(d -> String.valueOf(d.getFirstValue("id")))
-                .forEach(list::add);
-        return list;
+        int nestedDocumentCount = (int) solrClient.query(req).getResults()
+                .getNumFound();
+        log.debug("nestedDocumentCount = {}", nestedDocumentCount);
+        return nestedDocumentCount;
     }
 
     /**
