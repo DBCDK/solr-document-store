@@ -5,8 +5,9 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
-import dk.dbc.search.solrdocstore.updater.SolrFieldsBean;
+import dk.dbc.search.solrdocstore.updater.SolrCollection;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.ejb.Stateless;
@@ -40,9 +41,6 @@ public class DocTest {
     @Inject
     DocProducer docProducer;
 
-    @Inject
-    SolrFieldsBean solrFields;
-
     @GET
     @Produces(MediaType.APPLICATION_XML)
     @Path("format/{agencyId : \\d+}/{classifier}/{bibliographicRecordId : .*$}")
@@ -57,18 +55,19 @@ public class DocTest {
             if (deleted) {
                 return Response.ok(false).build();
             }
-            Optional<String> solrUrl;
+            Map<String, SolrCollection> solrCollections = config.getSolrCollections();
+            Optional<SolrCollection> solrCollection;
             if (collection == null) {
-                solrUrl = config.getSolrUrls().keySet().stream().findAny();
+                solrCollection = solrCollections.values().stream().findAny();
             } else {
-                solrUrl = config.getSolrUrls().keySet().stream()
-                        .filter(s -> s.substring(s.lastIndexOf('/') + 1).equalsIgnoreCase(collection))
+                solrCollection = solrCollections.values().stream()
+                        .filter(c -> c.getName().equalsIgnoreCase(collection))
                         .findAny();
             }
-            if (!solrUrl.isPresent())
+            if (!solrCollection.isPresent())
                 throw new InternalServerErrorException("Cannot find collection");
 
-            SolrInputDocument document = docProducer.inputDocument(node, solrFields.getFieldsFor(solrUrl.get()));
+            SolrInputDocument document = docProducer.inputDocument(node, solrCollection.get());
             String xml = ClientUtils.toXML(document);
 
             return Response.ok(xml, MediaType.APPLICATION_XML_TYPE).build();

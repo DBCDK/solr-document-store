@@ -27,10 +27,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -101,7 +99,8 @@ public class WorkerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
-        for (SolrClient solrClient : config.getSolrUrls().values()) {
+        for (SolrCollection solrCollection : config.getSolrCollections().values()) {
+            SolrClient solrClient = solrCollection.getSolrClient();
             solrClient.deleteByQuery("*:*");
             solrClient.commit();
         }
@@ -111,10 +110,6 @@ public class WorkerIT {
         worker.dataSource = dataSource;
         worker.docProducer = new DocProducer();
         worker.docProducer.config = config;
-        SolrFieldsBean solrFields = new SolrFieldsBean();
-        worker.solrFields = solrFields;
-        worker.solrFields.config = config;
-        worker.solrFields.init();
         worker.es = Executors.newCachedThreadPool();
         worker.docProducer.businessLogic = new BusinessLogic();
         worker.docProducer.businessLogic.config = config;
@@ -143,14 +138,14 @@ public class WorkerIT {
     public void testQueueWorkerConsumes() throws Exception {
         System.out.println("testQueueWorkerConsumes");
 
-        assertEquals("Number of collections: ", config.getSolrUrls().size(), 2);
+        assertEquals("Number of collections: ", config.getSolrCollections().size(), 2);
 
         try (Connection connection = dataSource.getConnection()) {
             Requests.load("test1-part1", solrDocStoreUrl);
 
-            config.getSolrUrls().forEach((url, solrClient) -> {
+            config.getSolrCollections().values().forEach(solrClient -> {
                 long count = count(solrClient);
-                assertEquals("After delete solr document count in: " + url, 0, count);
+                assertEquals("After delete solr document count in: " + solrClient.getName(), 0, count);
             });
 
             PreparedQueueSupplier supplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
@@ -159,34 +154,34 @@ public class WorkerIT {
             supplier.enqueue("test", new QueueJob(300000, "clazzifier", "23645564"));
 
             int maxRuns = 2500 / 50;
-            while (config.getSolrUrls().values().stream()
+            while (config.getSolrCollections().values().stream()
                     .map(this::count)
                     .anyMatch(l -> l == 0L)) {
                 Thread.sleep(50L);
-                config.getSolrUrls().values().forEach(this::commit);
+                config.getSolrCollections().values().forEach(this::commit);
                 if (maxRuns-- <= 0) {
                     break;
                 }
             }
             worker.destroy();
-            config.getSolrUrls().forEach((url, solrClient) -> {
-                long count = count(solrClient);
-                assertEquals("After dequeue - solr document count in: " + url, 3, count);
+            config.getSolrCollections().values().forEach(solrCollection -> {
+                long count = count(solrCollection);
+                assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 3, count);
             });
         }
     }
 
-    long count(SolrClient solrClient) {
+    long count(SolrCollection solrCollection) {
         try {
-            return solrClient.query(new SolrQuery("*:*")).getResults().getNumFound();
+            return solrCollection.getSolrClient().query(new SolrQuery("*:*")).getResults().getNumFound();
         } catch (SolrServerException | IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    void commit(SolrClient solrClient) {
+    void commit(SolrCollection solrCollection) {
         try {
-            solrClient.commit(true, true);
+            solrCollection.getSolrClient().commit(true, true);
         } catch (SolrServerException | IOException ex) {
             throw new RuntimeException(ex);
         }

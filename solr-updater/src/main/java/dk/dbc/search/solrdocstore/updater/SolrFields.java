@@ -3,17 +3,11 @@ package dk.dbc.search.solrdocstore.updater;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.ejb.EJBException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -21,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -31,7 +24,6 @@ public class SolrFields {
 
     private static final Logger log = LoggerFactory.getLogger(SolrFields.class);
 
-    private static final DocumentBuilder DOCUMENT_BUILDER = newDocumentBuilder();
     private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
 
     private final ConcurrentHashMap<String, Boolean> knownFields;
@@ -42,18 +34,11 @@ public class SolrFields {
         this.dynamicFieldSpecs = new ArrayList<>();
     }
 
-    public SolrFields(SolrClient solrClient, SolrFieldsBean bean) {
+
+    public SolrFields(Document doc) {
         this.knownFields = new ConcurrentHashMap<>();
         this.dynamicFieldSpecs = new ArrayList<>();
-
-        log.info("Getting solr fields");
-        InputStream entity = bean.getSchemaXml(solrClient);
-        try {
-            Document doc = DOCUMENT_BUILDER.parse(entity);
-            processDoc(doc);
-        } catch (SAXException | IOException ex) {
-            throw new EJBException("Error parsing response from solr: ", ex);
-        }
+        processDoc(doc);
     }
 
     /**
@@ -133,28 +118,6 @@ public class SolrFields {
             }
         }
         throw new EJBException("Cound not find XML element: " + name);
-    }
-
-    /**
-     * Construct an xml parser
-     *
-     * @return new document builder
-     */
-    private static DocumentBuilder newDocumentBuilder() {
-        try {
-            synchronized (DocumentBuilderFactory.class) {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setIgnoringComments(true);
-                factory.setNamespaceAware(true);
-                factory.setCoalescing(true);
-                factory.setIgnoringElementContentWhitespace(true);
-                factory.setValidating(false);
-                factory.setXIncludeAware(false);
-                return factory.newDocumentBuilder();
-            }
-        } catch (ParserConfigurationException ex) {
-            throw new EJBException("Error making a XML parser", ex);
-        }
     }
 
     /**

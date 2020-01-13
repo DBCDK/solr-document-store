@@ -31,7 +31,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.sql.DataSource;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.eclipse.microprofile.metrics.MetricRegistry;
@@ -60,9 +59,6 @@ public class Worker {
     DocProducer docProducer;
 
     @Inject
-    SolrFieldsBean solrFields;
-
-    @Inject
     DocStasher docStasher;
 
     @Inject
@@ -74,11 +70,11 @@ public class Worker {
     @Resource(type = ManagedExecutorService.class)
     ExecutorService es;
 
-    private Map<String, SolrClient> solrUrls;
+    private Map<String, SolrCollection> solrCollections;
 
     @PostConstruct
     public void init() {
-        this.solrUrls = config.getSolrUrls();
+        this.solrCollections = config.getSolrCollections();
         this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                 .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
                 .dataSource(dataSource)
@@ -125,14 +121,8 @@ public class Worker {
                 JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
 
                 sourceDoc.deepCopy();
-                List<Runnable> tasks = solrUrls.entrySet().stream()
-                        .map(e -> {
-                            String solrUrl = e.getKey();
-                            SolrClient solrClient = e.getValue();
-                            SolrFields fields = solrFields.getFieldsFor(solrUrl);
-                            String solrCollection = solrUrl.substring(solrUrl.lastIndexOf('/') + 1);
-                            return processForOneCollection(sourceDoc.deepCopy(), solrClient, fields, pid, job.getCommitwithin(), solrCollection);
-                        })
+                List<Runnable> tasks = solrCollections.values().stream()
+                        .map(solrCollection -> processForOneCollection(sourceDoc.deepCopy(), solrCollection, pid, job.getCommitwithin()))
                         .collect(Collectors.toList());
                 try {
                     switch (tasks.size()) {
@@ -179,18 +169,18 @@ public class Worker {
         };
     }
 
-    public Runnable processForOneCollection(JsonNode sourceDoc, SolrClient solrClient, SolrFields solrFields, String pid, Integer commitWithin, String solrCollection) {
+    public Runnable processForOneCollection(JsonNode sourceDoc, SolrCollection collection, String pid, Integer commitWithin) {
         return () -> {
             try (DBCTrackedLogContext logContext = new DBCTrackedLogContext()
                     .with("pid", pid)
-                    .with("solrCollection", solrCollection)) {
-                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, solrFields);
+                    .with("solrCollection", collection.getName())) {
+                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, collection);
                 String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-                int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, solrClient);
+                int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, collection);
 
-                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, solrClient, commitWithin);
+                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, collection, commitWithin);
 
-                docProducer.deploy(solrDocument, solrClient, commitWithin);
+                docProducer.deploy(solrDocument, collection, commitWithin);
                 int count = 1;
                 if (solrDocument != null && solrDocument.hasChildDocuments())
                     count += solrDocument.getChildDocumentCount();

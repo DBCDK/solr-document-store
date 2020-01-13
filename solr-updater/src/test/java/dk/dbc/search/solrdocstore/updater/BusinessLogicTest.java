@@ -32,10 +32,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.ws.rs.client.Client;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.junit.Test;
@@ -97,7 +100,7 @@ public class BusinessLogicTest {
                 }
             }
         };
-        businessLogic.config = new Config("solrUrl=Not-Relevant",
+        businessLogic.config = new Config("solrUrl=",
                                           "zookeeperUrl=",
                                           "profileServiceUrl=Not-Relevant",
                                           "solrDocStoreUrl=Not-Relevant",
@@ -105,7 +108,12 @@ public class BusinessLogicTest {
                                           "queues=Not-Relevant",
                                           "openAgencyUrl=Not-Relevant",
                                           "scanProfiles=102030-magic,102030-self,123456-basic,876543-self",
-                                          "scanDefaultFields=scan.lti,scan.lfo");
+                                          "scanDefaultFields=scan.lti,scan.lfo") {
+            @Override
+            protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {
+                return Collections.EMPTY_MAP;
+            }
+        };
 
         businessLogic.profileService = new ProfileServiceBean() {
             @Override
@@ -139,7 +147,24 @@ public class BusinessLogicTest {
                 .toArray(String[]::new);
 
         SolrInputDocument before = solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(before, json, solrFields, "repoId");
+        // Mock solr-collection, that knows all fields
+        SolrCollection solrCollection = new SolrCollection() {
+            @Override
+            public String getName() {
+                return "UNKNOWN";
+            }
+
+            @Override
+            public SolrFields getSolrFields() {
+                return new SolrFields() {
+                    @Override
+                    public boolean isKnownField(String name) {
+                        return true;
+                    }
+                };
+            }
+        };
+        businessLogic.addNestedHoldingsDocuments(before, json, solrCollection, "repoId");
         try {
             Method method = BusinessLogic.class.getMethod(name.split("[^0-9a-zA-Z]", 2)[0], JsonNode.class);
             method.invoke(businessLogic, json);
@@ -147,7 +172,7 @@ public class BusinessLogicTest {
             throw (Exception) ex.getTargetException();
         }
         SolrInputDocument after = solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(after, json, solrFields, "repoId");
+        businessLogic.addNestedHoldingsDocuments(after, json, solrCollection, "repoId");
 
         List<String> diff = diff(before, after);
         System.out.println("diff = " + diff + "; expected = " + Arrays.asList(expected));

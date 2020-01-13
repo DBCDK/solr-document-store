@@ -24,7 +24,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.solr.client.solrj.SolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +42,7 @@ public class Config {
     public static final String DATABASE = "jdbc/solr-doc-store";
 
     final Properties props;
-    private Map<String, SolrClient> solrUrls;
+    private Map<String, SolrCollection> solrCollections;
     private String solrDocStoreUrl;
 
     private String[] queues;
@@ -86,8 +85,13 @@ public class Config {
     }
 
     private void processVars() throws NumberFormatException {
-
-        solrUrls = makeSolrUrls();
+        String userAgent = get("userAgent", "USER_AGENT", "Unknown/0.0");
+        log.debug("Using: {} as HttpUserAgent", userAgent);
+        client = ClientBuilder.newBuilder()
+                .register((ClientRequestFilter) (ClientRequestContext context) -> {
+                    context.getHeaders().putSingle("User-Agent", userAgent);
+                }).build();
+        solrCollections = makeSolrCollectionSetups(client);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
         queues = toCollection(get("queues", "QUEUES", null)).toArray(String[]::new);
         databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
@@ -118,18 +122,12 @@ public class Config {
                                          Collections::unmodifiableSet);
 
         jsonStash = get("jsonStash", "JSON_STASH", "");
-        if (!jsonStash.isEmpty() && solrUrls.size() != 1)
+        if (!jsonStash.isEmpty() && solrCollections.size() != 1)
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
 
-        String userAgent = get("userAgent", "USER_AGENT", "Unknown/0.0");
-        log.debug("Using: {} as HttpUserAgent", userAgent);
-        client = ClientBuilder.newBuilder()
-                .register((ClientRequestFilter) (ClientRequestContext context) -> {
-                    context.getHeaders().putSingle("User-Agent", userAgent);
-                }).build();
     }
 
-    private Map<String, SolrClient> makeSolrUrls() throws IllegalArgumentException {
+    protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {
         String solrUrl = get("solrUrl", "SOLR_URL", "");
         String zookeeperPrefix = get("zookeeperUrl", "ZOOKEEPER_URL", "")
                 .replaceFirst("(?<=.)/+$", "/");
@@ -143,23 +141,22 @@ public class Config {
                 .map(String::trim)
                 .map(c -> zookeeperPrefix + c);
 
-        Map<String, SolrClient> solrUrlMap = Stream.concat(urlStream, zkStream)
-                .collect(Collectors.toMap(s -> s, SolrApi::makeSolrClient));
-        if (solrUrlMap.isEmpty()) {
+        Map<String, SolrCollection> solrCollections = Stream.concat(urlStream, zkStream)
+                .collect(Collectors.toMap(s -> s, SolrCollection.builderWithClient(client)));
+        if (solrCollections.isEmpty()) {
             log.error("No SolR(s) declared");
             throw new IllegalArgumentException("No SolR(s) declared - use  SOLR_URL and ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS");
         }
-
-        log.debug("solrUrls = {}", solrUrlMap);
-        return solrUrlMap;
+        log.debug("solrCollections = {}", solrCollections.keySet());
+        return solrCollections;
     }
 
     public String getAppId() {
         return appId;
     }
 
-    public Map<String, SolrClient> getSolrUrls() {
-        return solrUrls;
+    public Map<String, SolrCollection> getSolrCollections() {
+        return solrCollections;
     }
 
     public String getSolrDocStoreUrl() {

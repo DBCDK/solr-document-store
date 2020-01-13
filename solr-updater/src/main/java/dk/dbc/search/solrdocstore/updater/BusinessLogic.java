@@ -212,13 +212,13 @@ public class BusinessLogic {
     /**
      * Append all holdings as nested document
      *
-     * @param doc          root solr document
-     * @param sourceDoc    document containing holdings
-     * @param solrFields   Which fields the collection knows about
-     * @param repositoryId id of record used by
+     * @param doc            root solr document
+     * @param sourceDoc      document containing holdings
+     * @param solrCollection Which fields the collection knows about
+     * @param repositoryId   id of record used by
      */
     @Timed
-    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, SolrFields solrFields, String repositoryId) {
+    public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, SolrCollection solrCollection, String repositoryId) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         int i = 0;
         for (JsonNode record : records) {
@@ -228,7 +228,7 @@ public class BusinessLogic {
                 setField(indexKeys, "rec.repositoryId", repositoryId);
                 setField(indexKeys, "id", id + ++i);
                 setField(indexKeys, "t", "h"); // Holdings type
-                SolrInputDocument nested = solrFields.newDocumentFromIndexKeys(indexKeys);
+                SolrInputDocument nested = solrCollection.getSolrFields().newDocumentFromIndexKeys(indexKeys);
                 doc.addChildDocument(nested);
             }
         }

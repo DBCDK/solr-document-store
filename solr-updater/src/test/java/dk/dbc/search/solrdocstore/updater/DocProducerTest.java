@@ -26,11 +26,13 @@ import dk.dbc.search.solrdocstore.updater.profile.Profile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import static org.junit.Assert.*;
 
@@ -43,14 +45,11 @@ public class DocProducerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Client CLIENT = ClientBuilder.newClient();
 
-    /**
-     * Test of init method, of class DocProducer.
-     */
     @Test
     public void test() throws Exception {
         System.out.println("test");
 
-        Config config = new Config("solrUrl=Not-Relevant",
+        Config config = new Config("solrUrl=",
                                    "zookeeperUrl=",
                                    "profileServiceUrl=Not-Relevant",
                                    "solrDocStoreUrl=Not-Relevant",
@@ -59,6 +58,11 @@ public class DocProducerTest {
                                    "openAgencyUrl=Not-Relevant",
                                    "scanProfiles=102030-magic,123456-basic",
                                    "scanDefaultFields=abc,def") {
+            @Override
+            protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {
+                return Collections.EMPTY_MAP;
+            }
+
             @Override
             public Client getClient() {
                 return CLIENT;
@@ -74,7 +78,6 @@ public class DocProducerTest {
                 }
             }
         };
-        SolrFields solrFields = SolrFieldsTest.newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
 
         docProducer.businessLogic = new BusinessLogic();
         docProducer.businessLogic.oa = new OpenAgency() {
@@ -104,8 +107,18 @@ public class DocProducerTest {
         System.out.println("node = " + node);
 
         assertFalse(docProducer.isDeleted(node));
+        SolrCollection solrCollection = new SolrCollection() {
+            @Override
+            public SolrFields getSolrFields() {
+                try {
+                    return SolrFieldsTest.newSolrFields("schema.xml");
+                } catch (IOException | SAXException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        };
 
-        SolrInputDocument document = docProducer.inputDocument(node, solrFields);
+        SolrInputDocument document = docProducer.inputDocument(node, solrCollection);
         System.out.println("document = " + document);
         assertTrue(document.containsKey("dkcclterm.po"));
         assertFalse(document.containsKey("unknown.field"));

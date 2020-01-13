@@ -18,11 +18,10 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import javax.ejb.EJBException;
-import org.apache.solr.client.solrj.SolrClient;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import static org.junit.Assert.*;
 
@@ -39,56 +38,16 @@ public class SolrFieldsTest {
     public void testIsKnownField() throws Exception {
         System.out.println("isKnownField");
 
-        SolrFields solrFields = newSolrFields("schema.xml", "http://some.crazy.host/with/a/strange/path");
+        SolrFields solrFields = newSolrFields("schema.xml");
 
         assertTrue("field", solrFields.isKnownField("_version_"));
         assertTrue("dynamicField", solrFields.isKnownField("facet.fool"));
         assertFalse("Unknown field", solrFields.isKnownField("foo"));
     }
 
-    public static SolrFields newSolrFields(String schemaXmlLocation, String url) {
-        SolrFieldsBean solrFieldsBean = new SolrFieldsBean() {
-            @Override
-            public InputStream getSchemaXml(SolrClient solrClient) throws EJBException {
-                return SolrFieldsTest.class.getClassLoader().getResourceAsStream(schemaXmlLocation);
-            }
-        };
-        solrFieldsBean.config = new Config("queues=NONE",
-                                           "solrDocStoreUrl=NONE",
-                                           "solrUrl=" + url,
-                                           "solrAppId=Not-Relevant",
-                                           "openAgencyUrl=Not-Relevant",
-                                           "profileServiceUrl=Not-Relevant",
-                                           "scanDefaultFields=",
-                                           "scanProfiles=");
-        solrFieldsBean.init();
-
-        return solrFieldsBean.getFieldsFor(url);
-    }
-
-    /**
-     * Run by hand with a known zk://
-     * <p>
-     * Setting up a solr cloud for integration testing is overkill
-     */
-//    @Test
-//    @Ignore
-    public void testZkUrl() {
-        String solrUrl = "zk://[hosts]/[chroot]/[collection]";
-
-        SolrFieldsBean solrFields = new SolrFieldsBean();
-        solrFields.config = new Config("queues=NONE",
-                                       "solrDocStoreUrl=NONE",
-                                       "solrUrl=" + solrUrl,
-                                       "solrAppId=Not-Relevant",
-                                       "openAgencyUrl=Not-Relevant",
-                                       "profileServiceUrl=Not-Relevant",
-                                       "scanDefaultFields=",
-                                       "scanProfiles=");
-
-        solrFields.init();
-
-        System.out.println("OK");
-        fail("OK");
+    public static SolrFields newSolrFields(String schemaXmlLocation) throws IOException, SAXException {
+        try (InputStream is = SolrFieldsTest.class.getClassLoader().getResourceAsStream(schemaXmlLocation)) {
+            return new SolrFields(SolrCollection.docFromStream(is));
+        }
     }
 }
