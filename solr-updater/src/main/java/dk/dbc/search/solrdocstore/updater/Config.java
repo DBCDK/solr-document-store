@@ -124,7 +124,6 @@ public class Config {
         jsonStash = get("jsonStash", "JSON_STASH", "");
         if (!jsonStash.isEmpty() && solrCollections.size() != 1)
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
-
     }
 
     protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {

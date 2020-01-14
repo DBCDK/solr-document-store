@@ -36,7 +36,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.ws.rs.client.Client;
 import org.apache.solr.common.SolrInputDocument;
@@ -51,6 +53,27 @@ import static org.junit.Assert.*;
 
 /**
  *
+ * This runs business logic test from the directory
+ * src/test/resource/BusinessLogic/test
+ * <p>
+ * It reads OpenAgency "responses" from the
+ * src/test/resource/BusinessLogic/openagency directory.
+ * <p>
+ * A test is located in a directory named after the function to test and an
+ * optional dash + description. In the directrory 2 files needs to be present:
+ * source.json (the json as it comes from solr-doc-store-service), and
+ * expected.json.
+ * <p>
+ * expected.json is an array of strings with the format:
+ * <p>
+ *  * plus/minus ('+'/'-') - if it is an addition or removal of a field
+ *  * underscore colon ('_:') - indicator of a nested document value (you can't
+ * destinguish nested documents, order is not guaranteed)
+ *  * fieldname colon (xxx':') - the field that has changes
+ *  * value - the value that has been added/removed from the field
+ * <p>
+ * a field should be repeated for each value that is added
+ *
  * @author DBC {@literal <dbc.dk>}
  */
 @RunWith(Parameterized.class)
@@ -59,6 +82,46 @@ public class BusinessLogicTest {
     private static final ObjectMapper O = new ObjectMapper()
             .configure(SerializationFeature.INDENT_OUTPUT, true)
             .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+
+    private static final SolrFields MOCK_SOLR_FIELDS = new SolrFields() {
+        // know all fields
+        @Override
+        public boolean isKnownField(String name) {
+            return true;
+        }
+    };
+
+    private static final SolrCollection MOCK_SOLR_COLLECTION = new SolrCollection() {
+        @Override
+        public SolrFields getSolrFields() {
+            return MOCK_SOLR_FIELDS;
+        }
+
+        // enable all features
+        @Override
+        public boolean hasFeature(FeatureSwitch feature) {
+            return true;
+        }
+    };
+
+    private static final ProfileServiceBean MOCK_PROFILE_SERVICE_BEAN = new ProfileServiceBean() {
+        @Override
+        public Profile getProfile(String agencyId, String profile) {
+            switch (agencyId + "-" + profile) {
+                case "102030-self":
+                    return new Profile(true);
+                case "102030-magic":
+                    return new Profile(true, "110000-foobar", "220000-katalog");
+                case "123456-basic":
+                    return new Profile(false, "110000-foobar", "220000-katalog");
+                case "876543-self":
+                    return new Profile(true);
+                default:
+                    throw new AssertionError();
+            }
+        }
+    };
+
     private final String name;
     private final Path testDirectory;
     private final Path openAgency;
@@ -100,8 +163,8 @@ public class BusinessLogicTest {
                 }
             }
         };
-        businessLogic.config = new Config("solrUrl=",
-                                          "zookeeperUrl=",
+        businessLogic.config = new Config("solrUrl=Not-Relevant",
+                                          "zookeeperUrl=Not-Relevant",
                                           "profileServiceUrl=Not-Relevant",
                                           "solrDocStoreUrl=Not-Relevant",
                                           "solrAppId=Not-Relevant",
@@ -114,31 +177,7 @@ public class BusinessLogicTest {
                 return Collections.EMPTY_MAP;
             }
         };
-
-        businessLogic.profileService = new ProfileServiceBean() {
-            @Override
-            public Profile getProfile(String agencyId, String profile) {
-                switch (agencyId + "-" + profile) {
-                    case "102030-self":
-                        return new Profile(true);
-                    case "102030-magic":
-                        return new Profile(true, "110000-foobar", "220000-katalog");
-                    case "123456-basic":
-                        return new Profile(false, "110000-foobar", "220000-katalog");
-                    case "876543-self":
-                        return new Profile(true);
-                    default:
-                        throw new AssertionError();
-                }
-            }
-        };
-
-        SolrFields solrFields = new SolrFields() {
-            @Override
-            public boolean isKnownField(String name) {
-                return true;
-            }
-        };
+        businessLogic.profileService = MOCK_PROFILE_SERVICE_BEAN;
 
         JsonNode json = O.readTree(testDirectory.resolve("source.json").toFile());
         JsonNode expectedJson = O.readTree(testDirectory.resolve("expected.json").toFile());
@@ -146,33 +185,16 @@ public class BusinessLogicTest {
                 .map(JsonNode::asText)
                 .toArray(String[]::new);
 
-        SolrInputDocument before = solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        // Mock solr-collection, that knows all fields
-        SolrCollection solrCollection = new SolrCollection() {
-            @Override
-            public String getName() {
-                return "UNKNOWN";
-            }
-
-            @Override
-            public SolrFields getSolrFields() {
-                return new SolrFields() {
-                    @Override
-                    public boolean isKnownField(String name) {
-                        return true;
-                    }
-                };
-            }
-        };
-        businessLogic.addNestedHoldingsDocuments(before, json, solrCollection, "repoId");
+        SolrInputDocument before = MOCK_SOLR_FIELDS.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        businessLogic.addNestedHoldingsDocuments(before, json, MOCK_SOLR_COLLECTION, "repoId");
         try {
-            Method method = BusinessLogic.class.getMethod(name.split("[^0-9a-zA-Z]", 2)[0], JsonNode.class);
-            method.invoke(businessLogic, json);
+            String methodName = name.split("[^0-9a-zA-Z_]", 2)[0];
+            callMethodByName(methodName, businessLogic, json, MOCK_SOLR_COLLECTION);
         } catch (InvocationTargetException ex) {
             throw (Exception) ex.getTargetException();
         }
-        SolrInputDocument after = solrFields.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
-        businessLogic.addNestedHoldingsDocuments(after, json, solrCollection, "repoId");
+        SolrInputDocument after = MOCK_SOLR_FIELDS.newDocumentFromIndexKeys(json.get("bibliographicRecord").get("indexKeys"));
+        businessLogic.addNestedHoldingsDocuments(after, json, MOCK_SOLR_COLLECTION, "repoId");
 
         List<String> diff = diff(before, after);
         System.out.println("diff = " + diff + "; expected = " + Arrays.asList(expected));
@@ -180,6 +202,32 @@ public class BusinessLogicTest {
         assertThat(diff, containsInAnyOrder(expected));
     }
 
+    private void callMethodByName(String name, BusinessLogic instance, Object... objectCandidates) throws Exception {
+        Function<Class<?>, Object> objectFinder = type -> {
+            for (Object obj : objectCandidates) {
+                if (type.isAssignableFrom(obj.getClass()))
+                    return obj;
+            }
+            throw new IllegalArgumentException("Cannot generate parameter for type: " + type.getName());
+        };
+        Method method = Stream.of(BusinessLogic.class.getMethods())
+                .filter(m -> m.getName().equals(name))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Cannot find method: " + name));
+        Object[] callArgs = Stream.of(method.getParameterTypes())
+                .map(objectFinder)
+                .toArray();
+        method.invoke(instance, callArgs);
+    }
+
+    /**
+     * Make a list of ['+'/'-']['_:'/''][field][':'][value] from 2 json
+     * documents
+     *
+     * @param before left side document
+     * @param after  right side document
+     * @return list of changes
+     */
     private List<String> diff(SolrInputDocument before, SolrInputDocument after) {
         HashSet<String> beforeKeys = new HashSet<>();
         addDocumentKeysTo("", before, beforeKeys);
@@ -197,16 +245,15 @@ public class BusinessLogicTest {
         return ret;
     }
 
-    private void addDocumentKeysTo(String prefix, SolrInputDocument before, HashSet<String> keys) {
-        before.forEach((String field, SolrInputField values) -> {
+    private void addDocumentKeysTo(String prefix, SolrInputDocument doc, HashSet<String> keys) {
+        doc.forEach((String field, SolrInputField values) -> {
             values.getValues()
                     .forEach(value -> keys.add(prefix + field + ":" + value));
         });
-        if (before.hasChildDocuments()) {
+        if (doc.hasChildDocuments()) {
             String nestedPrefix = prefix.isEmpty() ? "_:" : "_" + prefix;
-            before.getChildDocuments()
+            doc.getChildDocuments()
                     .forEach(child -> addDocumentKeysTo(nestedPrefix, child, keys));
         }
     }
-
 }

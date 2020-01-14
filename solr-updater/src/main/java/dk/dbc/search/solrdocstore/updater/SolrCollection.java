@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore.updater;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -55,12 +56,14 @@ public class SolrCollection {
 
     private final SolrClient solrClient;
     private final SolrFields solrFields;
+    private final EnumSet<FeatureSwitch> features;
     private final String solrUrl;
     private final String name;
 
     SolrCollection() {
         this.solrClient = null;
         this.solrFields = null;
+        this.features = null;
         this.solrUrl = null;
         this.name = null;
     }
@@ -70,6 +73,13 @@ public class SolrCollection {
     }
 
     public SolrCollection(Client client, String solrUrl, BiFunction<Client, SolrClient, SolrFields> fieldsProvider) {
+        int idx = solrUrl.indexOf('=');
+        if (idx > 0) {
+            this.features = FeatureSwitch.featureSet(solrUrl.substring(idx));
+            solrUrl = solrUrl.substring(0, idx - 1);
+        } else {
+            this.features = FeatureSwitch.featureSet("all");
+        }
         this.solrUrl = solrUrl;
         this.name = solrUrl.substring(solrUrl.lastIndexOf('/') + 1);
         this.solrClient = SolrApi.makeSolrClient(solrUrl);
@@ -94,6 +104,10 @@ public class SolrCollection {
 
     public String getSolrUrl() {
         return solrUrl;
+    }
+
+    public boolean hasFeature(FeatureSwitch feature) {
+        return features.contains(feature);
     }
 
     /**

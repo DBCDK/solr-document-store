@@ -116,6 +116,11 @@ public class DocProducerTest {
                     throw new RuntimeException(ex);
                 }
             }
+
+            @Override
+            public boolean hasFeature(FeatureSwitch feature) {
+                return true;
+            }
         };
 
         SolrInputDocument document = docProducer.inputDocument(node, solrCollection);

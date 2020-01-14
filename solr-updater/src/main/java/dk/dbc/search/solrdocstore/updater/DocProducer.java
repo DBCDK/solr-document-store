@@ -68,11 +68,11 @@ public class DocProducer {
      * <p>
      * Delete from solr, of not deleted then add too
      *
-     * @param doc          The document to post to the solr (null if no
-     *                     documents)
-     * @param solrCollection   collection to solr collection
-     * @param commitWithin optional - number of milliseconds before a
-     *                     commit should occur
+     * @param doc            The document to post to the solr (null if no
+     *                       documents)
+     * @param solrCollection collection to solr collection
+     * @param commitWithin   optional - number of milliseconds before a
+     *                       commit should occur
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
@@ -110,7 +110,7 @@ public class DocProducer {
      *
      * @param bibliographicShardId the root id of the document to purge
      * @param netstedDocumentCount id's to delete from SolR
-     * @param solrCollection           collection to solr collection
+     * @param solrCollection       collection to solr collection
      * @param commitWithin         then to commit
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
@@ -259,14 +259,12 @@ public class DocProducer {
             setField(indexKeys, "id", id);
             setField(indexKeys, "t", "m"); // Manifestation type
 
-            businessLogic.addRecHoldingsAgencyId(sourceDoc);
-            businessLogic.addFromPartOfDanbib(sourceDoc);
-            businessLogic.addCollectionIdentifier800000(sourceDoc);
-            businessLogic.addHoldingsItemRole(sourceDoc);
-
-            businessLogic.addScan(sourceDoc);
-
-            businessLogic.attachedResources(sourceDoc);
+            businessLogic.addRecHoldingsAgencyId(sourceDoc, solrCollection);
+            businessLogic.addFromPartOfDanbib(sourceDoc, solrCollection);
+            businessLogic.addCollectionIdentifier800000(sourceDoc, solrCollection);
+            businessLogic.addHoldingsItemRole(sourceDoc, solrCollection);
+            businessLogic.addScan(sourceDoc, solrCollection);
+            businessLogic.attachedResources(sourceDoc, solrCollection);
 
             SolrInputDocument doc = solrCollection.getSolrFields().newDocumentFromIndexKeys(indexKeys);
             businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, solrCollection, repositoryId);
