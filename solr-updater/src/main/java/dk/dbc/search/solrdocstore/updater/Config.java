@@ -42,7 +42,7 @@ public class Config {
     public static final String DATABASE = "jdbc/solr-doc-store";
 
     final Properties props;
-    private Map<String, SolrCollection> solrCollections;
+    private Set<SolrCollection> solrCollections;
     private String solrDocStoreUrl;
 
     private String[] queues;
@@ -91,7 +91,7 @@ public class Config {
                 .register((ClientRequestFilter) (ClientRequestContext context) -> {
                     context.getHeaders().putSingle("User-Agent", userAgent);
                 }).build();
-        solrCollections = makeSolrCollectionSetups(client);
+        solrCollections = makeSolrCollections(client);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
         queues = toCollection(get("queues", "QUEUES", null)).toArray(String[]::new);
         databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
@@ -126,7 +126,7 @@ public class Config {
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
     }
 
-    protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {
+    protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
         String solrUrl = get("solrUrl", "SOLR_URL", "");
         String zookeeperPrefix = get("zookeeperUrl", "ZOOKEEPER_URL", "")
                 .replaceFirst("(?<=.)/+$", "/");
@@ -140,13 +140,14 @@ public class Config {
                 .map(String::trim)
                 .map(c -> zookeeperPrefix + c);
 
-        Map<String, SolrCollection> solrCollections = Stream.concat(urlStream, zkStream)
-                .collect(Collectors.toMap(s -> s, SolrCollection.builderWithClient(client)));
+        Set<SolrCollection> solrCollections = Stream.concat(urlStream, zkStream)
+                .map(SolrCollection.builderWithClient(client))
+                .collect(Collectors.toSet());
         if (solrCollections.isEmpty()) {
             log.error("No SolR(s) declared");
             throw new IllegalArgumentException("No SolR(s) declared - use  SOLR_URL and ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS");
         }
-        log.debug("solrCollections = {}", solrCollections.keySet());
+        log.debug("solrCollections = {}", solrCollections);
         return solrCollections;
     }
 
@@ -154,7 +155,7 @@ public class Config {
         return appId;
     }
 
-    public Map<String, SolrCollection> getSolrCollections() {
+    public Set<SolrCollection> getSolrCollections() {
         return solrCollections;
     }
 

@@ -111,7 +111,7 @@ public class DocProducerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
-        for (SolrCollection collection : config.getSolrCollections().values()) {
+        for (SolrCollection collection : config.getSolrCollections()) {
             SolrClient solrClient = collection.getSolrClient();
             solrClient.deleteByQuery("*:*");
             solrClient.commit();
@@ -135,7 +135,7 @@ public class DocProducerIT {
     @Test
     public void loadAndDelete() throws Exception {
         System.out.println("loadAndDelete");
-        SolrCollection solrCollection = config.getSolrCollections().values().iterator().next();
+        SolrCollection solrCollection = config.getSolrCollections().iterator().next();
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
@@ -149,7 +149,7 @@ public class DocProducerIT {
     @Test
     public void loadAndFewerHolding() throws Exception {
         System.out.println("loadAndFewerHolding");
-        SolrCollection solrCollection = config.getSolrCollections().values().iterator().next();
+        SolrCollection solrCollection = config.getSolrCollections().iterator().next();
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
@@ -163,7 +163,7 @@ public class DocProducerIT {
     @Test
     public void creatAndDeleteWithoutHoldings() throws Exception {
         System.out.println("creatAndDeleteWithoutHoldings");
-        SolrCollection solrCollection = config.getSolrCollections().values().iterator().next();
+        SolrCollection solrCollection = config.getSolrCollections().iterator().next();
 
         Requests.load("test2-part1", solrDocStoreUrl);
 

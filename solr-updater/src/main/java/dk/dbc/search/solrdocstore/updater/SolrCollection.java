@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -45,6 +46,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
+ * Only compare key is solrUrl (needed by Set<>)
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -108,6 +110,28 @@ public class SolrCollection {
 
     public boolean hasFeature(FeatureSwitch feature) {
         return features.contains(feature);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 59 * hash + Objects.hashCode(this.solrUrl);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        final SolrCollection other = (SolrCollection) obj;
+        return Objects.equals(this.solrUrl, other.solrUrl);
+    }
+
+    @Override
+    public String toString() {
+        return "SolrCollection{" + "solrClient=" + solrClient + ", solrFields=" + solrFields + ", features=" + features + ", solrUrl=" + solrUrl + ", name=" + name + '}';
     }
 
     /**

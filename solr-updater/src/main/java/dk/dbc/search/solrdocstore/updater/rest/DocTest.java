@@ -7,8 +7,8 @@ import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import dk.dbc.search.solrdocstore.updater.SolrCollection;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -55,12 +55,12 @@ public class DocTest {
             if (deleted) {
                 return Response.ok(false).build();
             }
-            Map<String, SolrCollection> solrCollections = config.getSolrCollections();
+            Set<SolrCollection> solrCollections = config.getSolrCollections();
             Optional<SolrCollection> solrCollection;
             if (collection == null) {
-                solrCollection = solrCollections.values().stream().findAny();
+                solrCollection = solrCollections.stream().findAny();
             } else {
-                solrCollection = solrCollections.values().stream()
+                solrCollection = solrCollections.stream()
                         .filter(c -> c.getName().equalsIgnoreCase(collection))
                         .findAny();
             }

@@ -99,7 +99,7 @@ public class WorkerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
-        for (SolrCollection solrCollection : config.getSolrCollections().values()) {
+        for (SolrCollection solrCollection : config.getSolrCollections()) {
             SolrClient solrClient = solrCollection.getSolrClient();
             solrClient.deleteByQuery("*:*");
             solrClient.commit();
@@ -143,7 +143,7 @@ public class WorkerIT {
         try (Connection connection = dataSource.getConnection()) {
             Requests.load("test1-part1", solrDocStoreUrl);
 
-            config.getSolrCollections().values().forEach(solrClient -> {
+            config.getSolrCollections().forEach(solrClient -> {
                 long count = count(solrClient);
                 assertEquals("After delete solr document count in: " + solrClient.getName(), 0, count);
             });
@@ -154,17 +154,17 @@ public class WorkerIT {
             supplier.enqueue("test", new QueueJob(300000, "clazzifier", "23645564"));
 
             int maxRuns = 2500 / 50;
-            while (config.getSolrCollections().values().stream()
+            while (config.getSolrCollections().stream()
                     .map(this::count)
                     .anyMatch(l -> l == 0L)) {
                 Thread.sleep(50L);
-                config.getSolrCollections().values().forEach(this::commit);
+                config.getSolrCollections().forEach(this::commit);
                 if (maxRuns-- <= 0) {
                     break;
                 }
             }
             worker.destroy();
-            config.getSolrCollections().values().forEach(solrCollection -> {
+            config.getSolrCollections().forEach(solrCollection -> {
                 long count = count(solrCollection);
                 assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 3, count);
             });

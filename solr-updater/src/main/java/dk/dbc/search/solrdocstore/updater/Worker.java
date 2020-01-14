@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -70,7 +70,7 @@ public class Worker {
     @Resource(type = ManagedExecutorService.class)
     ExecutorService es;
 
-    private Map<String, SolrCollection> solrCollections;
+    private Set<SolrCollection> solrCollections;
 
     @PostConstruct
     public void init() {
@@ -121,13 +121,13 @@ public class Worker {
                 JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
 
                 sourceDoc.deepCopy();
-                List<Runnable> tasks = solrCollections.values().stream()
+                List<Runnable> tasks = solrCollections.stream()
                         .map(solrCollection -> processForOneCollection(sourceDoc.deepCopy(), solrCollection, pid, job.getCommitwithin()))
                         .collect(Collectors.toList());
                 try {
                     switch (tasks.size()) {
                         case 0:
-                            throw new AssertionError();
+                            throw new IllegalStateException("No collection to put " + pid + " into");
                         case 1:
                             tasks.get(0).run();
                         default: {

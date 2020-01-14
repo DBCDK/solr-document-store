@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -173,8 +173,8 @@ public class BusinessLogicTest {
                                           "scanProfiles=102030-magic,102030-self,123456-basic,876543-self",
                                           "scanDefaultFields=scan.lti,scan.lfo") {
             @Override
-            protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {
-                return Collections.EMPTY_MAP;
+            protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
+                return Collections.EMPTY_SET;
             }
         };
         businessLogic.profileService = MOCK_PROFILE_SERVICE_BEAN;

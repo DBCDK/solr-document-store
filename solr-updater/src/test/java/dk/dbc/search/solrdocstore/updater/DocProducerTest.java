@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.common.SolrInputDocument;
@@ -49,8 +50,8 @@ public class DocProducerTest {
     public void test() throws Exception {
         System.out.println("test");
 
-        Config config = new Config("solrUrl=",
-                                   "zookeeperUrl=",
+        Config config = new Config("solrUrl=Not-Relevant",
+                                   "zookeeperUrl=Not-Relevant",
                                    "profileServiceUrl=Not-Relevant",
                                    "solrDocStoreUrl=Not-Relevant",
                                    "solrAppId=Not-Relevant",
@@ -59,8 +60,8 @@ public class DocProducerTest {
                                    "scanProfiles=102030-magic,123456-basic",
                                    "scanDefaultFields=abc,def") {
             @Override
-            protected Map<String, SolrCollection> makeSolrCollectionSetups(Client client) throws IllegalArgumentException {
-                return Collections.EMPTY_MAP;
+            protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
+                return Collections.EMPTY_SET;
             }
 
             @Override
