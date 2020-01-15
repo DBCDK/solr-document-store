@@ -46,7 +46,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Only compare key is solrUrl (needed by Set<>)
+ * Only compare key is solrUrl (needed by Set&lt;&gt;)
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
