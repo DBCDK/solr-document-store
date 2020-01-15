@@ -7,7 +7,7 @@ ENV THREADS=1 \
     CACHE_TIMEOUT=60 \
     USER_AGENT="solr-doc-store-solr-updater/1.1"
 
-LABEL SOLR_URL="(zk-/httpurl[=features]) (comma seperated list) of solr-collection (required see also ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS and doc_FEATURES)" \
+LABEL SOLR_URL="(zk-/httpurl[=features]) (semicolon seperated list) of solr-collection (required see also ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS and doc_FEATURES)" \
       ZOOKEEPER_URL="zk:// type url for the zookeeper" \
       ZOOKEEPER_COLLECTIONS="collections in the zookeeper (this is shorthand for SOLR_URL+=',$ZOOEEPER_URL/$ZOOEEPER_COLLECTION...')" \
       SOLR_APPID="Application ID pass to SOLR, for logging in SOLR (Required)" \

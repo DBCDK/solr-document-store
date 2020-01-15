@@ -26,7 +26,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.DependsOn;
-import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
@@ -46,7 +45,6 @@ import static dk.dbc.log.LogWith.track;
 @Singleton
 @Startup
 @DependsOn(value = "DatabaseMigrator")
-@LocalBean
 public class Worker {
 
     private static final Logger log = LoggerFactory.getLogger(Worker.class);
@@ -67,7 +65,7 @@ public class Worker {
     @Resource(lookup = Config.DATABASE)
     DataSource dataSource;
 
-    @Resource(type = ManagedExecutorService.class)
+    @Resource(type = ManagedExecutorService.class, lookup = "java:comp/DefaultManagedExecutorService")
     ExecutorService es;
 
     private Set<SolrCollection> solrCollections;

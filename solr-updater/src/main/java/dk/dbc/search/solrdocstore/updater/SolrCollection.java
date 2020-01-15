@@ -75,14 +75,16 @@ public class SolrCollection {
     }
 
     public SolrCollection(Client client, String solrUrl, BiFunction<Client, SolrClient, SolrFields> fieldsProvider) {
+        System.out.println("solrUrl = " + solrUrl);
         int idx = solrUrl.indexOf('=');
         if (idx > 0) {
-            this.features = FeatureSwitch.featureSet(solrUrl.substring(idx));
-            solrUrl = solrUrl.substring(0, idx - 1);
+            this.features = FeatureSwitch.featureSet(solrUrl.substring(idx + 1));
+            solrUrl = solrUrl.substring(0, idx);
         } else {
             this.features = FeatureSwitch.featureSet("all");
         }
         this.solrUrl = solrUrl;
+        System.out.println("solrUrl = " + solrUrl);
         this.name = solrUrl.substring(solrUrl.lastIndexOf('/') + 1);
         this.solrClient = SolrApi.makeSolrClient(solrUrl);
         this.solrFields = fieldsProvider.apply(client, solrClient);

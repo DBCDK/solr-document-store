@@ -128,14 +128,13 @@ public class Config {
 
     protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
         String solrUrl = get("solrUrl", "SOLR_URL", "");
-        String zookeeperPrefix = get("zookeeperUrl", "ZOOKEEPER_URL", "")
-                .replaceFirst("(?<=.)/+$", "/");
+        String zookeeperPrefix = getZookeeperPrefix();
         String collections = get("zookeeperCollections", "ZOOKEEPER_COLLECTIONS", "");
 
-        Stream<String> urlStream = Stream.of(solrUrl.split(","))
+        Stream<String> urlStream = Stream.of(solrUrl.split(";"))
                 .filter(s -> !s.isEmpty())
                 .map(String::trim);
-        Stream<String> zkStream = Stream.of(collections.split(","))
+        Stream<String> zkStream = Stream.of(collections.split(";"))
                 .filter(s -> !s.isEmpty())
                 .map(String::trim)
                 .map(c -> zookeeperPrefix + c);
@@ -149,6 +148,15 @@ public class Config {
         }
         log.debug("solrCollections = {}", solrCollections);
         return solrCollections;
+    }
+
+    private String getZookeeperPrefix() {
+        String prefix = get("zookeeperUrl", "ZOOKEEPER_URL", "");
+        if (prefix.isEmpty())
+            return prefix;
+        if (!prefix.endsWith("/"))
+            prefix = prefix + "/";
+        return prefix;
     }
 
     public String getAppId() {
