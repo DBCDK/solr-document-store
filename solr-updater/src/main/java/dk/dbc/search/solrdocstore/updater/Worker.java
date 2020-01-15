@@ -117,8 +117,6 @@ public class Worker {
                         .toString();
 
                 JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
-
-                sourceDoc.deepCopy();
                 List<Runnable> tasks = solrCollections.stream()
                         .map(solrCollection -> processForOneCollection(sourceDoc.deepCopy(), solrCollection, pid, job.getCommitwithin()))
                         .collect(Collectors.toList());
@@ -128,6 +126,7 @@ public class Worker {
                             throw new IllegalStateException("No collection to put " + pid + " into");
                         case 1:
                             tasks.get(0).run();
+                            break;
                         default: {
                             RuntimeException rex = null;
                             List<Future<?>> futures = tasks.stream()
@@ -152,7 +151,6 @@ public class Worker {
                             if (rex != null)
                                 throw rex;
                         }
-                        throw new AssertionError();
                     }
                 } catch (RethrowableException ex) {
                     ex.throwAs(IOException.class);
@@ -172,6 +170,7 @@ public class Worker {
             try (DBCTrackedLogContext logContext = new DBCTrackedLogContext()
                     .with("pid", pid)
                     .with("solrCollection", collection.getName())) {
+                log.info("Building document");
                 SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, collection);
                 String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
                 int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, collection);
