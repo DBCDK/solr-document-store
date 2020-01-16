@@ -167,10 +167,10 @@ public class DocProducer {
      * @param id             the document-id, that has nested documents
      * @param solrCollection the collection to query
      * @return number of nested documents
-     * @throws
-     org.apache.solr.common.params.SolrParams)}
-     * @throws
-     org.apache.solr.common.params.SolrParams)}
+     * @throws IOException         see
+     *                             {@link SolrClient#query(org.apache.solr.common.params.SolrParams)}
+     * @throws SolrServerException see
+     *                             {@link SolrClient#query(org.apache.solr.common.params.SolrParams)}
      */
     @Timed
     public int getNestedDocumentCount(String id, SolrCollection solrCollection) throws IOException, SolrServerException {
