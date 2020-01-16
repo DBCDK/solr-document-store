@@ -19,6 +19,9 @@
 package dk.dbc.search.solrdocstore.updater;
 
 /**
+ * RuntimeException for use with Function&lt;T,R&gt;, Consumer&lt;T&gt;,
+ * Supplier&lt;R&gt;
+ *
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -28,6 +31,15 @@ public class RethrowableException extends RuntimeException {
         super(cause);
     }
 
+    /**
+     * Unwraps an exception and throws it
+     * <p>
+     * if any cause (tracersed up) is instance of type throw that exception
+     *
+     * @param <T>  The wanted Exception type
+     * @param type Class instance
+     * @throws T Thrown if any parent exception is of this type
+     */
     public <T extends Exception> void throwAs(Class<T> type) throws T {
         for (Throwable cause = getCause() ; cause != null ; cause = cause.getCause()) {
             if (type.isAssignableFrom(cause.getClass()))

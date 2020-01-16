@@ -281,7 +281,8 @@ public class BusinessLogic {
     }
 
     /**
-     * Set field is any is set to true
+     * Set a given field to the value true, if any of the values passed are
+     * true.
      *
      * @param indexKeys                The bibliographic part of the json from
      *                                 solr-doc-store
@@ -305,7 +306,7 @@ public class BusinessLogic {
     }
 
     /**
-     * Set field is all are set to true
+     * Set a given field to the value true, if all the values passed are true.
      *
      * @param indexKeys                The bibliographic part of the json from
      *                                 solr-doc-store
@@ -371,7 +372,7 @@ public class BusinessLogic {
     }
 
     /**
-     * Generate the scan.default field with values from $SCAN_DEFAULT_FIRLDS
+     * Generate the scan.default field with values from $SCAN_DEFAULT_FIELDS
      *
      * @param sourceDoc entire json from solr-doc-store
      */

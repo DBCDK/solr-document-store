@@ -46,7 +46,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Only compare key is solrUrl (needed by Set&lt;&gt;)
+ * Only compare key is address of the solr collection (needed by Set&lt;&gt;) to
+ * ensure only one description of a given collection
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -59,14 +60,15 @@ public class SolrCollection {
     private final SolrClient solrClient;
     private final SolrFields solrFields;
     private final EnumSet<FeatureSwitch> features;
-    private final String solrUrl;
+    private final String collectionAddress;
     private final String name;
 
-    SolrCollection() {
+    // Only used in testing
+    protected SolrCollection() {
         this.solrClient = null;
         this.solrFields = null;
         this.features = null;
-        this.solrUrl = null;
+        this.collectionAddress = null;
         this.name = null;
     }
 
@@ -74,22 +76,33 @@ public class SolrCollection {
         return solrUrl -> new SolrCollection(client, solrUrl);
     }
 
-    public SolrCollection(Client client, String solrUrl, BiFunction<Client, SolrClient, SolrFields> fieldsProvider) {
-        System.out.println("solrUrl = " + solrUrl);
+    /**
+     * Extracts features from the url, fetches known fields
+     *
+     * @param client         http-clients for resolving known fields
+     * @param solrUrl        url consisting of [collection address]=[featureset]
+     * @param fieldsProvider function that given a http-client and a solr-client
+     *                       resolves known fields in the solr-collection
+     */
+    private SolrCollection(Client client, String solrUrl, BiFunction<Client, SolrClient, SolrFields> fieldsProvider) {
         int idx = solrUrl.indexOf('=');
         if (idx > 0) {
+            this.collectionAddress = solrUrl.substring(0, idx);
             this.features = FeatureSwitch.featureSet(solrUrl.substring(idx + 1));
-            solrUrl = solrUrl.substring(0, idx);
         } else {
+            this.collectionAddress = solrUrl;
             this.features = FeatureSwitch.featureSet("all");
         }
-        this.solrUrl = solrUrl;
-        System.out.println("solrUrl = " + solrUrl);
-        this.name = solrUrl.substring(solrUrl.lastIndexOf('/') + 1);
+        this.name = collectionAddress.substring(collectionAddress.lastIndexOf('/') + 1);
         this.solrClient = SolrApi.makeSolrClient(solrUrl);
         this.solrFields = fieldsProvider.apply(client, solrClient);
     }
 
+    /**
+     *
+     * @param client  http-clients for resolving known fields
+     * @param solrUrl url consisting of [collection address]=[featureset]
+     */
     public SolrCollection(Client client, String solrUrl) {
         this(client, solrUrl, SolrCollection::makeSolrFields);
     }
@@ -106,10 +119,6 @@ public class SolrCollection {
         return solrFields;
     }
 
-    public String getSolrUrl() {
-        return solrUrl;
-    }
-
     public boolean hasFeature(FeatureSwitch feature) {
         return features.contains(feature);
     }
@@ -117,7 +126,7 @@ public class SolrCollection {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 59 * hash + Objects.hashCode(this.solrUrl);
+        hash = 59 * hash + Objects.hashCode(this.collectionAddress);
         return hash;
     }
 
@@ -128,12 +137,12 @@ public class SolrCollection {
         if (obj == null || getClass() != obj.getClass())
             return false;
         final SolrCollection other = (SolrCollection) obj;
-        return Objects.equals(this.solrUrl, other.solrUrl);
+        return Objects.equals(this.collectionAddress, other.collectionAddress);
     }
 
     @Override
     public String toString() {
-        return "SolrCollection{" + "solrClient=" + solrClient + ", solrFields=" + solrFields + ", features=" + features + ", solrUrl=" + solrUrl + ", name=" + name + '}';
+        return "SolrCollection{" + "solrClient=" + solrClient + ", solrFields=" + solrFields + ", features=" + features + ", collectionAddress=" + collectionAddress + ", name=" + name + '}';
     }
 
     /**

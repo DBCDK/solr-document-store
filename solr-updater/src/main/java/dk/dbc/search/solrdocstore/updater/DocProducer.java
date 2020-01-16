@@ -20,6 +20,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -70,7 +71,7 @@ public class DocProducer {
      *
      * @param doc            The document to post to the solr (null if no
      *                       documents)
-     * @param solrCollection collection to solr collection
+     * @param solrCollection connection to solr collection
      * @param commitWithin   optional - number of milliseconds before a
      *                       commit should occur
      * @throws IOException         if an retrieval error occurs
@@ -110,7 +111,7 @@ public class DocProducer {
      *
      * @param bibliographicShardId the root id of the document to purge
      * @param netstedDocumentCount id's to delete from SolR
-     * @param solrCollection       collection to solr collection
+     * @param solrCollection       connection to solr collection
      * @param commitWithin         then to commit
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
@@ -158,6 +159,19 @@ public class DocProducer {
         return doc;
     }
 
+    /**
+     * Find the number of nested documents
+     * <p>
+     * Nested document ids are of the format: document-id@sequential-number
+     *
+     * @param id             the document-id, that has nested documents
+     * @param solrCollection the collection to query
+     * @return number of nested documents
+     * @throws
+     org.apache.solr.common.params.SolrParams)}
+     * @throws
+     org.apache.solr.common.params.SolrParams)}
+     */
     @Timed
     public int getNestedDocumentCount(String id, SolrCollection solrCollection) throws IOException, SolrServerException {
         // Delete by query:
@@ -217,11 +231,13 @@ public class DocProducer {
      * @return map
      */
     private static Map<String, String> mapForUri(QueueJob job) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("agencyId", String.valueOf(job.getAgencyId()));
-        map.put("classifier", job.getClassifier());
-        map.put("bibliographicRecordId", job.getBibliographicRecordId());
-        return map;
+        return new HashMap<String, String>() {
+            {
+                put("agencyId", String.valueOf(job.getAgencyId()));
+                put("classifier", job.getClassifier());
+                put("bibliographicRecordId", job.getBibliographicRecordId());
+            }
+        };
     }
 
     /**
@@ -300,5 +316,4 @@ public class DocProducer {
         String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
         return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
     }
-
 }
