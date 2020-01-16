@@ -231,13 +231,11 @@ public class DocProducer {
      * @return map
      */
     private static Map<String, String> mapForUri(QueueJob job) {
-        return new HashMap<String, String>() {
-            {
-                put("agencyId", String.valueOf(job.getAgencyId()));
-                put("classifier", job.getClassifier());
-                put("bibliographicRecordId", job.getBibliographicRecordId());
-            }
-        };
+        HashMap<String, String> map = new HashMap<String, String>();
+                map.put("agencyId", String.valueOf(job.getAgencyId()));
+                map.put("classifier", job.getClassifier());
+                map.put("bibliographicRecordId", job.getBibliographicRecordId());
+        return map;
     }
 
     /**
