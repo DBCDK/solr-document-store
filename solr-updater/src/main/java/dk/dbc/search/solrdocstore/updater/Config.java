@@ -42,7 +42,7 @@ public class Config {
     public static final String DATABASE = "jdbc/solr-doc-store";
 
     final Properties props;
-    private String solrUrl;
+    private Set<SolrCollection> solrCollections;
     private String solrDocStoreUrl;
 
     private String[] queues;
@@ -62,8 +62,9 @@ public class Config {
     private UriBuilder profileService;
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
-    private Client client;
+    private String jsonStash;
     private String appId;
+    private Client client;
 
     public Config() {
         props = findProperties("solr-doc-store-updater");
@@ -84,21 +85,25 @@ public class Config {
     }
 
     private void processVars() throws NumberFormatException {
-        solrUrl = get("solrUrl", "SOLR_URL", null);
+        String userAgent = get("userAgent", "USER_AGENT", "Unknown/0.0");
+        log.debug("Using: {} as HttpUserAgent", userAgent);
+        client = ClientBuilder.newBuilder()
+                .register((ClientRequestFilter) (ClientRequestContext context) -> {
+                    context.getHeaders().putSingle("User-Agent", userAgent);
+                }).build();
+        solrCollections = makeSolrCollections(client);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
-        if (isWorker()) {
-            queues = toCollection(get("queues", "QUEUES", null)).toArray(String[]::new);
-            databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
-            failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
-            emptyQueueSleep = Long.max(100L, milliseconds(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10s")));
-            queueWindow = Long.max(0, milliseconds(get("queueWindow", "QUEUE_WINDOW", "1s")));
-            rescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("rescanEvery", "RESCAN_EVERY", "100"), 10));
-            idleRescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("idleRescanEvery", "IDLE_RESCAN_EVERY", "5"), 10));
-            maxQueryTime = Long.max(100L, milliseconds(get("maxQueryTime", "MAX_QUERY_TIME", "100ms")));
-            threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
-            maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
-            appId = get("solrAppId", "SOLR_APPID", null);
-        }
+        queues = toCollection(get("queues", "QUEUES", null)).toArray(String[]::new);
+        databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
+        failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
+        emptyQueueSleep = Long.max(100L, milliseconds(get("emptyQueueSleep", "EMPTY_QUEUE_SLEEP", "10s")));
+        queueWindow = Long.max(0, milliseconds(get("queueWindow", "QUEUE_WINDOW", "1s")));
+        rescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("rescanEvery", "RESCAN_EVERY", "100"), 10));
+        idleRescanEvery = Integer.max(1, Integer.parseUnsignedInt(get("idleRescanEvery", "IDLE_RESCAN_EVERY", "5"), 10));
+        maxQueryTime = Long.max(100L, milliseconds(get("maxQueryTime", "MAX_QUERY_TIME", "100ms")));
+        threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
+        maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
+        appId = get("solrAppId", "SOLR_APPID", null);
         openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
@@ -115,24 +120,51 @@ public class Config {
         scanDefaultFields = toCollection(get("scanDefaultFields", "SCAN_DEFAULT_FIELDS", null),
                                          Collectors.toSet(),
                                          Collections::unmodifiableSet);
-        String userAgent = get("userAgent", "USER_AGENT", "Unknown/0.0");
-        log.debug("Using: {} as HttpUserAgent", userAgent);
-        client = ClientBuilder.newBuilder()
-                .register((ClientRequestFilter) (ClientRequestContext context) -> {
-                    context.getHeaders().putSingle("User-Agent", userAgent);
-                }).build();
+
+        jsonStash = get("jsonStash", "JSON_STASH", "");
+        if (!jsonStash.isEmpty() && solrCollections.size() != 1)
+            throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
     }
 
-    public boolean isWorker() {
-        return !( "FORMAT_ONLY".equals(solrUrl) );
+    protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
+        String solrUrl = get("solrUrl", "SOLR_URL", "");
+        String zookeeperPrefix = getZookeeperPrefix();
+        String collections = get("zookeeperCollections", "ZOOKEEPER_COLLECTIONS", "");
+
+        Stream<String> urlStream = Stream.of(solrUrl.split(";"))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim);
+        Stream<String> zkStream = Stream.of(collections.split(";"))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .map(c -> zookeeperPrefix + c);
+
+        Set<SolrCollection> solrCollections = Stream.concat(urlStream, zkStream)
+                .map(SolrCollection.builderWithClient(client))
+                .collect(Collectors.toSet());
+        if (solrCollections.isEmpty()) {
+            log.error("No SolR(s) declared");
+            throw new IllegalArgumentException("No SolR(s) declared - use  SOLR_URL and ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS");
+        }
+        log.debug("solrCollections = {}", solrCollections);
+        return solrCollections;
+    }
+
+    private String getZookeeperPrefix() {
+        String prefix = get("zookeeperUrl", "ZOOKEEPER_URL", "");
+        if (prefix.isEmpty())
+            return prefix;
+        if (!prefix.endsWith("/"))
+            prefix = prefix + "/";
+        return prefix;
     }
 
     public String getAppId() {
         return appId;
     }
 
-    public String getSolrUrl() {
-        return solrUrl;
+    public Set<SolrCollection> getSolrCollections() {
+        return solrCollections;
     }
 
     public String getSolrDocStoreUrl() {
@@ -205,6 +237,10 @@ public class Config {
 
     public Set<String> getScanDefaultFields() {
         return scanDefaultFields;
+    }
+
+    public String getJsonStash() {
+        return jsonStash;
     }
 
     public Client getClient() {

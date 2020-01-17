@@ -7,7 +7,9 @@ ENV THREADS=1 \
     CACHE_TIMEOUT=60 \
     USER_AGENT="solr-doc-store-solr-updater/1.1"
 
-LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only inspect service - required parameters are: SOLR_DOC_STORE_URL, OPEN_AGENCY_URL, SOLR_DOC_STORE_DATABASE=any-parsable-url, MAX_POOL_SIZE=1)  (required)" \
+LABEL SOLR_URL="(zk-/httpurl[=features]) (semicolon seperated list) of solr-collection (required see also ZOOKEEPER_URL/ZOOKEEPER_COLLECTIONS and doc_FEATURES)" \
+      ZOOKEEPER_URL="zk:// type url for the zookeeper" \
+      ZOOKEEPER_COLLECTIONS="collections in the zookeeper (this is shorthand for SOLR_URL+=',$ZOOEEPER_URL/$ZOOEEPER_COLLECTION...')" \
       SOLR_APPID="Application ID pass to SOLR, for logging in SOLR (Required)" \
       SOLR_DOC_STORE_URL="http url of solr-doc-store-service (required)" \
       SOLR_DOC_STORE_DATABASE="user:pass@host[:port]/database where the queue is located (required)" \
@@ -33,6 +35,7 @@ LABEL SOLR_URL="zk or http url of solr-collection SPECIAL:FORMAT_ONLY (only insp
       SCAN_DEFAULT_FIELDS="COmma separated list of scan.field that scan.ddefault covers (required)" \
       USER_AGENT="Useragent string to use for http-client" \
       SCOPE="Name of service (for cache identification)" \
-      COLLECTION="Name of collection (for cache identification)"
+      COLLECTION="Name of collection (for cache identification)" \
+      doc_FEATURES="feature set as after = on collection-url is list of +- features ie. all-800000-scan or (none+)scan+role... scan+all is all (left to right)"
 
 COPY target/${project.build.finalName}.war target/docker/app.json deployments/

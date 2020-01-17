@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +44,13 @@ public class DocStasher {
 
     private Path path;
 
+    @Inject
+    Config config;
+
     @PostConstruct
     public void init() {
-        String pathBase = System.getenv("JSON_STASH");
-        if (pathBase == null) {
+        String pathBase = config.getJsonStash();
+        if (pathBase.isEmpty()) {
             path = null;
         } else {
             path = new File(pathBase).toPath();
@@ -55,7 +59,7 @@ public class DocStasher {
     }
 
     public void store(String pid, SolrInputDocument doc) {
-        if(path == null)
+        if (path == null)
             return;
         try {
             File file = path.resolve(pid + "_" + Instant.now().toString()).toFile();

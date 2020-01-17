@@ -23,8 +23,7 @@ public class DatabaseMigrator {
 
     @PostConstruct
     public void migrate() {
-        if (config.isWorker())
-            migrate(dataSource);
+        migrate(dataSource);
     }
 
     static void migrate(DataSource dataSource) {

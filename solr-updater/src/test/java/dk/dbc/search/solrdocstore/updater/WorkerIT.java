@@ -23,15 +23,19 @@ import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,7 +53,6 @@ public class WorkerIT {
     private static final Logger log = LoggerFactory.getLogger(WorkerIT.class);
     private static final Client CLIENT = ClientBuilder.newClient();
 
-    private static String solrUrl;
     private static String solrDocStoreUrl;
 
     private static PostgresITDataSource pg;
@@ -61,7 +64,6 @@ public class WorkerIT {
     @BeforeClass
     public static void setUpClass() throws Exception {
 
-        solrUrl = System.getenv("SOLR_URL");
         solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
 
         pg = new PostgresITDataSource("solrdocstore");
@@ -97,19 +99,18 @@ public class WorkerIT {
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
-        solrClient.deleteByQuery("*:*");
-        solrClient.commit();
+        for (SolrCollection solrCollection : config.getSolrCollections()) {
+            SolrClient solrClient = solrCollection.getSolrClient();
+            solrClient.deleteByQuery("*:*");
+            solrClient.commit();
+        }
 
         worker = new Worker();
         worker.config = config;
         worker.dataSource = dataSource;
         worker.docProducer = new DocProducer();
         worker.docProducer.config = config;
-        SolrFields solrFields = new SolrFields();
-        worker.docProducer.solrFields = solrFields;
-        worker.docProducer.solrFields.config = config;
-        worker.docProducer.solrFields.init();
+        worker.es = Executors.newCachedThreadPool();
         worker.docProducer.businessLogic = new BusinessLogic();
         worker.docProducer.businessLogic.config = config;
         worker.docProducer.businessLogic.oa = new OpenAgency() {
@@ -120,23 +121,32 @@ public class WorkerIT {
         };
         worker.docProducer.businessLogic.profileService = new ProfileServiceBean();
         worker.docProducer.businessLogic.profileService.config = config;
-        worker.docProducer.businessLogic.solrFields = solrFields;
         worker.docProducer.init();
         worker.metrics = null;
         worker.init();
     }
 
+    @After
+    public void shutdown() throws Exception {
+        worker.es.shutdown();
+        boolean terminated = worker.es.awaitTermination(1, TimeUnit.SECONDS);
+        if (!terminated)
+            throw new AssertionError("Cannot terminate executorservice");
+    }
+
     @Test(timeout = 5000L)
     public void testQueueWorkerConsumes() throws Exception {
         System.out.println("testQueueWorkerConsumes");
-        SolrClient solrClient = SolrApi.makeSolrClient(solrUrl);
+
+        assertEquals("Number of collections: ", config.getSolrCollections().size(), 2);
 
         try (Connection connection = dataSource.getConnection()) {
-
             Requests.load("test1-part1", solrDocStoreUrl);
 
-            long count = solrClient.query(new SolrQuery("*:*")).getResults().getNumFound();
-            assertEquals("After delete sorl document count: ", 0, count);
+            config.getSolrCollections().forEach(solrClient -> {
+                long count = count(solrClient);
+                assertEquals("After delete solr document count in: " + solrClient.getName(), 0, count);
+            });
 
             PreparedQueueSupplier supplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
                     .preparedSupplier(connection);
@@ -144,17 +154,36 @@ public class WorkerIT {
             supplier.enqueue("test", new QueueJob(300000, "clazzifier", "23645564"));
 
             int maxRuns = 2500 / 50;
-            while (solrClient.query(new SolrQuery("*:*")).getResults().getNumFound() == 0) {
+            while (config.getSolrCollections().stream()
+                    .map(this::count)
+                    .anyMatch(l -> l == 0L)) {
                 Thread.sleep(50L);
-                solrClient.commit(true, true);
+                config.getSolrCollections().forEach(this::commit);
                 if (maxRuns-- <= 0) {
                     break;
                 }
             }
             worker.destroy();
-            count = solrClient.query(new SolrQuery("*:*")).getResults().getNumFound();
-            assertEquals("After dequeue -  sorl document count: ", 3, count);
+            config.getSolrCollections().forEach(solrCollection -> {
+                long count = count(solrCollection);
+                assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 3, count);
+            });
         }
     }
 
+    long count(SolrCollection solrCollection) {
+        try {
+            return solrCollection.getSolrClient().query(new SolrQuery("*:*")).getResults().getNumFound();
+        } catch (SolrServerException | IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    void commit(SolrCollection solrCollection) {
+        try {
+            solrCollection.getSolrClient().commit(true, true);
+        } catch (SolrServerException | IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 }
