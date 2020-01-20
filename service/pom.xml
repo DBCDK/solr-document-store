@@ -49,9 +49,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.microprofile.metrics</groupId>
-            <artifactId>microprofile-metrics-api</artifactId>
-            <version>${microprofile.version}</version>
+            <groupId>org.eclipse.microprofile</groupId>
+            <artifactId>microprofile</artifactId>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
