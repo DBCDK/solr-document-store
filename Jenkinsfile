@@ -1,4 +1,4 @@
-def workerNode = 'devel9'
+def workerNode = 'devel10'
 
 if (env.BRANCH_NAME == 'master') {
     properties([
@@ -14,7 +14,7 @@ if (env.BRANCH_NAME == 'master') {
     ])
 }
 pipeline {
-    agent { label "devel8" }
+    agent { label "devel10" }
     tools {
         maven "maven 3.5"
     }
