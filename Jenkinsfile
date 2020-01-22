@@ -1,3 +1,5 @@
+def workerNode = 'devel10'
+
 if (env.BRANCH_NAME == 'master') {
     properties([
         disableConcurrentBuilds(),
@@ -18,6 +20,8 @@ pipeline {
     }
     environment {
         MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+        DOCKER_PUSH_TAG = "${env.BUILD_NUMBER}"
+        GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
     }
     triggers {
         pollSCM("H/3 * * * *")
@@ -139,6 +143,32 @@ pipeline {
                 }
             }
         }
+
+        stage("Update DIT") {
+            agent {
+                docker {
+                    label workerNode
+                    image "docker.dbc.dk/build-env:latest"
+                    alwaysPull true
+                }
+            }
+            when {
+                expression {
+                    (currentBuild.result == null || currentBuild.result == 'SUCCESS') && env.BRANCH_NAME == 'master'
+                }
+            }
+            steps {
+                script {
+                    dir("deploy") {
+                        sh "set-new-version services/search/solr-doc-store.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
+                        sh "set-new-version services/search/solr-doc-store-format.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
+                        sh "set-new-version services/search/solr-doc-store-monitor.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
+                        sh "set-new-version services/search/solr-doc-store-updater.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
+                    }
+                }
+            }
+        }
+
     }
     post {
         failure {
