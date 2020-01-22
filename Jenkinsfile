@@ -14,7 +14,7 @@ if (env.BRANCH_NAME == 'master') {
     ])
 }
 pipeline {
-    agent { label "devel10" }
+    agent { label "devel8" }
     tools {
         maven "maven 3.5"
     }
