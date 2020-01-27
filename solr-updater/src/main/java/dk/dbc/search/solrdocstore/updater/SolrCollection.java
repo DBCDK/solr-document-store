@@ -94,7 +94,7 @@ public class SolrCollection {
             this.features = FeatureSwitch.featureSet("all");
         }
         this.name = collectionAddress.substring(collectionAddress.lastIndexOf('/') + 1);
-        this.solrClient = SolrApi.makeSolrClient(solrUrl);
+        this.solrClient = SolrApi.makeSolrClient(collectionAddress);
         this.solrFields = fieldsProvider.apply(client, solrClient);
     }
 
