@@ -155,6 +155,9 @@ public class Worker {
                 } catch (RethrowableException ex) {
                     ex.throwAs(IOException.class);
                     ex.throwAs(SolrServerException.class);
+                    ex.throwAs(FatalQueueError.class);
+                    ex.throwAs(NonFatalQueueError.class);
+                    ex.throwAs(PostponedNonFatalQueueError.class);
                     throw new FatalQueueError(ex);
                 }
             } catch (IOException ex) {
