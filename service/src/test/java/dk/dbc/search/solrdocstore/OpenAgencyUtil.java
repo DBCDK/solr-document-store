@@ -20,17 +20,17 @@ public class OpenAgencyUtil {
      */
     public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId) {
         if(agencyId == LibraryType.COMMON_AGENCY) {
-            return makeOpenAgencyEntity(LibraryType.COMMON_AGENCY, true, true);
+            return makeOpenAgencyEntity(LibraryType.COMMON_AGENCY, true, false, true);
         }
         if(agencyId == LibraryType.SCHOOL_COMMON_AGENCY) {
-            return makeOpenAgencyEntity(LibraryType.SCHOOL_COMMON_AGENCY, false, false);
+            return makeOpenAgencyEntity(LibraryType.SCHOOL_COMMON_AGENCY, false, false, false);
         }
         boolean partOfDanbib = ( agencyId / 1 ) % 10 < 5;
         boolean authCreateCommonRecord = ( agencyId / 10 ) % 10 < 5;
-        return makeOpenAgencyEntity(agencyId, authCreateCommonRecord, partOfDanbib);
+        return makeOpenAgencyEntity(agencyId, authCreateCommonRecord, partOfDanbib, partOfDanbib);
     }
 
-    public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId, boolean authCreateCommonRecord, boolean partOfDanbib) {
+    public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId, boolean authCreateCommonRecord, boolean partOfBibDk, boolean partOfDanbib) {
         LibraryType type = LibraryType.FBS;
         if (agencyId < 400000) {
             type = LibraryType.FBSSchool;
@@ -41,7 +41,7 @@ public class OpenAgencyUtil {
         if (agencyId >= 900000) {
             type = LibraryType.Missing;
         }
-        return new OpenAgencyEntity(agencyId, type, authCreateCommonRecord, partOfDanbib);
+        return new OpenAgencyEntity(agencyId, type, authCreateCommonRecord, partOfBibDk, partOfDanbib);
     }
 
 }

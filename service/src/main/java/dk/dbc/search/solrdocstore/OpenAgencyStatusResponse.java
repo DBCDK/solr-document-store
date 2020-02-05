@@ -30,6 +30,8 @@ public class OpenAgencyStatusResponse {
 
         public LibraryType libraryType;
 
+        public boolean partOfBibDk;
+
         public boolean partOfDanbib;
 
         public String fetched;
@@ -40,6 +42,7 @@ public class OpenAgencyStatusResponse {
         public OpenAgencyReportResponse(OpenAgencyEntity oa) {
             this.agencyId = oa.getAgencyId();
             this.libraryType = oa.getLibraryType();
+            this.partOfBibDk = oa.getPartOfBibDk();
             this.partOfDanbib = oa.getPartOfDanbib();
             this.fetched = oa.getFetched().toInstant().toString();
         }

@@ -25,6 +25,8 @@ public class OpenAgencyEntity implements Serializable {
 
     private boolean partOfDanbib;
 
+    private boolean partOfBibDk;
+
     private boolean authCreateCommonRecord;
 
     private Timestamp fetched;
@@ -34,10 +36,11 @@ public class OpenAgencyEntity implements Serializable {
     public OpenAgencyEntity() {
     }
 
-    public OpenAgencyEntity(int agencyId, LibraryType libraryType, boolean authCreateCommonRecord, boolean partOfDanbib) {
+    public OpenAgencyEntity(int agencyId, LibraryType libraryType, boolean authCreateCommonRecord, boolean partOfBibDk, boolean partOfDanbib) {
         this.agencyId = agencyId;
         this.libraryType = libraryType;
         this.authCreateCommonRecord = authCreateCommonRecord;
+        this.partOfBibDk = partOfBibDk;
         this.partOfDanbib = partOfDanbib;
         this.fetched = Timestamp.from(Instant.now());
         this.valid = true;
@@ -65,6 +68,14 @@ public class OpenAgencyEntity implements Serializable {
 
     public void setPartOfDanbib(boolean partOfDanbib) {
         this.partOfDanbib = partOfDanbib;
+    }
+
+    public boolean getPartOfBibDk() {
+        return partOfBibDk;
+    }
+
+    public void setPartOfBibDk(boolean partOfBibDk) {
+        this.partOfBibDk = partOfBibDk;
     }
 
     public boolean getAuthCreateCommonRecord() {
@@ -107,40 +118,28 @@ public class OpenAgencyEntity implements Serializable {
         hash = 67 * hash + this.agencyId;
         hash = 67 * hash + Objects.hashCode(this.libraryType);
         hash = 67 * hash + ( this.authCreateCommonRecord ? 1 : 0 );
+        hash = 67 * hash + ( this.partOfBibDk ? 1 : 0 );
         hash = 67 * hash + ( this.partOfDanbib ? 1 : 0 );
         return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null || getClass() != obj.getClass())
             return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
         final OpenAgencyEntity other = (OpenAgencyEntity) obj;
-        if (this.agencyId != other.agencyId) {
-            return false;
-        }
-        if (this.authCreateCommonRecord != other.authCreateCommonRecord) {
-            return false;
-        }
-        if (this.partOfDanbib != other.partOfDanbib) {
-            return false;
-        }
-        if (this.libraryType != other.libraryType) {
-            return false;
-        }
-        return true;
+        return this.agencyId == other.agencyId &&
+               this.authCreateCommonRecord == other.authCreateCommonRecord &&
+               this.partOfBibDk == other.partOfBibDk &&
+               this.partOfDanbib == other.partOfDanbib &&
+               this.libraryType == other.libraryType;
     }
 
     @Override
     public String toString() {
-        return "OpenAgencyEntity{" + "agencyId=" + agencyId + ", libraryType=" + libraryType + ", partOfDanbib=" + partOfDanbib + ", authCreateCommonRecord=" + authCreateCommonRecord + ", fetched=" + fetched + '}';
+        return "OpenAgencyEntity{" + "agencyId=" + agencyId + ", libraryType=" + libraryType + ", partOfDanbib=" + partOfDanbib + ", partOfBibDk=" + partOfBibDk + ", authCreateCommonRecord=" + authCreateCommonRecord + ", fetched=" + fetched + ", valid=" + valid + '}';
     }
 
 }

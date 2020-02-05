@@ -101,11 +101,11 @@ public class Config {
             Object lookup = InitialContext.doLookup(resourceName);
             if (lookup instanceof Properties) {
                 return (Properties) lookup;
-            } else {
+            } else if(lookup != null) {
                 throw new NamingException("Found " + resourceName + ", but not of type Properties of type: " + lookup.getClass().getTypeName());
             }
         } catch (NamingException ex) {
-            log.error("Exception: {}", ex.getMessage());
+            log.info("Exception: {}", ex.getMessage());
         }
         return new Properties();
     }

@@ -21,17 +21,17 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     }
 
     @Before
-    public void ClearDatabase() throws SQLException {
+    public void clearDatabase() throws SQLException {
         try (Connection conn = env().getDatasource().getConnection() ;
              Statement statement = conn.createStatement()) {
-            statement.executeUpdate("TRUNCATE holdingsToBibliographic");
-            statement.executeUpdate("TRUNCATE holdingsItemssolrkeys");
-            statement.executeUpdate("TRUNCATE bibliographicToBibliographic");
-            statement.executeUpdate("TRUNCATE bibliographicSolrKeys");
-            statement.executeUpdate("TRUNCATE openagencycache");
-            statement.executeUpdate("TRUNCATE queuerule");
-            statement.executeUpdate("TRUNCATE queue");
-            statement.executeUpdate("TRUNCATE resource");
+            statement.executeUpdate("TRUNCATE holdingsToBibliographic CASCADE");
+            statement.executeUpdate("TRUNCATE holdingsItemssolrkeys CASCADE");
+            statement.executeUpdate("TRUNCATE bibliographicToBibliographic CASCADE");
+            statement.executeUpdate("TRUNCATE bibliographicSolrKeys CASCADE");
+            statement.executeUpdate("TRUNCATE openagencycache CASCADE");
+            statement.executeUpdate("TRUNCATE queuerule CASCADE");
+            statement.executeUpdate("TRUNCATE queue CASCADE");
+            statement.executeUpdate("TRUNCATE resource CASCADE");
         }
     }
 

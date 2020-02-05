@@ -3,12 +3,17 @@ package dk.dbc.search.solrdocstore;
 import java.util.List;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionManagement;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 /**
  *
@@ -117,6 +122,7 @@ public class OpenAgencyBean {
             log.warn("Migrate OpenAgency entry for {}, has no holdings ({} -> {})", agencyId, oldEntry, newEntry);
             oldEntry.setFetched(newEntry.getFetched());
             oldEntry.setLibraryType(newEntry.getLibraryType());
+            oldEntry.setPartOfBibDk(newEntry.getPartOfBibDk());
             oldEntry.setPartOfDanbib(newEntry.getPartOfDanbib());
             entityManager.merge(oldEntry);
         }
@@ -142,4 +148,24 @@ public class OpenAgencyBean {
         }
     }
 
+    /**
+     * For updating part_of_bibdk from real OpenAgency Response
+     *
+     * @param agencyId agency that needs real part_of_bibdk value
+     */
+    @TransactionAttribute(REQUIRES_NEW)
+    public void migratePartOfBibDk(int agencyId) {
+        OpenAgencyEntity local = lookup(agencyId, false);
+        if (local == null) {
+            log.error("Could not get local copy of OpenAgencyCache {}", agencyId);
+            return;
+        }
+        OpenAgencyEntity remote = proxy.loadOpenAgencyEntry(agencyId);
+        if (remote == null) {
+            log.error("Could not get remote copy of OpenAgencyCache {}", agencyId);
+            return;
+        }
+        local.setPartOfBibDk(remote.getPartOfBibDk());
+        entityManager.merge(local);
+    }
 }
