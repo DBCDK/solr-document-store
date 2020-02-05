@@ -159,10 +159,6 @@ public class OpenAgencyBean {
             return;
         }
         OpenAgencyEntity remote = proxy.loadOpenAgencyEntry(agencyId);
-        if (remote == null) {
-            log.error("Could not get remote copy of OpenAgencyCache {}", agencyId);
-            return;
-        }
         local.setPartOfBibDk(remote.getPartOfBibDk());
         entityManager.merge(local);
     }
