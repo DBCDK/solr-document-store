@@ -40,10 +40,19 @@ public class DatabaseMigrator {
         log.debug("migrated = {}", migrated);
 
         boolean has_logged = false;
+        if (migrated.contains("1")) {
+            log.info("Migrated from scratch - no existing data manipulation needed");
+            return; // Drops out here to not handle data migrations from "*Default" tables in a test setup
+        }
         if (migrated.contains("14")) {
             log.info("----------------------OpenAgencyReload-------------------------");
             has_logged = true;
             reloadOpenAgency();
+        }
+        if (migrated.contains("18")) {
+            log.info("----------------------OpenAgency partOfBibDk-------------------");
+            has_logged = true;
+            reloadOpenAgencyPartOfBibDk();
         }
         if (has_logged) {
             log.info("---------------------------------------------------------------");
@@ -76,6 +85,24 @@ public class DatabaseMigrator {
                 log.debug("Error loading agency: {}: ", agencyId, e);
             }
         }
+    }
+
+    private void reloadOpenAgencyPartOfBibDk() {
+        log.info("Reloading openagency cache - adding real part_of_bibdk");
+        List<Integer> knownAgencies = entityManager
+                .createQuery("SELECT oa.agencyId FROM OpenAgencyEntity oa WHERE oa.libraryType <> :type", Integer.class)
+                .setParameter("type", LibraryType.Missing)
+                .getResultList();
+        for (Integer agencyId : knownAgencies) {
+            log.info("Reloading agency: {}", agencyId);
+            try {
+                openAgency.migratePartOfBibDk(agencyId);
+            } catch (RuntimeException e) {
+                log.error("Error loading agency: {}: {}", agencyId, e.getMessage());
+                log.debug("Error loading agency: {}: ", agencyId, e);
+            }
+        }
+
     }
 
 }

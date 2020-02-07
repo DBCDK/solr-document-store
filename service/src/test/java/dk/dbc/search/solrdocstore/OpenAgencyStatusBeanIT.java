@@ -36,7 +36,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getStatusOk() throws Exception {
         System.out.println("getStatusOk");
         OpenAgencyStatusResponse status = env().getPersistenceContext().run(() -> {
-            em.persist(new OpenAgencyEntity(711100, LibraryType.FBS, true, true));
+            em.persist(new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true));
             return (OpenAgencyStatusResponse) openAgencyStatus.getStatus().getEntity();
         });
         assertThat(status.ok, is(true));
@@ -46,7 +46,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getStatusNotOk() throws Exception {
         System.out.println("getStatusNotOk");
         OpenAgencyStatusResponse status = env().getPersistenceContext().run(() -> {
-            OpenAgencyEntity entity = new OpenAgencyEntity(711100, LibraryType.FBS, true, false);
+            OpenAgencyEntity entity = new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false);
             entity.setValid(false);
             em.persist(entity);
             return (OpenAgencyStatusResponse) openAgencyStatus.getStatus().getEntity();

@@ -24,6 +24,17 @@
                     },
                     {
                         "name": {
+                            "$": "part_of_bibliotek_dk",
+                            "@": "oa"
+                        },
+                        "bool": {
+                            "$": "1",
+                            "@": "oa"
+                        },
+                        "@": "oa"
+                    },
+                    {
+                        "name": {
                             "$": "part_of_danbib",
                             "@": "oa"
                         },

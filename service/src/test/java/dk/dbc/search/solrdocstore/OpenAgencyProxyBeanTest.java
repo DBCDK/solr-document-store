@@ -39,7 +39,7 @@ public class OpenAgencyProxyBeanTest {
 
         OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(150059);
         System.out.println("150059 = " + openAgency);
-        assertEquals(new OpenAgencyEntity(150059, LibraryType.NonFBS, false, false), openAgency);
+        assertEquals(new OpenAgencyEntity(150059, LibraryType.NonFBS, false, false, false), openAgency);
     }
 
     @Test

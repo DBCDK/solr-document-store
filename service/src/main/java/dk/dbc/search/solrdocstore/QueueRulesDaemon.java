@@ -22,7 +22,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -166,7 +165,9 @@ public class QueueRulesDaemon {
         while (alive()) {
             PGNotification[] notifications = pgConnection.getNotifications(1_000);
             if (notifications != null) {
-                log.debug("notifications = {}", Arrays.toString(notifications));
+                for (PGNotification notification : notifications) {
+                    log.debug("notification: = {}/{}", notification.getName(), notification.getParameter());
+                }
                 return true;
             }
         }

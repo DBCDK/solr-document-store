@@ -47,7 +47,7 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     public void testAddNonFBSdResourceEnqueue() {
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
-            em.merge(new OpenAgencyEntity(890890,LibraryType.NonFBS,false,false));
+            em.merge(new OpenAgencyEntity(890890,LibraryType.NonFBS,false,false,false));
             em.merge(new BibliographicEntity(890890,"classifier:1","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
             em.merge(new BibliographicEntity(890890,"classifier:2","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
             em.merge(new BibliographicEntity(890890,"classifier:3","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
@@ -90,11 +90,11 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     private void runCommonEnqueueTest(AddResourceRequest request) {
         jpa(em -> {
             // Setup
-            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS,false,false));
-            em.merge(new OpenAgencyEntity(870970,LibraryType.NonFBS,false,false));
-            em.merge(new OpenAgencyEntity(300000,LibraryType.NonFBS,false,false));
-            em.merge(new OpenAgencyEntity(610610,LibraryType.FBS,false,false));
-            em.merge(new OpenAgencyEntity(312000,LibraryType.FBSSchool,false,false));
+            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS,false,false,false));
+            em.merge(new OpenAgencyEntity(870970,LibraryType.NonFBS,false,false,false));
+            em.merge(new OpenAgencyEntity(300000,LibraryType.NonFBS,false,false,false));
+            em.merge(new OpenAgencyEntity(610610,LibraryType.FBS,false,false,false));
+            em.merge(new OpenAgencyEntity(312000,LibraryType.FBSSchool,false,false,false));
             em.merge(new BibliographicEntity(870970,"classifier:1","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
             em.merge(new BibliographicEntity(300000,"classifier:1","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
             em.merge(new BibliographicEntity(610610,"classifier:2","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));

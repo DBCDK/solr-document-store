@@ -91,10 +91,10 @@ public class WorkerIT {
             pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic", "openagencycache");
             try (Connection connection = dataSource.getConnection() ;
                  Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300000, 'FBSSchool', False, False, NOW(), True);");
-                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300101, 'FBSSchool', False, False, NOW(), True);");
-                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300102, 'FBSSchool', False, False, NOW(), True);");
-                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300103, 'FBSSchool', False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300000, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300101, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300102, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300103, 'FBSSchool', False, False, False, NOW(), True);");
             }
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());

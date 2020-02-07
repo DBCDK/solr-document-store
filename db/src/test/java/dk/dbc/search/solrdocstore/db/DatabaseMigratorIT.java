@@ -48,7 +48,7 @@ public class DatabaseMigratorIT {
                 System.out.println("version = " + version);
             }
         }
-        assertEquals(17, version);
+        assertEquals(18, version);
 
         String queueRule = null;
         try (Connection connection = datasource.getConnection() ;
@@ -69,8 +69,8 @@ public class DatabaseMigratorIT {
         }
     }
 
-    private PGSimpleDataSource getDataSource() {
-        final PGSimpleDataSource datasource = new PGSimpleDataSource();
+    private static PGSimpleDataSource getDataSource() {
+        PGSimpleDataSource datasource = new PGSimpleDataSource();
 
         datasource.setServerName("localhost");
         String postgresqlPort = System.getProperty("postgresql.port");
