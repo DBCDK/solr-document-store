@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import org.junit.After;
@@ -139,13 +140,13 @@ public class QueueAsyncJobIT extends JpaSolrDocStoreIntegrationTester {
     private void setupData() {
         env().getPersistenceContext().run(() -> {
             for (int i = 0 ; i < 10 ; i++) {
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST, true);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST, true);
-                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST, true);
+                bibl.addBibliographicKeys(makeBiblEntity(700000, "a" + i), Collections.EMPTY_LIST, Optional.empty(), true);
+                bibl.addBibliographicKeys(makeBiblEntity(700000, "b" + i), Collections.EMPTY_LIST, Optional.empty(), true);
+                bibl.addBibliographicKeys(makeBiblEntity(700000, "c" + i), Collections.EMPTY_LIST, Optional.empty(), true);
             }
             BibliographicEntity entity = makeBiblEntity(700001, "dd");
             entity.setDeleted(true);
-            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST, true);
+            bibl.addBibliographicKeys(entity, Collections.EMPTY_LIST, Optional.empty(), true);
         });
         clearQueue(dataSource);
     }

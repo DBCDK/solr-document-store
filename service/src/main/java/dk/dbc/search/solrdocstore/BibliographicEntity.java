@@ -207,4 +207,8 @@ public class BibliographicEntity implements Serializable {
     public AgencyClassifierItemKey asAgencyClassifierItemKey() {
         return new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId);
     }
+
+    public String asPid() {
+        return agencyId + "-" + classifier + ":" + bibliographicRecordId;
+    }
 }

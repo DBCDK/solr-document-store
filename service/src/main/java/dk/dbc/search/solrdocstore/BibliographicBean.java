@@ -114,10 +114,6 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, boolean queueAll) {
-        addBibliographicKeys(bibliographicEntity, superceds, Optional.empty(), queueAll);
-    }
-
     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin, boolean queueAll) {
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
@@ -141,6 +137,7 @@ public class BibliographicBean {
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
             if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
+                log.info("Cannot update to an older stream date: pid = {}, databaseTime = {}, requestTime = {}", bibliographicEntity.asPid(), dbTime, reqTime);
                 throw new IntermittentErrorException("Cannot update to an older stream date");
             }
             // If we delete or re-create, related holdings must be moved appropriately
