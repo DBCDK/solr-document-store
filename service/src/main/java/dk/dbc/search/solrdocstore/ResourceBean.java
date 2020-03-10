@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static dk.dbc.log.LogWith.track;
@@ -48,7 +49,7 @@ public class ResourceBean {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("add")
     public Response addResource(String jsonContent) throws JSONBException {
-        try (LogWith logWith = track(null)) {
+        try (LogWith logWith = track(UUID.randomUUID().toString())) {
             AddResourceRequest request = jsonbContext.unmarshall(jsonContent, AddResourceRequest.class);
             log.debug("Added resource with key: {} - {} - {} having value: {}", request.getAgencyId(),
                       request.getBibliographicRecordId(), request.getField(), request.getValue());

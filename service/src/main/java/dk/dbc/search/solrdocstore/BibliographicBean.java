@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -86,17 +87,17 @@ public class BibliographicBean {
     public Response addBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
                                          String jsonContent) throws Exception {
 
-        try {
-            BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-            try (LogWith logWith = track(request.getTrackingId())
-                    .pid(request.getRepositoryId())) {
-                if (request.getIndexKeys() == null && !request.isDeleted()) {
-                    log.warn("Got a request which wasn't deleted but had no indexkeys");
-                    return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
-                }
-                addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()), !skipQueue);
-                return Response.ok().entity("{ \"ok\": true }").build();
+        BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
+        if(request.getTrackingId() == null)
+            request.setTrackingId(UUID.randomUUID().toString());
+        try (LogWith logWith = track(request.getTrackingId())
+                .pid(request.getRepositoryId())) {
+            if (request.getIndexKeys() == null && !request.isDeleted()) {
+                log.warn("Got a request which wasn't deleted but had no indexkeys");
+                return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
             }
+            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()), !skipQueue);
+            return Response.ok().entity("{ \"ok\": true }").build();
         } catch (RuntimeException ex) {
             log.error("addBibliographicKeys error: {}", ex.getMessage());
             log.debug("addBibliographicKeys error: ", ex);
