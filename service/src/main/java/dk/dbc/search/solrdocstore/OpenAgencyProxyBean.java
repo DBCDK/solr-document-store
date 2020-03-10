@@ -66,11 +66,13 @@ public class OpenAgencyProxyBean {
     }
 
     public JsonNode fetchOpenAgencyJSON(int agencyId) throws IOException {
+        URI uri = UriBuilder.fromUri(URI.create(config.getOaURL()))
+                .queryParam("action", "libraryRules")
+                .queryParam("agencyId", String.format("%06d", agencyId))
+                .queryParam("outputType", "json")
+                .build();
         Response resp = ClientBuilder.newClient()
-                .target(UriBuilder.fromUri(URI.create(config.getOaURL()))
-                        .queryParam("action", "libraryRules")
-                        .queryParam("agencyId", String.format("%06d", agencyId))
-                        .queryParam("outputType", "json"))
+                .target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .buildGet()
                 .invoke();
@@ -79,9 +81,9 @@ public class OpenAgencyProxyBean {
             resp.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
             return O.readTree(content);
         }
-        log.error("openagency respone is of type: {}/{} with content:", resp.getStatusInfo(), resp.getMediaType());
+        log.error("openagency response is of type: {}/{} for url: {} with content:", resp.getStatusInfo(), resp.getMediaType());
         log.error(content);
-        throw new EJBException("openagency respone is of type: " + resp.getMediaType());
+        throw new EJBException("openagency response is of type: " + resp.getMediaType());
     }
 
     private static OpenAgencyEntity parseOpenAgencyJSON(JsonNode tree) {
