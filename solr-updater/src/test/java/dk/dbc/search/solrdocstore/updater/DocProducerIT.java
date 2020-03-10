@@ -24,7 +24,10 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -54,22 +57,17 @@ public class DocProducerIT {
     private static String solrDocStoreUrl;
 
     private static PostgresITDataSource pg;
+    private static DataSource dataSource;
     private static Config config;
 
     private DocProducer docProducer;
-
-    private final SolrFields solrFields = new SolrFields() {
-        @Override
-        public boolean isKnownField(String name) {
-            return true;
-        }
-    };
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
 
         pg = new PostgresITDataSource("solrdocstore");
+        dataSource = pg.getDataSource();
         config = new Config("queues=test",
                             "scanProfiles=102030-magic,123456-basic",
                             "scanDefaultFields=abc,def") {
@@ -108,6 +106,14 @@ public class DocProducerIT {
     public void setUp() throws Exception {
         try {
             pg.clearTables("bibliographicSolrKeys", "bibliographictobibliographic", "holdingsitemssolrkeys", "holdingstobibliographic");
+            try (Connection connection = dataSource.getConnection() ;
+                 Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300000, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300010, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300101, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300102, 'FBSSchool', False, False, False, NOW(), True);");
+                stmt.executeUpdate("INSERT INTO openagencycache (agencyid, librarytype, partofbibdk, partofdanbib, authcreatecommonrecord, fetched, valid) VALUES(300103, 'FBSSchool', False, False, False, NOW(), True);");
+            }
         } catch (SQLException ex) {
             log.trace("Exception: {}", ex.getMessage());
         }
