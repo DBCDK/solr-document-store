@@ -35,6 +35,20 @@ public class EnqueueAdapter {
         }
     }
 
+    public void enqueueAllHoldingsPostponed(Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+        for (AgencyClassifierItemKey k : agencyItemKeys) {
+            try {
+                // If delete marked, set postponed option
+                Optional<Long> postponed = Optional.of(config.getHoldingQueueDelay());
+                queue.getManifestationEnqueueService().enqueue(k, commitWithin.orElse(null), postponed);
+            } catch (SQLException e) {
+                log.error("Error enqueuing item: " + k);
+                log.debug("Error enqueuing item: " + k, e);
+                throw new PersistenceException(e);
+            }
+        }
+    }
+
     public static Set<AgencyClassifierItemKey> setOfOne(int agency, String classifier, String recordId) {
         HashSet<AgencyClassifierItemKey> s = new HashSet<>();
         s.add(makeKey(agency, classifier, recordId));

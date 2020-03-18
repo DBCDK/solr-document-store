@@ -19,10 +19,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +48,7 @@ public class HoldingsItemBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
-    public Response setHoldingsKeys(@Context UriInfo uriInfo, String jsonContent) throws Exception {
+    public Response setHoldingsKeys(String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         if (hi.getTrackingId() == null)
@@ -82,7 +80,7 @@ public class HoldingsItemBean {
         entityManager.merge(hi);
         Set<AgencyClassifierItemKey> affectedKeys =
                 h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
-        enqueueAdapter.enqueueAll(affectedKeys, commitWithin);
+        enqueueAdapter.enqueueAllHoldingsPostponed(affectedKeys, commitWithin);
     }
 
     private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {
