@@ -4,7 +4,9 @@ LABEL DOCSTORE_POSTGRES_URL="Database url (required)" \
       OPEN_AGENCY_URL="Open Agency url (required)" \
       SYSTEM_NAME="System name (Optional)" \ 
       MAX_POOL_SIZE="Max number of connections to the database (default: 30)" \
-      ALLOW_NON_EMPTY_SCHEMA="Allow tables in database whem dooing first migrate"
+      ALLOW_NON_EMPTY_SCHEMA="Allow tables in database whem dooing first migrate" \
+      DELETE_MARKED_DELAY="How many ms a deleted bibliographic item should be delayed for processing (default: 200000)" \
+      HOLDINGS_QUEUE_DELAY="How many ms a holdings item should be delayed for processing (default: 300000)"
 
 COPY target/docker/*.jar /opt/payara5/jars/
 

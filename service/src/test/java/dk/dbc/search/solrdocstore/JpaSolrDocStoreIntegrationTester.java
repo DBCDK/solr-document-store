@@ -1,7 +1,13 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import dk.dbc.commons.persistence.JpaIntegrationTest;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -9,9 +15,12 @@ import org.postgresql.ds.PGSimpleDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import javax.persistence.EntityManager;
 
 public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
+
+    protected static final ObjectMapper O = new ObjectMapper();
 
     @Override
     public JpaTestEnvironment setup() {
@@ -94,6 +103,46 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     public interface JpaCodeBlockVoidExecution {
 
         void execute(EntityManager em) throws Exception;
+    }
+
+    /**
+     * Read a file from requests/bibl-%s.json and update rec.fedoraStreamDate
+     *
+     * @param id               part of filename
+     * @param fedoraStreamDate date so set (null is unset)
+     * @return string content
+     * @throws IOException if file doesn't exist or is invalid xml
+     */
+    protected String jsonRequestBibl(String id, Instant fedoraStreamDate) throws IOException {
+        String file = "requests/bibl-" + id + ".json";
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(file)) {
+            if (is == null)
+                throw new FileNotFoundException(file);
+            JsonNode tree = O.readTree(is);
+            if (fedoraStreamDate != null) {
+                ( (ArrayNode) tree.with("indexKeys").withArray("rec.fedoraStreamDate") )
+                        .removeAll()
+                        .add(fedoraStreamDate.toString());
+            }
+            return O.writeValueAsString(tree);
+        }
+    }
+
+    /**
+     * Read a file from requests/hold-%s.json
+     *
+     * @param id part of filename
+     * @return string content
+     * @throws IOException if file doesn't exist or is invalid xml
+     */
+    protected String jsonRequestHold(String id) throws IOException {
+        String file = "requests/hold-" + id + ".json";
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(file)) {
+            if (is == null)
+                throw new FileNotFoundException(file);
+            JsonNode tree = O.readTree(is);
+            return O.writeValueAsString(tree);
+        }
     }
 
 }
