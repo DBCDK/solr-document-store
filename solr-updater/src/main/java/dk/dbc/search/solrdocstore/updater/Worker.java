@@ -74,7 +74,7 @@ public class Worker {
     public void init() {
         this.solrCollections = config.getSolrCollections();
         this.worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
-                .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
+                .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION, true)
                 .dataSource(dataSource)
                 .consume(config.getQueues())
                 .databaseConnectThrottle(config.getDatabaseConnectThrottle())
