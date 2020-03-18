@@ -27,6 +27,7 @@ public class Config {
     private Boolean allowNonEmptySchema;
     private int[] openAgencyValidateTime;
     private long deleteMarkedDelay;
+    private long holdingsQueueDelay;
 
     @PostConstruct
     public void loadProperties() {
@@ -39,6 +40,7 @@ public class Config {
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
         // Number of milliseconds to delay bib entities that are being deleted
         deleteMarkedDelay = getValue(props, "deleteMarkedDelay", "DELETE_MARKED_DELAY", "200000", null, Long::parseUnsignedLong);
+        holdingsQueueDelay = getValue(props, "holdingsQueueDelay", "HOLDINGS_QUEUE_DELAY", "300000", null, Long::parseUnsignedLong);
     }
 
     public String getOaURL() {
@@ -64,6 +66,10 @@ public class Config {
 
     public long getDeleteMarkedDelay() {
         return deleteMarkedDelay;
+    }
+
+    public long getHoldingQueueDelay() {
+        return holdingsQueueDelay;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
@@ -105,7 +111,7 @@ public class Config {
                 throw new NamingException("Found " + resourceName + ", but not of type Properties of type: " + lookup.getClass().getTypeName());
             }
         } catch (NamingException ex) {
-            log.info("Exception: {}", ex.getMessage());
+            log.debug("Exception: {}", ex.getMessage());
         }
         return new Properties();
     }

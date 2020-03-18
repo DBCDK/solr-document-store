@@ -89,8 +89,14 @@ public class BeanFactoryUtil {
         enqueueAdapter.config = new Config() {
             @Override
             public long getDeleteMarkedDelay() {
-                return 200000;
+                return 200_000L;
             }
+
+            @Override
+            public long getHoldingQueueDelay() {
+                return 0L;
+            }
+
         };
         enqueueAdapter.queue = createEnqueueSupplier(env);
         return enqueueAdapter;
