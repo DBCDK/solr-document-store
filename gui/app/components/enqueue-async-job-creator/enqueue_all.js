@@ -20,7 +20,7 @@ class EnqueueAllAsyncJob extends React.Component {
         <h5>Sæt alle poster i kø</h5>
         <div className="d-flex">
           <Input
-            placeholder="Kø navn"
+            placeholder="Kø-navn"
             style={{ width: "15vw" }}
             value={this.state.queueInput}
             onChange={e => this.setState({ queueInput: e.target.value })}

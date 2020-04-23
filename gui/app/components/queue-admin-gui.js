@@ -26,22 +26,24 @@ class QueueAdminGUI extends React.PureComponent {
     // pretty simple procedure we skip the whole redux thing
     fetch("/api/status/system")
       .then(res => res.json())
-      .then(json => this.setState({ systemName: json.systemName }))
+      .then(json => this.setState({ systemName: json.systemName.replace(/^\w/, c => c.toUpperCase()) }))
       .catch(e => {});
   }
 
   render() {
+    document.title = document.title + " " + this.state.systemName;
+
     return (
       <div>
         <Navbar color="dark" light expand="md">
           <NavbarBrand href="/queue-admin.html" className="text-light">
-            solr-document-store Kø-værktøj
+            Solr DocStore Kø-værktøj
           </NavbarBrand>
           <Collapse navbar>
             <Nav className="mr-auto" navbar>
               <NavItem>
                 <NavLink href="/" className="text-light">
-                  Søge værktøj
+                  Søge-værktøj
                 </NavLink>
               </NavItem>
               <NavItem className="text-light mx-4 my-2">
