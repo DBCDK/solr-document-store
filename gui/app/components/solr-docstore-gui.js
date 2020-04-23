@@ -42,20 +42,21 @@ class SolrDocstoreGUI extends React.PureComponent {
   }
 
   componentDidMount() {
-    // Small script to figure out what system we are running on, since this is a
+    // Small script to figure out what system (repo) we are running on, since this is a
     // pretty simple procedure we skip the whole redux thing
     fetch("/api/status/system")
       .then(res => res.json())
-      .then(json => this.setState({ systemName: json.systemName }))
+      .then(json => this.setState({ systemName: json.systemName.replace(/^\w/, c => c.toUpperCase())}))
       .catch(e => {});
-    // Figuring out af someone is using a link to a specific item
+
+    // Figuring out if someone is using a link to a specific item
     let params = new URLSearchParams(window.location.search);
     let key = params.get("key");
     if (key) {
       try {
         let bibKey = JSON.parse(key);
         if (bibKey.bibliographicRecordId && bibKey.bibliographicAgencyId) {
-          console.log("Let get this show on a roll!");
+          console.log("Let's get this show on the road!");
           this.props.preSelectBibItem(
             bibKey.bibliographicRecordId,
             bibKey.bibliographicAgencyId
@@ -90,17 +91,19 @@ class SolrDocstoreGUI extends React.PureComponent {
   }
 
   render() {
+    document.title = document.title + " " + this.state.systemName;
+
     return (
       <div>
         <Navbar color="dark" light expand="md">
           <NavbarBrand href="/" className="text-light">
-            solr-document-store Søgeværktøj
+            Solr DocStore Søge-værktøj
           </NavbarBrand>
           <Collapse navbar>
             <Nav className="mr-auto" navbar>
               <NavItem>
                 <NavLink href="/queue-admin.html" className="text-light">
-                  Kø administrator
+                  Kø-værktøj
                 </NavLink>
               </NavItem>
               <NavItem className="text-light mx-4 my-2">
