@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 public enum FeatureSwitch {
     COLLECTION_IDENTIFIER_800000("800000"),
     HOLDINGS_AGENCY("holdingsAgency"),
+    HOLDINGS_STATS("holdingsStats"),
     NESTED_HOLDINGS_DOCUMENTS("nested"),
     HOLDING_ITEMS_ROLE("role"),
     PART_OF_DANBIB("partOfDanbib"),

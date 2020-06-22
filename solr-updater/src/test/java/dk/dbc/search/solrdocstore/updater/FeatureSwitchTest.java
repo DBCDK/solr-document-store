@@ -39,7 +39,7 @@ public class FeatureSwitchTest {
         featureSet = FeatureSwitch.featureSet("all-nested-800000");
         System.out.println("featureSet = " + featureSet);
         assertThat(featureSet,
-                   is(EnumSet.of(HOLDINGS_AGENCY, HOLDING_ITEMS_ROLE, PART_OF_DANBIB, ATTACH_RESOURCES, SCAN)));
+                   is(EnumSet.of(HOLDINGS_AGENCY, HOLDINGS_STATS, HOLDING_ITEMS_ROLE, PART_OF_DANBIB, ATTACH_RESOURCES, SCAN)));
         featureSet = FeatureSwitch.featureSet("nested+800000");
         System.out.println("featureSet = " + featureSet);
         assertThat(featureSet,
