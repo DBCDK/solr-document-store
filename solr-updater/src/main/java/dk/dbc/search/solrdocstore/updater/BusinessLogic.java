@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -107,6 +108,40 @@ public class BusinessLogic {
                 addField(indexKeys, "rec.holdingsAgencyId", agencyId);
             }
         }
+    }
+
+    /**
+     * Find all fraction of items on loan
+     *
+     * @param sourceDoc      entire json from solr-doc-store
+     * @param solrCollection description of the single collection
+     */
+    @Timed
+    public void addRecHoldingsStats(JsonNode sourceDoc, SolrCollection solrCollection) {
+        if (!solrCollection.hasFeature(FeatureSwitch.HOLDINGS_STATS))
+            return;
+        JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
+
+        int onLoan = 0;
+        int onShelf = 0;
+        for (JsonNode record : find(sourceDoc, "holdingsItemRecords")) {
+            for (JsonNode holding : find(record, "indexKeys")) {
+                System.out.println("holding = " + holding);
+                int count = find(holding, "holdingsitem.itemId").size();
+                String status = find(holding, "holdingsitem.status").get(0).asText();
+                switch (status.toLowerCase(Locale.ROOT)) {
+                    case "onloan":
+                        onLoan += count;
+                        break;
+                    case "onshelf":
+                        onShelf += count;
+                        break;
+                }
+            }
+        }
+        int total = onLoan + onShelf;
+        setField(indexKeys, "rec.holdingsCount", String.valueOf(total));
+        setField(indexKeys, "rec.holdingsOnLoan", String.valueOf((double) onLoan / (double) total));
     }
 
     /**
