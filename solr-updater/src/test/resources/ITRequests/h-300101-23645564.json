@@ -7,7 +7,14 @@
         {
             "rec.bibliographicRecordId": ["23645564"],
             "holdingsitem.agencyId": ["300101"],
-            "holdingsitem.status": ["OnLoan", "OnOrder"]
+            "holdingsitem.itemId": ["300101_1"],
+            "holdingsitem.status": ["OnLoan"]
+        },
+        {
+            "rec.bibliographicRecordId": ["23645564"],
+            "holdingsitem.agencyId": ["300101"],
+            "holdingsitem.itemId": ["300101_2"],
+            "holdingsitem.status": ["OnOrder"]
         }
     ]
 }
