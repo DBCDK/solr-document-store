@@ -136,6 +136,8 @@ public class BusinessLogic {
                     case "onshelf":
                         onShelf += count;
                         break;
+                    default:
+                        break;
                 }
             }
         }
