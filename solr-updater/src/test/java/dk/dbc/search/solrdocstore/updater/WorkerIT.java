@@ -167,7 +167,7 @@ public class WorkerIT {
             worker.destroy();
             config.getSolrCollections().forEach(solrCollection -> {
                 long count = count(solrCollection);
-                assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 3, count);
+                assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 5, count);
             });
         }
     }

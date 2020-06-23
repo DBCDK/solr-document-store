@@ -145,7 +145,7 @@ public class DocProducerIT {
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrCollection, 3);
+        deployAndSearch(300000, docProducer, solrCollection, 5);
 
         Requests.load("test1-part2", solrDocStoreUrl);
 
@@ -159,11 +159,11 @@ public class DocProducerIT {
 
         Requests.load("test1-part1", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrCollection, 3);
+        deployAndSearch(300000, docProducer, solrCollection, 5);
 
         Requests.load("test1-part3", solrDocStoreUrl);
 
-        deployAndSearch(300000, docProducer, solrCollection, 2);
+        deployAndSearch(300000, docProducer, solrCollection, 3);
     }
 
     @Test

@@ -9,23 +9,24 @@
         "unit": "unit:893270",
         "producerVersion": "solr-indexer-cloud-worker-javascript:1.0-SNAPSHOT#116975",
         "indexKeys": {
-            "rec.repositoryId": ["300101-katalog:23645564"],
-            "dkcclterm.po": ["Haruki", "Murakami"],
-            "unknown.field": ["Haruki", "Murakami"]
+            "rec.repositoryId": [ "300101-katalog:23645564" ],
+            "dkcclterm.po": [ "Haruki", "Murakami" ],
+            "unknown.field": [ "Haruki", "Murakami" ]
         },
         "trackingId": "woot",
         "superceds": null,
         "commitWithin": 0
     },
-    "holdingsItemRecords": [{
+    "holdingsItemRecords": [ {
             "agencyId": 300102,
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
             "hasLiveHoldings": true,
-            "indexKeys": [{
-                    "holdingsitem.agencyId": ["300102"],
-                    "holdingsitem.status": ["OnOrder"]
-                }],
+            "indexKeys": [ {
+                    "holdingsitem.agencyId": [ "300102" ],
+                    "holdingsitem.itemId": [ "300102_1" ],
+                    "holdingsitem.status": [ "OnOrder" ]
+                } ],
             "trackingId": "",
             "commitWithin": 0
         }, {
@@ -33,10 +34,16 @@
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
             "hasLiveHoldings": true,
-            "indexKeys": [{
-                    "holdingsitem.agencyId": ["300102"],
-                    "holdingsitem.status": ["OnLoan", "OnShelf"]
-                }],
+            "indexKeys": [ {
+                    "holdingsitem.agencyId": [ "300102" ],
+                    "holdingsitem.itemId": [ "300102_1" ],
+                    "holdingsitem.status": [ "OnLoan" ]
+                },
+                {
+                    "holdingsitem.agencyId": [ "300102" ],
+                    "holdingsitem.itemId": [ "300102_2" ],
+                    "holdingsitem.status": [ "OnShelf" ]
+                } ],
             "trackingId": "",
             "commitWithin": 0
         }, {
@@ -44,10 +51,11 @@
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
             "hasLiveHoldings": false,
-            "indexKeys": [{
-                    "holdingsitem.agencyId": ["300103"],
-                    "holdingsitem.status": ["Decommissioned"]
-                }],
+            "indexKeys": [ {
+                    "holdingsitem.agencyId": [ "300103" ],
+                    "holdingsitem.itemId": [ "300103_1" ],
+                    "holdingsitem.status": [ "Decommissioned" ]
+                } ],
             "trackingId": "",
             "commitWithin": 0
         }, {
@@ -55,10 +63,21 @@
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
             "hasLiveHoldings": true,
-            "indexKeys": [{
-                    "holdingsitem.agencyId": ["300104"],
-                    "holdingsitem.status": ["OnLoan", "OnShelf", "Decommissioned"]
-                }],
+            "indexKeys": [ {
+                    "holdingsitem.agencyId": [ "300104" ],
+                    "holdingsitem.itemId": [ "300104_1" ],
+                    "holdingsitem.status": [ "OnLoan" ]
+                },
+                {
+                    "holdingsitem.agencyId": [ "300104" ],
+                    "holdingsitem.itemId": [ "300104_2" ],
+                    "holdingsitem.status": [ "OnShelf" ]
+                },
+                {
+                    "holdingsitem.agencyId": [ "300104" ],
+                    "holdingsitem.itemId": [ "300104_3" ],
+                    "holdingsitem.status": [ "Decommissioned" ]
+                } ],
             "trackingId": "",
             "commitWithin": 0
         }, {
@@ -66,10 +85,10 @@
             "bibliographicRecordId": "23645564",
             "producerVersion": "",
             "hasLiveHoldings": false,
-            "indexKeys": [],
+            "indexKeys": [ ],
             "trackingId": "",
             "commitWithin": 0
-        }],
-    "partOfDanbib": [777777],
-    "attachedResources": {}
+        } ],
+    "partOfDanbib": [ 777777 ],
+    "attachedResources": { }
 }
