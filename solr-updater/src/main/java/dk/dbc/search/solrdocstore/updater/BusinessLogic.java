@@ -111,7 +111,7 @@ public class BusinessLogic {
     }
 
     /**
-     * Find all fraction of items on loan
+     * Find the fraction of items on loan
      *
      * @param sourceDoc      entire json from solr-doc-store
      * @param solrCollection description of the single collection
