@@ -126,7 +126,6 @@ public class BusinessLogic {
         int onShelf = 0;
         for (JsonNode record : find(sourceDoc, "holdingsItemRecords")) {
             for (JsonNode holding : find(record, "indexKeys")) {
-                System.out.println("holding = " + holding);
                 int count = find(holding, "holdingsitem.itemId").size();
                 String status = find(holding, "holdingsitem.status").get(0).asText();
                 switch (status.toLowerCase(Locale.ROOT)) {
