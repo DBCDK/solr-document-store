@@ -6,14 +6,14 @@ Endpoint for updating bibliographic records.
 
 `POST` to `[service]/bibliographic` with `JSON` content:
 
-* `agencyId`: (integer) containing the offician library-number
+* `agencyId`: (integer) containing the official library-number
 * `classifier`: (string) the collection within the agency, usually but not limited to *basic* or *katalog*
 * `bibliographicRecordId`: (string) the record identifier
 * `repositoryId`: (string) the identifier of the generating record
 * `work`: (string) the work identifier
-* `unit`: (string) the unit identifer
-* `producerVersion`: (string) identifying the JavaScript version
-* `deleted`: (boolean) if the record is deleted
+* `unit`: (string) the unit identifier
+* `producerVersion`: (string) identifies the JavaScript version
+* `deleted`: (boolean) whether the record is deleted
 * `indexKeys`: (map-of-string-to-list-of-strings, optional)
   If `deleted` is **false** then this key is required
   The map contains SolR index values
@@ -25,4 +25,4 @@ Endpoint for updating bibliographic records.
 
 `QUREY_STRING` parameters:
 
-* `skipQueue`: (boolean, default *false*) if the record should be put on queue to SolR after beeing updated
+* `skipQueue`: (boolean, default *false*) if the record should be put on queue to SolR after being updated

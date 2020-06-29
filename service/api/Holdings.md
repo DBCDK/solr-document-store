@@ -6,7 +6,7 @@ Endpoint for updating holdings-items records.
 
 `POST` to `[service]/holdings` with `JSON` content:
 
-* `agencyId`: (integer) containing the offician library-number
+* `agencyId`: (integer) containing the official library-number
 * `bibliographicRecordId`: (string) the record identifier
 * `producerVersion`: (string) identifying the JavaScript version
 * `indexKeys`: (list-of-map-of-string-to-list-of-strings)
