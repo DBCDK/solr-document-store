@@ -12,7 +12,6 @@ import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.function.Function;
 
 @Stateless
 @Startup
