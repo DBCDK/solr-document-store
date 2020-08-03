@@ -19,7 +19,6 @@ public class DocStoreEmulatorApplication extends Application {
         res.put("jersey.config.server.disableMoxyJson", true);
 
         return res;
-
     }
 
 }

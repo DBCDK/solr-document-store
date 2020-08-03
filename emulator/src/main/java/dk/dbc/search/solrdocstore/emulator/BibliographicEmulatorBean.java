@@ -31,11 +31,12 @@ public class BibliographicEmulatorBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
-    public Response addBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
-                                         String jsonContent) throws Exception
+    public Response forwardBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
+                                             String jsonContent) throws Exception
     {
-        log.debug("Forwarding json: {}", jsonContent);
-        URI uri = UriBuilder.fromUri(URI.create(config.getSolrDocStoreUrl()))
+        final String solrDocStoreUrl = config.getSolrDocStoreUrl();
+        log.debug("Forwarding json: {} to url: {}", jsonContent, solrDocStoreUrl);
+        URI uri = UriBuilder.fromUri(URI.create(solrDocStoreUrl))
                 .queryParam("skipQueue", skipQueue)
                 .queryParam("jsonContent", jsonContent)
                 .build();
@@ -50,7 +51,7 @@ public class BibliographicEmulatorBean {
             return resp;
         }
         log.error("SolrDocStore response is of type {}/{} for url {} with this content:",
-                resp.getStatusInfo(), resp.getMediaType(), config.getSolrDocStoreUrl());
+                resp.getStatusInfo(), resp.getMediaType(), solrDocStoreUrl);
         log.error(content);
         throw new EJBException("SolrDocStore response is of type: " + resp.getMediaType());
     }
