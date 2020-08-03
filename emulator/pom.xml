@@ -10,8 +10,11 @@
     </parent>
 
     <artifactId>solr-doc-store-emulator</artifactId>
+    <packaging>war</packaging>
+    <name>solr-doc-store-emulator</name>
 
     <dependencies>
+
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-log</artifactId>
