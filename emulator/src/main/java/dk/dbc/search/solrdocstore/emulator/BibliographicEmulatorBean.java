@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -37,14 +38,13 @@ public class BibliographicEmulatorBean {
         final String solrDocStoreUrl = config.getSolrDocStoreUrl();
         log.debug("Forwarding json: {} to url: {}", jsonContent, solrDocStoreUrl);
         URI uri = UriBuilder.fromUri(URI.create(solrDocStoreUrl))
+                .path("bibliographic")
                 .queryParam("skipQueue", skipQueue)
-                .queryParam("jsonContent", jsonContent)
                 .build();
         Response resp = ClientBuilder.newClient()
                 .target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
-                .buildGet()
-                .invoke();
+                .post(Entity.json(jsonContent));
         String content = resp.readEntity(String.class);
         if (resp.getStatusInfo().equals(Response.Status.OK) &&
                 resp.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
