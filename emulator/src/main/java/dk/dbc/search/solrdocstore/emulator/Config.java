@@ -47,10 +47,6 @@ public class Config {
         return value;
     }
 
-    private static <T> T getValue(Properties props, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
-        return mapper.apply(getValue(props, propertyName, envName, defaultValue, error));
-    }
-
     private Properties findProperties(String resourceName) {
         try {
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(resourceName + ".properties");
