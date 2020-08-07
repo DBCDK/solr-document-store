@@ -23,6 +23,6 @@ Endpoint for updating bibliographic records.
 * `superceds`: (list-of-strings, optional) `bibliographicRecordId` that this record is a replacement for
 * `commitWithin`: (integer, optional) number carried through to solr-updater, and used to indicate when SolR should commit - currently not utilized in production.
 
-`QUREY_STRING` parameters:
+`QUERY_STRING` parameters:
 
 * `skipQueue`: (boolean, default *false*) if the record should be put on queue to SolR after being updated
