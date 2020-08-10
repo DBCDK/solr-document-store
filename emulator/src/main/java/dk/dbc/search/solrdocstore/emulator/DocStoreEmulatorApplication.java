@@ -2,9 +2,6 @@ package dk.dbc.search.solrdocstore.emulator;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * This class defines the other classes that make up this JAX-RS application by
