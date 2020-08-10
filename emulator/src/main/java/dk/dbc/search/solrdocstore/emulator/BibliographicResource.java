@@ -19,16 +19,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @Stateless
-@Path("bibliographic")
-public class BibliographicEmulatorBean {
-    private static final Logger log = LoggerFactory.getLogger(BibliographicEmulatorBean.class);
+@Path("/")
+@Produces("application/json")
+public class BibliographicResource {
+    private static final Logger log = LoggerFactory.getLogger(BibliographicResource.class);
+    private static final ObjectMapper O = new ObjectMapper();
 
     @Inject
     private Config config;
 
     @POST
+    @Path("bibliographic")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
@@ -38,7 +43,7 @@ public class BibliographicEmulatorBean {
         final String solrDocStoreUrl = config.getSolrDocStoreUrl();
         log.debug("Forwarding json: {} to url: {}", jsonContent, solrDocStoreUrl);
         URI uri = UriBuilder.fromUri(URI.create(solrDocStoreUrl))
-                .path("bibliographic")
+                .path("api/bibliographic")
                 .queryParam("skipQueue", skipQueue)
                 .build();
         Response resp = ClientBuilder.newClient()
@@ -48,7 +53,9 @@ public class BibliographicEmulatorBean {
         String content = resp.readEntity(String.class);
         if (resp.getStatusInfo().equals(Response.Status.OK) &&
                 resp.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
-            return resp;
+            // things are looking OK, return whatever solr-doc-store returned.
+            Object o = O.readValue(content, Object.class);
+            return Response.ok(o).build();
         }
         log.error("SolrDocStore response is of type {}/{} for url {} with this content:",
                 resp.getStatusInfo(), resp.getMediaType(), solrDocStoreUrl);

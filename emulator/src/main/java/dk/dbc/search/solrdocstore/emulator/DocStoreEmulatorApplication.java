@@ -12,13 +12,4 @@ import java.util.Map;
  */
 @ApplicationPath("/api")
 public class DocStoreEmulatorApplication extends Application {
-
-    @Override
-    public Map<String, Object> getProperties() {
-        final Map<String, Object> res = new HashMap<>();
-        res.put("jersey.config.server.disableMoxyJson", true);
-
-        return res;
-    }
-
 }
