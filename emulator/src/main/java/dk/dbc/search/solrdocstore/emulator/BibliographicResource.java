@@ -40,12 +40,12 @@ public class BibliographicResource {
     public Response forwardBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
                                              String jsonContent) throws Exception
     {
-        final String solrDocStoreUrl = config.getSolrDocStoreUrl();
-        log.debug("Forwarding json: {} to url: {}", jsonContent, solrDocStoreUrl);
-        URI uri = UriBuilder.fromUri(URI.create(solrDocStoreUrl))
+        UriBuilder solrDocStoreUrlBuilder = config.getSolrDocStoreUriBuilder();
+        URI uri = solrDocStoreUrlBuilder
                 .path("api/bibliographic")
                 .queryParam("skipQueue", skipQueue)
                 .build();
+        log.debug("Forwarding json: {} to url: {}", jsonContent, uri.getHost() + uri.getPath());
         Response resp = ClientBuilder.newClient()
                 .target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
@@ -58,7 +58,7 @@ public class BibliographicResource {
             return Response.ok(o).build();
         }
         log.error("SolrDocStore response is of type {}/{} for url {} with this content:",
-                resp.getStatusInfo(), resp.getMediaType(), solrDocStoreUrl);
+                resp.getStatusInfo(), resp.getMediaType(), uri.getHost() + uri.getPath());
         log.error(content);
         throw new EJBException("SolrDocStore response is of type: " + resp.getMediaType());
     }

@@ -9,6 +9,7 @@ import javax.ejb.Startup;
 import javax.ejb.Stateless;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -20,15 +21,23 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private String solrDocStoreUrl;
+    private UriBuilder solrDocStoreUriBuilder;
 
     @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-emulator-service");
         solrDocStoreUrl = getValue(props, "solrDocStoreUrl", "SOLR_DOC_STORE_URL", null, "No solrDocStore url specified");
+        try {
+            solrDocStoreUriBuilder = UriBuilder.fromPath(solrDocStoreUrl);
+        } catch (IllegalArgumentException e) {
+            log.error("Error when resolving URL for SolrDocStore ({})", solrDocStoreUrl);
+            log.error("Error was: {}", e);
+            throw new EJBException("Error in configuration:" + e.getMessage());
+        }
     }
 
-    public String getSolrDocStoreUrl() {
-        return solrDocStoreUrl;
+    public UriBuilder getSolrDocStoreUriBuilder() {
+        return solrDocStoreUriBuilder.clone();
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
