@@ -19,15 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 @Stateless
 @Path("/")
 @Produces("application/json")
 public class BibliographicResource {
     private static final Logger log = LoggerFactory.getLogger(BibliographicResource.class);
-    private static final ObjectMapper O = new ObjectMapper();
 
     @Inject
     private Config config;
@@ -38,7 +35,7 @@ public class BibliographicResource {
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
     public Response forwardBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
-                                             String jsonContent) throws Exception
+                                             String jsonContent) throws EJBException
     {
         UriBuilder solrDocStoreUrlBuilder = config.getSolrDocStoreUriBuilder();
         URI uri = solrDocStoreUrlBuilder
@@ -54,8 +51,7 @@ public class BibliographicResource {
         if (resp.getStatusInfo().equals(Response.Status.OK) &&
                 resp.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
             // things are looking OK, return whatever solr-doc-store returned.
-            Object o = O.readValue(content, Object.class);
-            return Response.ok(o).build();
+            return Response.ok(content).build();
         }
         log.error("SolrDocStore response is of type {}/{} for url {} with this content:",
                 resp.getStatusInfo(), resp.getMediaType(), uri.getHost() + uri.getPath());
