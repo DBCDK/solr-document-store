@@ -1,5 +1,5 @@
 FROM docker.dbc.dk/payara5-micro:latest
-MAINTAINER os-team
+LABEL maintainer="Team Search os-team@dbc.dk"
 
 LABEL SOLR_DOC_STORE_URL="SolrDocStore url (required)"
 

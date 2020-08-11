@@ -20,18 +20,17 @@ public class Config {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
-    private String solrDocStoreUrl;
     private UriBuilder solrDocStoreUriBuilder;
 
     @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-emulator-service");
-        solrDocStoreUrl = getValue(props, "solrDocStoreUrl", "SOLR_DOC_STORE_URL", null, "No solrDocStore url specified");
+        String solrDocStoreUrl = getValue(props, "solrDocStoreUrl", "SOLR_DOC_STORE_URL", null, "No solrDocStore url specified");
         try {
             solrDocStoreUriBuilder = UriBuilder.fromPath(solrDocStoreUrl);
         } catch (IllegalArgumentException e) {
             log.error("Error when resolving URL for SolrDocStore ({})", solrDocStoreUrl);
-            log.error("Error was: {}", e);
+            log.error("Error was: ", e);
             throw new EJBException("Error in configuration:" + e.getMessage());
         }
     }

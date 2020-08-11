@@ -24,7 +24,7 @@ You are then ready to run the component with a command resembling this:
 docker run -e SOLR_DOC_STORE_URL=$SOLR_DOC_STORE_URL -e JAVA_MAX_HEAP_SIZE=2g -ti -e LOG_LEVEL=debug -e LOG-FORMAT=text -p 8090:8080 nots/solr-doc-store-emulator:latest
 ```
 
-where you have set and environment variable `$SOLR_DOC_STORE_URL` to a "real" solr-doc-store url. 
+where you have set an environment variable `$SOLR_DOC_STORE_URL` to a "real" solr-doc-store url. 
 This could be on a local dit system, for example. 
 Don't set it to a production system URL unless you know what you are doing!
 
