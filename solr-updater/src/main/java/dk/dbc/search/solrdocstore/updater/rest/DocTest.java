@@ -53,7 +53,7 @@ public class DocTest {
             JsonNode node = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
             boolean deleted = docProducer.isDeleted(node);
             if (deleted) {
-                return Response.ok(false).build();
+                return Response.noContent().build();
             }
             Set<SolrCollection> solrCollections = config.getSolrCollections();
             Optional<SolrCollection> solrCollection;
@@ -71,7 +71,7 @@ public class DocTest {
             String xml = ClientUtils.toXML(document);
 
             return Response.ok(xml, MediaType.APPLICATION_XML_TYPE).build();
-        } catch (IOException | PostponedNonFatalQueueError ex) {
+        } catch (IOException | PostponedNonFatalQueueError | RuntimeException ex) {
             log.error("Exception: {}", ex.getMessage());
             log.debug("Exception:", ex);
             return Response.ok(ex.getMessage(), MediaType.TEXT_PLAIN).build();
