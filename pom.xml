@@ -18,7 +18,7 @@
 
     <properties>
         <dbc-commons.version>1.3-SNAPSHOT</dbc-commons.version>
-        <pg-queue.version>1.3-SNAPSHOT</pg-queue.version>
+        <pg-queue.version>1.4-SNAPSHOT</pg-queue.version>
         <hamcrest.version>1.3</hamcrest.version>
         <mockito.version>1.10.19</mockito.version>
     </properties>
