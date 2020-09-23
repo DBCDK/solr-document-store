@@ -42,9 +42,9 @@ public class UnpooledDataSource {
             if (matcher.group(2) != null)
                 ds.setPassword(matcher.group(2));
         }
-        ds.setServerName(matcher.group(3));
+        ds.setServerNames(new String[]{matcher.group(3)});
         if (matcher.group(4) != null)
-            ds.setPortNumber(Integer.parseUnsignedInt(matcher.group(4)));
+            ds.setPortNumbers(new int[]{Integer.parseUnsignedInt(matcher.group(4))});
         ds.setDatabaseName(matcher.group(5));
         ds.setApplicationName("SolrDocStore-" + connectionName);
         return ds;

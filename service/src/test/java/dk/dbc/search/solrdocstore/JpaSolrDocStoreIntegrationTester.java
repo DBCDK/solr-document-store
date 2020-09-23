@@ -47,14 +47,14 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     private PGSimpleDataSource getDataSource() {
         final PGSimpleDataSource datasource = new PGSimpleDataSource();
 
-        datasource.setServerName("localhost");
+        datasource.setServerNames(new String[] {"localhost"});
         String postgresqlPort = System.getProperty("postgresql.port");
         if (postgresqlPort != null && postgresqlPort.length() > 1) {
             datasource.setDatabaseName("docstore");
-            datasource.setPortNumber(Integer.parseInt(System.getProperty("postgresql.port", "5432")));
+            datasource.setPortNumbers(new int[]{Integer.parseInt(System.getProperty("postgresql.port", "5432"))});
         } else {
             datasource.setDatabaseName(System.getProperty("user.name"));
-            datasource.setPortNumber(5432);
+            datasource.setPortNumbers(new int[]{5432});
         }
         datasource.setUser(System.getProperty("user.name"));
         datasource.setPassword(System.getProperty("user.name"));
