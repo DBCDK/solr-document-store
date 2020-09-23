@@ -33,7 +33,7 @@ import org.junit.Test;
 import static dk.dbc.search.solrdocstore.QueueTestUtil.*;
 import static dk.dbc.search.solrdocstore.asyncjob.AsyncJobRunnerFactory.makeAsyncJobRunner;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  *

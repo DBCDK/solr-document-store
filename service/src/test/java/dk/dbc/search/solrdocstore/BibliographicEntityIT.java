@@ -1,7 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
@@ -10,6 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
 

@@ -9,8 +9,7 @@ import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.*;
-
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**

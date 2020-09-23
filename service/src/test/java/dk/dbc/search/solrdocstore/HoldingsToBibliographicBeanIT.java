@@ -13,6 +13,7 @@ import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 

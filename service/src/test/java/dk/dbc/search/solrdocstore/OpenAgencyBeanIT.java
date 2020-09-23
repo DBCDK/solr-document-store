@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import javax.persistence.EntityManager;
 import org.junit.Before;

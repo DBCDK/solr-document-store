@@ -49,7 +49,7 @@ import org.junit.runners.Parameterized;
 
 import static org.hamcrest.Matchers.*;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.*;
 
 /**
  *

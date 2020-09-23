@@ -12,18 +12,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
-import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
-
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import org.hamcrest.Matchers;
+
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -143,7 +141,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-   }
+    }
 
     private Build build(int holdingsAgencyId) {
         return new Build(holdingsAgencyId, ID);
