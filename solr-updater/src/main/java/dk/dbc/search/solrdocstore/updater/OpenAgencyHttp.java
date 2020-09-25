@@ -45,7 +45,7 @@ public class OpenAgencyHttp {
 
 
     public ObjectNode fetchJson(URI uri) throws IOException {
-        AtomicReference<ObjectNode> res = null;
+        AtomicReference<ObjectNode> res = new AtomicReference<>();
         Failsafe.with(RETRY_POLICY).run(() -> res.set(fetchJsonImpl(uri)));
         return res.get();
     }

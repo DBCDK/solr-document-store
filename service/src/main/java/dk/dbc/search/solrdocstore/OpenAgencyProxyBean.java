@@ -57,7 +57,7 @@ public class OpenAgencyProxyBean {
     @Timed
     public JsonNode loadOpenAgencyJson(int agencyId) {
         try {
-            AtomicReference<JsonNode> res = null;
+            AtomicReference<JsonNode> res = new AtomicReference<>();
             Failsafe.with(RETRY_POLICY).run(() -> {
                 res.set(fetchOpenAgencyJSON(agencyId));
             });
