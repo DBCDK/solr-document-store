@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -30,9 +31,10 @@ public class OpenAgencyProxyBean {
     private static final ObjectMapper O = new ObjectMapper();
     private static final String SCHOOLLIBRARY = "Skolebibliotek";
 
-    private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
-            .withDelay(250, TimeUnit.MILLISECONDS)
-            .retryOn(Exception.class)
+    private static final RetryPolicy RETRY_POLICY = new RetryPolicy<>()
+            .handle(Exception.class)
+            .handleResult(null)
+            .withDelay(Duration.ofMillis(250))
             .withMaxRetries(4);
 
     @Inject
@@ -55,7 +57,11 @@ public class OpenAgencyProxyBean {
     @Timed
     public JsonNode loadOpenAgencyJson(int agencyId) {
         try {
-            return Failsafe.with(RETRY_POLICY).get(() -> fetchOpenAgencyJSON(agencyId));
+            AtomicReference<JsonNode> res = null;
+            Failsafe.with(RETRY_POLICY).run(() -> {
+                res.set(fetchOpenAgencyJSON(agencyId));
+            });
+            return res.get();
         } catch (EJBException ex) {
             throw ex;
         } catch (RuntimeException ex) {
