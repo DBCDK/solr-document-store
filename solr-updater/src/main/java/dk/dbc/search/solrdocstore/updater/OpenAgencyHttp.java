@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
@@ -33,9 +34,10 @@ public class OpenAgencyHttp {
     @Inject
     Config config;
 
-    private static final RetryPolicy RETRY_POLICY = new RetryPolicy()
-            .withDelay(250, TimeUnit.MILLISECONDS)
-            .retryOn(Exception.class)
+    private static final RetryPolicy RETRY_POLICY = new RetryPolicy<>()
+            .handle(Exception.class)
+            .handleResult(null)
+            .withDelay(Duration.ofMillis(250))
             .withMaxRetries(4);
 
     public OpenAgencyHttp() {
@@ -43,7 +45,9 @@ public class OpenAgencyHttp {
 
 
     public ObjectNode fetchJson(URI uri) throws IOException {
-        return Failsafe.with(RETRY_POLICY).get(() -> fetchJsonImpl(uri));
+        AtomicReference<ObjectNode> res = null;
+        Failsafe.with(RETRY_POLICY).run(() -> res.set(fetchJsonImpl(uri)));
+        return res.get();
     }
 
     private ObjectNode fetchJsonImpl(URI uri) throws IOException {
