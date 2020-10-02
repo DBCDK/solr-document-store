@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.vipcore.marshallers.LibraryRule;
+import dk.dbc.vipcore.marshallers.LibraryRules;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -8,6 +10,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.stream.Stream;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
@@ -42,6 +45,23 @@ public class OpenAgencyEntity implements Serializable {
         this.authCreateCommonRecord = authCreateCommonRecord;
         this.partOfBibDk = partOfBibDk;
         this.partOfDanbib = partOfDanbib;
+        this.fetched = Timestamp.from(Instant.now());
+        this.valid = true;
+    }
+
+    private static boolean getLibraryRuleBoolean(Stream<LibraryRule> libraryRuleStream, String libraryRuleName) {
+        final LibraryRule libRule = libraryRuleStream.filter(lr -> lr.getName().equals(libraryRuleName)).findFirst().orElse(null);
+        return libRule != null ? libRule.getBool() : false;
+    }
+
+    public OpenAgencyEntity(LibraryRules libraryRules) {
+        Integer aId = Integer.valueOf(libraryRules.getAgencyId());
+        this.agencyId = aId == null ? -1 : aId;
+        this.libraryType = LibraryType.libraryTypeFromAgency(agencyId);
+        Stream<LibraryRule> libraryRuleStream = libraryRules.getLibraryRule().stream();
+        this.authCreateCommonRecord = getLibraryRuleBoolean(libraryRuleStream, "auth_create_common_record");
+        this.partOfBibDk = getLibraryRuleBoolean(libraryRuleStream, "part_of_bibliotek_dk");
+        this.partOfDanbib = getLibraryRuleBoolean(libraryRuleStream, "part_of_danbib");
         this.fetched = Timestamp.from(Instant.now());
         this.valid = true;
     }

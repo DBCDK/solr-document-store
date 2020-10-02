@@ -194,11 +194,11 @@ public class BusinessLogic {
             JsonNode holdingsIndexKeys = find(record, "indexKeys");
             if (holdingsIndexKeys != null && holdingsIndexKeys.size() > 0) {
                 String agencyId = find(record, "agencyId").asText();
-                OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
-                if (libraryRule.isResearchLibrary() &&
-                    libraryRule.hasUseHoldingItem()) {
-                    addBibDk = addBibDk || libraryRule.isPartOfBibliotekDk();
-                    addDanbib = addDanbib || libraryRule.isPartOfDanbib();
+                OpenAgency.OpenAgencyLibraryRule openAgencyLibraryRule = oa.libraryRule(agencyId);
+                if (openAgencyLibraryRule.isResearchLibrary() &&
+                    openAgencyLibraryRule.hasUseHoldingItem()) {
+                    addBibDk = addBibDk || openAgencyLibraryRule.isPartOfBibliotekDk();
+                    addDanbib = addDanbib || openAgencyLibraryRule.isPartOfDanbib();
                 }
             }
         }
@@ -239,14 +239,14 @@ public class BusinessLogic {
         JsonNode holdingsItems = find(sourceDoc, "holdingsItemRecords");
         for (JsonNode holdingItem : holdingsItems) {
             String agencyId = find(holdingItem, "agencyId").asText();
-            OpenAgency.LibraryRule libraryRule = oa.libraryRule(agencyId);
-            boolean authCreateCommonRecord = libraryRule.hasAuthCreateCommonRecord();
+            OpenAgency.OpenAgencyLibraryRule openAgencyLibraryRule = oa.libraryRule(agencyId);
+            boolean authCreateCommonRecord = openAgencyLibraryRule.hasAuthCreateCommonRecord();
             JsonNode holdingsItemIndexKeys = holdingItem.get("indexKeys");
             if (holdingsItemIndexKeys != null)
                 holdingsItemIndexKeys.forEach(doc -> {
-                    addHoldingsItemRole(doc, "bibdk", libraryRule.isPartOfBibliotekDk(),
+                    addHoldingsItemRole(doc, "bibdk", openAgencyLibraryRule.isPartOfBibliotekDk(),
                                         excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
-                    addHoldingsItemRole(doc, "danbib", libraryRule.isPartOfDanbib(),
+                    addHoldingsItemRole(doc, "danbib", openAgencyLibraryRule.isPartOfDanbib(),
                                         excludeFromUnionCatalogue, authCreateCommonRecord, repositoryId);
                 });
         }

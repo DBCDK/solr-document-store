@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import static dk.dbc.search.solrdocstore.LibraryType.libraryTypeFromAgency;
+
 /**
  *
  * @author DBC {@literal <dbc.dk>}
@@ -31,17 +33,7 @@ public class OpenAgencyUtil {
     }
 
     public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId, boolean authCreateCommonRecord, boolean partOfBibDk, boolean partOfDanbib) {
-        LibraryType type = LibraryType.FBS;
-        if (agencyId < 400000) {
-            type = LibraryType.FBSSchool;
-        }
-        if (agencyId >= 800000) {
-            type = LibraryType.NonFBS;
-        }
-        if (agencyId >= 900000) {
-            type = LibraryType.Missing;
-        }
-        return new OpenAgencyEntity(agencyId, type, authCreateCommonRecord, partOfBibDk, partOfDanbib);
+        return new OpenAgencyEntity(agencyId, libraryTypeFromAgency(agencyId), authCreateCommonRecord, partOfBibDk, partOfDanbib);
     }
 
 }

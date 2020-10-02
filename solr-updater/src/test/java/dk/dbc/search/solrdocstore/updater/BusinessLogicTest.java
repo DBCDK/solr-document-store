@@ -153,7 +153,7 @@ public class BusinessLogicTest {
         };
         businessLogic.oa = new OpenAgency() {
             @Override
-            public OpenAgency.LibraryRule libraryRule(String agencyId) {
+            public OpenAgencyLibraryRule libraryRule(String agencyId) {
                 try {
                     JsonNode json = O.readTree(openAgency.resolve(agencyId + ".json").toFile());
                     return buildLibraryRule(agencyId, (ObjectNode) json);

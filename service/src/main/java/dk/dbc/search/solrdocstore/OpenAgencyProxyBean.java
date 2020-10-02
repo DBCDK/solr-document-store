@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -13,6 +14,10 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+
+import dk.dbc.openagency.http.OpenAgencyException;
+import dk.dbc.openagency.http.VipCoreHttpClient;
+import dk.dbc.vipcore.marshallers.LibraryRules;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -39,6 +44,9 @@ public class OpenAgencyProxyBean {
 
     @Inject
     Config config;
+
+    @Inject
+    private VipCoreHttpClient vipCoreHttpClient;
 
     @Timed
     public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
@@ -72,6 +80,7 @@ public class OpenAgencyProxyBean {
     }
 
     public JsonNode fetchOpenAgencyJSON(int agencyId) throws IOException {
+        log.debug("hello from fetchOpenAgencyJson");
         URI uri = UriBuilder.fromUri(URI.create(config.getOaURL()))
                 .queryParam("action", "libraryRules")
                 .queryParam("agencyId", String.format("%06d", agencyId))
@@ -83,6 +92,16 @@ public class OpenAgencyProxyBean {
                 .buildGet()
                 .invoke();
         String content = resp.readEntity(String.class);
+        // vipcore
+        final String url = VipCoreHttpClient.LIBRARY_RULES_PATH + String.format("%06d", agencyId);
+        try {
+            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), url);
+            LibraryRules vipCoreLibRules = O.readValue(vipCoreResponse, LibraryRules.class);
+            log.debug("vipCore LibraryRules: {}", vipCoreLibRules);
+        } catch (OpenAgencyException e) {
+            log.error("Error occurred when calling vipcore endpoint {}: {}", config.getVipCoreEndpoint() + url, e.getMessage());
+        }
+
         if (resp.getStatusInfo().equals(Response.Status.OK) &&
             resp.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
             return O.readTree(content);

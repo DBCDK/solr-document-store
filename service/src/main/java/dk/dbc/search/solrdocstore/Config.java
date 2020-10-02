@@ -28,6 +28,7 @@ public class Config {
     private int[] openAgencyValidateTime;
     private long deleteMarkedDelay;
     private long holdingsQueueDelay;
+    private String vipCoreEndpoint;
 
     @PostConstruct
     public void loadProperties() {
@@ -41,10 +42,15 @@ public class Config {
         // Number of milliseconds to delay bib entities that are being deleted
         deleteMarkedDelay = getValue(props, "deleteMarkedDelay", "DELETE_MARKED_DELAY", "200000", null, Long::parseUnsignedLong);
         holdingsQueueDelay = getValue(props, "holdingsQueueDelay", "HOLDINGS_QUEUE_DELAY", "300000", null, Long::parseUnsignedLong);
+        vipCoreEndpoint = getValue(props, "vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
     }
 
     public String getOaURL() {
         return oaURL;
+    }
+
+    public String getVipCoreEndpoint() {
+        return vipCoreEndpoint;
     }
 
     public long getJobPruneMinutes() {

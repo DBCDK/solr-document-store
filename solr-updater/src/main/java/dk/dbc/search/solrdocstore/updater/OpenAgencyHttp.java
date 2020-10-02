@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
@@ -14,6 +15,8 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import dk.dbc.openagency.http.VipCoreHttpClient;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.slf4j.Logger;
@@ -33,6 +36,9 @@ public class OpenAgencyHttp {
 
     @Inject
     Config config;
+
+    @EJB
+    private VipCoreHttpClient vipCoreHttpClient;
 
     private static final RetryPolicy RETRY_POLICY = new RetryPolicy<>()
             .handle(Exception.class)

@@ -13,4 +13,20 @@ public enum LibraryType {
     public static final int SCHOOL_COMMON_AGENCY = 300000;
 
     public static final EnumSet<LibraryType> FBS_LIBS = EnumSet.of(FBS, FBSSchool);
+
+    public static LibraryType libraryTypeFromAgency(int agencyId) {
+        LibraryType type = LibraryType.FBS;
+        if (agencyId < 400000) {
+            type = LibraryType.FBSSchool;
+        }
+        if (agencyId >= 800000) {
+            type = LibraryType.NonFBS;
+        }
+        if (agencyId >= 900000) {
+            type = LibraryType.Missing;
+        }
+        return type;
+    }
+
 }
+

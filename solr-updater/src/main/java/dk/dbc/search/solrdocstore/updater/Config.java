@@ -56,6 +56,7 @@ public class Config {
     private long maxQueryTime;
     private int threads;
     private String openAgencyUrl;
+    private String vipCoreEndpoint;
     private long openAgencyTimeout;
     private long openAgencyAge;
     private long openAgencyFailureAge;
@@ -124,6 +125,10 @@ public class Config {
         jsonStash = get("jsonStash", "JSON_STASH", "");
         if (!jsonStash.isEmpty() && solrCollections.size() != 1)
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
+        vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk");
+        if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
+            throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
+        }
     }
 
     protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
@@ -322,4 +327,7 @@ public class Config {
                 .filter(s -> !s.isEmpty());
     }
 
+    public String getVipCoreEndpoint() {
+        return vipCoreEndpoint;
+    }
 }
