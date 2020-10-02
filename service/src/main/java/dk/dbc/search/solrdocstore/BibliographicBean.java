@@ -1,8 +1,11 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,6 +30,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import dk.dbc.openagency.http.OpenAgencyException;
+import dk.dbc.openagency.http.VipCoreHttpClient;
+import dk.dbc.vipcore.marshallers.LibraryRules;
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import org.slf4j.Logger;
@@ -47,6 +55,12 @@ public class BibliographicBean {
 
     @Inject
     OpenAgencyBean openAgency;
+
+    @Inject
+    VipCoreHttpClient vipCoreHttpClient;
+
+    @Inject
+    Config config;
 
     @Inject
     HoldingsToBibliographicBean h2bBean;
@@ -116,6 +130,25 @@ public class BibliographicBean {
     }
 
     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin, boolean queueAll) {
+        int agencyId = bibliographicEntity.getAgencyId();
+        try {
+            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
+            log.debug("Got this when calling vipCore for agency {}: {}", agencyId, vipCoreResponse);
+            LibraryRulesResponse libraryRulesResponse = new ObjectMapper().readValue(vipCoreResponse, LibraryRulesResponse.class);
+            List<LibraryRules> libraryRulesList = libraryRulesResponse.getLibraryRules();
+            for (LibraryRules lr : libraryRulesList) {
+                OpenAgencyEntity oa = new OpenAgencyEntity(lr);
+                log.debug("Got this libraryRules object: {}", oa.toString());
+            }
+        } catch (OpenAgencyException e) {
+            log.error("Error happened while fetching vipCore stuff for agency {}: {}", agencyId, e.getMessage());
+        } catch (JsonMappingException e) {
+            log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());
+            log.debug("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e);
+        } catch (JsonProcessingException e) {
+            log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());
+            log.debug("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e);
+        }
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
         if (bibliographicEntity.getClassifier() == null) {

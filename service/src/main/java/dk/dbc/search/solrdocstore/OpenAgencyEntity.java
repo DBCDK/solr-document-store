@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import javax.persistence.EnumType;
@@ -49,19 +50,23 @@ public class OpenAgencyEntity implements Serializable {
         this.valid = true;
     }
 
-    private static boolean getLibraryRuleBoolean(Stream<LibraryRule> libraryRuleStream, String libraryRuleName) {
-        final LibraryRule libRule = libraryRuleStream.filter(lr -> lr.getName().equals(libraryRuleName)).findFirst().orElse(null);
-        return libRule != null ? libRule.getBool() : false;
+    private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
+        for (LibraryRule lr : libraryRuleList) {
+            if (libraryRuleName.equals(lr.getName())) {
+                return lr.getBool();
+            }
+        }
+        return false;
     }
 
     public OpenAgencyEntity(LibraryRules libraryRules) {
         Integer aId = Integer.valueOf(libraryRules.getAgencyId());
         this.agencyId = aId == null ? -1 : aId;
         this.libraryType = LibraryType.libraryTypeFromAgency(agencyId);
-        Stream<LibraryRule> libraryRuleStream = libraryRules.getLibraryRule().stream();
-        this.authCreateCommonRecord = getLibraryRuleBoolean(libraryRuleStream, "auth_create_common_record");
-        this.partOfBibDk = getLibraryRuleBoolean(libraryRuleStream, "part_of_bibliotek_dk");
-        this.partOfDanbib = getLibraryRuleBoolean(libraryRuleStream, "part_of_danbib");
+        List<LibraryRule> libraryRuleList = libraryRules.getLibraryRule();
+        this.authCreateCommonRecord = getLibraryRuleBoolean(libraryRuleList, "auth_create_common_record");
+        this.partOfBibDk = getLibraryRuleBoolean(libraryRuleList, "part_of_bibliotek_dk");
+        this.partOfDanbib = getLibraryRuleBoolean(libraryRuleList, "part_of_danbib");
         this.fetched = Timestamp.from(Instant.now());
         this.valid = true;
     }
