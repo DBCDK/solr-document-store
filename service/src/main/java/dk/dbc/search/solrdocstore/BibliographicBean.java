@@ -130,25 +130,6 @@ public class BibliographicBean {
     }
 
     void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin, boolean queueAll) {
-        int agencyId = bibliographicEntity.getAgencyId();
-        try {
-            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
-            log.debug("Got this when calling vipCore for agency {}: {}", agencyId, vipCoreResponse);
-            LibraryRulesResponse libraryRulesResponse = new ObjectMapper().readValue(vipCoreResponse, LibraryRulesResponse.class);
-            List<LibraryRules> libraryRulesList = libraryRulesResponse.getLibraryRules();
-            for (LibraryRules lr : libraryRulesList) {
-                OpenAgencyEntity oa = new OpenAgencyEntity(lr);
-                log.debug("Got this libraryRules object: {}", oa.toString());
-            }
-        } catch (OpenAgencyException e) {
-            log.error("Error happened while fetching vipCore stuff for agency {}: {}", agencyId, e.getMessage());
-        } catch (JsonMappingException e) {
-            log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());
-            log.debug("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e);
-        } catch (JsonProcessingException e) {
-            log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());
-            log.debug("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e);
-        }
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
         if (bibliographicEntity.getClassifier() == null) {

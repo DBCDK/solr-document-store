@@ -35,7 +35,7 @@ public class OpenAgencyProxyBeanTest {
 
     @Test
     public void openAgencyParser15() throws Exception {
-        System.out.println("openAgencyParser");
+        System.out.println("openAgencyParser15");
 
         OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(150059);
         System.out.println("150059 = " + openAgency);

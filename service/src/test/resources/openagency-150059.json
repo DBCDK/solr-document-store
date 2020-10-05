@@ -1,89 +1,101 @@
 {
-    "libraryRulesResponse": {
-        "libraryRules": [{
-                "agencyId": {
-                    "$": "150059",
-                    "@": "oa"
+    "libraryRules": [
+        {
+            "agencyId": "150059",
+            "libraryRule": [
+                {
+                    "name": "create_enrichments",
+                    "bool": false
                 },
-                "agencyType": {
-                    "@": "oa"
+                {
+                    "name": "use_enrichments",
+                    "bool": false
                 },
-                "libraryRule": [{
-                        "name": {
-                            "$": "create_enrichments",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }, {
-                        "name": {
-                            "$": "use_enrichments",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }, {
-                        "name": {
-                            "$": "use_localdata_stream",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }, {
-                        "name": {
-                            "$": "use_holdings_item",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }, {
-                        "name": {
-                            "$": "part_of_bibliotek_dk",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }, {
-                        "name": {
-                            "$": "auth_create_common_record",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }, {
-                        "name": {
-                            "$": "part_of_danbib",
-                            "@": "oa"
-                        },
-                        "bool": {
-                            "$": "0",
-                            "@": "oa"
-                        },
-                        "@": "oa"
-                    }],
-                "@": "oa"
-            }],
-        "@": "oa"
-    },
-    "@namespaces": {
-        "oa": "http:\/\/oss.dbc.dk\/ns\/openagency"
-    }
+                {
+                    "name": "auth_root",
+                    "bool": false
+                },
+                {
+                    "name": "auth_common_subjects",
+                    "bool": false
+                },
+                {
+                    "name": "auth_common_notes",
+                    "bool": false
+                },
+                {
+                    "name": "auth_dbc_records",
+                    "bool": false
+                },
+                {
+                    "name": "auth_public_lib_common_record",
+                    "bool": false
+                },
+                {
+                    "name": "auth_ret_record",
+                    "bool": false
+                },
+                {
+                    "name": "auth_agency_common_record",
+                    "bool": false
+                },
+                {
+                    "name": "auth_export_holdings",
+                    "bool": false
+                },
+                {
+                    "name": "use_localdata_stream",
+                    "bool": false
+                },
+                {
+                    "name": "use_holdings_item",
+                    "bool": false
+                },
+                {
+                    "name": "part_of_bibliotek_dk",
+                    "bool": false
+                },
+                {
+                    "name": "auth_create_common_record",
+                    "bool": false
+                },
+                {
+                    "name": "ims_library",
+                    "bool": false
+                },
+                {
+                    "name": "worldcat_synchronize",
+                    "bool": false
+                },
+                {
+                    "name": "worldcat_resource_sharing",
+                    "bool": false
+                },
+                {
+                    "name": "cataloging_template_set",
+                    "string": ""
+                },
+                {
+                    "name": "part_of_danbib",
+                    "bool": false
+                },
+                {
+                    "name": "auth_add_dk5_to_phd",
+                    "bool": false
+                },
+                {
+                    "name": "auth_metacompass",
+                    "bool": false
+                },
+                {
+                    "name": "view_metacompass",
+                    "bool": false
+                },
+                {
+                    "name": "use_central_faust",
+                    "bool": false
+                }
+            ]
+        }
+    ]
 }

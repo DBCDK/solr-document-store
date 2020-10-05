@@ -1,7 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import static dk.dbc.search.solrdocstore.LibraryType.libraryTypeFromAgency;
-
 /**
  *
  * @author DBC {@literal <dbc.dk>}
@@ -10,6 +8,20 @@ public class OpenAgencyUtil {
 
     public static int COMMON_AGENCY = LibraryType.COMMON_AGENCY;
     public static int SCHOOL_COMMON_AGENCY = LibraryType.SCHOOL_COMMON_AGENCY;
+
+    private static LibraryType libraryTypeFromAgency(int agencyId) {
+        LibraryType type = LibraryType.FBS;
+        if (agencyId < 400000) {
+            type = LibraryType.FBSSchool;
+        }
+        if (agencyId >= 800000) {
+            type = LibraryType.NonFBS;
+        }
+        if (agencyId >= 900000) {
+            type = LibraryType.Missing;
+        }
+        return type;
+    }
 
     /**
      *

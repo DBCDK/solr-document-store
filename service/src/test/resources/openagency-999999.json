@@ -1,8 +1,7 @@
 {
-    "libraryRulesResponse": {
-        "@": "oa"
-    },
-    "@namespaces": {
-        "oa": "http:\/\/oss.dbc.dk\/ns\/openagency"
-    }
+    "libraryRules": [
+        {
+            "agencyId": "999999",
+        }
+    ]
 }

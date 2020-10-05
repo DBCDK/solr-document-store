@@ -1,7 +1,14 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
+import dk.dbc.openagency.http.OpenAgencyException;
+import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -20,6 +27,7 @@ import javax.persistence.Enumerated;
 public class OpenAgencyEntity implements Serializable {
 
     private static final long serialVersionUID = 2352663426617537636L;
+    private static final String SCHOOLLIBRARY = "Skolebibliotek";
 
     @Id
     private int agencyId;
@@ -59,10 +67,22 @@ public class OpenAgencyEntity implements Serializable {
         return false;
     }
 
+    private LibraryType getLibraryTypeFromLibraryRules(LibraryRules libraryRules) {
+        LibraryType agencyType = LibraryType.NonFBS;
+        if (getLibraryRuleBoolean(libraryRules.getLibraryRule(), "use_enrichments")) {
+            if (SCHOOLLIBRARY.equals(libraryRules.getAgencyType())) {
+                agencyType = LibraryType.FBSSchool;
+            } else {
+                agencyType = LibraryType.FBS;
+            }
+        }
+        return agencyType;
+    }
+
     public OpenAgencyEntity(LibraryRules libraryRules) {
         Integer aId = Integer.valueOf(libraryRules.getAgencyId());
         this.agencyId = aId == null ? -1 : aId;
-        this.libraryType = LibraryType.libraryTypeFromAgency(agencyId);
+        this.libraryType = getLibraryTypeFromLibraryRules(libraryRules);
         List<LibraryRule> libraryRuleList = libraryRules.getLibraryRule();
         this.authCreateCommonRecord = getLibraryRuleBoolean(libraryRuleList, "auth_create_common_record");
         this.partOfBibDk = getLibraryRuleBoolean(libraryRuleList, "part_of_bibliotek_dk");
