@@ -1,16 +1,12 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
-import dk.dbc.openagency.http.OpenAgencyException;
-import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
-import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -18,9 +14,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 @Entity
 @Table(name = "OpenAgencyCache")

@@ -1,21 +1,18 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
-import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 
+import javax.ejb.EJBException;
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import javax.ejb.EJBException;
-import javax.persistence.EntityManager;
 
-import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 
 public class BeanFactoryUtil {
 

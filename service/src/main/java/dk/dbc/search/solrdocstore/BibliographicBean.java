@@ -1,21 +1,13 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -30,15 +22,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import dk.dbc.openagency.http.OpenAgencyException;
-import dk.dbc.openagency.http.VipCoreHttpClient;
-import dk.dbc.vipcore.marshallers.LibraryRules;
-import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
-import org.eclipse.microprofile.metrics.annotation.Timed;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static dk.dbc.log.LogWith.track;
 import static dk.dbc.search.solrdocstore.RecordType.SingleRecord;
@@ -55,12 +47,6 @@ public class BibliographicBean {
 
     @Inject
     OpenAgencyBean openAgency;
-
-    @Inject
-    VipCoreHttpClient vipCoreHttpClient;
-
-    @Inject
-    Config config;
 
     @Inject
     HoldingsToBibliographicBean h2bBean;

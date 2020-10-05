@@ -9,20 +9,6 @@ public class OpenAgencyUtil {
     public static int COMMON_AGENCY = LibraryType.COMMON_AGENCY;
     public static int SCHOOL_COMMON_AGENCY = LibraryType.SCHOOL_COMMON_AGENCY;
 
-    private static LibraryType libraryTypeFromAgency(int agencyId) {
-        LibraryType type = LibraryType.FBS;
-        if (agencyId < 400000) {
-            type = LibraryType.FBSSchool;
-        }
-        if (agencyId >= 800000) {
-            type = LibraryType.NonFBS;
-        }
-        if (agencyId >= 900000) {
-            type = LibraryType.Missing;
-        }
-        return type;
-    }
-
     /**
      *
      * agencyId last digit less than 5 gives part_of_danbib
@@ -45,7 +31,17 @@ public class OpenAgencyUtil {
     }
 
     public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId, boolean authCreateCommonRecord, boolean partOfBibDk, boolean partOfDanbib) {
-        return new OpenAgencyEntity(agencyId, libraryTypeFromAgency(agencyId), authCreateCommonRecord, partOfBibDk, partOfDanbib);
+        LibraryType type = LibraryType.FBS;
+        if (agencyId < 400000) {
+            type = LibraryType.FBSSchool;
+        }
+        if (agencyId >= 800000) {
+            type = LibraryType.NonFBS;
+        }
+        if (agencyId >= 900000) {
+            type = LibraryType.Missing;
+        }
+        return new OpenAgencyEntity(agencyId, type, authCreateCommonRecord, partOfBibDk, partOfDanbib);
     }
 
 }

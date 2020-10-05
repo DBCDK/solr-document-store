@@ -2,6 +2,7 @@ FROM docker.dbc.dk/payara5-micro:latest
 
 LABEL DOCSTORE_POSTGRES_URL="Database url (required)" \
       SYSTEM_NAME="System (repository) name (optional)"\
+      VIPCORE_ENDPOINT="Url for VipCore"\
       MAX_POOL_SIZE="Max number of connections to the database (default: 30)" \
       ALLOW_NON_EMPTY_SCHEMA="Allow tables in database when doing first migrate" \
       DELETE_MARKED_DELAY="How many ms a deleted bibliographic item should be delayed for processing (default: 200000)" \
