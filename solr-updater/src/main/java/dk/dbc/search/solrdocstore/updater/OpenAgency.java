@@ -61,8 +61,8 @@ public class OpenAgency {
             this.auth_create_common_record = auth_create_common_record;
         }
 
-        private static boolean getLibraryRuleBoolean(@NotNull List<LibraryRule> libraryRuleList, String libraryRuleName) {
-            LibraryRule libraryRule = Iterables.find(libraryRuleList, lr -> lr.getName().equals(libraryRuleName), null);
+        private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
+            LibraryRule libraryRule = libraryRuleList != null ? Iterables.find(libraryRuleList, lr -> lr != null && lr.getName().equals(libraryRuleName), null) : null;
             return libraryRule != null && libraryRule.getBool();
         }
 
