@@ -13,7 +13,6 @@ import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -52,6 +52,7 @@ public class OpenAgencyEntity implements Serializable {
         this.valid = true;
     }
 
+    @SuppressFBWarnings(value = {"NP_NONNULL_PARAM_VIOLATION", "RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE"})
     private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
         LibraryRule libraryRule = libraryRuleList != null ? Iterables.find(libraryRuleList, lr -> lr != null && lr.getName().equals(libraryRuleName), null) : null;
         return libraryRule != null && libraryRule.getBool();
