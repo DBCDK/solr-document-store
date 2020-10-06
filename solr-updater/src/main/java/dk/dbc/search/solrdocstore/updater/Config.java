@@ -55,7 +55,6 @@ public class Config {
     private int maxTries;
     private long maxQueryTime;
     private int threads;
-    private String openAgencyUrl;
     private String vipCoreEndpoint;
     private long openAgencyTimeout;
     private long openAgencyAge;
@@ -105,7 +104,6 @@ public class Config {
         threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
         maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
         appId = get("solrAppId", "SOLR_APPID", null);
-        openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
         openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
@@ -214,10 +212,6 @@ public class Config {
 
     public int getThreads() {
         return threads;
-    }
-
-    public String getOpenAgencyUrl() {
-        return openAgencyUrl;
     }
 
     public long getOpenAgencyAge() {
