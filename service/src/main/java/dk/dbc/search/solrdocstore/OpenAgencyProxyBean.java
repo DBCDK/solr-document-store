@@ -26,15 +26,6 @@ public class OpenAgencyProxyBean {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAgencyProxyBean.class);
 
-    private static final ObjectMapper O = new ObjectMapper();
-    private static final String SCHOOLLIBRARY = "Skolebibliotek";
-
-    private static final RetryPolicy RETRY_POLICY = new RetryPolicy<>()
-            .handle(Exception.class)
-            .handleResult(null)
-            .withDelay(Duration.ofMillis(250))
-            .withMaxRetries(4);
-
     @Inject
     Config config;
 
@@ -46,7 +37,7 @@ public class OpenAgencyProxyBean {
         try {
             String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
             LibraryRulesResponse libraryRulesResponse = new ObjectMapper().readValue(vipCoreResponse, LibraryRulesResponse.class);
-            return new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
+            return libraryRulesResponse == null ? null : new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
         } catch (OpenAgencyException e) {
             log.error("Error happened while fetching vipCore library rules for agency {}: {}", agencyId, e.getMessage());
             throw new EJBException(e);

@@ -36,7 +36,6 @@ import java.util.concurrent.ExecutionException;
 public class DocTest {
 
     private static final Logger log = LoggerFactory.getLogger(DocTest.class);
-    private final static ObjectMapper O = new ObjectMapper();
 
     @Inject
     Config config;

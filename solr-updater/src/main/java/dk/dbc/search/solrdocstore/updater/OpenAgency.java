@@ -24,6 +24,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.util.ArrayList;
@@ -60,9 +61,9 @@ public class OpenAgency {
             this.auth_create_common_record = auth_create_common_record;
         }
 
-        private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
+        private static boolean getLibraryRuleBoolean(@NotNull List<LibraryRule> libraryRuleList, String libraryRuleName) {
             LibraryRule libraryRule = Iterables.find(libraryRuleList, lr -> lr.getName().equals(libraryRuleName), null);
-            return libraryRule == null ? false : libraryRule.getBool();
+            return libraryRule != null && libraryRule.getBool();
         }
 
         public OpenAgencyLibraryRule(LibraryRules vipCoreLibraryRules) {
@@ -152,7 +153,7 @@ public class OpenAgency {
             final String path = VipCoreHttpClient.LIBRARY_RULES_PATH + agencyId;
             final String responseFromVipCore = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), path);
             final LibraryRulesResponse libraryRulesResponse = O.readValue(responseFromVipCore, LibraryRulesResponse.class);
-            return Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null);
+            return libraryRulesResponse == null ? null : Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null);
         } catch (OpenAgencyException | JsonProcessingException e) {
             log.error("OA Exception when fetching from vipCore for agency {}: {}", agencyId, e.getMessage());
             log.debug("OA Exception when fetching from vipCore for agency {}: {}", agencyId, e);

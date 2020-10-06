@@ -10,6 +10,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -52,9 +53,9 @@ public class OpenAgencyEntity implements Serializable {
         this.valid = true;
     }
 
-    private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
+    private static boolean getLibraryRuleBoolean(@NotNull List<LibraryRule> libraryRuleList, String libraryRuleName) {
         LibraryRule libraryRule = Iterables.find(libraryRuleList, lr -> lr.getName().equals(libraryRuleName), null);
-        return libraryRule == null ? false : libraryRule.getBool();
+        return libraryRule != null && libraryRule.getBool();
     }
 
     private LibraryType getLibraryTypeFromLibraryRules(LibraryRules libraryRules) {
