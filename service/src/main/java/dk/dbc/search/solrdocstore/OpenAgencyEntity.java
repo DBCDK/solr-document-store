@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import com.google.common.collect.Iterables;
 import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -52,12 +53,8 @@ public class OpenAgencyEntity implements Serializable {
     }
 
     private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
-        for (LibraryRule lr : libraryRuleList) {
-            if (libraryRuleName.equals(lr.getName())) {
-                return lr.getBool();
-            }
-        }
-        return false;
+        LibraryRule libraryRule = Iterables.find(libraryRuleList, lr -> lr.getName().equals(libraryRuleName), null);
+        return libraryRule == null ? false : libraryRule.getBool();
     }
 
     private LibraryType getLibraryTypeFromLibraryRules(LibraryRules libraryRules) {
