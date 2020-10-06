@@ -12,6 +12,8 @@ import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +62,9 @@ public class OpenAgency {
             this.auth_create_common_record = auth_create_common_record;
         }
 
+        @SuppressFBWarnings(value = {"NP_NONNULL_PARAM_VIOLATION", "RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE"})
         private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
-            LibraryRule libraryRule = libraryRuleList != null ? Iterables.find(libraryRuleList, lr -> lr != null && lr.getName().equals(libraryRuleName), null) : null;
+            LibraryRule libraryRule = Iterables.find(libraryRuleList, lr -> lr != null && lr.getName().equals(libraryRuleName), null);
             return libraryRule != null && libraryRule.getBool();
         }
 
@@ -147,6 +150,7 @@ public class OpenAgency {
         }
     }
 
+    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     private LibraryRules libraryRulesFromVipCore(String agencyId) {
         try {
             final String path = VipCoreHttpClient.LIBRARY_RULES_PATH + agencyId;

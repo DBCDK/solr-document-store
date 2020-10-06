@@ -8,6 +8,7 @@ import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ public class OpenAgencyProxyBean {
     private VipCoreHttpClient vipCoreHttpClient;
 
     @Timed
+    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
         try {
             String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
