@@ -1,21 +1,17 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.dbc.openagency.http.OpenAgencyException;
-import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import dk.dbc.search.solrdocstore.updater.SolrCollection;
-import java.io.IOException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import javax.ejb.EJB;
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -26,12 +22,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import dk.dbc.vipcore.marshallers.LibraryRules;
-import org.apache.solr.client.solrj.util.ClientUtils;
-import org.apache.solr.common.SolrInputDocument;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -42,42 +36,13 @@ import org.slf4j.LoggerFactory;
 public class DocTest {
 
     private static final Logger log = LoggerFactory.getLogger(DocTest.class);
+    private final static ObjectMapper O = new ObjectMapper();
 
     @Inject
     Config config;
 
     @Inject
     DocProducer docProducer;
-
-    @EJB
-    VipCoreHttpClient vipCoreHttpClient;
-
-
-    private LibraryRules libraryRulesFromVipCore(String agencyId) {
-        final ObjectMapper O = new ObjectMapper();
-        try {
-            final String path = VipCoreHttpClient.LIBRARY_RULES_PATH + agencyId;
-            final String responseFromVipCore = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), path);
-            final LibraryRules res = O.readValue(responseFromVipCore, LibraryRules.class);
-        } catch (OpenAgencyException e) {
-            log.error("OA Exception when fetching from vipCore for agency {}: {}", agencyId, e.getMessage());
-        } catch (JsonMappingException e) {
-            log.error("JsonMapping exception when unmarshalling vipCore response for agency {}: {}", agencyId, e.getMessage());
-        } catch (JsonProcessingException e) {
-            log.error("JsonProcessingEx when unmarshalling vipCore response for agency {}: {}", agencyId, e.getMessage());
-        }
-        return null;
-    }
-
-
-    @GET
-    @Produces("application/json")
-    @Path("libRule/{agencyId}")
-    public Response libRule(@PathParam("agencyId") String agencyId) {
-        log.debug("libRule called for agency {}", agencyId);
-        final LibraryRules res = libraryRulesFromVipCore(agencyId);
-        return Response.ok(res, MediaType.APPLICATION_JSON_TYPE).build();
-    }
 
     @GET
     @Produces(MediaType.APPLICATION_XML)

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.openagency.http.VipCoreHttpClient;
-import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import net.jodah.failsafe.RetryPolicy;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -17,7 +16,6 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.time.Duration;
-import java.util.List;
 
 /**
  *
@@ -48,9 +46,7 @@ public class OpenAgencyProxyBean {
         try {
             String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
             LibraryRulesResponse libraryRulesResponse = new ObjectMapper().readValue(vipCoreResponse, LibraryRulesResponse.class);
-            List<LibraryRules> libraryRulesList = libraryRulesResponse.getLibraryRules();
-            final LibraryRules libraryRules = Iterables.getFirst(libraryRulesList, null);
-            return new OpenAgencyEntity(libraryRules);
+            return new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
         } catch (OpenAgencyException e) {
             log.error("Error happened while fetching vipCore library rules for agency {}: {}", agencyId, e.getMessage());
             throw new EJBException(e);

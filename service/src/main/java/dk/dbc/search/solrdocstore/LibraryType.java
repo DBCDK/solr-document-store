@@ -15,4 +15,3 @@ public enum LibraryType {
     public static final EnumSet<LibraryType> FBS_LIBS = EnumSet.of(FBS, FBSSchool);
 
 }
-
