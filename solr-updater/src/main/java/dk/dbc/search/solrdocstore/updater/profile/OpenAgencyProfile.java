@@ -55,9 +55,9 @@ public class OpenAgencyProfile implements Serializable {
         this.includeOwnHoldings = vipCoreProfileResponse.getIncludeOwnHoldings();
     }
 
-    public static OpenAgencyProfile errorProfile(ErrorType errorType) {
+    public static OpenAgencyProfile errorProfile(String errorText) {
         OpenAgencyProfile res = new OpenAgencyProfile();
-        res.error = errorType.value();
+        res.error = errorText;
         res.success = false;
         return res;
     }

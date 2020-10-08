@@ -81,13 +81,12 @@ public class ProfileServiceBean {
             log.debug("vipCoreResponse was: {}", vipCoreResponse);
             ProfileServiceResponse profileServiceResponse = O.readValue(vipCoreResponse, ProfileServiceResponse.class);
             log.trace("response for agency {} is: {}", agencyId, profileServiceResponse);
-            return profileServiceResponse.getError() == null ? new OpenAgencyProfile(profileServiceResponse) : OpenAgencyProfile.errorProfile(profileServiceResponse.getError());
+            return profileServiceResponse.getError() == null
+                    ? new OpenAgencyProfile(profileServiceResponse)
+                    : OpenAgencyProfile.errorProfile(profileServiceResponse.getError().value());
         } catch (OpenAgencyException e) {
             log.error("Error when fetching profile {} for agencyId {}", profile, agencyId);
-            OpenAgencyProfile res = new OpenAgencyProfile();
-            res.success = false;
-            res.error = e.getMessage();
-            return res;
+            return OpenAgencyProfile.errorProfile(e.getMessage());
         } catch (JsonProcessingException e) {
             log.error("Error when processing response from VipCore profileservice for agency {} and profile {}: {}", agencyId, profile, e.getMessage());
             log.debug("Error when processing response from VipCore profileservice for agency {} and profile {}: {}", agencyId, profile, e);
