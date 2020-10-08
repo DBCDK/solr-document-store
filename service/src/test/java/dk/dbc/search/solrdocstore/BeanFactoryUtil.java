@@ -134,7 +134,7 @@ public class BeanFactoryUtil {
                     LibraryRulesResponse libraryRulesResponse =
                             new ObjectMapper().readValue(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource), LibraryRulesResponse.class);
                     return new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     throw new EJBException(ex);
                 }
             }
