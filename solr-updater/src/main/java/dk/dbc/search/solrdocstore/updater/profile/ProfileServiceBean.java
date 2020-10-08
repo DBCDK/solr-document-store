@@ -18,8 +18,13 @@
  */
 package dk.dbc.search.solrdocstore.updater.profile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hazelcast.config.OnJoinPermissionOperationName;
+import dk.dbc.openagency.http.OpenAgencyException;
+import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.search.solrdocstore.updater.Config;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,12 +32,16 @@ import java.net.URI;
 import java.rmi.ServerException;
 import java.util.HashMap;
 import javax.cache.annotation.CacheResult;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import dk.dbc.vipcore.marshallers.ErrorType;
+import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +51,8 @@ import org.slf4j.LoggerFactory;
  */
 @Stateless
 public class ProfileServiceBean {
+
+    private final static String vipCoreProfileServicePath = "profileservice"; // should be a constant in vipCore...
 
     private static final Logger log = LoggerFactory.getLogger(ProfileServiceBean.class);
     private static final ObjectMapper O = new ObjectMapper()
@@ -53,25 +64,34 @@ public class ProfileServiceBean {
     @Inject
     public Config config;
 
+    @Inject
+    VipCoreHttpClient vipCoreHttpClient;
+
     @CacheResult(cacheName = "oaProfile",
                  exceptionCacheName = "oaProfileError",
                  cachedExceptions = {ClientErrorException.class,
                                      ServerErrorException.class})
-    public Profile getProfile(String agencyId, String profile) {
-        URI uri = config.getProfileServiceUrl()
-                .buildFromMap(new PropsMap()
-                        .with("agencyId", agencyId)
-                        .with("profile", profile));
-        try (InputStream is = get(uri)) {
-            Profile response = O.readValue(is, Profile.class);
-            if (!response.success)
-                throw new ServerException("Profile error: " + response.error);
-            return response;
-        } catch (IOException ex) {
-            log.error("Error processing OpenAgency response for profile: {}-{}: {}", agencyId, profile, ex.getMessage());
-            log.debug("Error processing OpenAgency response for profile: {}-{}: ", agencyId, profile, ex);
-            throw new ServerErrorException("Error processing profile-service response for " + agencyId + "-" + profile,
-                                           Response.Status.INTERNAL_SERVER_ERROR, ex);
+    public OpenAgencyProfile getOpenAgencyProfile(String agencyId, String profile) {
+        try {
+            if (vipCoreHttpClient == null) {
+                log.trace("vipCoreClient is null for some reason");
+                vipCoreHttpClient = new VipCoreHttpClient();
+            }
+            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), vipCoreProfileServicePath + "/search/" + agencyId + "/" + profile);
+            log.debug("vipCoreResponse was: {}", vipCoreResponse);
+            ProfileServiceResponse profileServiceResponse = O.readValue(vipCoreResponse, ProfileServiceResponse.class);
+            log.trace("response for agency {} is: {}", agencyId, profileServiceResponse);
+            return profileServiceResponse.getError() == null ? new OpenAgencyProfile(profileServiceResponse) : OpenAgencyProfile.errorProfile(profileServiceResponse.getError());
+        } catch (OpenAgencyException e) {
+            log.error("Error when fetching profile {} for agencyId {}", profile, agencyId);
+            OpenAgencyProfile res = new OpenAgencyProfile();
+            res.success = false;
+            res.error = e.getMessage();
+            return res;
+        } catch (JsonProcessingException e) {
+            log.error("Error when processing response from VipCore profileservice for agency {} and profile {}: {}", agencyId, profile, e.getMessage());
+            log.debug("Error when processing response from VipCore profileservice for agency {} and profile {}: {}", agencyId, profile, e);
+            throw new RuntimeException(e);
         }
     }
 

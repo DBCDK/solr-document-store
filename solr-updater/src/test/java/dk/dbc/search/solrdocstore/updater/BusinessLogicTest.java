@@ -21,9 +21,8 @@ package dk.dbc.search.solrdocstore.updater;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Iterables;
-import dk.dbc.search.solrdocstore.updater.profile.Profile;
+import dk.dbc.search.solrdocstore.updater.profile.OpenAgencyProfile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.File;
 import java.io.IOException;
@@ -109,16 +108,16 @@ public class BusinessLogicTest {
 
     private static final ProfileServiceBean MOCK_PROFILE_SERVICE_BEAN = new ProfileServiceBean() {
         @Override
-        public Profile getProfile(String agencyId, String profile) {
+        public OpenAgencyProfile getOpenAgencyProfile(String agencyId, String profile) {
             switch (agencyId + "-" + profile) {
                 case "102030-self":
-                    return new Profile(true);
+                    return new OpenAgencyProfile(true);
                 case "102030-magic":
-                    return new Profile(true, "110000-foobar", "220000-katalog");
+                    return new OpenAgencyProfile(true, "110000-foobar", "220000-katalog");
                 case "123456-basic":
-                    return new Profile(false, "110000-foobar", "220000-katalog");
+                    return new OpenAgencyProfile(false, "110000-foobar", "220000-katalog");
                 case "876543-self":
-                    return new Profile(true);
+                    return new OpenAgencyProfile(true);
                 default:
                     throw new AssertionError();
             }

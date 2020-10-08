@@ -18,7 +18,12 @@
  */
 package dk.dbc.search.solrdocstore.updater.profile;
 
+import dk.dbc.vipcore.marshallers.ErrorType;
+import dk.dbc.vipcore.marshallers.Profile;
+import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -27,28 +32,41 @@ import java.util.Objects;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class Profile implements Serializable {
+public class OpenAgencyProfile implements Serializable {
 
     private static final long serialVersionUID = 7173963836276661255L;
 
     public boolean success;
     public String error;
     public boolean includeOwnHoldings;
-    public List<String> search;
+    public List<String> collectionIdentifiers;
 
-    public Profile() {
+    public OpenAgencyProfile() {
     }
 
-    public Profile(boolean includeOwnHoldings, String... search) {
+    public OpenAgencyProfile(boolean includeOwnHoldings, String... collectionIdentifiers) {
         this.includeOwnHoldings = includeOwnHoldings;
-        this.search = Arrays.asList(search);
+        this.collectionIdentifiers = Arrays.asList(collectionIdentifiers);
+    }
+
+    public OpenAgencyProfile(ProfileServiceResponse vipCoreProfileResponse) {
+        this.collectionIdentifiers = new ArrayList<>(vipCoreProfileResponse.getCollectionIdentifiers());
+        this.success = true;
+        this.includeOwnHoldings = vipCoreProfileResponse.getIncludeOwnHoldings();
+    }
+
+    public static OpenAgencyProfile errorProfile(ErrorType errorType) {
+        OpenAgencyProfile res = new OpenAgencyProfile();
+        res.error = errorType.value();
+        res.success = false;
+        return res;
     }
 
     @Override
     public int hashCode() {
         int hash = 3;
         hash = 67 * hash + ( this.includeOwnHoldings ? 1 : 0 );
-        hash = 67 * hash + Objects.hashCode(this.search);
+        hash = 67 * hash + Objects.hashCode(this.collectionIdentifiers);
         return hash;
     }
 
@@ -58,15 +76,15 @@ public class Profile implements Serializable {
             return true;
         if (obj == null || getClass() != obj.getClass())
             return false;
-        final Profile other = (Profile) obj;
+        final OpenAgencyProfile other = (OpenAgencyProfile) obj;
         return this.includeOwnHoldings == other.includeOwnHoldings &&
-               Objects.equals(this.search, other.search);
+               Objects.equals(this.collectionIdentifiers, other.collectionIdentifiers);
     }
 
     @Override
     public String toString() {
         return success ?
-               "Profile{" + "includeOwnHoldings=" + includeOwnHoldings + ", search=" + search + '}' :
-               "Profile{" + "error=" + error + '}';
+               "OpenAgencyProfile{" + "includeOwnHoldings=" + includeOwnHoldings + ", search=" + collectionIdentifiers + '}' :
+               "OpenAgencyProfile{" + "error=" + error + '}';
     }
 }

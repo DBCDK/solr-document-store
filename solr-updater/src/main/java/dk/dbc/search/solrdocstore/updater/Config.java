@@ -59,7 +59,6 @@ public class Config {
     private long openAgencyTimeout;
     private long openAgencyAge;
     private long openAgencyFailureAge;
-    private UriBuilder profileService;
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
     private String jsonStash;
@@ -107,8 +106,6 @@ public class Config {
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
         openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
-        profileService = UriBuilder.fromUri(get("profileServiceUrl", "PROFILE_SERVICE_URL", null))
-                .path("api").path("profile").path("{agencyId}").path("{profile}");
         scanProfiles = Arrays.stream(get("scanProfiles", "SCAN_PROFILES", null).split("\\s*,\\s*"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -123,7 +120,7 @@ public class Config {
         jsonStash = get("jsonStash", "JSON_STASH", "");
         if (!jsonStash.isEmpty() && solrCollections.size() != 1)
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
-        vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk");
+        vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-prod.svc.cloud.dbc.dk/1.0/api/");
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }
@@ -224,10 +221,6 @@ public class Config {
 
     public long getOpenAgencyTimeout() {
         return openAgencyTimeout;
-    }
-
-    public UriBuilder getProfileServiceUrl() {
-        return profileService.clone();
     }
 
     public Map<String, Set<String>> getScanProfiles() {

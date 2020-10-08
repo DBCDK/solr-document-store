@@ -3,7 +3,7 @@ package dk.dbc.search.solrdocstore.updater;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
-import dk.dbc.search.solrdocstore.updater.profile.Profile;
+import dk.dbc.search.solrdocstore.updater.profile.OpenAgencyProfile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +23,7 @@ import javax.ejb.Singleton;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.StringUtils;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -445,11 +446,11 @@ public class BusinessLogic {
         scanProfiles.forEach((agencyId, profiles) -> {
             profiles.forEach(profile -> {
                 log.trace("testing profile: {}-{}", agencyId, profile);
-                Profile p = profileService.getProfile(agencyId, profile);
-                boolean hasOwnHolding = p.includeOwnHoldings && holdingsAgencies.contains(agencyId);
+                OpenAgencyProfile p = profileService.getOpenAgencyProfile(agencyId, profile);
+                boolean hasOwnHolding = StringUtils.isEmpty(p.error) &&  p.includeOwnHoldings && holdingsAgencies.contains(agencyId);
                 log.trace("hasOwnHolding = {}", hasOwnHolding);
-                boolean matchesCollectionIdentifier = p.search.stream().anyMatch(collectionIdentifiers::contains);
-                log.trace("profileCollectionIdentifiers = {}", p.search);
+                boolean matchesCollectionIdentifier = StringUtils.isEmpty(p.error) && p.collectionIdentifiers.stream().anyMatch(collectionIdentifiers::contains);
+                log.trace("profileCollectionIdentifiers = {}", p.collectionIdentifiers);
                 log.trace("matchesCollectionIdentifier = {}", matchesCollectionIdentifier);
                 if (hasOwnHolding ||
                     matchesCollectionIdentifier) {
