@@ -55,7 +55,7 @@ public class Config {
     private int maxTries;
     private long maxQueryTime;
     private int threads;
-    private String openAgencyUrl;
+    private String vipCoreEndpoint;
     private long openAgencyTimeout;
     private long openAgencyAge;
     private long openAgencyFailureAge;
@@ -104,7 +104,6 @@ public class Config {
         threads = Integer.max(1, Integer.parseUnsignedInt(get("threads", "THREADS", "1"), 10));
         maxTries = Integer.max(1, Integer.parseUnsignedInt(get("maxTries", "THREADS", "3"), 10));
         appId = get("solrAppId", "SOLR_APPID", null);
-        openAgencyUrl = get("openAgencyUrl", "OPEN_AGENCY_URL", null);
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
         openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
@@ -124,6 +123,10 @@ public class Config {
         jsonStash = get("jsonStash", "JSON_STASH", "");
         if (!jsonStash.isEmpty() && solrCollections.size() != 1)
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
+        vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk");
+        if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
+            throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
+        }
     }
 
     protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
@@ -209,10 +212,6 @@ public class Config {
 
     public int getThreads() {
         return threads;
-    }
-
-    public String getOpenAgencyUrl() {
-        return openAgencyUrl;
     }
 
     public long getOpenAgencyAge() {
@@ -322,4 +321,7 @@ public class Config {
                 .filter(s -> !s.isEmpty());
     }
 
+    public String getVipCoreEndpoint() {
+        return vipCoreEndpoint;
+    }
 }

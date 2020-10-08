@@ -1,21 +1,27 @@
 package dk.dbc.search.solrdocstore;
 
+import com.google.common.collect.Iterables;
+import dk.dbc.vipcore.marshallers.LibraryRule;
+import dk.dbc.vipcore.marshallers.LibraryRules;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 @Entity
 @Table(name = "OpenAgencyCache")
 public class OpenAgencyEntity implements Serializable {
 
     private static final long serialVersionUID = 2352663426617537636L;
+    private static final String SCHOOLLIBRARY = "Skolebibliotek";
 
     @Id
     private int agencyId;
@@ -42,6 +48,36 @@ public class OpenAgencyEntity implements Serializable {
         this.authCreateCommonRecord = authCreateCommonRecord;
         this.partOfBibDk = partOfBibDk;
         this.partOfDanbib = partOfDanbib;
+        this.fetched = Timestamp.from(Instant.now());
+        this.valid = true;
+    }
+
+    @SuppressFBWarnings(value = {"NP_NONNULL_PARAM_VIOLATION", "RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE"})
+    private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
+        LibraryRule libraryRule = libraryRuleList != null ? Iterables.find(libraryRuleList, lr -> lr != null && lr.getName().equals(libraryRuleName), null) : null;
+        return libraryRule != null && libraryRule.getBool();
+    }
+
+    private LibraryType getLibraryTypeFromLibraryRules(LibraryRules libraryRules) {
+        LibraryType agencyType = LibraryType.NonFBS;
+        if (getLibraryRuleBoolean(libraryRules.getLibraryRule(), "use_enrichments")) {
+            if (SCHOOLLIBRARY.equals(libraryRules.getAgencyType())) {
+                agencyType = LibraryType.FBSSchool;
+            } else {
+                agencyType = LibraryType.FBS;
+            }
+        }
+        return agencyType;
+    }
+
+    public OpenAgencyEntity(LibraryRules libraryRules) {
+        Integer aId = Integer.valueOf(libraryRules.getAgencyId());
+        this.agencyId = aId == null ? -1 : aId;
+        this.libraryType = getLibraryTypeFromLibraryRules(libraryRules);
+        List<LibraryRule> libraryRuleList = libraryRules.getLibraryRule();
+        this.authCreateCommonRecord = getLibraryRuleBoolean(libraryRuleList, "auth_create_common_record");
+        this.partOfBibDk = getLibraryRuleBoolean(libraryRuleList, "part_of_bibliotek_dk");
+        this.partOfDanbib = getLibraryRuleBoolean(libraryRuleList, "part_of_danbib");
         this.fetched = Timestamp.from(Instant.now());
         this.valid = true;
     }

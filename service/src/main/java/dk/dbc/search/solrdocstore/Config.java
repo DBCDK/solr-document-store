@@ -21,18 +21,17 @@ public class Config {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
-    private String oaURL;
     private long jobPruneMinutes;
     private String systemName;
     private Boolean allowNonEmptySchema;
     private int[] openAgencyValidateTime;
     private long deleteMarkedDelay;
     private long holdingsQueueDelay;
+    private String vipCoreEndpoint;
 
     @PostConstruct
     public void loadProperties() {
         Properties props = findProperties("solr-doc-store-service");
-        oaURL = getValue(props, "openAgencyUrl", "OPEN_AGENCY_URL", null, "No URL found for Open Agency");
         jobPruneMinutes = getValue(props, "jobPruneMinutes", "JOB_PRUNE_MINUTES", "60", null, Long::parseUnsignedLong);
         // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
@@ -41,10 +40,11 @@ public class Config {
         // Number of milliseconds to delay bib entities that are being deleted
         deleteMarkedDelay = getValue(props, "deleteMarkedDelay", "DELETE_MARKED_DELAY", "200000", null, Long::parseUnsignedLong);
         holdingsQueueDelay = getValue(props, "holdingsQueueDelay", "HOLDINGS_QUEUE_DELAY", "300000", null, Long::parseUnsignedLong);
+        vipCoreEndpoint = getValue(props, "vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
     }
 
-    public String getOaURL() {
-        return oaURL;
+    public String getVipCoreEndpoint() {
+        return vipCoreEndpoint;
     }
 
     public long getJobPruneMinutes() {

@@ -131,8 +131,8 @@ public class DocProducerIT {
         docProducer.businessLogic.profileService.config = config;
         docProducer.businessLogic.oa = new OpenAgency() {
             @Override
-            public OpenAgency.LibraryRule libraryRule(String agencyId) {
-                return new LibraryRule(true, true, true, true, false, true);
+            public OpenAgencyLibraryRule libraryRule(String agencyId) {
+                return new OpenAgencyLibraryRule(true, true, true, true, false, true);
             }
         };
         docProducer.init();

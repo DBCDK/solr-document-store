@@ -13,4 +13,5 @@ public enum LibraryType {
     public static final int SCHOOL_COMMON_AGENCY = 300000;
 
     public static final EnumSet<LibraryType> FBS_LIBS = EnumSet.of(FBS, FBSSchool);
+
 }

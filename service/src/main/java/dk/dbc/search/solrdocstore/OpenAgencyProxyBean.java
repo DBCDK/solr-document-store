@@ -1,23 +1,22 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.time.Duration;
-import java.util.concurrent.atomic.AtomicReference;
-import javax.ejb.EJBException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
+import com.google.common.collect.Iterables;
+import dk.dbc.openagency.http.OpenAgencyException;
+import dk.dbc.openagency.http.VipCoreHttpClient;
+import dk.dbc.vipcore.marshallers.LibraryRules;
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJBException;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  *
@@ -28,131 +27,32 @@ public class OpenAgencyProxyBean {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAgencyProxyBean.class);
 
-    private static final ObjectMapper O = new ObjectMapper();
-    private static final String SCHOOLLIBRARY = "Skolebibliotek";
-
-    private static final RetryPolicy RETRY_POLICY = new RetryPolicy<>()
-            .handle(Exception.class)
-            .handleResult(null)
-            .withDelay(Duration.ofMillis(250))
-            .withMaxRetries(4);
-
     @Inject
     Config config;
 
+    @Inject
+    private VipCoreHttpClient vipCoreHttpClient;
+
     @Timed
+    @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
         try {
-            JsonNode json = loadOpenAgencyJson(agencyId);
-            return parseOpenAgencyJSON(json);
-        } catch (EJBException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            log.error("Error processing agency: {}: {}", agencyId, ex.getMessage());
-            log.debug("Error processing agency: {}: ", agencyId, ex);
-            throw new EJBException(ex);
+            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
+            LibraryRulesResponse libraryRulesResponse = new ObjectMapper().readValue(vipCoreResponse, LibraryRulesResponse.class);
+            final List<LibraryRules> libraryRuleList = libraryRulesResponse.getLibraryRules();
+            return libraryRuleList == null ? null : new OpenAgencyEntity(Iterables.getFirst(libraryRuleList, null));
+        } catch (OpenAgencyException e) {
+            log.error("Error happened while fetching vipCore library rules for agency {}: {}", agencyId, e.getMessage());
+            throw new EJBException(e);
+        } catch (JsonMappingException e) {
+            log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());
+            log.debug("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e);
+            throw new EJBException(e);
+        } catch (JsonProcessingException e) {
+            log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());
+            log.debug("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e);
+            throw new EJBException(e);
         }
-    }
-
-    @Timed
-    public JsonNode loadOpenAgencyJson(int agencyId) {
-        try {
-            AtomicReference<JsonNode> res = new AtomicReference<>();
-            Failsafe.with(RETRY_POLICY).run(() -> {
-                res.set(fetchOpenAgencyJSON(agencyId));
-            });
-            return res.get();
-        } catch (EJBException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            log.error("Cannot get openagency entry for: {}: {}", agencyId, ex.getMessage());
-            log.debug("Cannot get openagency entry for: {}:", agencyId, ex);
-            throw new EJBException(ex);
-        }
-    }
-
-    public JsonNode fetchOpenAgencyJSON(int agencyId) throws IOException {
-        URI uri = UriBuilder.fromUri(URI.create(config.getOaURL()))
-                .queryParam("action", "libraryRules")
-                .queryParam("agencyId", String.format("%06d", agencyId))
-                .queryParam("outputType", "json")
-                .build();
-        Response resp = ClientBuilder.newClient()
-                .target(uri)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .buildGet()
-                .invoke();
-        String content = resp.readEntity(String.class);
-        if (resp.getStatusInfo().equals(Response.Status.OK) &&
-            resp.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) {
-            return O.readTree(content);
-        }
-        log.error("openagency response is of type: {}/{} for url: {} with content:", resp.getStatusInfo(), resp.getMediaType());
-        log.error(content);
-        throw new EJBException("openagency response is of type: " + resp.getMediaType());
-    }
-
-    private static OpenAgencyEntity parseOpenAgencyJSON(JsonNode tree) {
-        log.debug("Processing JSON");
-        JsonNode libraryRuleResponse = getJsonKey(tree, "libraryRulesResponse");
-        JsonNode libraryRules = getJsonKey(libraryRuleResponse, "libraryRules");
-        for (JsonNode libraryRule : libraryRules) {
-            String agencyIdText = getJsonValue(getJsonKey(libraryRule, "agencyId"));
-            String agencyTypeText = getJsonValue(getJsonKey(libraryRule, "agencyType"));
-            if (agencyIdText != null) {
-                int agencyId = Integer.parseUnsignedInt(agencyIdText, 10);
-                JsonNode rules = getJsonKey(libraryRule, "libraryRule");
-                boolean auth_create_common_record = false;
-                boolean part_of_bibdk = false;
-                boolean part_of_danbib = false;
-                boolean use_enrichments = false;
-                for (JsonNode rule : rules) {
-                    String name = getJsonValue(getJsonKey(rule, "name"));
-                    switch (name) {
-                        case "auth_create_common_record":
-                            auth_create_common_record = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                            break;
-                        case "part_of_bibliotek_dk":
-                            part_of_bibdk = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                            break;
-                        case "part_of_danbib":
-                            part_of_danbib = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                            break;
-                        case "use_enrichments":
-                            use_enrichments = getJsonValue(getJsonKey(rule, "bool")).equals("1");
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                LibraryType agencyType = LibraryType.NonFBS;
-                if (use_enrichments) {
-                    if (SCHOOLLIBRARY.equals(agencyTypeText)) {
-                        agencyType = LibraryType.FBSSchool;
-                    } else {
-                        agencyType = LibraryType.FBS;
-                    }
-                }
-                return new OpenAgencyEntity(agencyId, agencyType, auth_create_common_record, part_of_bibdk, part_of_danbib);
-            }
-        }
-        throw new EJBException("Cannot find valid openagency");
-    }
-
-    private static JsonNode getJsonKey(JsonNode node, String key) {
-        JsonNode value = node.get(key);
-        if (value == null) {
-            throw new IllegalStateException("No key: " + key + " in json");
-        }
-        return value;
-    }
-
-    private static String getJsonValue(JsonNode node) {
-        JsonNode value = node.get("$");
-        if (value == null) {
-            return null;
-        }
-        return value.asText(null);
     }
 
 }

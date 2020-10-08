@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Iterables;
 import dk.dbc.search.solrdocstore.updater.profile.Profile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.File;
@@ -41,6 +42,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.ws.rs.client.Client;
+
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.junit.Test;
@@ -56,11 +59,11 @@ import static org.hamcrest.MatcherAssert.*;
  * This runs business logic test from the directory
  * src/test/resource/BusinessLogic/test
  * <p>
- * It reads OpenAgency "responses" from the
- * src/test/resource/BusinessLogic/openagency directory.
+ * It reads VipCore "responses" from the
+ * src/test/resource/BusinessLogic/vipCore directory.
  * <p>
  * A test is located in a directory named after the function to test and an
- * optional dash + description. In the directrory 2 files needs to be present:
+ * optional dash + description. In the directory 2 files needs to be present:
  * source.json (the json as it comes from solr-doc-store-service), and
  * expected.json.
  * <p>
@@ -68,7 +71,7 @@ import static org.hamcrest.MatcherAssert.*;
  * <p>
  *  * plus/minus ('+'/'-') - if it is an addition or removal of a field
  *  * underscore colon ('_:') - indicator of a nested document value (you can't
- * destinguish nested documents, order is not guaranteed)
+ * distinguish nested documents, order is not guaranteed)
  *  * fieldname colon (xxx':') - the field that has changes
  *  * value - the value that has been added/removed from the field
  * <p>
@@ -124,12 +127,12 @@ public class BusinessLogicTest {
 
     private final String name;
     private final Path testDirectory;
-    private final Path openAgency;
+    private final Path vipCore;
 
-    public BusinessLogicTest(String name, Path test, Path openAgency) throws Exception {
+    public BusinessLogicTest(String name, Path test, Path vipCore) throws Exception {
         this.name = name;
         this.testDirectory = test;
-        this.openAgency = openAgency;
+        this.vipCore = vipCore;
     }
 
     @Parameterized.Parameters(name = "{0}")
@@ -137,9 +140,9 @@ public class BusinessLogicTest {
         Path path = new File(BusinessLogicTest.class.getResource("/BusinessLogic").toURI())
                 .toPath()
                 .toAbsolutePath();
-        Path openAgency = path.resolve("openagency");
+        Path vipCore = path.resolve("vipCore");
         return Arrays.stream(path.resolve("tests").toFile().listFiles(File::isDirectory))
-                .map(f -> new Object[] {f.getName(), f.toPath(), openAgency})
+                .map(f -> new Object[] {f.getName(), f.toPath(), vipCore})
                 .sorted((l, r) -> ( (String) l[0] ).compareTo((String) r[0]))
                 .collect(Collectors.toList());
     }
@@ -148,15 +151,15 @@ public class BusinessLogicTest {
     public void test() throws Exception {
         System.out.println(name);
         System.out.println("test = " + testDirectory);
-        System.out.println("openAgency = " + openAgency);
+        System.out.println("vipCore = " + vipCore);
         BusinessLogic businessLogic = new BusinessLogic() {
         };
         businessLogic.oa = new OpenAgency() {
             @Override
-            public OpenAgency.LibraryRule libraryRule(String agencyId) {
+            public OpenAgencyLibraryRule libraryRule(String agencyId) {
                 try {
-                    JsonNode json = O.readTree(openAgency.resolve(agencyId + ".json").toFile());
-                    return buildLibraryRule(agencyId, (ObjectNode) json);
+                    LibraryRulesResponse libraryRulesResponse = O.readValue(vipCore.resolve(agencyId + ".json").toFile(), LibraryRulesResponse.class);
+                    return new OpenAgencyLibraryRule(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
                 } catch (IOException ex) {
                     System.err.println("ex = " + ex);
                     throw new RuntimeException(ex);

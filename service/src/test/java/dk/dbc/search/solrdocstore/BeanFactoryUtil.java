@@ -1,15 +1,18 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+
+import javax.ejb.EJBException;
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.persistence.EntityManager;
 
-import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 
 public class BeanFactoryUtil {
 
@@ -125,12 +128,14 @@ public class BeanFactoryUtil {
     public static OpenAgencyProxyBean createOpenAgencyProxyBean() {
         return new OpenAgencyProxyBean() {
             @Override
-            public JsonNode loadOpenAgencyJson(int agencyId) {
+            public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
                 try {
                     String resource = "openagency-" + agencyId + ".json";
-                    return O.readTree(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource));
-                } catch (IOException ex) {
-                    return null;
+                    LibraryRulesResponse libraryRulesResponse =
+                            new ObjectMapper().readValue(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource), LibraryRulesResponse.class);
+                    return new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
+                } catch (Exception ex) {
+                    throw new EJBException(ex);
                 }
             }
         };

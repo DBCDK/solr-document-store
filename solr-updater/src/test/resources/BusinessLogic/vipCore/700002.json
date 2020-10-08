@@ -1,15 +1,16 @@
 {
     "libraryRules": [
         {
-            "agencyId": "150059",
+            "agencyId": "700002",
+            "agencyType": "Folkebibliotek",
             "libraryRule": [
                 {
                     "name": "create_enrichments",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "use_enrichments",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "auth_root",
@@ -37,7 +38,7 @@
                 },
                 {
                     "name": "auth_agency_common_record",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "auth_export_holdings",
@@ -45,11 +46,11 @@
                 },
                 {
                     "name": "use_localdata_stream",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "use_holdings_item",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "part_of_bibliotek_dk",
@@ -57,7 +58,7 @@
                 },
                 {
                     "name": "auth_create_common_record",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "ims_library",
@@ -65,7 +66,7 @@
                 },
                 {
                     "name": "worldcat_synchronize",
-                    "bool": false
+                    "bool": true
                 },
                 {
                     "name": "worldcat_resource_sharing",
@@ -73,7 +74,7 @@
                 },
                 {
                     "name": "cataloging_template_set",
-                    "string": ""
+                    "string": "dbc"
                 },
                 {
                     "name": "part_of_danbib",
@@ -93,7 +94,7 @@
                 },
                 {
                     "name": "use_central_faust",
-                    "bool": false
+                    "bool": true
                 }
             ]
         }

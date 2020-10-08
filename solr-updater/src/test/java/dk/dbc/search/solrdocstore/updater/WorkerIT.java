@@ -116,8 +116,8 @@ public class WorkerIT {
         worker.docProducer.businessLogic.config = config;
         worker.docProducer.businessLogic.oa = new OpenAgency() {
             @Override
-            public OpenAgency.LibraryRule libraryRule(String agencyId) {
-                return new LibraryRule(true, true, true, true, false, true);
+            public OpenAgencyLibraryRule libraryRule(String agencyId) {
+                return new OpenAgencyLibraryRule(true, true, true, true, false, true);
             }
         };
         worker.docProducer.businessLogic.profileService = new ProfileServiceBean();

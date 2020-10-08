@@ -12,6 +12,7 @@
 
     <properties>
         <solr.version>8.6.2</solr.version>
+        <vipcore.endpoint>http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk</vipcore.endpoint>
     </properties>
     
     <dependencies>
@@ -148,6 +149,25 @@
             <artifactId>jersey-hk2</artifactId>
             <version>2.30</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>vipcore</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <classifier>vipcore-client</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>openagency</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <classifier>vipcore-httpclient</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
         </dependency>
 
     </dependencies>
@@ -360,6 +380,7 @@
                             <async>true</async>
                             <environmentVariables>
                                 <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/solrdocstore</DOCSTORE_POSTGRES_URL>
+                                <VIPCORE_ENDPOINT>${vipcore.endpoint}</VIPCORE_ENDPOINT>
                             </environmentVariables>
                             <executable>java</executable>
                             <arguments>

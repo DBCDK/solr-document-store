@@ -27,7 +27,6 @@ import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -83,8 +82,8 @@ public class DocProducerTest {
         docProducer.businessLogic = new BusinessLogic();
         docProducer.businessLogic.oa = new OpenAgency() {
             @Override
-            public OpenAgency.LibraryRule libraryRule(String agencyId) {
-                return new LibraryRule(true, true, true, true, false, true);
+            public OpenAgencyLibraryRule libraryRule(String agencyId) {
+                return new OpenAgencyLibraryRule(true, true, true, true, false, true);
             }
         };
         docProducer.businessLogic.config = config;
