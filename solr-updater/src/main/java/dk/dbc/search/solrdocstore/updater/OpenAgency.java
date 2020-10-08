@@ -155,6 +155,10 @@ public class OpenAgency {
             final String path = VipCoreHttpClient.LIBRARY_RULES_PATH + agencyId;
             final String responseFromVipCore = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), path);
             final LibraryRulesResponse libraryRulesResponse = O.readValue(responseFromVipCore, LibraryRulesResponse.class);
+            if (libraryRulesResponse.getError() != null) {
+                log.error("Error occurred when fetching library rules for agency {}: {}", agencyId, libraryRulesResponse.getError().value());
+                throw new RuntimeException("\"Error occurred when fetching library rules for agency " + agencyId);
+            }
             return libraryRulesResponse == null ? null : Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null);
         } catch (OpenAgencyException | JsonProcessingException e) {
             log.error("OA Exception when fetching from vipCore for agency {}: {}", agencyId, e.getMessage());
