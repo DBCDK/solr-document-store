@@ -12,7 +12,6 @@
 
     <properties>
         <solr.version>8.6.2</solr.version>
-        <vipcore.endpoint>http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk</vipcore.endpoint>
     </properties>
     
     <dependencies>

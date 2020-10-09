@@ -123,7 +123,7 @@ public class Config {
         jsonStash = get("jsonStash", "JSON_STASH", "");
         if (!jsonStash.isEmpty() && solrCollections.size() != 1)
             throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
-        vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk");
+        vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", null);
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }

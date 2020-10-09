@@ -152,7 +152,7 @@ public class OpenAgency {
     @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     private LibraryRules libraryRulesFromVipCore(String agencyId) {
         try {
-            final String path = VipCoreHttpClient.LIBRARY_RULES_PATH + agencyId;
+            final String path = VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId;
             final String responseFromVipCore = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), path);
             final LibraryRulesResponse libraryRulesResponse = O.readValue(responseFromVipCore, LibraryRulesResponse.class);
             if (libraryRulesResponse == null) {
