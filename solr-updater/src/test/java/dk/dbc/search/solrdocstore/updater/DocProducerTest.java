@@ -56,6 +56,7 @@ public class DocProducerTest {
                                    "solrAppId=Not-Relevant",
                                    "queues=Not-Relevant",
                                    "openAgencyUrl=Not-Relevant",
+                                   "vipCoreEndpoint=Not-Relevant",
                                    "scanProfiles=102030-magic,123456-basic",
                                    "scanDefaultFields=abc,def") {
             @Override

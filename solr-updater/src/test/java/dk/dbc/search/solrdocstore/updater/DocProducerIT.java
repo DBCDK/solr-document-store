@@ -70,6 +70,7 @@ public class DocProducerIT {
         dataSource = pg.getDataSource();
         config = new Config("queues=test",
                             "scanProfiles=102030-magic,123456-basic",
+                            "vipCoreEndpoint=Not-Relevant",
                             "scanDefaultFields=abc,def") {
             @Override
             public Client getClient() {
