@@ -39,6 +39,9 @@ public class OpenAgencyProxyBean {
         try {
             String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.LIBRARY_RULES_PATH + "/" + agencyId);
             LibraryRulesResponse libraryRulesResponse = new ObjectMapper().readValue(vipCoreResponse, LibraryRulesResponse.class);
+            if (libraryRulesResponse.getError() != null) {
+                return new OpenAgencyEntity(agencyId, LibraryType.Missing, false, false, false);
+            }
             final List<LibraryRules> libraryRuleList = libraryRulesResponse.getLibraryRules();
             return libraryRuleList == null ? null : new OpenAgencyEntity(Iterables.getFirst(libraryRuleList, null));
         } catch (OpenAgencyException e) {
