@@ -76,6 +76,7 @@ public class WorkerIT {
                             "maxTries=1",
                             "emptyQueueSleep=10ms",
                             "scanProfiles=102030-magic,123456-basic",
+                            "vipCoreEndpoint=Not-Relevant",
                             "scanDefaultFields=scan.abc,scan.def") {
             @Override
             public Client getClient() {

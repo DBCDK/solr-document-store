@@ -172,6 +172,7 @@ public class BusinessLogicTest {
                                           "solrAppId=Not-Relevant",
                                           "queues=Not-Relevant",
                                           "openAgencyUrl=Not-Relevant",
+                                          "vipCoreEndpoint=Not-Relevant",
                                           "scanProfiles=102030-magic,102030-self,123456-basic,876543-self",
                                           "scanDefaultFields=scan.lti,scan.lfo") {
             @Override
