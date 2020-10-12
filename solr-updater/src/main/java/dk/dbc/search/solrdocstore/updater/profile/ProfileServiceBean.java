@@ -20,30 +20,23 @@ package dk.dbc.search.solrdocstore.updater.profile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hazelcast.config.OnJoinPermissionOperationName;
 import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.search.solrdocstore.updater.Config;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.rmi.ServerException;
-import java.util.HashMap;
+import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.cache.annotation.CacheResult;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import dk.dbc.vipcore.marshallers.ErrorType;
-import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.HashMap;
 
 /**
  *
@@ -51,8 +44,6 @@ import org.slf4j.LoggerFactory;
  */
 @Stateless
 public class ProfileServiceBean {
-
-    private final static String vipCoreProfileServicePath = "profileservice"; // should be a constant in vipCore...
 
     private static final Logger log = LoggerFactory.getLogger(ProfileServiceBean.class);
     private static final ObjectMapper O = new ObjectMapper()
@@ -65,7 +56,7 @@ public class ProfileServiceBean {
     public Config config;
 
     @Inject
-    VipCoreHttpClient vipCoreHttpClient;
+    protected VipCoreHttpClient vipCoreHttpClient;
 
     @CacheResult(cacheName = "oaProfile",
                  exceptionCacheName = "oaProfileError",
@@ -73,11 +64,11 @@ public class ProfileServiceBean {
                                      ServerErrorException.class})
     public OpenAgencyProfile getOpenAgencyProfile(String agencyId, String profile) {
         try {
+            // the below check is needed for integration tests.
             if (vipCoreHttpClient == null) {
-                log.trace("vipCoreClient is null for some reason");
                 vipCoreHttpClient = new VipCoreHttpClient();
             }
-            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), vipCoreProfileServicePath + "/search/" + agencyId + "/" + profile);
+            String vipCoreResponse = vipCoreHttpClient.getFromVipCore(config.getVipCoreEndpoint(), VipCoreHttpClient.PROFILE_SERVICE_PATH + "/search/" + agencyId + "/" + profile);
             log.debug("vipCoreResponse was: {}", vipCoreResponse);
             ProfileServiceResponse profileServiceResponse = O.readValue(vipCoreResponse, ProfileServiceResponse.class);
             log.trace("response for agency {} is: {}", agencyId, profileServiceResponse);
