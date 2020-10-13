@@ -33,10 +33,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.MediaType;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.HashMap;
 
 /**
  *
@@ -82,34 +78,6 @@ public class ProfileServiceBean {
             log.error("Error when processing response from VipCore profileservice for agency {} and profile {}: {}", agencyId, profile, e.getMessage());
             log.debug("Error when processing response from VipCore profileservice for agency {} and profile {}: {}", agencyId, profile, e);
             throw new RuntimeException(e);
-        }
-    }
-
-    private InputStream get(URI uri) {
-        try {
-            log.debug("Fetching: {}", uri);
-            InputStream is = config.getClient()
-                    .target(uri)
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .get(InputStream.class
-                    );
-            if (is == null)
-                throw new ClientErrorException("No content from downstream", 500);
-            return is;
-        } catch (ClientErrorException | ServerErrorException ex) {
-            log.error("Error fetching resource: {}: {}", uri, ex.getMessage());
-            log.debug("Error fetching resource: ", ex);
-            throw ex;
-
-        }
-    }
-
-    private static class PropsMap extends HashMap<String, Object> {
-
-        public PropsMap with(String key, Object value) {
-            put(key, value);
-            return this;
         }
     }
 

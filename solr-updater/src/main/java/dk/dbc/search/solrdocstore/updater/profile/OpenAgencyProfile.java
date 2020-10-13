@@ -18,8 +18,6 @@
  */
 package dk.dbc.search.solrdocstore.updater.profile;
 
-import dk.dbc.vipcore.marshallers.ErrorType;
-import dk.dbc.vipcore.marshallers.Profile;
 import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
 
 import java.io.Serializable;
