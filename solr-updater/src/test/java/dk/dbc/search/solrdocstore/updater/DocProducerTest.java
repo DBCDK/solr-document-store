@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import dk.dbc.search.solrdocstore.updater.profile.Profile;
+import dk.dbc.search.solrdocstore.updater.profile.OpenAgencyProfile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,12 +91,12 @@ public class DocProducerTest {
 
         docProducer.businessLogic.profileService = new ProfileServiceBean() {
             @Override
-            public Profile getProfile(String agencyId, String profile) {
+            public OpenAgencyProfile getOpenAgencyProfile(String agencyId, String profile) {
                 switch (agencyId + "-" + profile) {
                     case "102030-magic":
-                        return new Profile(true, "220000-katalog");
+                        return new OpenAgencyProfile(true, "220000-katalog");
                     case "123456-basic":
-                        return new Profile(false, "220000-katalog");
+                        return new OpenAgencyProfile(false, "220000-katalog");
                     default:
                         throw new AssertionError();
                 }

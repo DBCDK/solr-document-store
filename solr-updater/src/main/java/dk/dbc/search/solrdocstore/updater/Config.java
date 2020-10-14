@@ -1,16 +1,8 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
@@ -23,9 +15,17 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.UriBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -59,7 +59,6 @@ public class Config {
     private long openAgencyTimeout;
     private long openAgencyAge;
     private long openAgencyFailureAge;
-    private UriBuilder profileService;
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
     private String jsonStash;
@@ -107,8 +106,6 @@ public class Config {
         openAgencyTimeout = Long.max(1000, milliseconds(get("openAgencyTimeout", "OPEN_AGENCY_TIMEOUT", "1s")));
         openAgencyAge = Long.max(1000, milliseconds(get("openAgencyAge", "OPEN_AGENCY_AGE", "4h")));
         openAgencyFailureAge = Long.max(1000, milliseconds(get("openAgencyFailureAge", "OPEN_AGENCY_FAILURE_AGE", "5m")));
-        profileService = UriBuilder.fromUri(get("profileServiceUrl", "PROFILE_SERVICE_URL", null))
-                .path("api").path("profile").path("{agencyId}").path("{profile}");
         scanProfiles = Arrays.stream(get("scanProfiles", "SCAN_PROFILES", null).split("\\s*,\\s*"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -224,10 +221,6 @@ public class Config {
 
     public long getOpenAgencyTimeout() {
         return openAgencyTimeout;
-    }
-
-    public UriBuilder getProfileServiceUrl() {
-        return profileService.clone();
     }
 
     public Map<String, Set<String>> getScanProfiles() {
