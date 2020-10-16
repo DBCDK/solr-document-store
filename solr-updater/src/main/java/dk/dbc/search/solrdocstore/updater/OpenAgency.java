@@ -74,7 +74,7 @@ public class OpenAgency {
             this.use_holdings_item = getLibraryRuleBoolean(libraryRules, "use_holdings_item");
             this.part_of_danbib = getLibraryRuleBoolean(libraryRules, "part_of_danbib");
             this.part_of_bibliotek_dk = getLibraryRuleBoolean(libraryRules, "part_of_bibliotek_dk");
-            this.research_library = (vipCoreLibraryRules.getAgencyType() == null) ? false : vipCoreLibraryRules.getAgencyType().equals(RESEARCH_LIBRARY);
+            this.research_library = vipCoreLibraryRules.getAgencyType() != null && vipCoreLibraryRules.getAgencyType().equals(RESEARCH_LIBRARY);
             this.auth_create_common_record = getLibraryRuleBoolean(libraryRules, "auth_create_common_record");
         }
 
