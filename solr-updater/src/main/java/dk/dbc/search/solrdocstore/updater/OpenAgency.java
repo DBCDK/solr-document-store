@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import dk.dbc.gracefulcache.CacheTimeoutException;
@@ -73,7 +74,7 @@ public class OpenAgency {
             this.use_holdings_item = getLibraryRuleBoolean(libraryRules, "use_holdings_item");
             this.part_of_danbib = getLibraryRuleBoolean(libraryRules, "part_of_danbib");
             this.part_of_bibliotek_dk = getLibraryRuleBoolean(libraryRules, "part_of_bibliotek_dk");
-            this.research_library = vipCoreLibraryRules.getAgencyType().equals(RESEARCH_LIBRARY);
+            this.research_library = vipCoreLibraryRules.getAgencyType() != null && vipCoreLibraryRules.getAgencyType().equals(RESEARCH_LIBRARY);
             this.auth_create_common_record = getLibraryRuleBoolean(libraryRules, "auth_create_common_record");
         }
 
@@ -137,6 +138,7 @@ public class OpenAgency {
                 config.getOpenAgencyTimeout());
 
         this.O = new ObjectMapper();
+        this.O.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
     }
 
     public OpenAgencyLibraryRule libraryRule(String agencyId) throws PostponedNonFatalQueueError {
