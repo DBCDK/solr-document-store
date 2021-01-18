@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore.monitor;
 
-import dk.dbc.ee.stats.Timed;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -50,7 +49,6 @@ public class Status {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
     public Response getStatus() {
         log.info("getStatus called ");
         try (Connection connection = dataSource.getConnection() ;
