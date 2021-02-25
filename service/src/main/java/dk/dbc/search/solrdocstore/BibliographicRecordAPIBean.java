@@ -50,7 +50,7 @@ public class BibliographicRecordAPIBean {
     @GET
     @Path("bibliographic-records/bibliographic-record-id/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
+    @Timed(reusable = true)
     public Response getBibliographicKeysWithSupersedeId(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
             @DefaultValue("1") @QueryParam("page") int page,
@@ -78,7 +78,7 @@ public class BibliographicRecordAPIBean {
     @GET
     @Path("bibliographic-records/repository-id/{repositoryId}")
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
+    @Timed(reusable = true)
     public Response getBibliographicKeysByRepositoryIdWithSupersedeId(
             @PathParam("repositoryId") String repositoryID,
             @DefaultValue("1") @QueryParam("page") int page,
@@ -116,7 +116,7 @@ public class BibliographicRecordAPIBean {
     @GET
     @Path("bibliographic-record/{bibliographicRecordId}/{bibliographicAgencyId}")
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
+    @Timed(reusable = true)
     public Response getBibliographicRecord(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
             @PathParam("bibliographicAgencyId") int bibliographicAgencyId) {
@@ -139,7 +139,7 @@ public class BibliographicRecordAPIBean {
     @GET
     @Path("related-holdings/{bibliographicRecordId}/{bibliographicAgencyId}")
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
+    @Timed(reusable = true)
     public Response getRelatedHoldings(@PathParam("bibliographicRecordId") String bibliographicRecordId,
                                        @PathParam("bibliographicAgencyId") int bibliographicAgencyId) {
         try (LogWith logWith = track(null)) {

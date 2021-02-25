@@ -77,7 +77,7 @@ public class DocProducer {
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    @Timed
+    @Timed(reusable = true)
     public void deploy(SolrInputDocument doc, SolrCollection solrCollection, Integer commitWithin) throws IOException, SolrServerException {
 
         if (doc != null) {
@@ -116,7 +116,7 @@ public class DocProducer {
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
-    @Timed
+    @Timed(reusable = true)
     public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, SolrCollection solrCollection, Integer commitWithin) throws IOException, SolrServerException {
         int deleteCount = netstedDocumentCount * 2 + 100; // Ensure all old documents gets deleted, even if an uncommitted request has many more than is currently searchable
         UpdateRequest updateRequest = new UpdateRequest();
@@ -148,7 +148,7 @@ public class DocProducer {
      * @throws PostponedNonFatalQueueError if unable to communicate with
      *                                     profile-service
      */
-    @Timed
+    @Timed(reusable = true)
     public SolrInputDocument createSolrDocument(JsonNode sourceDoc, SolrCollection solrCollection) throws PostponedNonFatalQueueError {
         boolean deleted = isDeleted(sourceDoc);
         log.trace("deleted = {}", deleted);
@@ -172,7 +172,7 @@ public class DocProducer {
      * @throws SolrServerException see
      *                             {@link SolrClient#query(org.apache.solr.common.params.SolrParams)}
      */
-    @Timed
+    @Timed(reusable = true)
     public int getNestedDocumentCount(String id, SolrCollection solrCollection) throws IOException, SolrServerException {
         // Delete by query:
         // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
@@ -200,7 +200,7 @@ public class DocProducer {
      * @return the document collection
      * @throws IOException In case of http errors
      */
-    @Timed
+    @Timed(reusable = true)
     public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
         URI uri = uriTemplate.buildFromMap(mapForUri(job));
         log.debug("Fetching: {}", uri);

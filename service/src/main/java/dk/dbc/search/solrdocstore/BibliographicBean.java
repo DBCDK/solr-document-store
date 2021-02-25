@@ -83,7 +83,7 @@ public class BibliographicBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
+    @Timed(reusable = true)
     public Response addBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
                                          String jsonContent) throws Exception {
 

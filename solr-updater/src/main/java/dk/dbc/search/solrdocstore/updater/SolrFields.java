@@ -126,7 +126,7 @@ public class SolrFields {
      * @param indexKeys document keys
      * @return new document
      */
-    @Timed
+    @Timed(reusable = true)
     public SolrInputDocument newDocumentFromIndexKeys(JsonNode indexKeys) {
         if (indexKeys.isObject()) {
             trimIndexFieldsLength((ObjectNode) indexKeys, MAX_SOLR_FIELD_VALUE_SIZE);

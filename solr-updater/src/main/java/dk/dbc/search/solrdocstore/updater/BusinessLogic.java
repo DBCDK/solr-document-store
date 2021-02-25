@@ -57,7 +57,7 @@ public class BusinessLogic {
      *
      * @param sourceDoc entire json from solr-doc-store
      */
-    @Timed
+    @Timed(reusable = true)
     public void filterOutDecommissioned(JsonNode sourceDoc) {
         JsonNode records = find(sourceDoc, "holdingsItemRecords");
         if (records == null) {
@@ -95,7 +95,7 @@ public class BusinessLogic {
      * @param sourceDoc      entire json from solr-doc-store
      * @param solrCollection description of the single collection
      */
-    @Timed
+    @Timed(reusable = true)
     public void addRecHoldingsAgencyId(JsonNode sourceDoc, SolrCollection solrCollection) {
         if (!solrCollection.hasFeature(FeatureSwitch.HOLDINGS_AGENCY))
             return;
@@ -117,7 +117,7 @@ public class BusinessLogic {
      * @param sourceDoc      entire json from solr-doc-store
      * @param solrCollection description of the single collection
      */
-    @Timed
+    @Timed(reusable = true)
     public void addRecHoldingsStats(JsonNode sourceDoc, SolrCollection solrCollection) {
         if (!solrCollection.hasFeature(FeatureSwitch.HOLDINGS_STATS))
             return;
@@ -152,7 +152,7 @@ public class BusinessLogic {
      * @param sourceDoc      entire json from solr-doc-store
      * @param solrCollection description of the single collection
      */
-    @Timed
+    @Timed(reusable = true)
     public void addFromPartOfDanbib(JsonNode sourceDoc, SolrCollection solrCollection) {
         if (!solrCollection.hasFeature(FeatureSwitch.PART_OF_DANBIB))
             return;
@@ -172,7 +172,7 @@ public class BusinessLogic {
      * @throws PostponedNonFatalQueueError if unable to communicate with
      *                                     openagency
      */
-    @Timed
+    @Timed(reusable = true)
     public void addCollectionIdentifier800000(JsonNode sourceDoc, SolrCollection solrCollection) throws PostponedNonFatalQueueError {
         if (!solrCollection.hasFeature(FeatureSwitch.COLLECTION_IDENTIFIER_800000))
             return;
@@ -226,7 +226,7 @@ public class BusinessLogic {
      * @throws PostponedNonFatalQueueError if unable to communicate with
      *                                     openagency
      */
-    @Timed
+    @Timed(reusable = true)
     public void addHoldingsItemRole(JsonNode sourceDoc, SolrCollection solrCollection) throws PostponedNonFatalQueueError {
         if (!solrCollection.hasFeature(FeatureSwitch.HOLDING_ITEMS_ROLE))
             return;
@@ -271,7 +271,7 @@ public class BusinessLogic {
      * @param solrCollection description of the single collection
      * @param repositoryId   id of record used by
      */
-    @Timed
+    @Timed(reusable = true)
     public void addNestedHoldingsDocuments(SolrInputDocument doc, JsonNode sourceDoc, SolrCollection solrCollection, String repositoryId) {
         if (!solrCollection.hasFeature(FeatureSwitch.NESTED_HOLDINGS_DOCUMENTS))
             return;
@@ -296,7 +296,7 @@ public class BusinessLogic {
      * @param sourceDoc      document containing resources
      * @param solrCollection description of the single collection
      */
-    @Timed
+    @Timed(reusable = true)
     public void attachedResources(JsonNode sourceDoc, SolrCollection solrCollection) {
         if (!solrCollection.hasFeature(FeatureSwitch.ATTACH_RESOURCES))
             return;
@@ -379,7 +379,7 @@ public class BusinessLogic {
      * @param solrCollection description of the single collection
      * @throws RuntimeException If there's problems with the profile-service
      */
-    @Timed
+    @Timed(reusable = true)
     public void addScan(JsonNode sourceDoc, SolrCollection solrCollection) {
         if (!solrCollection.hasFeature(FeatureSwitch.SCAN))
             return;

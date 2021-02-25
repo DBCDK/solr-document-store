@@ -40,7 +40,7 @@ public class OpenAgencyBean {
         }
     }
 
-    @Timed
+    @Timed(reusable = true)
     public OpenAgencyEntity lookup(int agencyId) {
         return lookup(agencyId, true);
     }
@@ -70,7 +70,7 @@ public class OpenAgencyBean {
      * fetched-now value to indicate last time it was fetched from oa with this
      * value
      */
-    @Timed
+    @Timed(reusable = true)
     public void verifyOpenAgencyCache() {
         List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class)
                 .getResultList();

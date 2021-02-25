@@ -29,7 +29,7 @@ public class HoldingsToBibliographicBean {
     @Inject
     BibliographicRetrieveBean brBean;
 
-    @Timed
+    @Timed(reusable = true)
     public Set<AgencyClassifierItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId, hBibliographicRecordId);
         LibraryType libraryType = openAgency.lookup(hAgencyId).getLibraryType();
@@ -51,7 +51,7 @@ public class HoldingsToBibliographicBean {
         return Collections.emptySet();
     }
 
-    @Timed
+    @Timed(reusable = true)
     public Set<AgencyClassifierItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
         Map<Integer, LibraryType> map = new HashMap<>();
         Set<AgencyClassifierItemKey> keysUpdated = EnqueueAdapter.makeSet();
@@ -85,7 +85,7 @@ public class HoldingsToBibliographicBean {
         return t;
     }
 
-    @Timed
+    @Timed(reusable = true)
     public List<HoldingsToBibliographicEntity> getRelatedHoldingsToBibliographic(int bibliographicAgencyId, String bibliographicRecordId) {
         return entityManager.createQuery(
                 "SELECT h FROM HoldingsToBibliographicEntity h WHERE " +

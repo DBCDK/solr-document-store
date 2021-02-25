@@ -33,7 +33,7 @@ public class OpenAgencyProxyBean {
     @Inject
     private VipCoreHttpClient vipCoreHttpClient;
 
-    @Timed
+    @Timed(reusable = true)
     @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION")
     public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
         try {

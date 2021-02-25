@@ -47,7 +47,7 @@ public class HoldingsItemBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed
+    @Timed(reusable = true)
     public Response setHoldingsKeys(String jsonContent) throws Exception {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);

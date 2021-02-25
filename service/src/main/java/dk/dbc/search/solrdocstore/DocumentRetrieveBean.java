@@ -57,7 +57,7 @@ public class DocumentRetrieveBean {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ classifier }/{ bibliographicRecordId : .*}")
-    @Timed
+    @Timed(reusable = true)
     public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
