@@ -182,8 +182,11 @@ public class Worker {
 
                 docProducer.deploy(solrDocument, collection, commitWithin);
                 int count = 1;
-                if (solrDocument != null && solrDocument.hasChildDocuments())
-                    count += solrDocument.getChildDocumentCount();
+                if (solrDocument != null && solrDocument.hasChildDocuments()) {
+                    List<SolrInputDocument> childDocuments = solrDocument.getChildDocuments();
+                    if (childDocuments != null)
+                        count += childDocuments.size();
+                }
                 log.info("Deleted {} record(s) and added {} to SolR", nestedDocumentCount + 1, count);
                 docStasher.store(pid, solrDocument);
             } catch (PostponedNonFatalQueueError | IOException | SolrServerException ex) {
