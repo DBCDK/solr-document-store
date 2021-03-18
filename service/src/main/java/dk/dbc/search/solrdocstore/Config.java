@@ -23,7 +23,6 @@ public class Config {
 
     private long jobPruneMinutes;
     private String systemName;
-    private Boolean allowNonEmptySchema;
     private int[] openAgencyValidateTime;
     private long deleteMarkedDelay;
     private long holdingsQueueDelay;
@@ -35,7 +34,6 @@ public class Config {
         jobPruneMinutes = getValue(props, "jobPruneMinutes", "JOB_PRUNE_MINUTES", "60", null, Long::parseUnsignedLong);
         // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
-        allowNonEmptySchema = getValue(props, "allowNonEmptySchema", "ALLOW_NON_EMPTY_SCHEMA", "false", null, Boolean::parseBoolean);
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
         // Number of milliseconds to delay bib entities that are being deleted
         deleteMarkedDelay = getValue(props, "deleteMarkedDelay", "DELETE_MARKED_DELAY", "200000", null, Long::parseUnsignedLong);
@@ -53,10 +51,6 @@ public class Config {
 
     public String getSystemName() {
         return systemName;
-    }
-
-    public Boolean getAllowNonEmptySchema() {
-        return allowNonEmptySchema;
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP")

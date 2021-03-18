@@ -13,15 +13,11 @@ public class DatabaseMigrator {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseMigrator.class);
 
-    public static HashSet<String> migrate(DataSource dataSource, boolean allowNonEmptySchema) {
+    public static HashSet<String> migrate(DataSource dataSource) {
         HashSet<String> migrates = new HashSet<>();
         FluentConfiguration flywayConfigure = Flyway.configure()
                 .table("schema_version")
                 .dataSource(dataSource);
-        if (allowNonEmptySchema) {
-            flywayConfigure = flywayConfigure.baselineOnMigrate(true)
-                    .baselineVersion("0"); // This is needed for afterMigrate
-        }
 
         final Flyway flyway = flywayConfigure.load();
         for (MigrationInfo i : flyway.info().applied()) {

@@ -27,17 +27,7 @@ public class DatabaseMigratorIT {
 
         int version = -1;
 
-        try (Connection connection = datasource.getConnection() ;
-             Statement stmt = connection.createStatement()) {
-            for (String sql : Arrays.asList("DROP SCHEMA public CASCADE",
-                                            "CREATE SCHEMA public",
-                                            "DROP TABLE IF EXISTS queueruledefault",
-                                            "CREATE TABLE queueruledefault (queue TEXT NOT NULL)",
-                                            "INSERT INTO queueruledefault(queue) VALUES('my-secret-queue')")) {
-                stmt.executeUpdate(sql);
-            }
-        }
-        HashSet<String> migrated = DatabaseMigrator.migrate(datasource, true);
+        HashSet<String> migrated = DatabaseMigrator.migrate(datasource);
         System.out.println("migrated = " + migrated);
 
         try (Connection connection = datasource.getConnection() ;
@@ -50,23 +40,6 @@ public class DatabaseMigratorIT {
         }
         assertEquals(18, version);
 
-        String queueRule = null;
-        try (Connection connection = datasource.getConnection() ;
-             Statement stmt = connection.createStatement() ;
-             ResultSet resultSet = stmt.executeQuery("SELECT queue FROM queuerule WHERE queue='my-secret-queue'")) {
-            if (resultSet.next()) {
-                queueRule = resultSet.getString(1);
-                System.out.println("resultSet = " + resultSet);
-            }
-        }
-        assertEquals("my-secret-queue", queueRule);
-
-        try (Connection connection = datasource.getConnection() ;
-             Statement stmt = connection.createStatement()) {
-            for (String sql : Arrays.asList("DROP TABLE IF EXISTS queueruledefault")) {
-                stmt.executeUpdate(sql);
-            }
-        }
     }
 
     private static PGSimpleDataSource getDataSource() {

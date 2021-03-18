@@ -36,7 +36,7 @@ public class DatabaseMigrator {
     @PostConstruct
     public void init() {
         log.info("Running database migration");
-        HashSet<String> migrated = dk.dbc.search.solrdocstore.db.DatabaseMigrator.migrate(dataSource, config.getAllowNonEmptySchema());
+        HashSet<String> migrated = dk.dbc.search.solrdocstore.db.DatabaseMigrator.migrate(dataSource);
         log.debug("migrated = {}", migrated);
 
         boolean has_logged = false;
