@@ -77,7 +77,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         System.out.println("status = " + status);
-        QueueTestUtil.queueIs(env().getDatasource(), "a,870970,basis,23645564");
+        QueueTestUtil.queueIs(env().getDatasource(), "a,870970-basis:23645564");
     }
 
     @Test

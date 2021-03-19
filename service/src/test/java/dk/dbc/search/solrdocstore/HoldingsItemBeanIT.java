@@ -73,14 +73,11 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         DataSource dataSource = this.env().getDatasource();
         try (Connection connection = dataSource.getConnection() ;
              Statement stmt = connection.createStatement() ;
-             ResultSet resultSet = stmt.executeQuery("DELETE FROM queue RETURNING agencyid, classifier, bibliographicRecordId, dequeueAfter > now() AS postponed")) {
+             ResultSet resultSet = stmt.executeQuery("DELETE FROM queue RETURNING jobid, dequeueAfter > now() AS postponed")) {
             while (resultSet.next()) {
-                int agencyId = resultSet.getInt(1);
-                String classifier = resultSet.getString(2);
-                String bibliographic = resultSet.getString(3);
-                boolean postponed = resultSet.getBoolean(4);
-                ret.add(agencyId + "-" + classifier + ":" + bibliographic + "=" + postponed);
-
+                String jobid = resultSet.getString(1);
+                boolean postponed = resultSet.getBoolean(2);
+                ret.add(jobid + "=" + postponed);
             }
             return ret;
         }

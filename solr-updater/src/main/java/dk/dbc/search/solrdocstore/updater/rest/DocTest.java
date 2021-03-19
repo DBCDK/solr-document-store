@@ -51,7 +51,7 @@ public class DocTest {
                            @QueryParam("collection") String collection) throws InterruptedException, ExecutionException, IOException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         try {
-            JsonNode node = docProducer.fetchSourceDoc(new QueueJob(agencyId, classifier, bibliographicRecordId));
+            JsonNode node = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, classifier, bibliographicRecordId));
             boolean deleted = docProducer.isDeleted(node);
             if (deleted) {
                 return Response.noContent().build();
