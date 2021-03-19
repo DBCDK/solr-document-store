@@ -25,6 +25,7 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Executors;
@@ -35,6 +36,7 @@ import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -76,7 +78,6 @@ public class WorkerIT {
                             "maxTries=1",
                             "emptyQueueSleep=10ms",
                             "scanProfiles=102030-magic,123456-basic",
-                            "vipCoreEndpoint=Not-Relevant",
                             "scanDefaultFields=scan.abc,scan.def") {
             @Override
             public Client getClient() {
@@ -125,7 +126,18 @@ public class WorkerIT {
         worker.docProducer.businessLogic.profileService.config = config;
         worker.docProducer.init();
         worker.metrics = null;
+        worker.docStasher = new DocStasher() {
+            @Override
+            public void store(String pid, SolrInputDocument doc) {
+            }
+        };
         worker.init();
+
+        try (Connection connection = dataSource.getConnection();
+            Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate("TRUNCATE queue");
+            stmt.executeUpdate("TRUNCATE queue_error");
+        }
     }
 
     @After
@@ -154,6 +166,7 @@ public class WorkerIT {
                     .preparedSupplier(connection);
 
             supplier.enqueue("test", QueueJob.manifestation(300000, "clazzifier", "23645564"));
+            supplier.enqueue("test", QueueJob.work("work:1")); // This is expected to be in the queue_error table
 
             int maxRuns = 2500 / 50;
             while (config.getSolrCollections().stream()
@@ -170,6 +183,15 @@ public class WorkerIT {
                 long count = count(solrCollection);
                 assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 5, count);
             });
+        }
+        try (Connection connection = dataSource.getConnection();
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT jobid, diag FROM queue_error ORDER BY jobid")) {
+            assertTrue("Atleast one in queue_error", resultSet.next());
+            System.out.println("resultSet.getString(1) = " + resultSet.getString(1));
+            System.out.println("resultSet.getString(2) = " + resultSet.getString(2));
+            assertEquals("work:1", resultSet.getString(1));
+            assertFalse("Only one in queue_error", resultSet.next());
         }
     }
 
