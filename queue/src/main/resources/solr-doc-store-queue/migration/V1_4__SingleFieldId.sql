@@ -23,10 +23,14 @@ $$
 BEGIN
   IF NEW.jobid IS NULL THEN
     NEW.jobid = NEW.agencyid || '-' || NEW.classifier || ':' || NEW.bibliographicrecordid;
- ELSE
-   NEW.agencyid = SUBSTRING(NEW.jobid FROM '^([0-9]*)')::INTEGER;
-   NEW.classifier = SUBSTRING(NEW.jobid FROM '-([^:]*):');
-   NEW.bibliographicrecordid = SUBSTRING(NEW.jobid FROM ':(.*)');
+  ELSIF NEW.jobid LIKE '%-%:%' THEN
+    NEW.agencyid = SUBSTRING(NEW.jobid FROM '^([0-9]*)')::INTEGER;
+    NEW.classifier = SUBSTRING(NEW.jobid FROM '-([^:]*):');
+    NEW.bibliographicrecordid = SUBSTRING(NEW.jobid FROM ':(.*)');
+  ELSE -- `work:*` type
+    NEW.agencyid = 0;
+    NEW.classifier = '';
+    NEW.bibliographicrecordid = '';
   END IF;
   RETURN NEW;
 END;
