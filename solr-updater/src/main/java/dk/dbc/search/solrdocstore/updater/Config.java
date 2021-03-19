@@ -124,7 +124,6 @@ public class Config {
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }
-        System.out.println("vipCoreEndpoint = " + vipCoreEndpoint);
     }
 
     protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
