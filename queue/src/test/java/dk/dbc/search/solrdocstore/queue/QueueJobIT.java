@@ -30,7 +30,6 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -44,8 +43,6 @@ import static org.junit.Assert.*;
  */
 public class QueueJobIT {
 
-    private static final Logger log = LoggerFactory.getLogger(QueueJobIT.class);
-
     private static final QueueSupplier QUEUE_SUPPLIER = new QueueSupplier(QueueJob.STORAGE_ABSTRACTION);
     private static final String QUEUE = "test";
 
@@ -57,16 +54,10 @@ public class QueueJobIT {
         pg = new PostgresITDataSource("queue");
         dataSource = pg.getDataSource();
         DatabaseMigrator.migrate(dataSource);
-    }
-
-    @After
-    public void shutDown() throws Exception {
         try (Connection connection = dataSource.getConnection() ;
              Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("DROP TABLE queue");
-            stmt.executeUpdate("DROP TABLE queue_error CASCADE");
-            stmt.executeUpdate("DROP TABLE solr_doc_store_queue_version");
-            stmt.executeUpdate("DROP TABLE queue_version");
+            stmt.executeUpdate("TRUNCATE TABLE queue CASCADE");
+            stmt.executeUpdate("TRUNCATE TABLE queue_error CASCADE");
         }
     }
 
@@ -74,9 +65,9 @@ public class QueueJobIT {
     public void testStoreRetrieve() throws Exception {
         System.out.println("store-retrieve");
 
-        QueueJob job1 = new QueueJob(888888, "clazzifier", "12345678");
-        QueueJob job2 = new QueueJob(888888, "clazzifier", "87654321", 1000); // This should be collapsed
-        QueueJob job3 = new QueueJob(888888, "clazzifier", "87654321", 10); // This should be used (shorter commitwithin)
+        QueueJob job1 =  QueueJob.work("work:12345678");
+        QueueJob job2 =  QueueJob.manifestation(888888, "clazzifier", "87654321", 1000); // This should be collapsed
+        QueueJob job3 =  QueueJob.manifestation(888888, "clazzifier", "87654321", 10); // This should be used (shorter commitwithin)
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedQueueSupplier<QueueJob> supplier = QUEUE_SUPPLIER.preparedSupplier(connection);

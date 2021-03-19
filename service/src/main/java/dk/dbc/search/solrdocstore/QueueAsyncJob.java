@@ -88,7 +88,7 @@ public class QueueAsyncJob {
                             int agencyId = resultSet.getInt(++i);
                             String classifier = resultSet.getString(++i);
                             String bibliographicRecordId = resultSet.getString(++i);
-                            enqueueService.enqueue(new QueueJob(agencyId, classifier, bibliographicRecordId));
+                            enqueueService.enqueue(QueueJob.manifestation(agencyId, classifier, bibliographicRecordId));
                             shouldCommit = true;
                             if (++counter % 2500 == 0) {
                                 log.info("Committet: {}", counter);
@@ -295,7 +295,7 @@ public class QueueAsyncJob {
         }
 
         public QueueJob toQueueJob() {
-            return new QueueJob(agencyId, classifier, bibliographicRecordId);
+            return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
         }
 
     }

@@ -141,7 +141,7 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         HashSet<String> set = new HashSet<>();
         try (Connection conn = env().getDatasource().getConnection() ;
              Statement statement = conn.createStatement() ;
-             ResultSet resultSet = statement.executeQuery("SELECT consumer || ':' || agencyid || '-' || classifier || ':' || bibliographicrecordid FROM queue")) {
+             ResultSet resultSet = statement.executeQuery("SELECT consumer || ':' || jobid FROM queue")) {
             while (resultSet.next()) {
                 set.add(resultSet.getString(1));
             }

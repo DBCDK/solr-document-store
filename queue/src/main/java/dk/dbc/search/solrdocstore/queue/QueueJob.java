@@ -23,6 +23,8 @@ import dk.dbc.pgqueue.QueueStorageAbstraction;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.sql.Types.*;
 
@@ -32,35 +34,76 @@ import static java.sql.Types.*;
  */
 public class QueueJob {
 
-    private final int agencyId;
-    private final String classifier;
-    private final String bibliographicRecordId;
+    private static final Pattern MANIFESTATION = Pattern.compile("([0-9]+)-([^:]+):(.+)");
+
+    private final String jobId;
     private final Integer commitWithin;
 
-    public QueueJob(int agencyId, String classifier, String bibliographicRecordId) {
-        this.agencyId = agencyId;
-        this.classifier = classifier;
-        this.bibliographicRecordId = bibliographicRecordId;
-        this.commitWithin = null;
-    }
-
-    public QueueJob(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
-        this.agencyId = agencyId;
-        this.classifier = classifier;
-        this.bibliographicRecordId = bibliographicRecordId;
+    private QueueJob(String jobId, Integer commitWithin) {
+        this.jobId = jobId;
         this.commitWithin = commitWithin;
     }
 
+    public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId) {
+        return manifestation(agencyId, classifier, bibliographicRecordId, null);
+    }
+
+    public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
+        QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId, commitWithin);
+        if (!job.isManifestation())
+            throw new IllegalArgumentException("Invalid arguments to manifestation");
+        return job;
+    }
+
+    public static QueueJob work(String work) {
+        return work(work, null);
+    }
+
+    public static QueueJob work(String work, Integer commitWithin) {
+        QueueJob job = new QueueJob(work, commitWithin);
+        if (!job.isWork())
+            throw new IllegalArgumentException("Invalid arguments to work");
+        return job;
+    }
+
+    public String getJobId() {
+        return jobId;
+    }
+
+    public boolean isManifestation() {
+        Matcher m = MANIFESTATION.matcher(jobId);
+        return m.matches();
+    }
+
     public int getAgencyId() {
-        return agencyId;
+        Matcher m = MANIFESTATION.matcher(jobId);
+        if (!m.matches())
+            throw new IllegalStateException("Trying to get agencyId from jobId: " + jobId);
+        return Integer.parseInt(m.group(1));
     }
 
     public String getClassifier() {
-        return classifier;
+        Matcher m = MANIFESTATION.matcher(jobId);
+        if (!m.matches())
+            throw new IllegalStateException("Trying to get classifier from jobId: " + jobId);
+        return m.group(2);
     }
 
     public String getBibliographicRecordId() {
-        return bibliographicRecordId;
+        Matcher m = MANIFESTATION.matcher(jobId);
+        if (!m.matches())
+            throw new IllegalStateException("Trying to get bibliographicRecordId from jobId: " + jobId);
+        return m.group(3);
+    }
+
+    public boolean isWork() {
+        return jobId.startsWith("work:");
+    }
+
+    public String getWork() {
+        if (!jobId.startsWith("work:"))
+            throw new IllegalStateException("Trying to get work from jobId: " + jobId);
+        return jobId;
     }
 
     public Integer getCommitwithin() {
@@ -73,11 +116,11 @@ public class QueueJob {
 
     @Override
     public String toString() {
-        return "QueueJob{" + "agencyId=" + agencyId + ", classifier=" + classifier + ", bibliographicRecordId=" + bibliographicRecordId + ", commitWithin=" + commitWithin + '}';
+        return "QueueJob{" + "jobId=" + jobId + ", commitWithin=" + commitWithin + '}';
     }
 
     public static final QueueStorageAbstraction<QueueJob> STORAGE_ABSTRACTION = new QueueStorageAbstraction<QueueJob>() {
-        private final String[] COLUMNS = "agencyId,classifier,bibliographicRecordId,commitWithin".split(",");
+        private final String[] COLUMNS = "jobid,commitWithin".split(",");
 
         @Override
         public String[] columnList() {
@@ -86,31 +129,27 @@ public class QueueJob {
 
         @Override
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
-            int agencyId = resultSet.getInt(startColumn++);
-            String classifier = resultSet.getString(startColumn++);
-            String bibliographicRecordId = resultSet.getString(startColumn++);
-            Integer commitwithin = resultSet.getInt(startColumn++);
+            String jobId = resultSet.getString(startColumn++);
+            Integer commitwithin = resultSet.getInt(startColumn);
             if (resultSet.wasNull()) {
                 commitwithin = null;
             }
-            return new QueueJob(agencyId, classifier, bibliographicRecordId, commitwithin);
+            return new QueueJob(jobId, commitwithin);
         }
 
         @Override
         public void saveJob(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
-            stmt.setInt(startColumn++, job.getAgencyId());
-            stmt.setString(startColumn++, job.getClassifier());
-            stmt.setString(startColumn++, job.getBibliographicRecordId());
+            stmt.setString(startColumn++, job.getJobId());
             if (job.hasCommitWithin()) {
-                stmt.setInt(startColumn++, job.getCommitwithin());
+                stmt.setInt(startColumn, job.getCommitwithin());
             } else {
-                stmt.setNull(startColumn++, INTEGER);
+                stmt.setNull(startColumn, INTEGER);
             }
         }
     };
 
     public static final DeduplicateAbstraction<QueueJob> DEDUPLICATE_ABSTRACTION = new DeduplicateAbstraction<QueueJob>() {
-        private final String[] COLUMNS = "agencyId,classifier,bibliographicRecordId".split(",");
+        private final String[] COLUMNS = "jobid".split(",");
 
         @Override
         public String[] duplicateDeleteColumnList() {
@@ -119,9 +158,7 @@ public class QueueJob {
 
         @Override
         public void duplicateValues(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
-            stmt.setInt(startColumn++, job.getAgencyId());
-            stmt.setString(startColumn++, job.getClassifier());
-            stmt.setString(startColumn++, job.getBibliographicRecordId());
+            stmt.setString(startColumn, job.getJobId());
         }
 
         @Override

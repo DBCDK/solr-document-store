@@ -62,7 +62,7 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
     }
 
     private void migrateDatabase(PGSimpleDataSource datasource) {
-        dk.dbc.search.solrdocstore.db.DatabaseMigrator.migrate(datasource, false);
+        dk.dbc.search.solrdocstore.db.DatabaseMigrator.migrate(datasource);
     }
 
     /**

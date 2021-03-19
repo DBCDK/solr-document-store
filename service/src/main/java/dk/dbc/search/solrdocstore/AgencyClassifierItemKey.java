@@ -102,7 +102,7 @@ public class AgencyClassifierItemKey implements Serializable {
     }
 
     public QueueJob toQueueJob(Integer commitWithin) {
-        return new QueueJob(agencyId, classifier, bibliographicRecordId, commitWithin);
+        return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId, commitWithin);
     }
 
     public boolean isDeleteMarked() {

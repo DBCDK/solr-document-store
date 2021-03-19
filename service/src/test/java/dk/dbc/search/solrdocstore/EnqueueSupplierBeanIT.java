@@ -86,12 +86,12 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             }
 
             queueIs(em,
-                    "a,870970,clazzifier,12345678",
-                    "b,870970,clazzifier,12345678",
-                    "a,870970,clazzifier,87654321,100",
-                    "b,870970,clazzifier,87654321,100",
-                    "a,870970,clazzifier,abc",
-                    "b,870970,clazzifier,abc");
+                    "a,870970-clazzifier:12345678",
+                    "b,870970-clazzifier:12345678",
+                    "a,870970-clazzifier:87654321,100",
+                    "b,870970-clazzifier:87654321,100",
+                    "a,870970-clazzifier:abc",
+                    "b,870970-clazzifier:abc");
         });
     }
 
@@ -361,11 +361,11 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String queueItem(int agency, String classifier, String bibliographicRecordId) {
-        return "a," + agency + "," + classifier + "," + bibliographicRecordId;
+        return "a," + agency + "-" + classifier + ":" + bibliographicRecordId;
     }
 
     private String queueItem(int agency, String classifier, String bibliographicRecordId, int commitWithin) {
-        return "a," + agency + "," + classifier + "," + bibliographicRecordId + "," + commitWithin;
+        return "a," + agency + "-" + classifier + ":" + bibliographicRecordId + "," + commitWithin;
     }
 
 }

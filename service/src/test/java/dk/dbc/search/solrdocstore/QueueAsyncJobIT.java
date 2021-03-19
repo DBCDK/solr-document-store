@@ -90,19 +90,19 @@ public class QueueAsyncJobIT extends JpaSolrDocStoreIntegrationTester {
         assertThat("Job is completed", runner.job(id).isCompleted(), is(true));
 
         queueIs(dataSource,
-                "foo,700000,clazzifier,a0", "foo,700000,clazzifier,a1", "foo,700000,clazzifier,a2",
-                "foo,700000,clazzifier,a3", "foo,700000,clazzifier,a4", "foo,700000,clazzifier,a5",
-                "foo,700000,clazzifier,a6", "foo,700000,clazzifier,a7", "foo,700000,clazzifier,a8",
-                "foo,700000,clazzifier,a9",
-                "foo,700000,clazzifier,b0", "foo,700000,clazzifier,b1", "foo,700000,clazzifier,b2",
-                "foo,700000,clazzifier,b3", "foo,700000,clazzifier,b4", "foo,700000,clazzifier,b5",
-                "foo,700000,clazzifier,b6", "foo,700000,clazzifier,b7", "foo,700000,clazzifier,b8",
-                "foo,700000,clazzifier,b9",
-                "foo,700000,clazzifier,c0", "foo,700000,clazzifier,c1", "foo,700000,clazzifier,c2",
-                "foo,700000,clazzifier,c3", "foo,700000,clazzifier,c4", "foo,700000,clazzifier,c5",
-                "foo,700000,clazzifier,c6", "foo,700000,clazzifier,c7", "foo,700000,clazzifier,c8",
-                "foo,700000,clazzifier,c9",
-                "foo,700001,clazzifier,dd");
+                "foo,700000-clazzifier:a0", "foo,700000-clazzifier:a1", "foo,700000-clazzifier:a2",
+                "foo,700000-clazzifier:a3", "foo,700000-clazzifier:a4", "foo,700000-clazzifier:a5",
+                "foo,700000-clazzifier:a6", "foo,700000-clazzifier:a7", "foo,700000-clazzifier:a8",
+                "foo,700000-clazzifier:a9",
+                "foo,700000-clazzifier:b0", "foo,700000-clazzifier:b1", "foo,700000-clazzifier:b2",
+                "foo,700000-clazzifier:b3", "foo,700000-clazzifier:b4", "foo,700000-clazzifier:b5",
+                "foo,700000-clazzifier:b6", "foo,700000-clazzifier:b7", "foo,700000-clazzifier:b8",
+                "foo,700000-clazzifier:b9",
+                "foo,700000-clazzifier:c0", "foo,700000-clazzifier:c1", "foo,700000-clazzifier:c2",
+                "foo,700000-clazzifier:c3", "foo,700000-clazzifier:c4", "foo,700000-clazzifier:c5",
+                "foo,700000-clazzifier:c6", "foo,700000-clazzifier:c7", "foo,700000-clazzifier:c8",
+                "foo,700000-clazzifier:c9",
+                "foo,700001-clazzifier:dd");
     }
 
     @Test
@@ -123,18 +123,18 @@ public class QueueAsyncJobIT extends JpaSolrDocStoreIntegrationTester {
         assertThat("Job is completed", runner.job(id).isCompleted(), is(true));
 
         queueIs(dataSource,
-                "foo,700000,clazzifier,a0", "foo,700000,clazzifier,a1", "foo,700000,clazzifier,a2",
-                "foo,700000,clazzifier,a3", "foo,700000,clazzifier,a4", "foo,700000,clazzifier,a5",
-                "foo,700000,clazzifier,a6", "foo,700000,clazzifier,a7", "foo,700000,clazzifier,a8",
-                "foo,700000,clazzifier,a9",
-                "foo,700000,clazzifier,b0", "foo,700000,clazzifier,b1", "foo,700000,clazzifier,b2",
-                "foo,700000,clazzifier,b3", "foo,700000,clazzifier,b4", "foo,700000,clazzifier,b5",
-                "foo,700000,clazzifier,b6", "foo,700000,clazzifier,b7", "foo,700000,clazzifier,b8",
-                "foo,700000,clazzifier,b9",
-                "foo,700000,clazzifier,c0", "foo,700000,clazzifier,c1", "foo,700000,clazzifier,c2",
-                "foo,700000,clazzifier,c3", "foo,700000,clazzifier,c4", "foo,700000,clazzifier,c5",
-                "foo,700000,clazzifier,c6", "foo,700000,clazzifier,c7", "foo,700000,clazzifier,c8",
-                "foo,700000,clazzifier,c9");
+                "foo,700000-clazzifier:a0", "foo,700000-clazzifier:a1", "foo,700000-clazzifier:a2",
+                "foo,700000-clazzifier:a3", "foo,700000-clazzifier:a4", "foo,700000-clazzifier:a5",
+                "foo,700000-clazzifier:a6", "foo,700000-clazzifier:a7", "foo,700000-clazzifier:a8",
+                "foo,700000-clazzifier:a9",
+                "foo,700000-clazzifier:b0", "foo,700000-clazzifier:b1", "foo,700000-clazzifier:b2",
+                "foo,700000-clazzifier:b3", "foo,700000-clazzifier:b4", "foo,700000-clazzifier:b5",
+                "foo,700000-clazzifier:b6", "foo,700000-clazzifier:b7", "foo,700000-clazzifier:b8",
+                "foo,700000-clazzifier:b9",
+                "foo,700000-clazzifier:c0", "foo,700000-clazzifier:c1", "foo,700000-clazzifier:c2",
+                "foo,700000-clazzifier:c3", "foo,700000-clazzifier:c4", "foo,700000-clazzifier:c5",
+                "foo,700000-clazzifier:c6", "foo,700000-clazzifier:c7", "foo,700000-clazzifier:c8",
+                "foo,700000-clazzifier:c9");
     }
 
     private void setupData() {

@@ -182,7 +182,7 @@ public class DocProducerIT {
     }
 
     private void deployAndSearch(int agencyId, DocProducer docProducer, SolrCollection solrCollection, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
-        JsonNode sourceDoc = docProducer.fetchSourceDoc(new QueueJob(agencyId, "clazzifier", "23645564"));
+        JsonNode sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, "clazzifier", "23645564"));
         SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc, solrCollection);
         String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
         int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, solrCollection);

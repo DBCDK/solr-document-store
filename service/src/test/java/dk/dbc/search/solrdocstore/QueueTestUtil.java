@@ -77,8 +77,8 @@ public class QueueTestUtil {
      */
     public static void queueIs(Connection connection, String... elements) {
         HashSet<String> enqueued = new HashSet<>();
-        for (String sql : Arrays.asList("SELECT consumer || ',' || agencyid || ',' || classifier || ',' || bibliographicrecordid FROM queue WHERE commitWithin IS NULL",
-                                        "SELECT consumer || ',' || agencyid || ',' || classifier || ',' || bibliographicrecordid || ',' || commitWithin FROM queue WHERE commitWithin IS NOT NULL")) {
+        for (String sql : Arrays.asList("SELECT consumer || ',' || jobid FROM queue WHERE commitWithin IS NULL",
+                                        "SELECT consumer || ',' || jobid || ',' || commitWithin FROM queue WHERE commitWithin IS NOT NULL")) {
 
             try (Statement stmt = connection.createStatement() ;
                  ResultSet resultSet = stmt.executeQuery(sql)) {

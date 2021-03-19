@@ -103,7 +103,7 @@ public class DocProducerTest {
             }
         };
 
-        JsonNode node = docProducer.fetchSourceDoc(new QueueJob(300101, "clazzifier", "23645564"));
+        JsonNode node = docProducer.fetchSourceDoc(QueueJob.manifestation(300101, "clazzifier", "23645564"));
 
         System.out.println("node = " + node);
 
