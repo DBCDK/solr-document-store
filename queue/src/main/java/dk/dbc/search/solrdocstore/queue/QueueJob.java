@@ -111,7 +111,7 @@ public class QueueJob {
         @Override
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
             String jobId = resultSet.getString(startColumn++);
-            Integer commitwithin = resultSet.getInt(startColumn++);
+            Integer commitwithin = resultSet.getInt(startColumn);
             if (resultSet.wasNull()) {
                 commitwithin = null;
             }
@@ -122,9 +122,9 @@ public class QueueJob {
         public void saveJob(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
             stmt.setString(startColumn++, job.getJobId());
             if (job.hasCommitWithin()) {
-                stmt.setInt(startColumn++, job.getCommitwithin());
+                stmt.setInt(startColumn, job.getCommitwithin());
             } else {
-                stmt.setNull(startColumn++, INTEGER);
+                stmt.setNull(startColumn, INTEGER);
             }
         }
     };
@@ -139,7 +139,7 @@ public class QueueJob {
 
         @Override
         public void duplicateValues(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
-            stmt.setString(startColumn++, job.getJobId());
+            stmt.setString(startColumn, job.getJobId());
         }
 
         @Override
