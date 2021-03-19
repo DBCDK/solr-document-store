@@ -92,7 +92,7 @@ public class QueueJob {
     public String getBibliographicRecordId() {
         Matcher m = MANIFESTATION.matcher(jobId);
         if (!m.matches())
-            throw new IllegalStateException("Trying to get classifier from jobId: " + jobId);
+            throw new IllegalStateException("Trying to get bibliographicRecordId from jobId: " + jobId);
         return m.group(3);
     }
 
