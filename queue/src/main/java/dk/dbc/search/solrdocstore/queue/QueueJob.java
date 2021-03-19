@@ -39,22 +39,31 @@ public class QueueJob {
     private final String jobId;
     private final Integer commitWithin;
 
-    public QueueJob(String jobId) {
-        this.jobId = jobId;
-        this.commitWithin = null;
-    }
-
-    public QueueJob(String jobId, Integer commitWithin) {
+    private QueueJob(String jobId, Integer commitWithin) {
         this.jobId = jobId;
         this.commitWithin = commitWithin;
     }
 
     public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId) {
-        return new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId);
+        return manifestation(agencyId, classifier, bibliographicRecordId, null);
     }
 
     public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
-        return new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId, commitWithin);
+        QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId, commitWithin);
+        if (!job.isManifestation())
+            throw new IllegalArgumentException("Invalid arguments to manifestation");
+        return job;
+    }
+
+    public static QueueJob work(String work) {
+        return work(work, null);
+    }
+
+    public static QueueJob work(String work, Integer commitWithin) {
+        QueueJob job = new QueueJob(work, commitWithin);
+        if (!job.isWork())
+            throw new IllegalArgumentException("Invalid arguments to work");
+        return job;
     }
 
     public String getJobId() {
@@ -85,6 +94,16 @@ public class QueueJob {
         if (!m.matches())
             throw new IllegalStateException("Trying to get classifier from jobId: " + jobId);
         return m.group(3);
+    }
+
+    public boolean isWork() {
+        return jobId.startsWith("work:");
+    }
+
+    public String getWork() {
+        if (!jobId.startsWith("work:"))
+            throw new IllegalStateException("Trying to get wotk from jobId: " + jobId);
+        return jobId;
     }
 
     public Integer getCommitwithin() {
