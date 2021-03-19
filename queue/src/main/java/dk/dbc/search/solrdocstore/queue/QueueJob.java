@@ -102,7 +102,7 @@ public class QueueJob {
 
     public String getWork() {
         if (!jobId.startsWith("work:"))
-            throw new IllegalStateException("Trying to get wotk from jobId: " + jobId);
+            throw new IllegalStateException("Trying to get work from jobId: " + jobId);
         return jobId;
     }
 
