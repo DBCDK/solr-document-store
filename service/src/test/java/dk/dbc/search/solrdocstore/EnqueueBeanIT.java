@@ -117,9 +117,6 @@ public class EnqueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         // "Real" enqueue-supplier
         bean.enqueueSupplier = new EnqueueSupplierBean();
         bean.enqueueSupplier.entityManager = em;
-        bean.enqueueSupplier.daemon = new QueueRulesDaemon();
-        bean.enqueueSupplier.daemon.dataSource = env().getDatasource();
-        bean.enqueueSupplier.daemon.readQueueRules();
 
         Set<String> failed = env().getPersistenceContext().run(() -> {
             Object entity = bean.enqueuePids(" 870970-basis:23645564 870970-basis:12236455 ").getEntity();

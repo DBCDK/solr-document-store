@@ -7,10 +7,9 @@ import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 
@@ -75,11 +74,10 @@ public class BeanFactoryUtil {
     }
 
     public static EnqueueSupplierBean createEnqueueSupplier(JpaTestEnvironment env) {
-        EnqueueSupplierBean bean = new EnqueueSupplierBean();
-        bean.daemon = new QueueRulesDaemon() {
+        EnqueueSupplierBean bean = new EnqueueSupplierBean() {
             @Override
             public Collection<String> getManifestationQueues() {
-                return Arrays.asList("a");
+                return Collections.singleton("a");
             }
         };
         EntityManager entityManager = env.getEntityManager();

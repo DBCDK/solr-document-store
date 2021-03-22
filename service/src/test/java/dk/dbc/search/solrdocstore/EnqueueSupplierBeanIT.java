@@ -60,8 +60,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         EntityManager em = env().getEntityManager();
         env().getPersistenceContext().run(() -> {
 
-            EnqueueSupplierBean bean = new EnqueueSupplierBean();
-            bean.daemon = new QueueRulesDaemon() {
+            EnqueueSupplierBean bean = new EnqueueSupplierBean() {
                 @Override
                 public Collection<String> getManifestationQueues() {
                     return Arrays.asList("a", "b");
