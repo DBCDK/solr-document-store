@@ -33,8 +33,7 @@ var createPlugins = extractPlugin => [
 
 var createConfig = (plugins, extractPlugin) => ({
   entry: {
-    "solr-docstore-gui": "./app/index.js",
-    "queue-admin-gui": "./app/queue-admin.js"
+    "solr-docstore-gui": "./app/index.js"
   },
   output: {
     path: PATHS.build,
