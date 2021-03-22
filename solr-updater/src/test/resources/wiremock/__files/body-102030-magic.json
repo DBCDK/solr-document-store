@@ -1,5 +1,4 @@
 {
     "includeOwnHoldings": true,
-    "search": [ "150005-analyse", "870970-basis" ],
-    "success": true 
+    "collectionIdentifiers": [ "150005-analyse", "870970-basis" ]
 }

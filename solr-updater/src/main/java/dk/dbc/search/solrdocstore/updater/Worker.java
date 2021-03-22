@@ -108,13 +108,10 @@ public class Worker {
             try (LogWith logWith = track(null)) {
                 log.info("job = {}, metadata = {}", job, metaData);
 
-                String pid = new StringBuilder()
-                        .append(job.getAgencyId())
-                        .append('-')
-                        .append(job.getClassifier())
-                        .append(':')
-                        .append(job.getBibliographicRecordId())
-                        .toString();
+                if (!job.isManifestation())
+                    throw new FatalQueueError("Not a manifestation");
+
+                String pid = job.getJobId();
 
                 JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
                 List<Runnable> tasks = solrCollections.stream()
@@ -164,7 +161,12 @@ public class Worker {
                 throw new NonFatalQueueError(ex);
             } catch (SolrServerException ex) {
                 throw new FatalQueueError(ex);
+            } catch (RuntimeException ex) {
+                log.error("Runtime Exception: {}", ex.getMessage());
+                log.debug("Runtime Exception: ", ex);
+                throw ex;
             }
+
         };
     }
 

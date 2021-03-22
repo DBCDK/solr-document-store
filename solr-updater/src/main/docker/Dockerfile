@@ -24,14 +24,12 @@ LABEL SOLR_URL="(zk-/httpurl[=features]) (semicolon seperated list) of solr-coll
       THREADS="Number of parallel threads (default: 1)" \
       MAX_POOL_SIZE="Max number of connections to the database, should be THREADS+1 (default: 3)" \
       MAX_TRIES="Number of tries to process job (default: 3)" \
-      OPEN_AGENCY_URL="URL for OpenAgency service (required)" \
-      VIPCORE_ENDPOINT="URL for VipCore service" \
+      VIPCORE_ENDPOINT="URL for VipCore service (required)" \
       OPEN_AGENCY_AGE="Caching of successful openagency call (default: 4h)" \
       OPEN_AGENCY_FAILURE_AGE="Caching of unsuccessful result (default: 5m)"\
       OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)" \
       JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)" \
       CACHE_TIMEOUT="profile-service cache timeout in seconds (default: 60)" \
-      PROFILE_SERVICE_URL="Address of the profile-service (required)" \
       SCAN_PROFILES="Comma separated list of {agency}-{profile}, that can scan (required)" \
       SCAN_DEFAULT_FIELDS="COmma separated list of scan.field that scan.ddefault covers (required)" \
       USER_AGENT="Useragent string to use for http-client" \

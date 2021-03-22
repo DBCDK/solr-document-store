@@ -512,8 +512,7 @@ exit 1
                         <ZOOKEEPER_URL>zk://localhost:${solr.port.zk}/</ZOOKEEPER_URL>
                         <ZOOKEEPER_COLLECTIONS>corepo-b</ZOOKEEPER_COLLECTIONS>
                         <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
-                        <OPEN_AGENCY_URL>http://localhost:${wiremock.port}/openagency/</OPEN_AGENCY_URL>
-                        <PROFILE_SERVICE_URL>http://localhost:${wiremock.port}/profile-service/</PROFILE_SERVICE_URL>
+                        <VIPCORE_ENDPOINT>http://localhost:${wiremock.port}/vipcore/</VIPCORE_ENDPOINT>
                         <SOLR_APPID>solr-doc-store-updater</SOLR_APPID>
                     </environmentVariables>
                 </configuration>

@@ -1,7 +1,7 @@
 {
   "id" : "c5adf921-8d30-3310-ae3f-ce5566cd68f6",
   "request" : {
-    "url" : "/profile-service/api/profile/102030/magic",
+    "url" : "/vipcore/profileservice/search/102030/magic",
     "method" : "GET"
   },
   "response" : {
