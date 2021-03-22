@@ -1,1 +1,0 @@
-CREATE INDEX IF NOT EXISTS holdingsitemssolrkeys_bibliographicrecordid ON holdingsitemssolrkeys(bibliographicrecordid);
