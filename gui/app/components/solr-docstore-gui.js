@@ -101,11 +101,6 @@ class SolrDocstoreGUI extends React.PureComponent {
           </NavbarBrand>
           <Collapse navbar>
             <Nav className="mr-auto" navbar>
-              <NavItem>
-                <NavLink href="/queue-admin.html" className="text-light">
-                  Kø-værktøj
-                </NavLink>
-              </NavItem>
               <NavItem className="text-light mx-4 my-2">
                 {this.state.systemName}
               </NavItem>
