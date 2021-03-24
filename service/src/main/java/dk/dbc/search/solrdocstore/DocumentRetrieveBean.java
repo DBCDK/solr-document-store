@@ -1,6 +1,9 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.log.LogWith;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +44,10 @@ public class DocumentRetrieveBean {
             " AND h2b.bibliographicAgencyId = :agencyId" +
             " AND h2b.holdingsBibliographicRecordId = h.bibliographicRecordId" +
             " AND h2b.holdingsAgencyId = h.agencyId";
+
+    private static final String SELECT_MANIFESTATIONS_FOR_WORK_JPA =
+            "SELECT be FROM BibliographicEntity be" +
+            " WHERE be.work = :workId";
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -111,6 +118,39 @@ public class DocumentRetrieveBean {
         }
         DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, holdingsItemRecords, partOfDanbib, attachedResources);
         return response;
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("work/{ workid }")
+    @Timed(reusable = true)
+    public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
+                                                      @PathParam("workid") String workId) throws Exception {
+        try(LogWith logWith = track(null)) {
+            List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId);
+            if (responses == null || responses.size() == 0) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Work not found").build();
+            }
+            return Response.ok(responses).build();
+        } catch (Exception ex) {
+            log.error("Error retrieving documents for work {}: {}", workId, ex.getMessage());
+            log.debug("Error retrieving documents for work {}: {}", workId, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving documents for work").build();
+        }
+    }
+
+
+    public List<DocumentRetrieveResponse> getDocumentsForWork(String workId)  throws Exception {
+        List<BibliographicEntity> bibliographicEntities = Collections.EMPTY_LIST;
+        List<DocumentRetrieveResponse> res = new ArrayList<>();
+        TypedQuery<BibliographicEntity> query = entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class);
+        query.setParameter("workId", workId);
+        bibliographicEntities = query.getResultList();
+        for (BibliographicEntity b : bibliographicEntities) {
+            DocumentRetrieveResponse r = getDocumentWithHoldingsitems(b.getAgencyId(), b.getClassifier(), b.getBibliographicRecordId());
+            res.add(r);
+        }
+        return res;
     }
 
     public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {
