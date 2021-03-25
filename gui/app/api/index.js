@@ -48,40 +48,5 @@ export default {
         bibliographicRecordId
       )}`
     ).then(parse);
-  },
-  fetchQueueRules() {
-    return fetch("api/queue-rules").then(parse);
-  },
-  createQueueRule(queueRule) {
-    return fetch("api/create-queue-rule", {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(queueRule)
-    }).then(parse);
-  },
-  deleteQueueRule(queueID) {
-    return fetch(`api/queue-rule/${queueID}`, {
-      method: "DELETE"
-    }).then(parse);
-  },
-  fetchAsyncJobList() {
-    return fetch("api/async-job/jobs-status").then(parse);
-  },
-  fetchFullLog(uuid) {
-    return fetch(`api/log/${uuid}`).then(res => res.body);
-  },
-  enqueueAllJob(queue, includeDeleted) {
-    return fetch(
-      `api/async-job/queue-all/${encodeURI(queue)}/${includeDeleted}`
-    );
-  },
-  errorActionWithPattern(path, pattern, consumer) {
-    return fetch(
-      `api/async-job/${path}/${encodeURI(pattern)}` +
-        (consumer ? "?consumer=" + encodeURIComponent(consumer) : "")
-    );
   }
 };
