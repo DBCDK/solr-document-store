@@ -154,7 +154,6 @@ public class DocumentRetrieveBean {
         TypedQuery<HoldingsItemEntity> holdingsQuery = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA, HoldingsItemEntity.class);
         holdingsQuery.setParameter("workId", workId);
         holdingsItemEntities = holdingsQuery.getResultList();
-        log.debug("all holdingsItemEntites length: {}", holdingsItemEntities.size());
         for (BibliographicEntity b : bibliographicEntities) {
             List<Integer> partOfDanbib = Collections.EMPTY_LIST;
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsItemEntities.stream()
@@ -183,14 +182,13 @@ public class DocumentRetrieveBean {
                         "ON oa.agencyId = h2b.holdingsAgencyId AND oa.libraryType = 'FBS' AND (oa.partOfDanbib = TRUE OR oa.authCreateCommonRecord = TRUE)" +
                 " JOIN HoldingsItemsSolrKeys h " +
                         "ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId AND h.hasLiveHoldings = TRUE" +
-                " LEFT JOIN BibliographicSolrKeys b " +
-                        "ON b.agencyId = h2b.holdingsAgencyId AND b.bibliographicRecordId = h2b.bibliographicRecordId " +
-                        "AND 'true' = jsonb_extract_path_text(b.indexKeys, 'rec.excludeFromUnionCatalogue', '0')" +
                 " WHERE" +
                 "  h2b.isCommonDerived = TRUE" +
                 "  AND h2b.bibliographicRecordId = ?" +
-                "  AND (b.agencyId = NULL AND b.bibliographicRecordId = NULL)")
-                .setParameter(1, bibliographicRecordId)
+                "  AND NOT EXISTS (SELECT (1) FROM BibliographicSolrKeys b " +
+                        "WHERE b.agencyId = h2b.holdingsAgencyId AND b.bibliographicRecordId = h2b.bibliographicRecordId " +
+                        "AND 'true' = jsonb_extract_path_text(b.indexKeys, 'rec.excludeFromUnionCatalogue', '0'))"
+        ).setParameter(1, bibliographicRecordId)
                 .getResultList();
     }
 
