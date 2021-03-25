@@ -169,7 +169,6 @@ public class DocumentRetrieveBean {
             Map<String, Map<Integer, Boolean>> attachedResources = mapResources(resources);
 
             DocumentRetrieveResponse r = new DocumentRetrieveResponse(b, holdingsItemEntityList, partOfDanbib, attachedResources);
-            //DocumentRetrieveResponse r = getDocumentWithHoldingsitems(b.getAgencyId(), b.getClassifier(), b.getBibliographicRecordId());
             res.add(r);
         }
         return res;
