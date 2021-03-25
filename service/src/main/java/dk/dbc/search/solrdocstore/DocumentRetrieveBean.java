@@ -157,7 +157,7 @@ public class DocumentRetrieveBean {
         for (BibliographicEntity b : bibliographicEntities) {
             List<Integer> partOfDanbib = Collections.EMPTY_LIST;
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsItemEntities.stream()
-                    .filter(he -> (he.getAgencyId() == b.getAgencyId() && he.getBibliographicRecordId().equals(b.getBibliographicRecordId())))
+                    .filter(he -> he.getAgencyId() == b.getAgencyId() && he.getBibliographicRecordId().equals(b.getBibliographicRecordId()))
                     .collect(Collectors.toList());
             if (b.getAgencyId() == LibraryType.COMMON_AGENCY) {
                 partOfDanbib = getPartOfDanbibCommon(b.getBibliographicRecordId());
