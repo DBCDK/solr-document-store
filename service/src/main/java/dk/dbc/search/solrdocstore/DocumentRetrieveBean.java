@@ -131,7 +131,8 @@ public class DocumentRetrieveBean {
             if (responses == null || responses.size() == 0) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Work not found").build();
             }
-            return Response.ok(responses).build();
+            final WorkRetrieveResponse res = new WorkRetrieveResponse(workId, responses);
+            return Response.ok(res).build();
         } catch (Exception ex) {
             log.error("Error retrieving documents for work {}: {}", workId, ex.getMessage());
             log.debug("Error retrieving documents for work {}: {}", workId, ex);
@@ -141,7 +142,7 @@ public class DocumentRetrieveBean {
 
 
     public List<DocumentRetrieveResponse> getDocumentsForWork(String workId)  throws Exception {
-        List<BibliographicEntity> bibliographicEntities = Collections.EMPTY_LIST;
+        List<BibliographicEntity> bibliographicEntities;
         List<DocumentRetrieveResponse> res = new ArrayList<>();
         TypedQuery<BibliographicEntity> query = entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class);
         query.setParameter("workId", workId);
@@ -156,18 +157,13 @@ public class DocumentRetrieveBean {
     public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {
         return entityManager.createNativeQuery(
                 "SELECT CAST(h2b.holdingsAgencyId AS INTEGER) FROM HoldingsToBibliographic h2b" +
+                " JOIN OpenAgencyCache oa ON oa.agencyId = h2b.holdingsAgencyId AND oa.libraryType = 'FBS' AND (oa.partOfDanbib = TRUE OR oa.authCreateCommonRecord = TRUE)" +
+                " JOIN HoldingsItemsSolrKeys h ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId AND h.hasLiveHoldings = TRUE" +
+                " LEFT JOIN BibliographicSolrKeys b ON b.agencyId = h2b.holdingsAgencyId AND b.bibliographicRecordId = h2b.bibliographicRecordId AND 'true' = jsonb_extract_path_text(b.indexKeys, 'rec.excludeFromUnionCatalogue', '0')" +
                 " WHERE" +
                 "  h2b.isCommonDerived = TRUE" +
                 "  AND h2b.bibliographicRecordId = ?" +
-                "  AND EXISTS (SELECT 1 FROM OpenAgencyCache oa WHERE oa.agencyId = h2b.holdingsAgencyId" +
-                "   AND oa.libraryType = 'FBS'" +
-                "   AND (oa.partOfDanbib = TRUE OR oa.authCreateCommonRecord = TRUE))" +
-                "  AND EXISTS (SELECT 1 FROM HoldingsItemsSolrKeys h WHERE h.agencyId = h2b.holdingsAgencyId" +
-                "   AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
-                "   AND h.hasLiveHoldings = TRUE)" +
-                "  AND NOT EXISTS (SELECT 1 FROM BibliographicSolrKeys b WHERE b.agencyId = h2b.holdingsAgencyId" +
-                "   AND b.bibliographicRecordId = h2b.bibliographicRecordId" +
-                "   AND 'true' = jsonb_extract_path_text(b.indexKeys, 'rec.excludeFromUnionCatalogue', '0'))")
+                "  AND (b.agencyId = NULL AND b.bibliographicRecordId = NULL)")
                 .setParameter(1, bibliographicRecordId)
                 .getResultList();
     }
