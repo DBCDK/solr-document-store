@@ -53,13 +53,6 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static EnqueueBean createEnqueueBean(JpaTestEnvironment env) {
-        EnqueueBean bean = new EnqueueBean();
-        bean.entityManager = env.getEntityManager();
-        bean.enqueueSupplier = createEnqueueSupplier(env);
-        return bean;
-    }
-
     public static OpenAgencyStatusBean createOpenAgencyStatusBean(JpaTestEnvironment env) {
         OpenAgencyStatusBean bean = new OpenAgencyStatusBean() {
             @Override
