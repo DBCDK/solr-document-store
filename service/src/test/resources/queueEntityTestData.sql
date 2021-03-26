@@ -1,1 +1,1 @@
-INSERT INTO queueRule (queue) VALUES ('bar');
+INSERT INTO queueRule (queue, supplier, postpone) VALUES ('bar', 'horse', 1);

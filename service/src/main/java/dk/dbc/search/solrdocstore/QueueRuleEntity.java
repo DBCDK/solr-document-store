@@ -2,29 +2,44 @@ package dk.dbc.search.solrdocstore;
 
 import java.io.Serializable;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "queueRule")
 public class QueueRuleEntity implements Serializable {
 
-    private static final long serialVersionUID = -2773872842011755768L;
+    private static final long serialVersionUID = 0x5DF7F2B355D4530EL;
 
     public QueueRuleEntity() {
+        this.pk = new QueueRuleKey();
     }
 
-    public QueueRuleEntity(String queue) {
+    public QueueRuleEntity(String queue, String supplier, int postpone) {
         this.queue = queue;
+        this.supplier = supplier;
+        this.postpone = postpone;
+        this.pk = new QueueRuleKey(queue, supplier);
     }
 
-    @Id
+    @EmbeddedId
+    @SuppressWarnings("PMD.UnusedPrivateField")
+    private final QueueRuleKey pk;
+
+    @Column(name = "queue", updatable = false, nullable = false)
     private String queue;
+
+    @Column(name = "supplier", updatable = false, nullable = false)
+    private String supplier;
+
+    @Column(name = "postpone", updatable = false, nullable = false)
+    private int postpone;
 
     @Override
     public int hashCode() {
-        return queue.hashCode();
+        return Objects.hash(57, queue, supplier, postpone);
     }
 
     @Override
@@ -34,12 +49,14 @@ public class QueueRuleEntity implements Serializable {
         if (obj == null || getClass() != obj.getClass())
             return false;
         final QueueRuleEntity other = (QueueRuleEntity) obj;
-        return Objects.equals(this.queue, other.queue);
+        return Objects.equals(this.queue, other.queue) &&
+               Objects.equals(this.supplier, other.supplier) &&
+               this.postpone == other.postpone;
     }
 
     @Override
     public String toString() {
-        return "QueueRuleEntity{" + "queue=" + queue + '}';
+        return "QueueRuleEntity{" + "queue=" + queue + ", supplier=" + supplier + ", postpone=" + postpone + '}';
     }
 
     public String getQueue() {
@@ -50,4 +67,19 @@ public class QueueRuleEntity implements Serializable {
         this.queue = queue;
     }
 
+    public String getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(String supplier) {
+        this.supplier = supplier;
+    }
+
+    public int getPostpone() {
+        return postpone;
+    }
+
+    public void setPostpone(int postpone) {
+        this.postpone = postpone;
+    }
 }
