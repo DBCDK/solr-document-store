@@ -23,10 +23,9 @@ import dk.dbc.pgqueue.QueueStorageAbstraction;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.sql.Types.*;
 
 /**
  *
@@ -37,17 +36,24 @@ public class QueueJob {
     private static final Pattern MANIFESTATION = Pattern.compile("([0-9]+)-([^:]+):(.+)");
 
     private final String jobId;
-    private final Integer commitWithin;
 
+    @Deprecated
     private QueueJob(String jobId, Integer commitWithin) {
+        this(jobId);
+    }
+
+    private QueueJob(String jobId) {
         this.jobId = jobId;
-        this.commitWithin = commitWithin;
     }
 
     public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId) {
-        return manifestation(agencyId, classifier, bibliographicRecordId, null);
+        QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId);
+        if (!job.isManifestation())
+            throw new IllegalArgumentException("Invalid arguments to manifestation");
+        return job;
     }
 
+    @Deprecated
     public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
         QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId, commitWithin);
         if (!job.isManifestation())
@@ -56,9 +62,13 @@ public class QueueJob {
     }
 
     public static QueueJob work(String work) {
-        return work(work, null);
+        QueueJob job = new QueueJob(work);
+        if (!job.isWork())
+            throw new IllegalArgumentException("Invalid arguments to work");
+        return job;
     }
 
+    @Deprecated
     public static QueueJob work(String work, Integer commitWithin) {
         QueueJob job = new QueueJob(work, commitWithin);
         if (!job.isWork())
@@ -106,21 +116,38 @@ public class QueueJob {
         return jobId;
     }
 
+    @Deprecated
     public Integer getCommitwithin() {
-        return commitWithin;
+        return null;
     }
 
+    @Deprecated
     public boolean hasCommitWithin() {
-        return commitWithin != null;
+        return false;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        final QueueJob other = (QueueJob) obj;
+        return Objects.equals(this.jobId, other.jobId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(37, jobId);
     }
 
     @Override
     public String toString() {
-        return "QueueJob{" + "jobId=" + jobId + ", commitWithin=" + commitWithin + '}';
+        return "QueueJob{" + "jobId=" + jobId + '}';
     }
 
     public static final QueueStorageAbstraction<QueueJob> STORAGE_ABSTRACTION = new QueueStorageAbstraction<QueueJob>() {
-        private final String[] COLUMNS = "jobid,commitWithin".split(",");
+        private final String[] COLUMNS = "jobid".split(",");
 
         @Override
         public String[] columnList() {
@@ -130,21 +157,12 @@ public class QueueJob {
         @Override
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
             String jobId = resultSet.getString(startColumn++);
-            Integer commitwithin = resultSet.getInt(startColumn);
-            if (resultSet.wasNull()) {
-                commitwithin = null;
-            }
-            return new QueueJob(jobId, commitwithin);
+            return new QueueJob(jobId);
         }
 
         @Override
         public void saveJob(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
             stmt.setString(startColumn++, job.getJobId());
-            if (job.hasCommitWithin()) {
-                stmt.setInt(startColumn, job.getCommitwithin());
-            } else {
-                stmt.setNull(startColumn, INTEGER);
-            }
         }
     };
 
