@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
@@ -26,7 +25,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import org.postgresql.util.PGobject;
 
 /**
  *
