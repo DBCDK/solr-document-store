@@ -28,6 +28,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.QueueTestUtil.clearQueue;
@@ -40,7 +41,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(EnqueueSupplierBeanIT.class);
+    private static final Logger log = LoggerFactory.getLogger(EnqueueSupplierBeanIT.class);
+
     private BibliographicBean bibliographicBean;
     private HoldingsItemBean holdingsItemBean;
     private EntityManager em;
@@ -63,16 +65,16 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {
                 return Arrays.asList(
-                        new QueueRuleEntity("a", QueueType.MANIFESTATION.getColumnName(), 0),
-                        new QueueRuleEntity("b", QueueType.MANIFESTATION.getColumnName(), 5),
-                        new QueueRuleEntity("c", QueueType.HOLDING.getColumnName(), 0),
-                        new QueueRuleEntity("d", QueueType.HOLDING.getColumnName(), 20),
-                        new QueueRuleEntity("e", QueueType.FIRSTLASTHOLDING.getColumnName(), 0),
-                        new QueueRuleEntity("f", QueueType.FIRSTLASTHOLDING.getColumnName(), 20),
-                        new QueueRuleEntity("g", QueueType.WORK.getColumnName(), 0),
-                        new QueueRuleEntity("h", QueueType.WORK.getColumnName(), 100),
-                        new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING.getColumnName(), 0),
-                        new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING.getColumnName(), 100));
+                        new QueueRuleEntity("a", QueueType.MANIFESTATION, 0),
+                        new QueueRuleEntity("b", QueueType.MANIFESTATION, 5),
+                        new QueueRuleEntity("c", QueueType.HOLDING, 0),
+                        new QueueRuleEntity("d", QueueType.HOLDING, 20),
+                        new QueueRuleEntity("e", QueueType.FIRSTLASTHOLDING, 0),
+                        new QueueRuleEntity("f", QueueType.FIRSTLASTHOLDING, 20),
+                        new QueueRuleEntity("g", QueueType.WORK, 0),
+                        new QueueRuleEntity("h", QueueType.WORK, 100),
+                        new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0),
+                        new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING, 100));
             }
         };
         bean.entityManager = em;
@@ -88,47 +90,6 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                     "b,123456-katalog:87654321",
                     "g,123456-katalog:87654321",
                     "h,123456-katalog:87654321");
-        });
-    }
-
-    @Test(timeout = 1000L)
-    public void testEnqueueManifestationAddsToQueueTable() throws Exception {
-        System.out.println("testEnqueueManifestationAddsToQueueTable");
-
-        EntityManager em = env().getEntityManager();
-        env().getPersistenceContext().run(() -> {
-
-            EnqueueSupplierBean bean = new EnqueueSupplierBean() {
-                @Override
-                public Collection<String> getManifestationQueues() {
-                    return Arrays.asList("a", "b");
-                }
-            };
-            bean.entityManager = em;
-
-            clearQueue(em);
-            EnqueueService<AgencyClassifierItemKey> enqeueService = bean.getManifestationEnqueueService();
-
-            try {
-                System.out.println("* no commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "12345678"));
-                System.out.println("* commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "87654321"), Optional.empty());
-                System.out.println("* null commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "abc"), Optional.empty());
-                System.out.println("* queueing done");
-            } catch (SQLException ex) {
-                log.error("Exception: " + ex.getMessage());
-                log.debug("Exception:", ex);
-            }
-
-            queueIs(em,
-                    "a,870970-clazzifier:12345678",
-                    "b,870970-clazzifier:12345678",
-                    "a,870970-clazzifier:87654321",
-                    "b,870970-clazzifier:87654321",
-                    "a,870970-clazzifier:abc",
-                    "b,870970-clazzifier:abc");
         });
     }
 
@@ -367,31 +328,31 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId) {
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId) throws SQLException {
         return addBibliographic(agency, bibliographicRecordId, Optional.empty());
     }
 
-    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed) {
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed) throws SQLException {
         return addBibliographic(agency, bibliographicRecordId, superseed, Optional.empty());
     }
 
-    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) {
+    private BibliographicEntity addBibliographic(int agency, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) throws SQLException {
         return addBibliographic(agency, "clazzifier", bibliographicRecordId, superseed, commitWithin);
     }
 
-    private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) {
+    private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) throws SQLException {
         List<String> superseedList = superseed.orElse(Collections.emptyList());
         BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
         bibliographicBean.addBibliographicKeys(e, superseedList, true);
         return e;
     }
 
-    private void deleteBibliographic(BibliographicEntity ownRecord) {
+    private void deleteBibliographic(BibliographicEntity ownRecord) throws SQLException {
         ownRecord.setDeleted(true);
         bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), true);
     }
 
-    private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {
+    private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) throws SQLException {
         HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Collections.EMPTY_LIST, "IT");
         holdingsItemBean.setHoldingsKeys(e);
         return e;

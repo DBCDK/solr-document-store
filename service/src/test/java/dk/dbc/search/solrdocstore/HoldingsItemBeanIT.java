@@ -24,6 +24,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import javax.sql.DataSource;
 import org.junit.Test;
@@ -56,12 +58,14 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(clearQueue(), contains("870970-basis:25912233=false")); // Not postponed
 
-        hol.enqueueAdapter.config = new Config() {
+        hol.enqueueSupplier = new EnqueueSupplierBean() {
             @Override
-            public long getHoldingQueueDelay() {
-                return 600_000L; // 10 min
+            protected Collection<QueueRuleEntity> getQueueRules() {
+                return Arrays.asList(
+                        new QueueRuleEntity("a", QueueType.HOLDING, 100_000));
             }
         };
+        hol.enqueueSupplier.entityManager = env.getEntityManager();
         env().getPersistenceContext().run(() -> {
             hol.setHoldingsKeys(jsonRequestHold("710100-25912233"));
         });

@@ -592,7 +592,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(postResurrect, is(1L));
     }
 
-    @Test(timeout = 2_000L)
+    @Test(timeout = 20_000L)
     public void skipQueueParameter() throws Exception {
         System.out.println("skipQueueParameter");
 

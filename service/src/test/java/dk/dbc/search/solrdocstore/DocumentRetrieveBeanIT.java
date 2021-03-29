@@ -1,14 +1,13 @@
 package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,8 +23,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
-
-    private static final ObjectMapper O = new ObjectMapper();
 
     private static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"Decommissioned\"]}]");
     private static final List<Map<String, List<String>>> ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
@@ -50,7 +47,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         hold = createHoldingsItemBean(env);
         h2b = createHoldingsToBibliographicBean(env);
         env().getPersistenceContext().run(() -> {
-            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), true);
+            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), false);
         });
     }
 
@@ -151,8 +148,6 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         return new Build(holdingsAgencyId, id);
     }
 
-    private static final Optional<Integer> NOW = Optional.ofNullable(null);
-
     private class Build {
 
         private final int holdingsAgencyId;
@@ -164,14 +159,14 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.persist(makeOpenAgencyEntity(holdingsAgencyId));
         }
 
-        private Build holdings(List<Map<String, List<String>>> content) {
+        private Build holdings(List<Map<String, List<String>>> content) throws SQLException {
             hold.setHoldingsKeys(new HoldingsItemEntity(holdingsAgencyId, holdingsId, "v0", content, "t1"));
-            h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId);
+            h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId, EnqueueCollector.VOID, QueueType.HOLDING);
             return this;
         }
 
-        private Build record(Map<String, List<String>> content) {
-            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST, true);
+        private Build record(Map<String, List<String>> content) throws SQLException {
+            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST, false);
             return this;
         }
     }

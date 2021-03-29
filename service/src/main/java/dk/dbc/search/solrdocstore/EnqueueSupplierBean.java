@@ -23,9 +23,6 @@ import java.util.Collection;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -36,22 +33,6 @@ public class EnqueueSupplierBean {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
-
-    public EnqueueService<AgencyClassifierItemKey> getManifestationEnqueueService() {
-        // EclipseLink specific
-        Connection connection = entityManager.unwrap(Connection.class);
-        return new EnqueueService<>(connection, getManifestationQueues(),
-                                    (key) -> key.toQueueJob());
-    }
-
-    public Collection<String> getManifestationQueues() {
-        TypedQuery<QueueRuleEntity> query = entityManager.createQuery("SELECT qr FROM QueueRuleEntity qr",
-                                                                      QueueRuleEntity.class);
-        return query.getResultList()
-                .stream()
-                .map(QueueRuleEntity::getQueue)
-                .collect(toList());
-    }
 
     public EnqueueCollector getEnqueueCollector() {
         Connection connection = entityManager.unwrap(Connection.class);

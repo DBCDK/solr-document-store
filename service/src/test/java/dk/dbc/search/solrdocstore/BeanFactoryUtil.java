@@ -8,8 +8,8 @@ import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 
@@ -25,7 +25,7 @@ public class BeanFactoryUtil {
         bean.openAgency = openAgency;
         bean.h2bBean = createHoldingsToBibliographicBean(env);
         bean.brBean = createBibliographicRetrieveBean(env);
-        bean.enqueueAdapter = createEnqueueAdapter(env);
+        bean.enqueueSupplier = createEnqueueSupplier(env);
         return bean;
     }
 
@@ -41,7 +41,7 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = env.getEntityManager();
         bean.h2bBean = createHoldingsToBibliographicBean(env);
-        bean.enqueueAdapter = createEnqueueAdapter(env);
+        bean.enqueueSupplier = createEnqueueSupplier(env);
         return bean;
     }
 
@@ -69,31 +69,17 @@ public class BeanFactoryUtil {
     public static EnqueueSupplierBean createEnqueueSupplier(JpaTestEnvironment env) {
         EnqueueSupplierBean bean = new EnqueueSupplierBean() {
             @Override
-            public Collection<String> getManifestationQueues() {
-                return Collections.singleton("a");
+            protected Collection<QueueRuleEntity> getQueueRules() {
+                return Arrays.asList(
+                        new QueueRuleEntity("a", QueueType.MANIFESTATION, 0),
+                        new QueueRuleEntity("a", QueueType.MANIFESTATION_DELETED, 100_000),
+                        new QueueRuleEntity("a", QueueType.HOLDING, 0),
+                        new QueueRuleEntity("a", QueueType.RESOURCE, 0));
             }
         };
         EntityManager entityManager = env.getEntityManager();
         bean.entityManager = entityManager;
         return bean;
-    }
-
-    public static EnqueueAdapter createEnqueueAdapter(JpaTestEnvironment env) {
-        EnqueueAdapter enqueueAdapter = new EnqueueAdapter();
-        enqueueAdapter.config = new Config() {
-            @Override
-            public long getDeleteMarkedDelay() {
-                return 200_000L;
-            }
-
-            @Override
-            public long getHoldingQueueDelay() {
-                return 0L;
-            }
-
-        };
-        enqueueAdapter.queue = createEnqueueSupplier(env);
-        return enqueueAdapter;
     }
 
     public static OpenAgencyBean createOpenAgencyBean() {
@@ -173,7 +159,7 @@ public class BeanFactoryUtil {
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = env.getEntityManager();
         bean.openAgency = openAgency;
-        bean.enqueueAdapter = createEnqueueAdapter(env);
+        bean.enqueueSupplier = createEnqueueSupplier(env);
         return bean;
     }
 }

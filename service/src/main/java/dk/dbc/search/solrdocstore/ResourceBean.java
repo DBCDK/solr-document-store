@@ -3,6 +3,7 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +22,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static dk.dbc.log.LogWith.track;
 
@@ -39,7 +37,7 @@ public class ResourceBean {
     OpenAgencyBean openAgency;
 
     @Inject
-    EnqueueAdapter enqueueAdapter;
+    EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -61,6 +59,7 @@ public class ResourceBean {
             } catch (EJBException ex) {
                 return Response.ok().entity(new StatusBean.Resp("Unknown agency")).build();
             }
+
             // Add resource
             BibliographicResourceEntity resource = request.asBibliographicResource();
             entityManager.merge(resource);
@@ -73,9 +72,15 @@ public class ResourceBean {
             } else {
                 bibliographicEntities = nonFBSBibEntries(resource);
             }
-            Set<AgencyClassifierItemKey> keySet = bibliographicEntities.stream()
-                    .map(BibliographicEntity::asAgencyClassifierItemKey).collect(Collectors.toSet());
-            enqueueAdapter.enqueueAll(keySet);
+            try {
+                EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
+                bibliographicEntities.forEach(e -> enqueue.add(e, QueueType.RESOURCE));
+                enqueue.commit();
+            } catch (SQLException ex) {
+                log.error("Unable to commit queue entries: {}", ex.getMessage());
+                log.debug("Unable to commit queue entries: ", ex);
+                return Response.status(Response.Status.BAD_REQUEST).entity(new StatusBean.Resp("Unable to commit queue entries")).build();
+            }
             return Response.ok().entity(new StatusBean.Resp()).build();
         }
     }

@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,31 +29,32 @@ public class HoldingsToBibliographicBean {
     BibliographicRetrieveBean brBean;
 
     @Timed(reusable = true)
-    public Set<AgencyClassifierItemKey> tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId) {
+    public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId, EnqueueCollector enqueue, QueueType enqueueSource) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId, hBibliographicRecordId);
         LibraryType libraryType = openAgency.lookup(hAgencyId).getLibraryType();
 
         switch (libraryType) {
             case NonFBS:
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, false, hAgencyId);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, false, enqueue, enqueueSource, hAgencyId);
+                break;
 
             case FBS: {
                 String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
                 boolean isCommonDerived = bibliographicEntityExists(870970, liveBibliographicRecordId);
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, hAgencyId, LibraryType.COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, enqueue, enqueueSource, hAgencyId, LibraryType.COMMON_AGENCY);
+                break;
             }
             case FBSSchool: {
                 String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
-                return attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, hAgencyId, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, enqueue, enqueueSource, hAgencyId, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
+                break;
             }
         }
-        return Collections.emptySet();
     }
 
     @Timed(reusable = true)
-    public Set<AgencyClassifierItemKey> recalcAttachments(String newRecordId, Set<String> supersededRecordIds) {
+    public void recalcAttachments(String newRecordId, Set<String> supersededRecordIds, EnqueueCollector enqueue, QueueType enqueueSource) {
         Map<Integer, LibraryType> map = new HashMap<>();
-        Set<AgencyClassifierItemKey> keysUpdated = EnqueueAdapter.makeSet();
 
         for (String supersededRecordId : supersededRecordIds) {
             List<HoldingsToBibliographicEntity> recalcCandidates = findRecalcCandidates(supersededRecordId);
@@ -66,18 +66,17 @@ public class HoldingsToBibliographicBean {
                         break;
                     case FBS: {
                         boolean isCommonDerived = bibliographicEntityExists(870970, newRecordId);
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, h2b.getBibliographicAgencyId(), LibraryType.COMMON_AGENCY));
+                        attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, enqueue, enqueueSource, h2b.getBibliographicAgencyId(), LibraryType.COMMON_AGENCY);
                         break;
                     }
                     case FBSSchool:
-                        keysUpdated.addAll(attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, h2b.getBibliographicAgencyId(), LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY));
+                        attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, enqueue, enqueueSource, h2b.getBibliographicAgencyId(), LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
                         break;
                     default:
                         throw new AssertionError("Enum has unknown value" + libraryType);
                 }
             }
         }
-        return keysUpdated;
     }
 
     private LibraryType getFromCache(Map<Integer, LibraryType> map, int holdingsAgencyId) {
@@ -113,28 +112,30 @@ public class HoldingsToBibliographicBean {
         }
     }
 
-    private Set<AgencyClassifierItemKey> attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, boolean isCommonDerived, int... bibliographicAgencyPriorities) {
+    private void attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType enqueueSource, int... bibliographicAgencyPriorities) {
         for (int i = 0 ; i < bibliographicAgencyPriorities.length ; i++) {
-            Set<AgencyClassifierItemKey> keysUpdated =
-                    attachIfExists(
-                            bibliographicAgencyPriorities[i],
+            
+            boolean didAttach = attachIfExists(
+                    bibliographicAgencyPriorities[i],
                             bibliographicRecordId,
                             holdingsAgencyId,
                             holdingsBibliographicRecordId,
-                            isCommonDerived);
-            if (!keysUpdated.isEmpty()) {
-                return keysUpdated;
+                            isCommonDerived,
+                            enqueue,
+                            enqueueSource);
+            if (didAttach) {
+                return;
             }
         }
-        return Collections.emptySet();
     }
 
-    private Set<AgencyClassifierItemKey> attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId, boolean isCommonDerived) {
+    private boolean attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType enqueueSource) {
         if (bibliographicEntityExists(bibliographicAgencyId, bibliographicRecordId)) {
             HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId, isCommonDerived);
-            return attachToAgency(expectedState);
+            attachToAgency(expectedState, enqueue, enqueueSource);
+            return true;
         }
-        return Collections.emptySet();
+        return false;
     }
 
     public boolean bibliographicEntityExists(int agencyId, String bibliographicRecordId) {
@@ -142,22 +143,16 @@ public class HoldingsToBibliographicBean {
         return e != null && !e.isDeleted();
     }
 
-    public Set<AgencyClassifierItemKey> attachToAgency(HoldingsToBibliographicEntity expectedState) {
+    public void attachToAgency(HoldingsToBibliographicEntity expectedState, EnqueueCollector enqueue, QueueType enqueueSource) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
-        Set<AgencyClassifierItemKey> affectedKeys = EnqueueAdapter.makeSet();
 
         if (foundEntity != null && !foundEntity.equals(expectedState)) {
             List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(foundEntity.getBibliographicAgencyId(), foundEntity.getBibliographicRecordId());
-            for (BibliographicEntity entityAffected : entitiesAffected) {
-                affectedKeys.add(entityAffected.asAgencyClassifierItemKey());
-            }
+            entitiesAffected.forEach(e -> enqueue.add(e, enqueueSource));
         }
         List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(expectedState.getBibliographicAgencyId(), expectedState.getBibliographicRecordId());
-        for (BibliographicEntity entityAffected : entitiesAffected) {
-            affectedKeys.add(entityAffected.asAgencyClassifierItemKey());
-        }
+        entitiesAffected.forEach(e -> enqueue.add(e, enqueueSource));
         entityManager.merge(expectedState);
-        return affectedKeys;
     }
 
 }
