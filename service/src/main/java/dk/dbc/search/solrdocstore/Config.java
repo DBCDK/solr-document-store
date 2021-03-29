@@ -24,8 +24,6 @@ public class Config {
     private long jobPruneMinutes;
     private String systemName;
     private int[] openAgencyValidateTime;
-    private long deleteMarkedDelay;
-    private long holdingsQueueDelay;
     private String vipCoreEndpoint;
 
     @PostConstruct
@@ -36,8 +34,6 @@ public class Config {
         systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
         // Number of milliseconds to delay bib entities that are being deleted
-        deleteMarkedDelay = getValue(props, "deleteMarkedDelay", "DELETE_MARKED_DELAY", "200000", null, Long::parseUnsignedLong);
-        holdingsQueueDelay = getValue(props, "holdingsQueueDelay", "HOLDINGS_QUEUE_DELAY", "300000", null, Long::parseUnsignedLong);
         vipCoreEndpoint = getValue(props, "vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
     }
 
@@ -56,14 +52,6 @@ public class Config {
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public int[] getOpenAgencyValidateTime() {
         return openAgencyValidateTime;
-    }
-
-    public long getDeleteMarkedDelay() {
-        return deleteMarkedDelay;
-    }
-
-    public long getHoldingQueueDelay() {
-        return holdingsQueueDelay;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {

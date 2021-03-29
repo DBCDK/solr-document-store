@@ -3,9 +3,7 @@ FROM docker.dbc.dk/payara5-micro:latest
 LABEL DOCSTORE_POSTGRES_URL="Database url (required)" \
       SYSTEM_NAME="System (repository) name (optional)"\
       VIPCORE_ENDPOINT="Url for VipCore"\
-      MAX_POOL_SIZE="Max number of connections to the database (default: 30)" \
-      DELETE_MARKED_DELAY="How many ms a deleted bibliographic item should be delayed for processing (default: 200000)" \
-      HOLDINGS_QUEUE_DELAY="How many ms a holdings item should be delayed for processing (default: 300000)"
+      MAX_POOL_SIZE="Max number of connections to the database (default: 30)"
 
 COPY target/docker/*.jar /opt/payara5/jars/
 
