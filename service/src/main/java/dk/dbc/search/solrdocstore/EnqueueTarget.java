@@ -26,7 +26,7 @@ import java.sql.SQLException;
  */
 public interface EnqueueTarget {
 
-    public void add(BibliographicEntity entity);
+    void add(BibliographicEntity entity);
 
-    public void commit() throws SQLException;
+    void commit() throws SQLException;
 }

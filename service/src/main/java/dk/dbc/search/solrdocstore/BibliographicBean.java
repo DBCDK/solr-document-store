@@ -264,8 +264,6 @@ public class BibliographicBean {
                 addHoldingsToBibliographic(agency, recordId, agency, enqueue, QueueType.MANIFESTATION);
             }
         } else {
-            HashSet<AgencyClassifierItemKey> ret = new HashSet<>();
-
             TypedQuery<String> superceeded = entityManager.createQuery(
                     "SELECT b.deadBibliographicRecordId FROM BibliographicToBibliographicEntity b" +
                     " WHERE b.liveBibliographicRecordId = :bibId", String.class);
