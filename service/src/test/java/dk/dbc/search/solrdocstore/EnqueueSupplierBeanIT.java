@@ -87,8 +87,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             queueIs(em,
                     "a,870970-clazzifier:12345678",
                     "b,870970-clazzifier:12345678",
-                    "a,870970-clazzifier:87654321,100",
-                    "b,870970-clazzifier:87654321,100",
+                    "a,870970-clazzifier:87654321",
+                    "b,870970-clazzifier:87654321",
                     "a,870970-clazzifier:abc",
                     "b,870970-clazzifier:abc");
         });
@@ -298,10 +298,10 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             int commitWithin = 100;
             addBibliographic(commonAgency, superseedId, Optional.of(ids), Optional.of(commitWithin));
             queueIs(em,
-                    queueItem(commonAgency, "clazzifier", "test1", commitWithin),
-                    queueItem(commonAgency, "clazzifier", "test2", commitWithin),
-                    queueItem(commonAgency, "clazzifier", "test3", commitWithin),
-                    queueItem(commonAgency, "clazzifier", "test4", commitWithin));
+                    queueItem(commonAgency, "clazzifier", "test1"),
+                    queueItem(commonAgency, "clazzifier", "test2"),
+                    queueItem(commonAgency, "clazzifier", "test3"),
+                    queueItem(commonAgency, "clazzifier", "test4"));
 
         });
 
