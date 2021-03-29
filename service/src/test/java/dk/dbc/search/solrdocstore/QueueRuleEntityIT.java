@@ -21,6 +21,8 @@ public class QueueRuleEntityIT extends JpaSolrDocStoreIntegrationTester {
                 em.persist(new QueueRuleEntity("foo", type, -456));
             });
 
+            env().clearEntityManagerCache();
+
             QueueRuleEntity qr = env().getPersistenceContext()
                     .run(() -> em.find(QueueRuleEntity.class, new QueueRuleKey("foo", type)));
 

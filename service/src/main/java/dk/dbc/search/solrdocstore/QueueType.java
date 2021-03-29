@@ -67,29 +67,20 @@ public enum QueueType {
             .collect(Collectors.toMap(e -> e.columnValue, e -> e));
 
     @Converter
-    public static class JPA implements AttributeConverter<QueueType, PGobject> {
+    public static class JPA implements AttributeConverter<QueueType, String> {
 
         @Override
-        public PGobject convertToDatabaseColumn(QueueType content) {
-            final PGobject pgObject = new PGobject();
-            try {
-                pgObject.setType("text");
-                if (content == null) {
-                    pgObject.setValue(null);
-                } else {
-                    pgObject.setValue(content.columnValue);
-                }
-                return pgObject;
-            } catch (SQLException ex) {
-                throw new IllegalStateException(ex);
-            }
+        public String convertToDatabaseColumn(QueueType content) {
+            if(content == null)
+                return null;
+            return content.columnValue;
         }
 
         @Override
-        public QueueType convertToEntityAttribute(PGobject pgObject) {
+        public QueueType convertToEntityAttribute(String pgObject) {
             if (pgObject == null)
                 return null;
-            return LOOKUP.get(pgObject.getValue().toLowerCase(Locale.ROOT));
+            return LOOKUP.get(pgObject.toLowerCase(Locale.ROOT));
         }
 
     }
