@@ -96,7 +96,7 @@ public class BibliographicBean {
                 log.warn("Got a request which wasn't deleted but had no indexkeys");
                 return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
             }
-            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()), !skipQueue);
+            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), !skipQueue);
             return Response.ok().entity("{ \"ok\": true }").build();
         } catch (RuntimeException ex) {
             log.error("addBibliographicKeys error: {}", ex.getMessage());
@@ -115,7 +115,7 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin, boolean queueAll) {
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, boolean queueAll) {
         Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
 
         if (bibliographicEntity.getClassifier() == null) {
@@ -188,7 +188,7 @@ public class BibliographicBean {
         log.debug("queueAll = {}", queueAll);
         log.debug("affectedKeys = {}", affectedKeys);
         if (queueAll || affectedKeys.size() > 1)
-            enqueueAdapter.enqueueAll(affectedKeys, commitWithin);
+            enqueueAdapter.enqueueAll(affectedKeys);
     }
 
     private Instant extractFedoraStreamDate(BibliographicEntity entity) {

@@ -41,7 +41,7 @@ public class EnqueueSupplierBean {
         // EclipseLink specific
         Connection connection = entityManager.unwrap(Connection.class);
         return new EnqueueService<>(connection, getManifestationQueues(),
-                                    (key, commitWithin) -> key.toQueueJob(commitWithin));
+                                    (key) -> key.toQueueJob());
     }
 
     public Collection<String> getManifestationQueues() {

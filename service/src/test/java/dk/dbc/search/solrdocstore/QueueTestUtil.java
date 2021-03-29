@@ -47,7 +47,7 @@ public class QueueTestUtil {
      *
      * @param em       entity manager, that provides a connection
      * @param elements list of string with
-     *                 {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     *                 {consumer},{agencyId},{bibliographicRecordId}
      */
     public static void queueIs(EntityManager em, String... elements) {
         Connection connection = em.unwrap(java.sql.Connection.class);
@@ -59,7 +59,7 @@ public class QueueTestUtil {
      *
      * @param dataSource data source, that provides a connection
      * @param elements   list of string with
-     *                   {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     *                   {consumer},{agencyId},{bibliographicRecordId}
      */
     public static void queueIs(DataSource dataSource, String... elements) {
         try (Connection connection = dataSource.getConnection()) {
@@ -74,7 +74,7 @@ public class QueueTestUtil {
      *
      * @param connection database connection
      * @param elements   list of string with
-     *                   {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     *                   {consumer},{agencyId},{bibliographicRecordId}
      */
     public static void queueIs(Connection connection, String... elements) {
         HashSet<String> enqueued = new HashSet<>();

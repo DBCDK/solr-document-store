@@ -101,8 +101,8 @@ public class AgencyClassifierItemKey implements Serializable {
         this.bibliographicRecordId = bibliographicRecordId;
     }
 
-    public QueueJob toQueueJob(Integer commitWithin) {
-        return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId, commitWithin);
+    public QueueJob toQueueJob() {
+        return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
     }
 
     public boolean isDeleteMarked() {

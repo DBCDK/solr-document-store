@@ -21,12 +21,12 @@ public class EnqueueAdapter {
 
     private static Logger log = LoggerFactory.getLogger(EnqueueAdapter.class);
 
-    public void enqueueAll(Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+    public void enqueueAll(Set<AgencyClassifierItemKey> agencyItemKeys) {
         for (AgencyClassifierItemKey k : agencyItemKeys) {
             try {
                 // If delete marked, set postponed option
                 Optional<Long> postponed = k.isDeleteMarked() ? Optional.of(config.getDeleteMarkedDelay()) : Optional.empty();
-                queue.getManifestationEnqueueService().enqueue(k, commitWithin.orElse(null), postponed);
+                queue.getManifestationEnqueueService().enqueue(k, postponed);
             } catch (SQLException e) {
                 log.error("Error enqueuing item: " + k);
                 log.debug("Error enqueuing item: " + k, e);
@@ -35,12 +35,12 @@ public class EnqueueAdapter {
         }
     }
 
-    public void enqueueAllHoldingsPostponed(Set<AgencyClassifierItemKey> agencyItemKeys, Optional<Integer> commitWithin) {
+    public void enqueueAllHoldingsPostponed(Set<AgencyClassifierItemKey> agencyItemKeys) {
         for (AgencyClassifierItemKey k : agencyItemKeys) {
             try {
                 // If delete marked, set postponed option
                 Optional<Long> postponed = Optional.of(config.getHoldingQueueDelay());
-                queue.getManifestationEnqueueService().enqueue(k, commitWithin.orElse(null), postponed);
+                queue.getManifestationEnqueueService().enqueue(k, postponed);
             } catch (SQLException e) {
                 log.error("Error enqueuing item: " + k);
                 log.debug("Error enqueuing item: " + k, e);

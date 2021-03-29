@@ -75,9 +75,9 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                 System.out.println("* no commitWithin");
                 enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "12345678"));
                 System.out.println("* commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "87654321"), 100, Optional.empty());
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "87654321"), Optional.empty());
                 System.out.println("* null commitWithin");
-                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "abc"), null, Optional.empty());
+                enqeueService.enqueue(new AgencyClassifierItemKey(870970, "clazzifier", "abc"), Optional.empty());
                 System.out.println("* queueing done");
             } catch (SQLException ex) {
                 log.error("Exception: " + ex.getMessage());
@@ -258,7 +258,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             clearQueue(em);
 
             h.setTrackingId("NEW");
-            holdingsItemBean.setHoldingsKeys(h, Optional.empty());
+            holdingsItemBean.setHoldingsKeys(h);
             queueIs(em,
                     queueItem(commonAgency, "clazzifier", id));
         });
@@ -344,18 +344,18 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed, Optional commitWithin) {
         List<String> superseedList = superseed.orElse(Collections.emptyList());
         BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
-        bibliographicBean.addBibliographicKeys(e, superseedList, commitWithin, true);
+        bibliographicBean.addBibliographicKeys(e, superseedList, true);
         return e;
     }
 
     private void deleteBibliographic(BibliographicEntity ownRecord) {
         ownRecord.setDeleted(true);
-        bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), Optional.empty(), true);
+        bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), true);
     }
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) {
         HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Collections.EMPTY_LIST, "IT");
-        holdingsItemBean.setHoldingsKeys(e, Optional.empty());
+        holdingsItemBean.setHoldingsKeys(e);
         return e;
     }
 

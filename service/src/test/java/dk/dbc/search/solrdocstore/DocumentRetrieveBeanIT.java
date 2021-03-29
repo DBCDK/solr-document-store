@@ -50,7 +50,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         hold = createHoldingsItemBean(env);
         h2b = createHoldingsToBibliographicBean(env);
         env().getPersistenceContext().run(() -> {
-            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), Optional.empty(), true);
+            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), true);
         });
     }
 
@@ -165,13 +165,13 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         private Build holdings(List<Map<String, List<String>>> content) {
-            hold.setHoldingsKeys(new HoldingsItemEntity(holdingsAgencyId, holdingsId, "v0", content, "t1"), NOW);
+            hold.setHoldingsKeys(new HoldingsItemEntity(holdingsAgencyId, holdingsId, "v0", content, "t1"));
             h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId);
             return this;
         }
 
         private Build record(Map<String, List<String>> content) {
-            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST, Optional.empty(), true);
+            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST, true);
             return this;
         }
     }

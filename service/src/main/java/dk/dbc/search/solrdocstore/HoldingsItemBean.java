@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.log.LogWith;
-import java.util.Optional;
 import java.util.Set;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -55,7 +54,7 @@ public class HoldingsItemBean {
             hi.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(hi.getTrackingId())) {
 
-            setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.getCommitWithin()));
+            setHoldingsKeys(hi.asHoldingsItemEntity());
 
             return Response.ok().entity("{ \"ok\": true }").build();
         } catch (RuntimeException ex) {
@@ -75,12 +74,12 @@ public class HoldingsItemBean {
         }
     }
 
-    public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin) {
+    public void setHoldingsKeys(HoldingsItemEntity hi) {
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
         Set<AgencyClassifierItemKey> affectedKeys =
                 h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
-        enqueueAdapter.enqueueAllHoldingsPostponed(affectedKeys, commitWithin);
+        enqueueAdapter.enqueueAllHoldingsPostponed(affectedKeys);
     }
 
     private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {

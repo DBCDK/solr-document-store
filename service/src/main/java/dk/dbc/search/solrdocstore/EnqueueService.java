@@ -25,7 +25,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +37,11 @@ public class EnqueueService<T> {
 
     private static final Logger log = LoggerFactory.getLogger(EnqueueService.class);
 
-    private final BiFunction<T, Integer, QueueJob> jobCreator;
+    private final Function<T, QueueJob> jobCreator;
     private final Collection<String> queueNames;
     private final PreparedQueueSupplier queueSupplier;
 
-    public EnqueueService(Connection connection, Collection<String> queueNames, BiFunction<T, Integer, QueueJob> jobCreator) {
+    public EnqueueService(Connection connection, Collection<String> queueNames, Function<T, QueueJob> jobCreator) {
         this.jobCreator = jobCreator;
         this.queueNames = queueNames;
         this.queueSupplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
@@ -49,11 +49,11 @@ public class EnqueueService<T> {
     }
 
     public void enqueue(T t) throws SQLException {
-        enqueue(t, null, Optional.empty());
+        enqueue(t, Optional.empty());
     }
 
-    public void enqueue(T t, Integer commitWithin, Optional<Long> postponed) throws SQLException {
-        QueueJob job = jobCreator.apply(t, commitWithin);
+    public void enqueue(T t, Optional<Long> postponed) throws SQLException {
+        QueueJob job = jobCreator.apply(t);
         for (String queueName : queueNames) {
             log.trace("enqueue {} to: {}", job, queueName);
             if (postponed.isPresent()) {

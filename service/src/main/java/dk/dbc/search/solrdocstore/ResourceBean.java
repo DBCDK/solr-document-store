@@ -75,7 +75,7 @@ public class ResourceBean {
             }
             Set<AgencyClassifierItemKey> keySet = bibliographicEntities.stream()
                     .map(BibliographicEntity::asAgencyClassifierItemKey).collect(Collectors.toSet());
-            enqueueAdapter.enqueueAll(keySet, Optional.empty());
+            enqueueAdapter.enqueueAll(keySet);
             return Response.ok().entity(new StatusBean.Resp()).build();
         }
     }
