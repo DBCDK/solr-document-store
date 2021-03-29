@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import java.util.EnumSet;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
@@ -10,30 +11,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class QueueRuleEntityIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
-    public void StoreEntity() {
+    public void storeAndLoadEntity() {
+        System.out.println("storeAndLoadEntity");
         EntityManager em = env().getEntityManager();
-        env().getPersistenceContext().run(() -> {
-            em.persist(new QueueRuleEntity("foo", "cat", -456));
+        EnumSet.allOf(QueueType.class).forEach(type -> {
+            System.out.println(" - testing: " + type);
+
+            env().getPersistenceContext().run(() -> {
+                em.persist(new QueueRuleEntity("foo", type, -456));
+            });
+
+            QueueRuleEntity qr = env().getPersistenceContext()
+                    .run(() -> em.find(QueueRuleEntity.class, new QueueRuleKey("foo", type)));
+
+            assertThat(qr.getQueue(), is("foo"));
+            assertThat(qr.getSupplier(), is(type));
+            assertThat(qr.getPostpone(), is(-456));
+
+            env().getPersistenceContext()
+                    .run(() -> em.remove(em.find(QueueRuleEntity.class, new QueueRuleKey("foo", type))));
         });
-
-        QueueRuleEntity qr = env().getPersistenceContext()
-                .run(() -> em.find(QueueRuleEntity.class, new QueueRuleKey("foo", "cat")));
-
-        assertThat(qr.getQueue(), is("foo"));
-        assertThat(qr.getSupplier(), is("cat"));
-        assertThat(qr.getPostpone(), is(-456));
-    }
-
-    @Test
-    public void LoadEntity() {
-        executeScriptResource("/queueEntityTestData.sql");
-        EntityManager em = env().getEntityManager();
-
-        QueueRuleEntity qr = env().getPersistenceContext()
-                .run(() -> em.find(QueueRuleEntity.class, new QueueRuleKey("bar", "horse")));
-
-        assertThat(qr.getQueue(), is("bar"));
-        assertThat(qr.getSupplier(), is("horse"));
-        assertThat(qr.getPostpone(), is(1));
     }
 }

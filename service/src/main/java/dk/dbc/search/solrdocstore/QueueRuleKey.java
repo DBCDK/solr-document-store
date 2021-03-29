@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 
 /**
@@ -36,12 +37,13 @@ public class QueueRuleKey implements Serializable {
     private String queue;
 
     @Column(name = "supplier", updatable = false, insertable = false, nullable = false)
-    private String supplier;
+    @Convert(converter = QueueType.JPA.class)
+    private QueueType supplier;
 
     public QueueRuleKey() {
     }
 
-    public QueueRuleKey(String queue, String supplier) {
+    public QueueRuleKey(String queue, QueueType supplier) {
         this.queue = queue;
         this.supplier = supplier;
     }

@@ -18,45 +18,79 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+import org.postgresql.util.PGobject;
 
 /**
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 public enum QueueType {
-    MANIFESTATION("manifestation"),
-    HOLDING("holding"),
-    FIRSTLASTHOLDING("firstlastholding"),
-    WORK("work"),
-    WORKFIRSTLASTHOLDING("workfirstlastholding");
+    MANIFESTATION("manifestation", JobType.MANIFESTATION),
+    MANIFESTATION_DELETED("manifestation_deleted", JobType.MANIFESTATION),
+    HOLDING("holding", JobType.MANIFESTATION),
+    FIRSTLASTHOLDING("firstlastholding", JobType.MANIFESTATION),
+    RESOURCE("resource", JobType.MANIFESTATION),
+    WORK("work", JobType.WORK),
+    WORKFIRSTLASTHOLDING("workfirstlastholding", JobType.WORK);
 
-    private final String columnName;
-
-    QueueType(String columnName) {
-        this.columnName = columnName;
+    public enum JobType {
+        MANIFESTATION,
+        WORK
     }
 
-    public String getColumnName() {
-        return columnName;
+    private final String columnValue;
+    private final JobType type;
+
+    QueueType(String columnName, JobType type) {
+        this.columnValue = columnName;
+        this.type = type;
+    }
+
+    public JobType getType() {
+        return type;
     }
 
     public Predicate<QueueRuleEntity> asPredicate() {
-        return qr -> {
-            return columnName.equals(qr.getSupplier());
-        };
+        return qr -> this.equals(qr.getSupplier());
     }
 
     private static final Map<String, QueueType> LOOKUP = EnumSet.allOf(QueueType.class)
             .stream()
-            .collect(Collectors.toMap(e -> e.columnName, e -> e));
+            .collect(Collectors.toMap(e -> e.columnValue, e -> e));
 
-    public static QueueType fromColumnName(String text) {
-        return LOOKUP.get(text.toLowerCase(Locale.ROOT));
+    @Converter
+    public static class JPA implements AttributeConverter<QueueType, PGobject> {
+
+        @Override
+        public PGobject convertToDatabaseColumn(QueueType content) {
+            final PGobject pgObject = new PGobject();
+            try {
+                pgObject.setType("text");
+                if (content == null) {
+                    pgObject.setValue(null);
+                } else {
+                    pgObject.setValue(content.columnValue);
+                }
+                return pgObject;
+            } catch (SQLException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+
+        @Override
+        public QueueType convertToEntityAttribute(PGobject pgObject) {
+            if (pgObject == null)
+                return null;
+            return LOOKUP.get(pgObject.getValue().toLowerCase(Locale.ROOT));
+        }
+
     }
-
 }

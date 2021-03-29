@@ -3,6 +3,7 @@ package dk.dbc.search.solrdocstore;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -17,7 +18,7 @@ public class QueueRuleEntity implements Serializable {
         this.pk = new QueueRuleKey();
     }
 
-    public QueueRuleEntity(String queue, String supplier, int postpone) {
+    public QueueRuleEntity(String queue, QueueType supplier, int postpone) {
         this.queue = queue;
         this.supplier = supplier;
         this.postpone = postpone;
@@ -32,7 +33,8 @@ public class QueueRuleEntity implements Serializable {
     private String queue;
 
     @Column(name = "supplier", updatable = false, nullable = false)
-    private String supplier;
+    @Convert(converter = QueueType.JPA.class)
+    private QueueType supplier;
 
     @Column(name = "postpone", updatable = false, nullable = false)
     private int postpone;
@@ -67,11 +69,11 @@ public class QueueRuleEntity implements Serializable {
         this.queue = queue;
     }
 
-    public String getSupplier() {
+    public QueueType getSupplier() {
         return supplier;
     }
 
-    public void setSupplier(String supplier) {
+    public void setSupplier(QueueType supplier) {
         this.supplier = supplier;
     }
 

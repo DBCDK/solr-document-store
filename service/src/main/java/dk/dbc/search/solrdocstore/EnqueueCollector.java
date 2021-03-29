@@ -39,6 +39,22 @@ public class EnqueueCollector {
     private final Collection<QueueRuleEntity> queueRules;
     private final EnumMap<QueueType, EnqueueTarget> targetTypes;
 
+    public static final EnqueueCollector VOID = new EnqueueCollector() {
+        @Override
+        public void add(BibliographicEntity entity, QueueType type) {
+        }
+
+        @Override
+        public void commit() throws SQLException {
+        }
+    };
+
+    private EnqueueCollector() {
+        this.connection = null;
+        this.queueRules = null;
+        this.targetTypes = null;
+    }
+
     public EnqueueCollector(Connection connection, Collection<QueueRuleEntity> queueRules) {
         this.connection = connection;
         this.queueRules = queueRules;
@@ -64,13 +80,10 @@ public class EnqueueCollector {
             log.info("No queues defined for target: {}", type);
             return new EnqueueTargetNull();
         }
-        switch (type) {
+        switch (type.getType()) {
             case MANIFESTATION:
-            case HOLDING:
-            case FIRSTLASTHOLDING:
                 return new EnqueueTargetManifestation(connection, targets);
             case WORK:
-            case WORKFIRSTLASTHOLDING:
                 return new EnqueueTargetWork(connection, targets);
             default:
                 throw new AssertionError();
