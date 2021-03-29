@@ -209,4 +209,11 @@ public class BibliographicEntity implements Serializable {
         return new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId);
     }
 
+    public QueueJob asManifestationQueueJob() {
+        return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
+    }
+
+    public QueueJob asWorkQueueJob() {
+        return QueueJob.work(work);
+    }
 }

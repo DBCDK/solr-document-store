@@ -52,4 +52,15 @@ public class EnqueueSupplierBean {
                 .map(QueueRuleEntity::getQueue)
                 .collect(toList());
     }
+
+    public EnqueueCollector getEnqueueCollector() {
+        Connection connection = entityManager.unwrap(Connection.class);
+        return new EnqueueCollector(connection, getQueueRules());
+    }
+
+    protected Collection<QueueRuleEntity> getQueueRules() {
+        return entityManager.createQuery("SELECT qr FROM QueueRuleEntity qr",
+                                         QueueRuleEntity.class)
+                .getResultList();
+    }
 }

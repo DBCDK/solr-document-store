@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -51,6 +52,43 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         em = env().getEntityManager();
 
+    }
+
+    @Test(timeout = 1_000L)
+    public void testEnqueueAddsTotTables() throws Exception {
+        System.out.println("testEnqueueAddsTotTables");
+
+        EntityManager em = env().getEntityManager();
+        EnqueueSupplierBean bean = new EnqueueSupplierBean() {
+            @Override
+            protected Collection<QueueRuleEntity> getQueueRules() {
+                return Arrays.asList(
+                        new QueueRuleEntity("a", QueueType.MANIFESTATION.getColumnName(), 0),
+                        new QueueRuleEntity("b", QueueType.MANIFESTATION.getColumnName(), 5),
+                        new QueueRuleEntity("c", QueueType.HOLDING.getColumnName(), 0),
+                        new QueueRuleEntity("d", QueueType.HOLDING.getColumnName(), 20),
+                        new QueueRuleEntity("e", QueueType.FIRSTLASTHOLDING.getColumnName(), 0),
+                        new QueueRuleEntity("f", QueueType.FIRSTLASTHOLDING.getColumnName(), 20),
+                        new QueueRuleEntity("g", QueueType.WORK.getColumnName(), 0),
+                        new QueueRuleEntity("h", QueueType.WORK.getColumnName(), 100),
+                        new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING.getColumnName(), 0),
+                        new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING.getColumnName(), 100));
+            }
+        };
+        bean.entityManager = em;
+
+        env().getPersistenceContext().run(() -> {
+            clearQueue(em);
+            EnqueueCollector collector = bean.getEnqueueCollector();
+            collector.add(entity(123456, "katalog", "87654321", "work:2"), QueueType.WORK);
+            collector.add(entity(123456, "katalog", "87654321", "work:2"), QueueType.MANIFESTATION);
+            collector.commit();
+            queueIs(em,
+                    "a,123456-katalog:87654321",
+                    "b,123456-katalog:87654321",
+                    "g,123456-katalog:87654321",
+                    "h,123456-katalog:87654321");
+        });
     }
 
     @Test(timeout = 1000L)
@@ -363,4 +401,64 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         return "a," + agency + "-" + classifier + ":" + bibliographicRecordId;
     }
 
+    private BibliographicEntityBuilder entity(int agencyId, String classifier, String bibliogrephicRecordId, String work) {
+        return new BibliographicEntityBuilder()
+                .withAgencyId(agencyId)
+                .withClassifier(classifier)
+                .withBibliographicRecordId(bibliogrephicRecordId)
+                .withWork(work);
+    }
+
+    private static class BibliographicEntityBuilder extends BibliographicEntity {
+
+        public BibliographicEntityBuilder withIndexKeys(Map<String, List<String>> indexKeys) {
+            setIndexKeys(indexKeys);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withDeleted(boolean deleted) {
+            setDeleted(deleted);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withTrackingId(String trackingId) {
+            setTrackingId(trackingId);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withProducerVersion(String producerVersion) {
+            setProducerVersion(producerVersion);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withUnit(String unit) {
+            setUnit(unit);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withWork(String work) {
+            setWork(work);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withRepositoryId(String repositoryId) {
+            setRepositoryId(repositoryId);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withBibliographicRecordId(String bibliographicRecordId) {
+            setBibliographicRecordId(bibliographicRecordId);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withClassifier(String classifier) {
+            setClassifier(classifier);
+            return this;
+        }
+
+        public BibliographicEntityBuilder withAgencyId(int agencyId) {
+            setAgencyId(agencyId);
+            return this;
+        }
+    }
 }
