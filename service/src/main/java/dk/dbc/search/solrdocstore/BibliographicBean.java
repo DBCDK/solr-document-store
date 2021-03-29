@@ -88,7 +88,7 @@ public class BibliographicBean {
                                          String jsonContent) throws Exception {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        if(request.getTrackingId() == null)
+        if (request.getTrackingId() == null)
             request.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(request.getTrackingId())
                 .pid(request.getRepositoryId())) {
@@ -138,7 +138,9 @@ public class BibliographicBean {
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
             if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
-                log.warn("Cannot update to an older stream date: pid = {}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}", bibliographicEntity.asPid(), bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
+                log.warn("Cannot update to an older stream date: pid = {}-{}:{}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}",
+                         bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId(),
+                         bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
                 throw new IntermittentErrorException("Cannot update to an older stream date");
             }
             // If we delete or re-create, related holdings must be moved appropriately

@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.ColumnResult;
@@ -208,7 +209,4 @@ public class BibliographicEntity implements Serializable {
         return new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId);
     }
 
-    public String asPid() {
-        return agencyId + "-" + classifier + ":" + bibliographicRecordId;
-    }
 }

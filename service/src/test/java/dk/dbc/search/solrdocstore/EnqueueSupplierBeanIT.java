@@ -363,8 +363,4 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         return "a," + agency + "-" + classifier + ":" + bibliographicRecordId;
     }
 
-    private String queueItem(int agency, String classifier, String bibliographicRecordId, int commitWithin) {
-        return "a," + agency + "-" + classifier + ":" + bibliographicRecordId + "," + commitWithin;
-    }
-
 }
