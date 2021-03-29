@@ -125,13 +125,13 @@ public class QueueJob {
 
         @Override
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
-            String jobId = resultSet.getString(startColumn++);
+            String jobId = resultSet.getString(startColumn);
             return new QueueJob(jobId);
         }
 
         @Override
         public void saveJob(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
-            stmt.setString(startColumn++, job.getJobId());
+            stmt.setString(startColumn, job.getJobId());
         }
     };
 
