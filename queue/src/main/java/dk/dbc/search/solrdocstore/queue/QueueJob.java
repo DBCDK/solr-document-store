@@ -37,11 +37,6 @@ public class QueueJob {
 
     private final String jobId;
 
-    @Deprecated
-    private QueueJob(String jobId, Integer commitWithin) {
-        this(jobId);
-    }
-
     private QueueJob(String jobId) {
         this.jobId = jobId;
     }
@@ -53,24 +48,8 @@ public class QueueJob {
         return job;
     }
 
-    @Deprecated
-    public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
-        QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId, commitWithin);
-        if (!job.isManifestation())
-            throw new IllegalArgumentException("Invalid arguments to manifestation");
-        return job;
-    }
-
     public static QueueJob work(String work) {
         QueueJob job = new QueueJob(work);
-        if (!job.isWork())
-            throw new IllegalArgumentException("Invalid arguments to work");
-        return job;
-    }
-
-    @Deprecated
-    public static QueueJob work(String work, Integer commitWithin) {
-        QueueJob job = new QueueJob(work, commitWithin);
         if (!job.isWork())
             throw new IllegalArgumentException("Invalid arguments to work");
         return job;
@@ -114,16 +93,6 @@ public class QueueJob {
         if (!jobId.startsWith("work:"))
             throw new IllegalStateException("Trying to get work from jobId: " + jobId);
         return jobId;
-    }
-
-    @Deprecated
-    public Integer getCommitwithin() {
-        return null;
-    }
-
-    @Deprecated
-    public boolean hasCommitWithin() {
-        return false;
     }
 
     @Override
@@ -181,23 +150,7 @@ public class QueueJob {
 
         @Override
         public QueueJob mergeJob(QueueJob originalJob, QueueJob skippedJob) {
-            Integer originalCommitWithin = originalJob.getCommitwithin();
-            Integer skippedCommitWithin = skippedJob.getCommitwithin();
-            if (originalCommitWithin == null) {
-                if (skippedCommitWithin == null) {
-                    return originalJob;
-                } else {
-                    return skippedJob;
-                }
-            } else {
-                if (skippedCommitWithin == null) {
-                    return originalJob;
-                } else if (originalCommitWithin.compareTo(skippedCommitWithin) <= 0) {
-                    return originalJob;
-                } else {
-                    return skippedJob;
-                }
-            }
+            return originalJob;
         }
     };
 
