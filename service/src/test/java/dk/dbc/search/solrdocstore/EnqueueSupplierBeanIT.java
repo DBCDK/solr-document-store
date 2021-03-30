@@ -92,8 +92,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             queueIs(em,
                     "a,123456-katalog:87654321",
                     "b,123456-katalog:87654321",
-                    "g,123456-katalog:87654321",
-                    "h,123456-katalog:87654321");
+                    "g,work:2",
+                    "h,work:2");
         });
     }
 

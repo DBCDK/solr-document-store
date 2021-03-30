@@ -34,9 +34,8 @@ public class BibliographicFrontendResponse extends BibliographicEntity {
         if (obj == null || getClass() != obj.getClass())
             return false;
         final BibliographicFrontendResponse other = (BibliographicFrontendResponse) obj;
-        return  super.equals(obj) &&
-                Objects.equals(this.supersedeId, other.supersedeId);
+        return super.equals(obj) &&
+               Objects.equals(this.supersedeId, other.supersedeId);
     }
-
 
 }
