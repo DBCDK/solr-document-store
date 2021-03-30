@@ -64,11 +64,35 @@ public class EnqueueCollector {
         this.targetTypes = new EnumMap<>(QueueType.class);
     }
 
-    public void add(BibliographicEntity entity, QueueType type) {
-        targetTypes.computeIfAbsent(type, this::makeTarget)
+    /**
+     * Add to queues for a given supplier
+     *
+     * @param entity   the entity that should be added to queue
+     * @param supplier the supplier (source of this queue event)
+     */
+    public void add(BibliographicEntity entity, QueueType supplier) {
+        targetTypes.computeIfAbsent(supplier, this::makeTarget)
                 .add(entity);
     }
 
+    /**
+     * Add to queues for a number of supplier
+     *
+     * @param entity    the entity that should be added to queue
+     * @param suppliers the suppliers (source of this queue event)
+     */
+    public void add(BibliographicEntity entity, QueueType... suppliers) {
+        for (QueueType supplier : suppliers) {
+            targetTypes.computeIfAbsent(supplier, this::makeTarget)
+                    .add(entity);
+        }
+    }
+
+    /**
+     * Put all unique entities added onto the database queue
+     *
+     * @throws SQLException If the database acts up
+     */
     public void commit() throws SQLException {
         for (EnqueueTarget target : targetTypes.values()) {
             target.commit();

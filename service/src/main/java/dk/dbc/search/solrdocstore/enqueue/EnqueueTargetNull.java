@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore.enqueue;
 import dk.dbc.search.solrdocstore.BibliographicEntity;
 
 /**
+ * This is a NOOP implementation of {@link EnqueueTarget}
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */

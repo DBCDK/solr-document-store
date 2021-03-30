@@ -29,6 +29,10 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
+ * This is a base implementation for {@link EnqueueTarget}
+ * <p>
+ * This collects unique {@link QueueJob}s, and upon commit transfers then to the
+ * database
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -49,6 +53,12 @@ public abstract class EnqueueTargetAbstraction implements EnqueueTarget {
         jobs.add(queueJobOf(entity));
     }
 
+    /**
+     * This makes a QueueJob from an entity
+     *
+     * @param entity what to enqueue
+     * @return the job that should be put on the queue
+     */
     abstract protected QueueJob queueJobOf(BibliographicEntity entity);
 
     @Override

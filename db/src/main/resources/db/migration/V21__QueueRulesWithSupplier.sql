@@ -1,13 +1,14 @@
 CREATE TABLE queuesuppliers (
-  supplier TEXT NOT NULL PRIMARY KEY
+  supplier TEXT NOT NULL PRIMARY KEY,
+  description TEXT
 );
-INSERT INTO queuesuppliers VALUES('manifestation');
-INSERT INTO queuesuppliers VALUES('manifestation_deleted');
-INSERT INTO queuesuppliers VALUES('holding');
-INSERT INTO queuesuppliers VALUES('firstlastholding');
-INSERT INTO queuesuppliers VALUES('resource');
-INSERT INTO queuesuppliers VALUES('work');
-INSERT INTO queuesuppliers VALUES('workfirstlastholding');
+INSERT INTO queuesuppliers VALUES('manifestation', 'When a manifestation that hasn''t been deleted triggers queue events for manifestation ids');
+INSERT INTO queuesuppliers VALUES('manifestation_deleted', 'When a manifestation that has been deleted triggers queue events for manifestation ids');
+INSERT INTO queuesuppliers VALUES('holding', 'When a holdings change triggers queue events for manifestation ids');
+INSERT INTO queuesuppliers VALUES('firstlastholding', 'When a change in "has love holdings" triggers queue events for manifestation ids');
+INSERT INTO queuesuppliers VALUES('resource', 'When a resource change triggers queue events for manifestation ids');
+INSERT INTO queuesuppliers VALUES('work', 'When an updated manifestation triggers queue events for works');
+INSERT INTO queuesuppliers VALUES('workfirstlastholding', 'When a change in "has love holdings" triggers queue events for works');
 
 ALTER TABLE queuerule
   ADD COLUMN supplier TEXT NOT NULL DEFAULT 'manifestation';

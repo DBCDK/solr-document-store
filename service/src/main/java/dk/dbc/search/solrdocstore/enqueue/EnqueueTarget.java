@@ -22,12 +22,28 @@ import dk.dbc.search.solrdocstore.BibliographicEntity;
 import java.sql.SQLException;
 
 /**
+ * Interface of handling a specific queue
+ * <p>
+ * When
+ * {@link EnqueueCollector#add(dk.dbc.search.solrdocstore.BibliographicEntity, dk.dbc.search.solrdocstore.QueueType)}
+ * in called, this interface is used for an abstraction for the the supplier
+ * type
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 public interface EnqueueTarget {
 
+    /**
+     * Add a single entity to this queue-job collection
+     *
+     * @param entity what entity to enqueue
+     */
     void add(BibliographicEntity entity);
 
+    /**
+     * Transfer queue-jobs to the database
+     *
+     * @throws SQLException in case the database acts up in any way
+     */
     void commit() throws SQLException;
 }
