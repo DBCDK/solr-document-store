@@ -1,11 +1,14 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
-import java.util.Optional;
-import java.util.Set;
+import java.sql.SQLException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +42,7 @@ public class HoldingsItemBean {
     HoldingsToBibliographicBean h2bBean;
 
     @Inject
-    EnqueueAdapter enqueueAdapter;
+    EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -48,17 +51,17 @@ public class HoldingsItemBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed(reusable = true)
-    public Response setHoldingsKeys(String jsonContent) throws Exception {
+    public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException  {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         if (hi.getTrackingId() == null)
             hi.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(hi.getTrackingId())) {
 
-            setHoldingsKeys(hi.asHoldingsItemEntity(), Optional.ofNullable(hi.getCommitWithin()));
+            setHoldingsKeys(hi.asHoldingsItemEntity());
 
             return Response.ok().entity("{ \"ok\": true }").build();
-        } catch (RuntimeException ex) {
+        } catch (SQLException | RuntimeException ex) {
             log.error("setHoldingsKeys error: {}", ex.getMessage());
             log.debug("setHoldingsKeys error: ", ex);
             String message = null;
@@ -75,12 +78,13 @@ public class HoldingsItemBean {
         }
     }
 
-    public void setHoldingsKeys(HoldingsItemEntity hi, Optional<Integer> commitWithin) {
+    public void setHoldingsKeys(HoldingsItemEntity hi) throws SQLException {
+        EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
+
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
-        Set<AgencyClassifierItemKey> affectedKeys =
-                h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId());
-        enqueueAdapter.enqueueAllHoldingsPostponed(affectedKeys, commitWithin);
+        h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue, QueueType.HOLDING);
+        enqueue.commit();
     }
 
     private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {

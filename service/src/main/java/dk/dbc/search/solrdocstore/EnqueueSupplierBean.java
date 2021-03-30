@@ -18,14 +18,13 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import java.sql.Connection;
 import java.util.Collection;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -37,19 +36,14 @@ public class EnqueueSupplierBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    public EnqueueService<AgencyClassifierItemKey> getManifestationEnqueueService() {
-        // EclipseLink specific
+    public EnqueueCollector getEnqueueCollector() {
         Connection connection = entityManager.unwrap(Connection.class);
-        return new EnqueueService<>(connection, getManifestationQueues(),
-                                    (key, commitWithin) -> key.toQueueJob(commitWithin));
+        return new EnqueueCollector(connection, getQueueRules());
     }
 
-    public Collection<String> getManifestationQueues() {
-        TypedQuery<QueueRuleEntity> query = entityManager.createQuery("SELECT qr FROM QueueRuleEntity qr",
-                                                                      QueueRuleEntity.class);
-        return query.getResultList()
-                .stream()
-                .map(QueueRuleEntity::getQueue)
-                .collect(toList());
+    protected Collection<QueueRuleEntity> getQueueRules() {
+        return entityManager.createQuery("SELECT qr FROM QueueRuleEntity qr",
+                                         QueueRuleEntity.class)
+                .getResultList();
     }
 }

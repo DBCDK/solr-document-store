@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
 import java.io.Serializable;
 import java.util.Objects;

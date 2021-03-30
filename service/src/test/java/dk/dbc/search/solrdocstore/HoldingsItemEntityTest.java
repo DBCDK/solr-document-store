@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;

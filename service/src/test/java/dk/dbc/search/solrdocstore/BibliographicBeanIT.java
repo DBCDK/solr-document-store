@@ -1,5 +1,10 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import org.junit.Assert;
@@ -592,7 +597,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(postResurrect, is(1L));
     }
 
-    @Test(timeout = 2_000L)
+    @Test(timeout = 20_000L)
     public void skipQueueParameter() throws Exception {
         System.out.println("skipQueueParameter");
 
@@ -746,7 +751,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT", null, null);
+        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT", null);
         modifier.accept(entity);
         return jsonbContext.marshall(entity);
     }

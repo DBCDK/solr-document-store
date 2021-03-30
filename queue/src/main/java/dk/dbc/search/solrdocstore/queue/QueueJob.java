@@ -23,10 +23,9 @@ import dk.dbc.pgqueue.QueueStorageAbstraction;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.sql.Types.*;
 
 /**
  *
@@ -37,30 +36,20 @@ public class QueueJob {
     private static final Pattern MANIFESTATION = Pattern.compile("([0-9]+)-([^:]+):(.+)");
 
     private final String jobId;
-    private final Integer commitWithin;
 
-    private QueueJob(String jobId, Integer commitWithin) {
+    private QueueJob(String jobId) {
         this.jobId = jobId;
-        this.commitWithin = commitWithin;
     }
 
     public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId) {
-        return manifestation(agencyId, classifier, bibliographicRecordId, null);
-    }
-
-    public static QueueJob manifestation(int agencyId, String classifier, String bibliographicRecordId, Integer commitWithin) {
-        QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId, commitWithin);
+        QueueJob job = new QueueJob(agencyId + "-" + classifier + ":" + bibliographicRecordId);
         if (!job.isManifestation())
             throw new IllegalArgumentException("Invalid arguments to manifestation");
         return job;
     }
 
     public static QueueJob work(String work) {
-        return work(work, null);
-    }
-
-    public static QueueJob work(String work, Integer commitWithin) {
-        QueueJob job = new QueueJob(work, commitWithin);
+        QueueJob job = new QueueJob(work);
         if (!job.isWork())
             throw new IllegalArgumentException("Invalid arguments to work");
         return job;
@@ -106,21 +95,28 @@ public class QueueJob {
         return jobId;
     }
 
-    public Integer getCommitwithin() {
-        return commitWithin;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        final QueueJob other = (QueueJob) obj;
+        return Objects.equals(this.jobId, other.jobId);
     }
 
-    public boolean hasCommitWithin() {
-        return commitWithin != null;
+    @Override
+    public int hashCode() {
+        return Objects.hash(37, jobId);
     }
 
     @Override
     public String toString() {
-        return "QueueJob{" + "jobId=" + jobId + ", commitWithin=" + commitWithin + '}';
+        return "QueueJob{" + "jobId=" + jobId + '}';
     }
 
     public static final QueueStorageAbstraction<QueueJob> STORAGE_ABSTRACTION = new QueueStorageAbstraction<QueueJob>() {
-        private final String[] COLUMNS = "jobid,commitWithin".split(",");
+        private final String[] COLUMNS = "jobid".split(",");
 
         @Override
         public String[] columnList() {
@@ -129,22 +125,13 @@ public class QueueJob {
 
         @Override
         public QueueJob createJob(ResultSet resultSet, int startColumn) throws SQLException {
-            String jobId = resultSet.getString(startColumn++);
-            Integer commitwithin = resultSet.getInt(startColumn);
-            if (resultSet.wasNull()) {
-                commitwithin = null;
-            }
-            return new QueueJob(jobId, commitwithin);
+            String jobId = resultSet.getString(startColumn);
+            return new QueueJob(jobId);
         }
 
         @Override
         public void saveJob(QueueJob job, PreparedStatement stmt, int startColumn) throws SQLException {
-            stmt.setString(startColumn++, job.getJobId());
-            if (job.hasCommitWithin()) {
-                stmt.setInt(startColumn, job.getCommitwithin());
-            } else {
-                stmt.setNull(startColumn, INTEGER);
-            }
+            stmt.setString(startColumn, job.getJobId());
         }
     };
 
@@ -163,23 +150,7 @@ public class QueueJob {
 
         @Override
         public QueueJob mergeJob(QueueJob originalJob, QueueJob skippedJob) {
-            Integer originalCommitWithin = originalJob.getCommitwithin();
-            Integer skippedCommitWithin = skippedJob.getCommitwithin();
-            if (originalCommitWithin == null) {
-                if (skippedCommitWithin == null) {
-                    return originalJob;
-                } else {
-                    return skippedJob;
-                }
-            } else {
-                if (skippedCommitWithin == null) {
-                    return originalJob;
-                } else if (originalCommitWithin.compareTo(skippedCommitWithin) <= 0) {
-                    return originalJob;
-                } else {
-                    return skippedJob;
-                }
-            }
+            return originalJob;
         }
     };
 

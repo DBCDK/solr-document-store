@@ -1,5 +1,12 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,14 +38,15 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         env().getPersistenceContext().run(() -> {
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
+            MockEnqueueCollector mockEnqueueCollector = new MockEnqueueCollector();
 
             bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             createH2BRecord(agencyId, bibliographicRecordId, 132);
-            Set<AgencyClassifierItemKey> affectedKeys = bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, mockEnqueueCollector, QueueType.HOLDING);
             HoldingsToBibliographicEntity abc = fetchH2BRecord(agencyId, bibliographicRecordId);
-            affectedIs(affectedKeys,
-                       EnqueueAdapter.makeKey(agencyId, "clazzifier", bibliographicRecordId));
+            assertThat(mockEnqueueCollector.getJobs(), containsInAnyOrder(
+                    "HOLDING:" + agencyId + "-clazzifier:" + bibliographicRecordId));
             assertNotNull(abc);
             assertEquals(132, abc.getBibliographicAgencyId());
         });
@@ -52,7 +60,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
             bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity h2BRecord = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(h2BRecord);
             assertEquals(132, h2BRecord.getBibliographicAgencyId());
@@ -68,7 +76,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             deleteBibRecord(agencyId, bibliographicRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             assertNull(fetchH2BRecord(agencyId, bibliographicRecordId));
         });
     }
@@ -82,7 +90,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             bean.openAgency = mockToReturn(LibraryType.FBS);
 
             createBibRecord(LibraryType.COMMON_AGENCY, bibliographicRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
             assertEquals(LibraryType.COMMON_AGENCY, e.getBibliographicAgencyId());
@@ -97,7 +105,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
             bean.openAgency = mockToReturn(LibraryType.FBSSchool);
             createBibRecord(LibraryType.SCHOOL_COMMON_AGENCY, bibliographicRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
             assertEquals(LibraryType.SCHOOL_COMMON_AGENCY, e.getBibliographicAgencyId());
@@ -111,7 +119,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             String bibliographicRecordId = "ABC";
 
             bean.openAgency = mockToReturn(LibraryType.FBSSchool);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNull(e);
         });
@@ -119,8 +127,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
     @Test
     public void onFBSwillReadB2B() {
-        env().getPersistenceContext().run(
-                () -> {
+        env().getPersistenceContext().run(() -> {
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
             String newRecordId = "DEF";
@@ -130,7 +137,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createBibRecord(LibraryType.COMMON_AGENCY, bibliographicRecordId);
             createBibRecord(agencyId, newRecordId);
             createB2B(bibliographicRecordId, newRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
             assertEquals(agencyId, e.getBibliographicAgencyId());
@@ -150,7 +157,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createBibRecord(LibraryType.SCHOOL_COMMON_AGENCY, bibliographicRecordId);
             createBibRecord(LibraryType.COMMON_AGENCY, newRecordId);
             createB2B(bibliographicRecordId, newRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
             assertEquals(LibraryType.COMMON_AGENCY, e.getBibliographicAgencyId());
@@ -192,16 +199,17 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createB2B(originalRecordId, superseedingRecordId);
             em.flush();
 
-            Set<AgencyClassifierItemKey> affectedKeys = bean.recalcAttachments(superseedingRecordId, new HashSet<>(Arrays.asList(new String[] {originalRecordId})));
+            MockEnqueueCollector mockEnqueueCollector = new MockEnqueueCollector();
+            bean.recalcAttachments(superseedingRecordId, new HashSet<>(Arrays.asList(new String[] {originalRecordId})),
+                                   mockEnqueueCollector, QueueType.HOLDING);
 
-            affectedIs(affectedKeys,
-                       EnqueueAdapter.makeKey(LibraryType.COMMON_AGENCY, "clazzifier", originalRecordId),
-                       EnqueueAdapter.makeKey(LibraryType.SCHOOL_COMMON_AGENCY, "clazzifier", originalRecordId),
-                       EnqueueAdapter.makeKey(fbsAgencyWithLocalBib, "clazzifier", originalRecordId),
-                       EnqueueAdapter.makeKey(LibraryType.COMMON_AGENCY, "clazzifier", superseedingRecordId),
-                       EnqueueAdapter.makeKey(LibraryType.SCHOOL_COMMON_AGENCY, "clazzifier", superseedingRecordId),
-                       EnqueueAdapter.makeKey(fbsAgencyWithLocalBib, "clazzifier", superseedingRecordId)
-            );
+            assertThat(mockEnqueueCollector.getJobs(), containsInAnyOrder(
+                       "HOLDING:" + LibraryType.COMMON_AGENCY + "-clazzifier:"+ originalRecordId,
+                       "HOLDING:" + LibraryType.SCHOOL_COMMON_AGENCY + "-clazzifier:"+ originalRecordId,
+                       "HOLDING:" + fbsAgencyWithLocalBib + "-clazzifier:"+ originalRecordId,
+                       "HOLDING:" + LibraryType.COMMON_AGENCY + "-clazzifier:"+ superseedingRecordId,
+                       "HOLDING:" + LibraryType.SCHOOL_COMMON_AGENCY + "-clazzifier:"+ superseedingRecordId,
+                       "HOLDING:" + fbsAgencyWithLocalBib + "-clazzifier:"+ superseedingRecordId            ));
             assertH2B(fbsAgencyWithoutLocalBib, originalRecordId, LibraryType.COMMON_AGENCY, superseedingRecordId);
             assertH2B(fbsSchoolAgency, originalRecordId, LibraryType.SCHOOL_COMMON_AGENCY, superseedingRecordId);
             assertH2B(nonFbsAgency, originalRecordId, nonFbsAgency, originalRecordId);
@@ -230,7 +238,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createBibRecord(LibraryType.COMMON_AGENCY, bibliographicRecordId);
             createBibRecord(LibraryType.COMMON_AGENCY, newRecordId);
             createB2B(bibliographicRecordId, newRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity e = fetchH2BRecord(agencyId, bibliographicRecordId);
             assertNotNull(e);
             assertEquals(agencyId, e.getBibliographicAgencyId());
@@ -251,12 +259,12 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createAgency(701020);
             createAgency(702030);
             createAgency(876543);
-            bean.tryToAttachToBibliographicRecord(301020, biblId);
-            bean.tryToAttachToBibliographicRecord(302030, biblId);
-            bean.tryToAttachToBibliographicRecord(701020, biblId);
-            bean.tryToAttachToBibliographicRecord(702030, biblId);
-            bean.tryToAttachToBibliographicRecord(702030, biblId);
-            bean.tryToAttachToBibliographicRecord(876543, biblId);
+            bean.tryToAttachToBibliographicRecord(301020, biblId, EnqueueCollector.VOID, QueueType.HOLDING);
+            bean.tryToAttachToBibliographicRecord(302030, biblId, EnqueueCollector.VOID, QueueType.HOLDING);
+            bean.tryToAttachToBibliographicRecord(701020, biblId, EnqueueCollector.VOID, QueueType.HOLDING);
+            bean.tryToAttachToBibliographicRecord(702030, biblId, EnqueueCollector.VOID, QueueType.HOLDING);
+            bean.tryToAttachToBibliographicRecord(702030, biblId, EnqueueCollector.VOID, QueueType.HOLDING);
+            bean.tryToAttachToBibliographicRecord(876543, biblId, EnqueueCollector.VOID, QueueType.HOLDING);
             HoldingsToBibliographicEntity h2b_301020 = fetchH2BRecord(301020, biblId);
             HoldingsToBibliographicEntity h2b_302030 = fetchH2BRecord(302030, biblId);
             HoldingsToBibliographicEntity h2b_701020 = fetchH2BRecord(701020, biblId);

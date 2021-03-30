@@ -38,7 +38,6 @@ output = {
     "producerVersion": "1234",
     "deleted": False,
     "indexKeys": keys,
-    "commitWithin": 1000,
     "trackingId": ""
 }
 

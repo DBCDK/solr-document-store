@@ -18,6 +18,8 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Map;

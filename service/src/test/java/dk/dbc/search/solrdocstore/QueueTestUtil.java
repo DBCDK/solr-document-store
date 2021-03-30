@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.persistence.EntityManager;
@@ -46,7 +47,7 @@ public class QueueTestUtil {
      *
      * @param em       entity manager, that provides a connection
      * @param elements list of string with
-     *                 {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     *                 {consumer},{agencyId},{bibliographicRecordId}
      */
     public static void queueIs(EntityManager em, String... elements) {
         Connection connection = em.unwrap(java.sql.Connection.class);
@@ -58,7 +59,7 @@ public class QueueTestUtil {
      *
      * @param dataSource data source, that provides a connection
      * @param elements   list of string with
-     *                   {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     *                   {consumer},{agencyId},{bibliographicRecordId}
      */
     public static void queueIs(DataSource dataSource, String... elements) {
         try (Connection connection = dataSource.getConnection()) {
@@ -73,26 +74,22 @@ public class QueueTestUtil {
      *
      * @param connection database connection
      * @param elements   list of string with
-     *                   {consumer},{agencyId},{bibliographicRecordId}[,{commitWithin}]
+     *                   {consumer},{agencyId},{bibliographicRecordId}
      */
     public static void queueIs(Connection connection, String... elements) {
         HashSet<String> enqueued = new HashSet<>();
-        for (String sql : Arrays.asList("SELECT consumer || ',' || jobid FROM queue WHERE commitWithin IS NULL",
-                                        "SELECT consumer || ',' || jobid || ',' || commitWithin FROM queue WHERE commitWithin IS NOT NULL")) {
 
-            try (Statement stmt = connection.createStatement() ;
-                 ResultSet resultSet = stmt.executeQuery(sql)) {
-                while (resultSet.next()) {
-                    enqueued.add(resultSet.getString(1));
-                }
-            } catch (SQLException ex) {
-                log.error("Cannot exec query {}: {}", sql, ex.getMessage());
-                log.debug("Cannot exec query {}: ", sql, ex);
+        try (Statement stmt = connection.createStatement() ;
+             ResultSet resultSet = stmt.executeQuery("SELECT consumer || ',' || jobid FROM queue")) {
+            while (resultSet.next()) {
+                enqueued.add(resultSet.getString(1));
             }
+        } catch (SQLException ex) {
+            log.error("Cannot exec query: {}", ex.getMessage());
+            log.debug("Cannot exec query: ", ex);
         }
         log.debug("enqueued = {}", enqueued);
         assertThat(enqueued, containsInAnyOrder(elements));
-        assertThat("Nothing extra", enqueued.size(), is(elements.length));
     }
 
     public static void clearQueue(DataSource dataSource) {

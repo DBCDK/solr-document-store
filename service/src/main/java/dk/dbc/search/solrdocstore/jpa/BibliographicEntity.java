@@ -1,5 +1,7 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
+import dk.dbc.search.solrdocstore.QueueType;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.ColumnResult;
@@ -63,7 +65,7 @@ public class BibliographicEntity implements Serializable {
 
     private String trackingId;
 
-    BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
+    public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -208,7 +210,15 @@ public class BibliographicEntity implements Serializable {
         return new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId);
     }
 
-    public String asPid() {
-        return agencyId + "-" + classifier + ":" + bibliographicRecordId;
+
+    public QueueJob asQueueJobFor(QueueType supplier) {
+        switch (supplier.getType()) {
+            case MANIFESTATION:
+                return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
+            case WORK:
+                return QueueJob.work(work);
+            default:
+                throw new AssertionError();
+        }
     }
 }

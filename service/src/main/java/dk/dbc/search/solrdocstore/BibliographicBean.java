@@ -1,9 +1,16 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import java.sql.SQLException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +35,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -55,7 +61,7 @@ public class BibliographicBean {
     BibliographicRetrieveBean brBean;
 
     @Inject
-    EnqueueAdapter enqueueAdapter;
+    EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
@@ -77,18 +83,18 @@ public class BibliographicBean {
      * @param jsonContent The json request (see
      *                    {@link BibliographicEntityRequest})
      * @return Json with ok: true/false
-     * @throws Exception If database is unavailable or the JSON cannot be
-     *                   created
+     * @throws JSONBException          JSON cannot be parsed
+     * @throws JsonProcessingException JSON cannot be created
      */
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed(reusable = true)
     public Response addBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
-                                         String jsonContent) throws Exception {
+                                         String jsonContent) throws JSONBException, JsonProcessingException {
 
         BibliographicEntityRequest request = jsonbContext.unmarshall(jsonContent, BibliographicEntityRequest.class);
-        if(request.getTrackingId() == null)
+        if (request.getTrackingId() == null)
             request.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(request.getTrackingId())
                 .pid(request.getRepositoryId())) {
@@ -96,9 +102,9 @@ public class BibliographicBean {
                 log.warn("Got a request which wasn't deleted but had no indexkeys");
                 return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
             }
-            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), Optional.ofNullable(request.getCommitWithin()), !skipQueue);
+            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), !skipQueue);
             return Response.ok().entity("{ \"ok\": true }").build();
-        } catch (RuntimeException ex) {
+        } catch (SQLException | RuntimeException ex) {
             log.error("addBibliographicKeys error: {}", ex.getMessage());
             log.debug("addBibliographicKeys error: ", ex);
             String message = null;
@@ -115,8 +121,8 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, Optional<Integer> commitWithin, boolean queueAll) {
-        Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, boolean queueAll) throws SQLException {
+        EnqueueCollector enqueue = queueAll ? enqueueSupplier.getEnqueueCollector() : EnqueueCollector.VOID;
 
         if (bibliographicEntity.getClassifier() == null) {
             throw new IllegalStateException("classifier is not set");
@@ -126,36 +132,42 @@ public class BibliographicBean {
 
         BibliographicEntity dbbe = entityManager.find(BibliographicEntity.class, bibliographicEntity.asAgencyClassifierItemKey(), LockModeType.PESSIMISTIC_WRITE);
         if (dbbe == null) {
-            affectedKeys.add(bibliographicEntity.asAgencyClassifierItemKey());
+            if (!queueAll && !bibliographicEntity.isDeleted()) {
+                // A new record, should not respect the skipQueue flag
+                enqueue = enqueueSupplier.getEnqueueCollector();
+            }
+            enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
-            Set<AgencyClassifierItemKey> updatedHoldings = updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId());
-            affectedKeys.addAll(updatedHoldings);
+            updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
             // Record creates queue even id said not to
-            queueAll = true;
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
 
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
             if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
-                log.warn("Cannot update to an older stream date: pid = {}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}", bibliographicEntity.asPid(), bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
+                log.warn("Cannot update to an older stream date: pid = {}-{}:{}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}",
+                         bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId(),
+                         bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
                 throw new IntermittentErrorException("Cannot update to an older stream date");
             }
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
-                // Record changed deleted stats queue even id said not to
-                queueAll = true;
-                AgencyClassifierItemKey key = bibliographicEntity.asAgencyClassifierItemKey();
+                if(!queueAll) {
+                    // The record, changed delete status - should not respect the skipQueue flag
+                    enqueue = enqueueSupplier.getEnqueueCollector();
+                }
                 // If incoming bib entity is deleted, we mark it as delete so the enqueue adapter
                 // will delay the queue job, to prevent race conditions with updates to this same
                 // bib entity
                 if (bibliographicEntity.isDeleted()) {
-                    key.setDeleteMarked(true);
                     if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
                         deleteSuperceded(bibliographicEntity.getBibliographicRecordId());
                     }
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION_DELETED);
+                } else {
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
                 }
-                affectedKeys.add(key);
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
@@ -166,12 +178,10 @@ public class BibliographicBean {
                         h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
                         h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
                 for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings) {
-                    Set<AgencyClassifierItemKey> reattachedKeys =
-                            h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId());
-                    affectedKeys.addAll(reattachedKeys);
+                    h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
                 }
             } else {
-                affectedKeys.add(bibliographicEntity.asAgencyClassifierItemKey());
+                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
                 // Simple update
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
             }
@@ -180,15 +190,10 @@ public class BibliographicBean {
         if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY && !bibliographicEntity.isDeleted()) {
             Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
             if (supersededRecordIds.size() > 0) {
-                Set<AgencyClassifierItemKey> recalculatedKeys =
-                        h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(), supersededRecordIds);
-                affectedKeys.addAll(recalculatedKeys);
+                h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(), supersededRecordIds, enqueue, QueueType.MANIFESTATION);
             }
         }
-        log.debug("queueAll = {}", queueAll);
-        log.debug("affectedKeys = {}", affectedKeys);
-        if (queueAll || affectedKeys.size() > 1)
-            enqueueAdapter.enqueueAll(affectedKeys, commitWithin);
+        enqueue.commit();
     }
 
     private Instant extractFedoraStreamDate(BibliographicEntity entity) {
@@ -206,17 +211,16 @@ public class BibliographicBean {
     /*
      *
      */
-    private Set<AgencyClassifierItemKey> updateHoldingsToBibliographic(int agency, String recordId) {
+    private void updateHoldingsToBibliographic(int agency, String recordId, EnqueueCollector enqueue) {
         if (openAgency.getRecordType(agency) == SingleRecord) {
-            return updateHoldingsSingleRecord(agency, recordId);
+            updateHoldingsSingleRecord(agency, recordId, enqueue);
         } else {
-            return updateHoldingsForCommonRecords(agency, recordId);
+            updateHoldingsForCommonRecords(agency, recordId, enqueue);
         }
     }
 
-    private Set<AgencyClassifierItemKey> updateHoldingsForCommonRecords(int agency, String recordId) {
+    private void updateHoldingsForCommonRecords(int agency, String recordId, EnqueueCollector enqueue) {
         TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
-        Set<AgencyClassifierItemKey> affectedKeys = new HashSet<>();
         query.setParameter("bibId", recordId);
 
         TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
@@ -249,31 +253,26 @@ public class BibliographicBean {
                 case Missing:
                     throw new IllegalStateException("This state should not have leaked");
             }
-            affectedKeys.addAll(
-                    addHoldingsToBibliographic(agency, recordId, holdingsAgency)
-            );
+            addHoldingsToBibliographic(agency, recordId, holdingsAgency, enqueue, QueueType.MANIFESTATION);
 
         }
-        return affectedKeys;
     }
 
-    private Set<AgencyClassifierItemKey> updateHoldingsSingleRecord(int agency, String recordId) {
+    private void updateHoldingsSingleRecord(int agency, String recordId, EnqueueCollector enqueue) {
         if (openAgency.lookup(agency).getLibraryType() == LibraryType.NonFBS) {
             TypedQuery<Long> query = entityManager.createQuery("SELECT count(h.agencyId) FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", Long.class);
             query.setParameter("agency", agency);
             query.setParameter("bibId", recordId);
 
             if (query.getSingleResult() > 0) {
-                return addHoldingsToBibliographic(agency, recordId, agency);
+                addHoldingsToBibliographic(agency, recordId, agency, enqueue, QueueType.MANIFESTATION);
             }
         } else {
-            HashSet<AgencyClassifierItemKey> ret = new HashSet<>();
-
             TypedQuery<String> superceeded = entityManager.createQuery(
                     "SELECT b.deadBibliographicRecordId FROM BibliographicToBibliographicEntity b" +
                     " WHERE b.liveBibliographicRecordId = :bibId", String.class);
             superceeded.setParameter("bibId", recordId);
-            List<String> allIds = new ArrayList<String>(superceeded.getResultList());
+            List<String> allIds = new ArrayList<>(superceeded.getResultList());
             allIds.add(recordId);
 
             TypedQuery<String> query = entityManager.createQuery(
@@ -288,25 +287,23 @@ public class BibliographicBean {
             if (holdingsItems.size() >= 2) {
                 log.info("Strange: {}:{} has multiple holdings ({}) pointing to it (002/b2b issue?)", agency, recordId, holdingsItems);
             }
-            for (String holdingsItem : holdingsItems) {
-                ret.addAll(addHoldingsToBibliographic(agency, holdingsItem, agency, recordId));
-            }
-            return ret;
+            holdingsItems.forEach(holdingsItem ->
+                    addHoldingsToBibliographic(agency, holdingsItem, agency, recordId, enqueue, QueueType.MANIFESTATION)
+            );
         }
-        return Collections.emptySet();
     }
 
-    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency) {
-        return addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId);
+    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, EnqueueCollector enqueue, QueueType enqueueSource) {
+        addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId, enqueue, enqueueSource);
     }
 
-    private Set<AgencyClassifierItemKey> addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId) {
+    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId, EnqueueCollector enqueue, QueueType enqueueSource) {
         LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
         boolean isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                 holdingsAgency, recordId, agency, bibliographicRecordId, isCommonDerived
         );
-        return h2bBean.attachToAgency(h2b);
+        h2bBean.attachToAgency(h2b, enqueue, enqueueSource);
     }
 
     private void deleteSuperceded(String bibliographicRecordId) {
@@ -343,5 +340,4 @@ public class BibliographicBean {
         }
         return changedBibliographicRecordIds;
     }
-
 }

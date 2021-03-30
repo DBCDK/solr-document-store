@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import javax.ejb.EJBException;
 import org.junit.Before;
 import org.junit.Test;

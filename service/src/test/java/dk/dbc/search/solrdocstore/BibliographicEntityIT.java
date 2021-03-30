@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;

@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
+
 public class AddResourceRequest extends BibliographicResourceEntity {
 
     public AddResourceRequest(){}
