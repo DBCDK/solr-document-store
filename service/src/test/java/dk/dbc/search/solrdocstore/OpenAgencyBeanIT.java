@@ -1,5 +1,10 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
+import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.util.HashSet;
 import javax.persistence.EntityManager;
 import org.junit.Before;

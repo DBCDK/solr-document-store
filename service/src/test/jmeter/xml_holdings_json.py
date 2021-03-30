@@ -61,7 +61,6 @@ output = {
     "agencyId": global_agencyId,
     "bibliographicRecordId": global_bibliographicRecordId,
     "indexKeys": subDocuments,
-    "commitWithin": 1000,
     "trackingId": ""
 }
 

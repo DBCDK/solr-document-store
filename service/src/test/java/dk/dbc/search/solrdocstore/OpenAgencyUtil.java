@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+
 /**
  *
  * @author DBC {@literal <dbc.dk>}

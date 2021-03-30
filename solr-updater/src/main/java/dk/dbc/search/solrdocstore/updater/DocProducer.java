@@ -72,13 +72,11 @@ public class DocProducer {
      * @param doc            The document to post to the solr (null if no
      *                       documents)
      * @param solrCollection connection to solr collection
-     * @param commitWithin   optional - number of milliseconds before a
-     *                       commit should occur
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
     @Timed(reusable = true)
-    public void deploy(SolrInputDocument doc, SolrCollection solrCollection, Integer commitWithin) throws IOException, SolrServerException {
+    public void deploy(SolrInputDocument doc, SolrCollection solrCollection) throws IOException, SolrServerException {
 
         if (doc != null) {
             if (log.isDebugEnabled()) {
@@ -95,9 +93,6 @@ public class DocProducer {
             UpdateRequest updateRequest = new UpdateRequest();
             updateRequest.add(doc);
             updateRequest.setParam("appId", config.getAppId());
-            if (commitWithin != null && commitWithin > 0) {
-                updateRequest.setCommitWithin(commitWithin);
-            }
             UpdateResponse resp = updateRequest.process(solrCollection.getSolrClient());
             if (resp.getStatus() != 0) {
                 throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
@@ -112,18 +107,14 @@ public class DocProducer {
      * @param bibliographicShardId the root id of the document to purge
      * @param netstedDocumentCount id's to delete from SolR
      * @param solrCollection       connection to solr collection
-     * @param commitWithin         then to commit
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
     @Timed(reusable = true)
-    public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, SolrCollection solrCollection, Integer commitWithin) throws IOException, SolrServerException {
+    public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, SolrCollection solrCollection) throws IOException, SolrServerException {
         int deleteCount = netstedDocumentCount * 2 + 100; // Ensure all old documents gets deleted, even if an uncommitted request has many more than is currently searchable
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.setParam("appId", config.getAppId());
-        if (commitWithin != null && commitWithin > 0) {
-            updateRequest.setCommitWithin(commitWithin);
-        }
         ArrayList<String> docIdList = new ArrayList<>(deleteCount + 1);
         docIdList.add(bibliographicShardId);
         for (int i = 0 ; i < deleteCount ; i++) {

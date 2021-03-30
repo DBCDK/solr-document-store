@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.log.LogWith;
 import org.slf4j.Logger;
@@ -66,9 +68,9 @@ public class BibliographicRecordAPIBean {
             }
             Query frontendQuery = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId, orderBy, desc);
             List<Object[]> resultList = frontendQuery.setFirstResult(( page - 1 ) * pageSize).setMaxResults(pageSize).getResultList();
-            List<BibliographicFrontendEntity> bibliographicFrontendEntityList = resultList.stream().map((record) -> {
+            List<BibliographicFrontendResponse> bibliographicFrontendEntityList = resultList.stream().map((record) -> {
                 BibliographicEntity b = (BibliographicEntity) record[0];
-                return new BibliographicFrontendEntity(b, (String) record[1]);
+                return new BibliographicFrontendResponse(b, (String) record[1]);
             }).collect(Collectors.toList());
             long countResult = brBean.getBibliographicEntityCountById(bibliographicRecordId);
             return Response.ok(new FrontendReturnListType<>(bibliographicFrontendEntityList, pageCount(countResult, pageSize)), MediaType.APPLICATION_JSON).build();
@@ -102,9 +104,9 @@ public class BibliographicRecordAPIBean {
                     .setParameter(2, orderBy)
                     .setFirstResult(( page - 1 ) * pageSize)
                     .setMaxResults(pageSize);
-            List<BibliographicFrontendEntity> res = ( (List<Object[]>) frontendQuery.getResultList() ).stream().map((record) -> {
+            List<BibliographicFrontendResponse> res = ( (List<Object[]>) frontendQuery.getResultList() ).stream().map((record) -> {
                 BibliographicEntity b = (BibliographicEntity) record[0];
-                return new BibliographicFrontendEntity(b, (String) record[1]);
+                return new BibliographicFrontendResponse(b, (String) record[1]);
             }).collect(Collectors.toList());
             Query queryTotal = entityManager.createNativeQuery("SELECT COUNT(b.bibliographicRecordId) FROM bibliographicsolrkeys b WHERE b.repositoryId = ?")
                     .setParameter(1, repositoryID);
@@ -128,7 +130,7 @@ public class BibliographicRecordAPIBean {
                     .setParameter(1, bibliographicRecordId)
                     .setParameter(2, bibliographicAgencyId);
             Object[] record = (Object[]) frontendQuery.getSingleResult();
-            return Response.ok(new BibliographicFrontendEntity((BibliographicEntity) record[0], (String) record[1])).build();
+            return Response.ok(new BibliographicFrontendResponse((BibliographicEntity) record[0], (String) record[1])).build();
         }
     }
 

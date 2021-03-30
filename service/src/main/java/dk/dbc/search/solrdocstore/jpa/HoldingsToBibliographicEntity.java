@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -26,7 +26,7 @@ public class HoldingsToBibliographicEntity implements Serializable {
     public HoldingsToBibliographicEntity() {
     }
 
-    HoldingsToBibliographicEntity(int holdingsAgencyId, String bibliographicRecordId, int bibliographicAgencyId, boolean isCommonDerived) {
+    public HoldingsToBibliographicEntity(int holdingsAgencyId, String bibliographicRecordId, int bibliographicAgencyId, boolean isCommonDerived) {
         this(holdingsAgencyId, bibliographicRecordId, bibliographicAgencyId, bibliographicRecordId, isCommonDerived);
     }
 

@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class HoldingsItemEntity implements Serializable {
 
     private boolean hasLiveHoldings;
 
-    HoldingsItemEntity(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId) {
+    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.producerVersion = producerVersion;

@@ -1,5 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import java.util.List;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;

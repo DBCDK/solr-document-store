@@ -1,6 +1,7 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
 import com.google.common.collect.Iterables;
+import dk.dbc.search.solrdocstore.LibraryType;
 import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

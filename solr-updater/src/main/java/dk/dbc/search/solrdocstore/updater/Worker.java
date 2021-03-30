@@ -115,7 +115,7 @@ public class Worker {
 
                 JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
                 List<Runnable> tasks = solrCollections.stream()
-                        .map(solrCollection -> processForOneCollection(sourceDoc.deepCopy(), solrCollection, pid, job.getCommitwithin()))
+                        .map(solrCollection -> processForOneCollection(sourceDoc.deepCopy(), solrCollection, pid))
                         .collect(Collectors.toList());
                 try {
                     switch (tasks.size()) {
@@ -170,7 +170,7 @@ public class Worker {
         };
     }
 
-    public Runnable processForOneCollection(JsonNode sourceDoc, SolrCollection collection, String pid, Integer commitWithin) {
+    public Runnable processForOneCollection(JsonNode sourceDoc, SolrCollection collection, String pid) {
         return () -> {
             try (DBCTrackedLogContext logContext = new DBCTrackedLogContext()
                     .with("pid", pid)
@@ -180,9 +180,9 @@ public class Worker {
                 String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
                 int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, collection);
 
-                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, collection, commitWithin);
+                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, collection);
 
-                docProducer.deploy(solrDocument, collection, commitWithin);
+                docProducer.deploy(solrDocument, collection);
                 int count = 1;
                 if (solrDocument != null && solrDocument.hasChildDocuments()) {
                     List<SolrInputDocument> childDocuments = solrDocument.getChildDocuments();

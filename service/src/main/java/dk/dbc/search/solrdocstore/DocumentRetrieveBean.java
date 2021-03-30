@@ -1,5 +1,10 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.log.LogWith;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;

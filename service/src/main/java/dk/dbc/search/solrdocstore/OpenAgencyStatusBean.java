@@ -1,5 +1,10 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -74,6 +79,10 @@ public class OpenAgencyStatusBean {
             } else {
                 return Response.ok().type(MediaType.TEXT_PLAIN_TYPE).entity("add: ?hash=" + hash + " to path").build();
             }
+        } catch (SQLException ex) {
+            log.error("Could not enqueue: {}", ex.getMessage());
+            log.debug("Could not enqueue: ", ex);
+            return Response.serverError().type(MediaType.TEXT_PLAIN_TYPE).entity("Could not enqueue").build();
         } catch (NoSuchAlgorithmException ex) {
             log.error("No SHA-256 ?: {}", ex.getMessage());
             log.debug("No SHA-256 ?: ", ex);
@@ -96,9 +105,9 @@ public class OpenAgencyStatusBean {
                 .replaceAll("[+/=]", "-"); //uri safe
     }
 
-    ArrayList<String> purgeAgency(int agencyId) {
+    ArrayList<String> purgeAgency(int agencyId) throws SQLException {
         ArrayList<String> resp = new ArrayList<>();
-        EnqueueService<AgencyClassifierItemKey> enqueueService = supplier.getManifestationEnqueueService();
+        EnqueueCollector enqueue = supplier.getEnqueueCollector();
         // Queue related records
         entityManager.createQuery(
                 "SELECT b FROM BibliographicEntity b" +
@@ -110,14 +119,8 @@ public class OpenAgencyStatusBean {
                 .setParameter("agencyId", agencyId)
                 .getResultList()
                 .stream()
-                .map(BibliographicEntity::asAgencyClassifierItemKey)
-                .forEach(key -> {
-                    try {
-                        enqueueService.enqueue(key);
-                    } catch (SQLException ex) {
-                        resp.add(key + " - " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-                    }
-                });
+                .forEach(entity -> enqueue.add(entity, QueueType.MANIFESTATION));
+        enqueue.commit();
         // Purge holdings if no error occured
         if (resp.isEmpty()) {
             // Purge h2b

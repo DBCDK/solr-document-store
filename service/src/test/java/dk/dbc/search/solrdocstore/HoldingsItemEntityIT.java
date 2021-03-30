@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;

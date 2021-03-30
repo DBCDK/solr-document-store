@@ -186,8 +186,8 @@ public class DocProducerIT {
         SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc, solrCollection);
         String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
         int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, solrCollection);
-        docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, solrCollection, 0);
-        docProducer.deploy(doc, solrCollection, 0);
+        docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, solrCollection);
+        docProducer.deploy(doc, solrCollection);
         SolrClient solrClient = solrCollection.getSolrClient();
         solrClient.commit(true, true);
         QueryResponse response = solrClient.query(new SolrQuery("*:*"));

@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;

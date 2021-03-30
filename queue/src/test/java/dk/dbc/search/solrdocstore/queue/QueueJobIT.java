@@ -32,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
@@ -66,8 +64,8 @@ public class QueueJobIT {
         System.out.println("store-retrieve");
 
         QueueJob job1 =  QueueJob.work("work:12345678");
-        QueueJob job2 =  QueueJob.manifestation(888888, "clazzifier", "87654321", 1000); // This should be collapsed
-        QueueJob job3 =  QueueJob.manifestation(888888, "clazzifier", "87654321", 10); // This should be used (shorter commitwithin)
+        QueueJob job2 =  QueueJob.manifestation(888888, "clazzifier", "87654321"); // This should be collapsed
+        QueueJob job3 =  QueueJob.manifestation(888888, "clazzifier", "87654321"); // Into this
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedQueueSupplier<QueueJob> supplier = QUEUE_SUPPLIER.preparedSupplier(connection);
