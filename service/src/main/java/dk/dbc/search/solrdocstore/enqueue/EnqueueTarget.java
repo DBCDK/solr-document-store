@@ -25,7 +25,7 @@ import java.sql.SQLException;
  * Interface of handling a specific queue
  * <p>
  * When
- * {@link EnqueueCollector#add(dk.dbc.search.solrdocstore.BibliographicEntity, dk.dbc.search.solrdocstore.QueueType)}
+ * {@link EnqueueCollector#add(dk.dbc.search.solrdocstore.jpa.BibliographicEntity, dk.dbc.search.solrdocstore.QueueType)}
  * in called, this interface is used for an abstraction for the the supplier
  * type
  *
