@@ -18,7 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.enqueue;
 
-import dk.dbc.search.solrdocstore.BibliographicEntity;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.SQLException;
 
 /**
@@ -36,9 +36,9 @@ public interface EnqueueTarget {
     /**
      * Add a single entity to this queue-job collection
      *
-     * @param entity what entity to enqueue
+     * @param job what job to enqueue
      */
-    void add(BibliographicEntity entity);
+    void add(QueueJob job);
 
     /**
      * Transfer queue-jobs to the database

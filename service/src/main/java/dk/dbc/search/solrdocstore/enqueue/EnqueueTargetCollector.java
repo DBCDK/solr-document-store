@@ -20,7 +20,6 @@ package dk.dbc.search.solrdocstore.enqueue;
 
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
-import dk.dbc.search.solrdocstore.BibliographicEntity;
 import dk.dbc.search.solrdocstore.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
@@ -36,30 +35,22 @@ import java.util.HashSet;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public abstract class EnqueueTargetAbstraction implements EnqueueTarget {
+public class EnqueueTargetCollector implements EnqueueTarget {
 
     private final Connection connection;
     private final Collection<QueueRuleEntity> targets;
     private final HashSet<QueueJob> jobs;
 
-    public EnqueueTargetAbstraction(Connection connection, Collection<QueueRuleEntity> targets) {
+    public EnqueueTargetCollector(Connection connection, Collection<QueueRuleEntity> targets) {
         this.connection = connection;
         this.targets = targets;
         this.jobs = new HashSet<>();
     }
 
     @Override
-    public void add(BibliographicEntity entity) {
-        jobs.add(queueJobOf(entity));
+    public void add(QueueJob entity) {
+        jobs.add(entity);
     }
-
-    /**
-     * This makes a QueueJob from an entity
-     *
-     * @param entity what to enqueue
-     * @return the job that should be put on the queue
-     */
-    abstract protected QueueJob queueJobOf(BibliographicEntity entity);
 
     @Override
     public void commit() throws SQLException {

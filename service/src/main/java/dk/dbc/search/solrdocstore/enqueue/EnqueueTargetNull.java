@@ -18,7 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.enqueue;
 
-import dk.dbc.search.solrdocstore.BibliographicEntity;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 
 /**
  * This is a NOOP implementation of {@link EnqueueTarget}
@@ -28,7 +28,7 @@ import dk.dbc.search.solrdocstore.BibliographicEntity;
 public class EnqueueTargetNull implements EnqueueTarget {
 
     @Override
-    public void add(BibliographicEntity entity) {
+    public void add(QueueJob job) {
     }
 
     @Override

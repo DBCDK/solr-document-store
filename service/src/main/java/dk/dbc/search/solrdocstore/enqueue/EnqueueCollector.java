@@ -52,7 +52,7 @@ public class EnqueueCollector {
         }
     };
 
-    private EnqueueCollector() {
+    protected EnqueueCollector() {
         this.connection = null;
         this.queueRules = null;
         this.targetTypes = null;
@@ -72,7 +72,7 @@ public class EnqueueCollector {
      */
     public void add(BibliographicEntity entity, QueueType supplier) {
         targetTypes.computeIfAbsent(supplier, this::makeTarget)
-                .add(entity);
+                .add(entity.asQueueJobFor(supplier));
     }
 
     /**
@@ -83,8 +83,7 @@ public class EnqueueCollector {
      */
     public void add(BibliographicEntity entity, QueueType... suppliers) {
         for (QueueType supplier : suppliers) {
-            targetTypes.computeIfAbsent(supplier, this::makeTarget)
-                    .add(entity);
+            add(entity, supplier);
         }
     }
 
@@ -107,14 +106,7 @@ public class EnqueueCollector {
             log.info("No queues defined for target: {}", type);
             return new EnqueueTargetNull();
         }
-        switch (type.getType()) {
-            case MANIFESTATION:
-                return new EnqueueTargetManifestation(connection, targets);
-            case WORK:
-                return new EnqueueTargetWork(connection, targets);
-            default:
-                throw new AssertionError();
-        }
+        return new EnqueueTargetCollector(connection, targets);
     }
 
 }

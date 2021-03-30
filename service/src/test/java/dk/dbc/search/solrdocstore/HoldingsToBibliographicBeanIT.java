@@ -20,21 +20,11 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
     private HoldingsToBibliographicBean bean;
     private EntityManager em;
-    private Set<AgencyClassifierItemKey> affectedKeys;
-    private EnqueueCollector enqueueCollector;
 
     @Before
     public void before() {
         em = env().getEntityManager();
         bean = createHoldingsToBibliographicBean(env());
-        affectedKeys = new HashSet<>();
-        enqueueCollector = new EnqueueCollector(null, null) {
-            @Override
-            public void add(BibliographicEntity entity, QueueType type) {
-                affectedKeys.add(entity.asAgencyClassifierItemKey());
-            }
-        };
-
     }
 
     @Test
@@ -42,14 +32,15 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         env().getPersistenceContext().run(() -> {
             int agencyId = 132;
             String bibliographicRecordId = "ABC";
+            MockEnqueueCollector mockEnqueueCollector = new MockEnqueueCollector();
 
             bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(agencyId, bibliographicRecordId);
             createH2BRecord(agencyId, bibliographicRecordId, 132);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueueCollector, QueueType.HOLDING);
+            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, mockEnqueueCollector, QueueType.HOLDING);
             HoldingsToBibliographicEntity abc = fetchH2BRecord(agencyId, bibliographicRecordId);
-            affectedIs(affectedKeys,
-                       new AgencyClassifierItemKey(agencyId, "clazzifier", bibliographicRecordId));
+            assertThat(mockEnqueueCollector.getJobs(), containsInAnyOrder(
+                    "HOLDING:" + agencyId + "-clazzifier:" + bibliographicRecordId));
             assertNotNull(abc);
             assertEquals(132, abc.getBibliographicAgencyId());
         });
@@ -202,17 +193,17 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             createB2B(originalRecordId, superseedingRecordId);
             em.flush();
 
+            MockEnqueueCollector mockEnqueueCollector = new MockEnqueueCollector();
             bean.recalcAttachments(superseedingRecordId, new HashSet<>(Arrays.asList(new String[] {originalRecordId})),
-                                   enqueueCollector, QueueType.HOLDING);
+                                   mockEnqueueCollector, QueueType.HOLDING);
 
-            affectedIs(affectedKeys,
-                       new AgencyClassifierItemKey(LibraryType.COMMON_AGENCY, "clazzifier", originalRecordId),
-                       new AgencyClassifierItemKey(LibraryType.SCHOOL_COMMON_AGENCY, "clazzifier", originalRecordId),
-                       new AgencyClassifierItemKey(fbsAgencyWithLocalBib, "clazzifier", originalRecordId),
-                       new AgencyClassifierItemKey(LibraryType.COMMON_AGENCY, "clazzifier", superseedingRecordId),
-                       new AgencyClassifierItemKey(LibraryType.SCHOOL_COMMON_AGENCY, "clazzifier", superseedingRecordId),
-                       new AgencyClassifierItemKey(fbsAgencyWithLocalBib, "clazzifier", superseedingRecordId)
-            );
+            assertThat(mockEnqueueCollector.getJobs(), containsInAnyOrder(
+                       "HOLDING:" + LibraryType.COMMON_AGENCY + "-clazzifier:"+ originalRecordId,
+                       "HOLDING:" + LibraryType.SCHOOL_COMMON_AGENCY + "-clazzifier:"+ originalRecordId,
+                       "HOLDING:" + fbsAgencyWithLocalBib + "-clazzifier:"+ originalRecordId,
+                       "HOLDING:" + LibraryType.COMMON_AGENCY + "-clazzifier:"+ superseedingRecordId,
+                       "HOLDING:" + LibraryType.SCHOOL_COMMON_AGENCY + "-clazzifier:"+ superseedingRecordId,
+                       "HOLDING:" + fbsAgencyWithLocalBib + "-clazzifier:"+ superseedingRecordId            ));
             assertH2B(fbsAgencyWithoutLocalBib, originalRecordId, LibraryType.COMMON_AGENCY, superseedingRecordId);
             assertH2B(fbsSchoolAgency, originalRecordId, LibraryType.SCHOOL_COMMON_AGENCY, superseedingRecordId);
             assertH2B(nonFbsAgency, originalRecordId, nonFbsAgency, originalRecordId);
