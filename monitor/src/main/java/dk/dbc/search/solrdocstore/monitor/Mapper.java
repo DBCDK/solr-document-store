@@ -28,9 +28,6 @@ import java.util.Locale;
 public class Mapper {
 
     public static final JobLogMapper MAPPER = (r) ->
-            String.format(Locale.ROOT, "%06d-%s:%s",
-                                       r.getInt("agencyid"),
-                                       r.getString("classifier"),
-                                       r.getString("bibliographicrecordid"));
+            String.format(Locale.ROOT, "%s", r.getString("jobid"));
 
 }
