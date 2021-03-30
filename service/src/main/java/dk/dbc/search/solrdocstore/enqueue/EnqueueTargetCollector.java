@@ -20,7 +20,7 @@ package dk.dbc.search.solrdocstore.enqueue;
 
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
-import dk.dbc.search.solrdocstore.QueueRuleEntity;
+import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;

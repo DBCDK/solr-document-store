@@ -1,5 +1,6 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
+import dk.dbc.search.solrdocstore.QueueType;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.Serializable;
 import javax.persistence.Basic;
@@ -64,7 +65,7 @@ public class BibliographicEntity implements Serializable {
 
     private String trackingId;
 
-    BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
+    public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;

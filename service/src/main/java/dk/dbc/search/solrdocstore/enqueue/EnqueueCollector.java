@@ -18,8 +18,8 @@
  */
 package dk.dbc.search.solrdocstore.enqueue;
 
-import dk.dbc.search.solrdocstore.BibliographicEntity;
-import dk.dbc.search.solrdocstore.QueueRuleEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.QueueType;
 import java.sql.Connection;
 import java.sql.SQLException;

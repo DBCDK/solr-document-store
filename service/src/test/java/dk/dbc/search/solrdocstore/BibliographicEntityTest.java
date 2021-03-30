@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.commons.jsonb.JSONBContext;
 
 import org.junit.Test;

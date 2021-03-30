@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;

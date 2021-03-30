@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;

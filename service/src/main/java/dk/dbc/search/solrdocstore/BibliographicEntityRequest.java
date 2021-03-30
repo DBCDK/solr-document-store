@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

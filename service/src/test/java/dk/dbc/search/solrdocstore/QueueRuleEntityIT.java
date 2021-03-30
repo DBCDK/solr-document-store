@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
+import dk.dbc.search.solrdocstore.jpa.QueueRuleKey;
 import java.util.EnumSet;
 import org.junit.Test;
 

@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import java.sql.Connection;
 import java.sql.ResultSet;
