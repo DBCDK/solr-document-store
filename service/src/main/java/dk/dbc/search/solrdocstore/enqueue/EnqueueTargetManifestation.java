@@ -16,8 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.enqueue;
 
+import dk.dbc.search.solrdocstore.BibliographicEntity;
+import dk.dbc.search.solrdocstore.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.util.Collection;

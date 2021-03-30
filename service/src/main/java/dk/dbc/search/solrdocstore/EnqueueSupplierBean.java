@@ -18,6 +18,8 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.QueueRuleEntity;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import java.sql.Connection;
 import java.util.Collection;
 import javax.ejb.Stateless;

@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

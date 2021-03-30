@@ -16,24 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.enqueue;
 
-import dk.dbc.search.solrdocstore.queue.QueueJob;
-import java.sql.Connection;
-import java.util.Collection;
+import dk.dbc.search.solrdocstore.BibliographicEntity;
+import java.sql.SQLException;
 
 /**
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class EnqueueTargetWork extends EnqueueTargetAbstraction {
+public interface EnqueueTarget {
 
-    public EnqueueTargetWork(Connection connection, Collection<QueueRuleEntity> targets) {
-        super(connection, targets);
-    }
+    void add(BibliographicEntity entity);
 
-    @Override
-    protected QueueJob queueJobOf(BibliographicEntity entity) {
-        return entity.asManifestationQueueJob();
-    }
+    void commit() throws SQLException;
 }

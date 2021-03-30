@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.type.TypeReference;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import java.io.IOException;
