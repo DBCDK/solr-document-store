@@ -118,15 +118,15 @@ public class HoldingsToBibliographicBean {
 
     private void attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType enqueueSource, int... bibliographicAgencyPriorities) {
         for (int i = 0 ; i < bibliographicAgencyPriorities.length ; i++) {
-            
+
             boolean didAttach = attachIfExists(
                     bibliographicAgencyPriorities[i],
-                            bibliographicRecordId,
-                            holdingsAgencyId,
-                            holdingsBibliographicRecordId,
-                            isCommonDerived,
-                            enqueue,
-                            enqueueSource);
+                    bibliographicRecordId,
+                    holdingsAgencyId,
+                    holdingsBibliographicRecordId,
+                    isCommonDerived,
+                    enqueue,
+                    enqueueSource);
             if (didAttach) {
                 return;
             }

@@ -48,8 +48,8 @@ public enum QueueType {
     private final String columnValue;
     private final JobType type;
 
-    QueueType(String columnName, JobType type) {
-        this.columnValue = columnName;
+    QueueType(String columnValue, JobType type) {
+        this.columnValue = columnValue;
         this.type = type;
     }
 

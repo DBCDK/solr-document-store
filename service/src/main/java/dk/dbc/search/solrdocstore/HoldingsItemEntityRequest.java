@@ -10,7 +10,7 @@ public class HoldingsItemEntityRequest extends HoldingsItemEntity {
     private static final long serialVersionUID = 1991771211227276502L;
 
     // commitWithin is unused - however the skeleton for sending optional
-    // extra fields remains present, for the upcoming removel af producerVersion
+    // extra fields remains present, for the upcoming removal af producerVersion
     // Where it is removed from the database - but not from the request
     private Integer commitWithin;
 
