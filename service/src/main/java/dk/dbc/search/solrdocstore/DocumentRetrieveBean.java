@@ -15,10 +15,12 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -132,10 +134,12 @@ public class DocumentRetrieveBean {
     @Path("work/{ workid }")
     @Timed(reusable = true)
     public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
-                                                      @PathParam("workid") String workId) throws Exception {
-        log.debug("Fetching manifestations for work {}", workId);
+                                                      @PathParam("workid") String workId,
+                                                      @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys
+                                                    ) throws Exception {
+        log.debug("Fetching manifestations for work {}, includeHIIK: {}", workId, includeHoldingsItemsIndexKeys);
         try(LogWith logWith = track(null)) {
-            List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId);
+            List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId, includeHoldingsItemsIndexKeys);
             if (responses == null || responses.size() == 0) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Work not found").build();
             }
@@ -149,7 +153,7 @@ public class DocumentRetrieveBean {
     }
 
 
-    public List<DocumentRetrieveResponse> getDocumentsForWork(String workId)  throws Exception {
+    public List<DocumentRetrieveResponse> getDocumentsForWork(String workId, boolean includeHoldingsItemsIndexKeys)  throws Exception {
         List<BibliographicEntity> bibliographicEntities;
         List<HoldingsItemEntity> holdingsItemEntities;
         List<DocumentRetrieveResponse> res = new ArrayList<>();
@@ -159,6 +163,9 @@ public class DocumentRetrieveBean {
         TypedQuery<HoldingsItemEntity> holdingsQuery = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA, HoldingsItemEntity.class);
         holdingsQuery.setParameter("workId", workId);
         holdingsItemEntities = holdingsQuery.getResultList();
+        if (!includeHoldingsItemsIndexKeys) {
+            holdingsItemEntities.stream().map(h -> HoldingsItemEntity.trimForPresentation(h, entityManager)).collect(Collectors.toList());
+        }
         for (BibliographicEntity b : bibliographicEntities) {
             List<Integer> partOfDanbib = Collections.EMPTY_LIST;
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsItemEntities.stream()
