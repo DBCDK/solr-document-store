@@ -102,7 +102,7 @@ public class BibliographicBean {
                 log.warn("Got a request which wasn't deleted but had no indexkeys");
                 return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
             }
-            addBibliographicKeys(request.asBibliographicEntity(), request.getSuperceds(), !skipQueue);
+            addBibliographicKeys(request.asBibliographicEntity(), request.getSupersedes(), !skipQueue);
             return Response.ok().entity("{ \"ok\": true }").build();
         } catch (SQLException | RuntimeException ex) {
             log.error("addBibliographicKeys error: {}", ex.getMessage());
@@ -121,7 +121,7 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> superceds, boolean queueAll) throws SQLException {
+    void addBibliographicKeys(BibliographicEntity bibliographicEntity, List<String> supersedes, boolean queueAll) throws SQLException {
         EnqueueCollector enqueue = queueAll ? enqueueSupplier.getEnqueueCollector() : EnqueueCollector.VOID;
 
         if (bibliographicEntity.getClassifier() == null) {
@@ -162,7 +162,7 @@ public class BibliographicBean {
                 // bib entity
                 if (bibliographicEntity.isDeleted()) {
                     if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
-                        deleteSuperceded(bibliographicEntity.getBibliographicRecordId());
+                        deleteSuperseded(bibliographicEntity.getBibliographicRecordId());
                     }
                     enqueue.add(bibliographicEntity, QueueType.MANIFESTATION_DELETED);
                 } else {
@@ -188,7 +188,7 @@ public class BibliographicBean {
         }
 
         if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY && !bibliographicEntity.isDeleted()) {
-            Set<String> supersededRecordIds = updateSuperceded(bibliographicEntity.getBibliographicRecordId(), superceds);
+            Set<String> supersededRecordIds = updateSuperseded(bibliographicEntity.getBibliographicRecordId(), supersedes);
             if (supersededRecordIds.size() > 0) {
                 h2bBean.recalcAttachments(bibliographicEntity.getBibliographicRecordId(), supersededRecordIds, enqueue, QueueType.MANIFESTATION);
             }
@@ -268,11 +268,11 @@ public class BibliographicBean {
                 addHoldingsToBibliographic(agency, recordId, agency, enqueue, QueueType.MANIFESTATION);
             }
         } else {
-            TypedQuery<String> superceeded = entityManager.createQuery(
+            TypedQuery<String> superseded = entityManager.createQuery(
                     "SELECT b.deadBibliographicRecordId FROM BibliographicToBibliographicEntity b" +
                     " WHERE b.liveBibliographicRecordId = :bibId", String.class);
-            superceeded.setParameter("bibId", recordId);
-            List<String> allIds = new ArrayList<>(superceeded.getResultList());
+            superseded.setParameter("bibId", recordId);
+            List<String> allIds = new ArrayList<>(superseded.getResultList());
             allIds.add(recordId);
 
             TypedQuery<String> query = entityManager.createQuery(
@@ -306,7 +306,7 @@ public class BibliographicBean {
         h2bBean.attachToAgency(h2b, enqueue, enqueueSource);
     }
 
-    private void deleteSuperceded(String bibliographicRecordId) {
+    private void deleteSuperseded(String bibliographicRecordId) {
         List<BibliographicToBibliographicEntity> resultList =
                 entityManager.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity AS b2b" +
                                           " WHERE b2b.liveBibliographicRecordId = :bibliographicRecordId",
@@ -320,15 +320,15 @@ public class BibliographicBean {
         }
     }
 
-    private Set<String> updateSuperceded(String bibliographicRecordId, List<String> supercededs) {
-        if (supercededs == null) {
+    private Set<String> updateSuperseded(String bibliographicRecordId, List<String> supersededs) {
+        if (supersededs == null) {
             return Collections.emptySet();
         }
         HashSet<String> changedBibliographicRecordIds = new HashSet<>();
-        for (String superceded : supercededs) {
-            BibliographicToBibliographicEntity b2b = entityManager.find(BibliographicToBibliographicEntity.class, superceded, LockModeType.PESSIMISTIC_WRITE);
+        for (String superseded : supersededs) {
+            BibliographicToBibliographicEntity b2b = entityManager.find(BibliographicToBibliographicEntity.class, superseded, LockModeType.PESSIMISTIC_WRITE);
             if (b2b == null) {
-                b2b = new BibliographicToBibliographicEntity(superceded, bibliographicRecordId);
+                b2b = new BibliographicToBibliographicEntity(superseded, bibliographicRecordId);
             } else {
                 if (b2b.getLiveBibliographicRecordId().equals(bibliographicRecordId)) {
                     continue;
@@ -336,7 +336,7 @@ public class BibliographicBean {
                 b2b.setLiveBibliographicRecordId(bibliographicRecordId);
             }
             entityManager.merge(b2b);
-            changedBibliographicRecordIds.add(superceded);
+            changedBibliographicRecordIds.add(superseded);
         }
         return changedBibliographicRecordIds;
     }

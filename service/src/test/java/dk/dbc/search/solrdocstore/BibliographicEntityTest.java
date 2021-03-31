@@ -19,7 +19,7 @@ public class BibliographicEntityTest {
     private final JSONBContext context = new JSONBContext();
 
     @Test
-    public void SimpleEncode() throws Exception {
+    public void simpleEncode() throws Exception {
         Map<String, List<String>> indexKeys = new HashMap<>();
         indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
         indexKeys.put("id", Collections.singletonList("argle"));
@@ -30,7 +30,7 @@ public class BibliographicEntityTest {
     }
 
     @Test
-    public void SimpleDecode() throws Exception {
+    public void simpleDecode() throws Exception {
         String jsonContent = "{\"agencyId\":200,\"classifier\":\"clazzifier\",\"bibliographicRecordId\":\"1234\",\"repositoryId\":\"id#1\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"producerVersion\":\"1234\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"trackingId\":\"\"}";
 
         BibliographicEntity be = context.unmarshall(jsonContent, BibliographicEntity.class);

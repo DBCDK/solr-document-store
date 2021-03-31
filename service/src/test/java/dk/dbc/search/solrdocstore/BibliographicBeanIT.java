@@ -408,12 +408,12 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void supercedsAdd() throws Exception {
+    public void supersedesAdd() throws Exception {
 
         String json = makeBibliographicRequestJson(
                 870970,
                 e -> {
-            e.setSuperceds(Arrays.asList("a", "b"));
+            e.setSupersedes(Arrays.asList("a", "b"));
         });
 
         Response r = env().getPersistenceContext()
@@ -422,13 +422,13 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
 
         assertThat(l.size(), is(2));
-        Assert.assertTrue("One superceded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
-        Assert.assertTrue("One superceded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
+        Assert.assertTrue("One superseded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
+        Assert.assertTrue("One superseded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
     }
 
     @Test(timeout = 2_000L)
-    public void supercedsReverted() throws Exception {
-        System.out.println("supercedsReverted");
+    public void supersedesReverted() throws Exception {
+        System.out.println("supersedesReverted");
 
         try (Connection conn = env().getDatasource().getConnection() ;
              Statement statement = conn.createStatement()) {
@@ -441,7 +441,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                     870970,
                     e -> {
                 e.setBibliographicRecordId("b");
-                e.setSuperceds(Arrays.asList("a"));
+                e.setSupersedes(Arrays.asList("a"));
             });
 
             Response r = env().getPersistenceContext()
@@ -458,7 +458,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                     870970,
                     e -> {
                 e.setBibliographicRecordId("a");
-                e.setSuperceds(Arrays.asList("b"));
+                e.setSupersedes(Arrays.asList("b"));
             });
 
             Response r1 = env().getPersistenceContext()
@@ -469,7 +469,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                     e -> {
                 e.setBibliographicRecordId("b");
                 e.setDeleted(true);
-                e.setSuperceds(Arrays.asList("a"));
+                e.setSupersedes(Arrays.asList("a"));
             });
 
             Response r2 = env().getPersistenceContext()
@@ -483,7 +483,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void newRecordWhereSuperceedsIsAlreadySet() throws Exception {
+    public void newRecordWhereSupersedesIsAlreadySet() throws Exception {
 
         Response r;
         String a870970 = makeBibliographicRequestJson(
@@ -507,7 +507,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b870970 = makeBibliographicRequestJson(
                 870970, e -> {
             e.setBibliographicRecordId("b");
-            e.setSuperceds(Arrays.asList("a"));
+            e.setSupersedes(Arrays.asList("a"));
         });
         r = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(false, b870970));
