@@ -98,26 +98,21 @@ public class DocumentRetrieveBean {
     }
 
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(int agencyId, String classifier, String bibliographicRecordId) throws Exception {
-
         BibliographicEntity biblEntity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId));
         if (biblEntity == null) {
             return null;
         }
-
         List<HoldingsItemEntity> holdingsItemRecords = Collections.EMPTY_LIST;
         List<Integer> partOfDanbib = Collections.EMPTY_LIST;
         Map<String, Map<Integer, Boolean>> attachedResources = Collections.EMPTY_MAP;
-
         if (!biblEntity.isDeleted()) {
-            TypedQuery<HoldingsItemEntity> query = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class);
-            query.setParameter("bibliographicRecordId", bibliographicRecordId);
-            query.setParameter("agencyId", agencyId);
-            holdingsItemRecords = query.getResultList();
-
+            holdingsItemRecords = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_JPA, HoldingsItemEntity.class)
+                    .setParameter("bibliographicRecordId", bibliographicRecordId)
+                    .setParameter("agencyId", agencyId)
+                    .getResultList();
             if (LibraryType.COMMON_AGENCY == agencyId) {
                 partOfDanbib = getPartOfDanbibCommon(bibliographicRecordId);
             }
-
             OpenAgencyEntity oaEntity = oaBean.lookup(agencyId);
             LibraryType libraryType = oaEntity.getLibraryType();
 
@@ -155,14 +150,13 @@ public class DocumentRetrieveBean {
 
 
     public List<DocumentRetrieveResponse> getDocumentsForWork(String workId, boolean includeHoldingsItemsIndexKeys)  throws Exception {
-        List<BibliographicEntity> bibliographicEntities;
         List<DocumentRetrieveResponse> res = new ArrayList<>();
-        TypedQuery<BibliographicEntity> query = entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class);
-        query.setParameter("workId", workId);
-        bibliographicEntities = query.getResultList();
-        TypedQuery<HoldingsInfo> holdingsQuery = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA, HoldingsInfo.class);
-        holdingsQuery.setParameter("workId", workId);
-        List<HoldingsInfo> holdingsObjs = holdingsQuery.getResultList();
+        List<BibliographicEntity> bibliographicEntities = entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class)
+                .setParameter("workId", workId)
+                .getResultList();
+        List<HoldingsInfo> holdingsObjs = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA, HoldingsInfo.class)
+                .setParameter("workId", workId)
+                .getResultList();
         for (BibliographicEntity b : bibliographicEntities) {
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsObjs.stream()
                     .filter(ho -> ho.holdingsToBibliographicEntity.getBibliographicAgencyId() == b.getAgencyId()
