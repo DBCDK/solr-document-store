@@ -13,12 +13,12 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createResourceBean;
-import static dk.dbc.search.solrdocstore.QueueTestUtil.queueIs;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
+public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
+
     EntityManager em;
     ResourceBean bean;
     JSONBContext jsonbContext = new JSONBContext();
@@ -40,7 +40,7 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
         bean.addResource(jsonbContext.marshall(request));
         TypedQuery<BibliographicResourceEntity> query = em.createQuery(
                 "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
-                        "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResourceEntity.class);
+                "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResourceEntity.class);
         query.setParameter("agencyId", request.getAgencyId());
         query.setParameter("bibId", request.getBibliographicRecordId());
         query.setParameter("field", request.getField());
@@ -52,19 +52,18 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testAddNonFBSdResourceEnqueue");
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
-            em.merge(new OpenAgencyEntity(890890,LibraryType.NonFBS,false,false,false));
-            em.merge(new BibliographicEntity(890890,"classifier1","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
-            em.merge(new BibliographicEntity(890890,"classifier2","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
-            em.merge(new BibliographicEntity(890890,"classifier3","45454545","repo","work:1","unit:1","producer:1",false,null,"track:1"));
-            em.merge(new BibliographicResourceEntity(890890,"45454545","hasCoverUrl",true));
+            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
+            em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(890890, "classifier2", "45454545", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(890890, "classifier3", "45454545", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicResourceEntity(890890, "45454545", "hasCoverUrl", true));
             bean.addResource(jsonbContext.marshall(request));
-            // Only enqueues its own items
-            queueIs(em,
-                    queueItem(890890, "classifier1", "45454545"),
-                    queueItem(890890, "classifier2", "45454545"),
-                    queueItem(890890, "classifier3", "45454545")
-            );
         });
+        // Only enqueues its own items
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   queueItem(890890, "classifier1", "45454545"),
+                   queueItem(890890, "classifier2", "45454545"),
+                   queueItem(890890, "classifier3", "45454545")));
     }
 
     @Test
@@ -88,7 +87,6 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
         runCommonEnqueueTest(request);
     }
 
-
     @Test
     public void testAddFBSSchoolResourceEnqueue() {
         System.out.println("testAddFBSSchoolResourceEnqueue");
@@ -99,29 +97,29 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
     private void runCommonEnqueueTest(AddResourceRequest request) {
         jpa(em -> {
             // Setup
-            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS,false,false,false));
-            em.merge(new OpenAgencyEntity(870970,LibraryType.NonFBS,false,false,false));
-            em.merge(new OpenAgencyEntity(300000,LibraryType.NonFBS,false,false,false));
-            em.merge(new OpenAgencyEntity(610610,LibraryType.FBS,false,false,false));
-            em.merge(new OpenAgencyEntity(312000,LibraryType.FBSSchool,false,false,false));
-            em.merge(new BibliographicEntity(870970,"classifier1","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
-            em.merge(new BibliographicEntity(300000,"classifier1","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
-            em.merge(new BibliographicEntity(610610,"classifier2","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
-            em.merge(new BibliographicEntity(312000,"classifier3","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1"));
+            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
+            em.merge(new OpenAgencyEntity(870970, LibraryType.NonFBS, false, false, false));
+            em.merge(new OpenAgencyEntity(300000, LibraryType.NonFBS, false, false, false));
+            em.merge(new OpenAgencyEntity(610610, LibraryType.FBS, false, false, false));
+            em.merge(new OpenAgencyEntity(312000, LibraryType.FBSSchool, false, false, false));
+            em.merge(new BibliographicEntity(870970, "classifier1", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(300000, "classifier1", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(610610, "classifier2", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(312000, "classifier3", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
             // Elements that should not be enqueued
-            em.merge(new BibliographicEntity(312000,"classifier3","21212121","repo","work:1","unit:1","producer:1",false,null,"track:1")); // Non-matching bibliographicRecordId
-            em.merge(new BibliographicEntity(890890,"classifier3","12121212","repo","work:1","unit:1","producer:1",false,null,"track:1")); // NonFBS should not be enqueued
+            em.merge(new BibliographicEntity(312000, "classifier3", "21212121", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1")); // Non-matching bibliographicRecordId
+            em.merge(new BibliographicEntity(890890, "classifier3", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1")); // NonFBS should not be enqueued
             // Resource
-            em.merge(new BibliographicResourceEntity(300000,"12121212","hasCoverUrl",true));
+            em.merge(new BibliographicResourceEntity(300000, "12121212", "hasCoverUrl", true));
             bean.addResource(jsonbContext.marshall(request));
-            // Enqueues all posts with the recordId, since they might inherit this value from common
-            queueIs(em,
-                    queueItem(870970, "classifier1", "12121212"),
-                    queueItem(300000, "classifier1", "12121212"),
-                    queueItem(610610, "classifier2", "12121212"),
-                    queueItem(312000, "classifier3", "12121212")
-            );
         });
+        // Enqueues all posts with the recordId, since they might inherit this value from common
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   queueItem(870970, "classifier1", "12121212"),
+                   queueItem(300000, "classifier1", "12121212"),
+                   queueItem(610610, "classifier2", "12121212"),
+                   queueItem(312000, "classifier3", "12121212")
+           ));
     }
 
     @Test
@@ -130,12 +128,16 @@ public class BibliographicResourceIT  extends JpaSolrDocStoreIntegrationTester {
         Response response = bean.getResourcesByBibItem(870970, "11111111");
         List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
         assertThat(result, containsInAnyOrder(new BibliographicResourceEntity(870970, "11111111", "hasCoverUrl", true),
-                new BibliographicResourceEntity(870970, "11111111", "hasBackCoverUrl", false),
-                new BibliographicResourceEntity(870970, "11111111", "includesCD", true))
+                                              new BibliographicResourceEntity(870970, "11111111", "hasBackCoverUrl", false),
+                                              new BibliographicResourceEntity(870970, "11111111", "includesCD", true))
         );
     }
 
     private String queueItem(int agency, String classifier, String bibliographicRecordId) {
         return "a," + agency + "-" + classifier + ":" + bibliographicRecordId;
+    }
+
+    private String queueItem(String work) {
+        return "b," + work;
     }
 }

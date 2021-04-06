@@ -81,7 +81,8 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         System.out.println("status = " + status);
-        QueueTestUtil.queueIs(env().getDatasource(), "a,870970-basis:23645564");
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:23645564"));
     }
 
     @Test
@@ -96,7 +97,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         System.out.println("status = " + status);
-        QueueTestUtil.queueIs(env().getDatasource());
+        assertThat(queueContentAndClear(), containsInAnyOrder());
     }
 
 }

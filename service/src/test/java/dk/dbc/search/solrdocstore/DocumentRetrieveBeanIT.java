@@ -56,14 +56,14 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         hold = createHoldingsItemBean(env);
         h2b = createHoldingsToBibliographicBean(env);
         env().getPersistenceContext().run(() -> {
-            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "w:0", "u:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), false);
+            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "work:0", "unit:0", "v0", false, EMPTY, "t0"), Arrays.asList("CBA"), false);
         });
     }
 
     @Test
     public void newCommonRecordWithExistingHoldings() throws Exception {
 
-        em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "w", "u", "v1", false, Collections.EMPTY_MAP, "T1"));
+        em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", "v1", false, Collections.EMPTY_MAP, "T1"));
         em.merge(new HoldingsItemEntity(300101, "12345678", "v2", Collections.EMPTY_LIST, "T2"));
         em.merge(new HoldingsItemEntity(300102, "12345678", "v2", Collections.EMPTY_LIST, "T3"));
         em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
@@ -138,7 +138,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             build(300055).holdings(ON_SHELF);
             build(800055).holdings(ON_SHELF);
             build(710001, "CBA").holdings(ON_SHELF);
-            return bean.getDocumentsForWork("w:0", true);
+            return bean.getDocumentsForWork("work:0", true);
         });
         assertThat(resp, is(not(empty())));
         DocumentRetrieveResponse r = resp.get(0);
@@ -193,7 +193,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         private Build record(Map<String, List<String>> content) throws SQLException {
-            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "w:*", "u:*", "v0", false, content, "t0"), Collections.EMPTY_LIST, false);
+            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "work:1", "unit:1", "v0", false, content, "t0"), Collections.EMPTY_LIST, false);
             return this;
         }
     }

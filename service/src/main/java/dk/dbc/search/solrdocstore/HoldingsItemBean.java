@@ -83,7 +83,7 @@ public class HoldingsItemBean {
 
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
-        h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue, QueueType.HOLDING);
+        h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue, QueueType.HOLDING, QueueType.WORK);
         enqueue.commit();
     }
 

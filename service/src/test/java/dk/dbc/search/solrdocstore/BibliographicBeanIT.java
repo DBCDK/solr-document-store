@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -164,11 +165,21 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         Date now = new Date();
         try (Connection conn = env().getDatasource().getConnection() ;
              Statement statement = conn.createStatement() ;
-             ResultSet resultSet = statement.executeQuery("SELECT dequeueafter FROM queue")) {
+             ResultSet resultSet = statement.executeQuery("SELECT consumer, dequeueafter > now() FROM queue")) {
             while (resultSet.next()) {
-                Timestamp dequeueAfter = resultSet.getTimestamp(1);
-                // Assert delay
-                assertThat(dequeueAfter.after(now), is(true));
+                String consumer = resultSet.getString(1);
+                boolean postponed = resultSet.getBoolean(2);
+                switch (consumer) {
+                    case "a": // Manifestation based (postponed)
+                        assertThat(postponed, is(true));
+                        break;
+                    case "b": // work based (not postponed)
+                        assertThat(postponed, is(false));
+                        break;
+                    default:
+                        fail("Unknown consumer: " + consumer);
+                        break;
+                }
             }
         }
     }
@@ -568,8 +579,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         evictAll();
 
-        long pre = countAndClearQueue();
-        System.out.println("pre = " + pre);
+        assertThat(queueContentAndClear(), empty());
 
         Response r;
         String a870970d = makeBibliographicRequestJson(
@@ -584,17 +594,17 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(false, a870970d));
         assertThat(r.getStatus(), is(200));
 
-        long postDelete = countAndClearQueue();
-        System.out.println("postDelete = " + postDelete);
-        assertThat(postDelete, is(1L));
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-clazzifier:new",
+                   "b,work:0"));
 
         r = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(false, a870970));
         assertThat(r.getStatus(), is(200));
 
-        long postResurrect = countAndClearQueue();
-        System.out.println("postResurrect = " + postResurrect);
-        assertThat(postResurrect, is(1L));
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-clazzifier:new",
+                   "b,work:0"));
     }
 
     @Test(timeout = 20_000L)
@@ -603,8 +613,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         Response r;
 
-        long pre = countAndClearQueue();
-        System.out.println("pre = " + pre);
+        assertThat(queueContentAndClear(), empty());
 
         // live holdings
         env().getPersistenceContext()
@@ -634,36 +643,35 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(true, a870970));
         assertThat(r.getStatus(), is(200));
 
-        long postCreate = countAndClearQueue();
-        System.out.println("postCreate = " + postCreate);
-        assertThat(postCreate, is(1L));
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-clazzifier:new",
+                   "b,work:0"));
 
         // No changes in structire - nothing queued
         r = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(true, a870970));
         assertThat(r.getStatus(), is(200));
 
-        long postUpdate = countAndClearQueue();
-        System.out.println("postUpdate = " + postUpdate);
-        assertThat(postUpdate, is(0L));
+        assertThat(queueContentAndClear(), empty());
 
         // Change in structure
         r = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(true, a700000));
         assertThat(r.getStatus(), is(200));
 
-        long postMovedHoldings = countAndClearQueue();
-        System.out.println("postMovedHoldings = " + postMovedHoldings);
-        assertThat(postMovedHoldings, is(2L));
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,700000-clazzifier:new",
+                   "a,870970-clazzifier:new",
+                   "b,work:0"));
 
         // Delete - change in structure
         r = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(true, a870970d));
         assertThat(r.getStatus(), is(200));
 
-        long postDelete = countAndClearQueue();
-        System.out.println("postDelete = " + postDelete);
-        assertThat(postDelete, is(1L));
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-clazzifier:new",
+                   "b,work:0"));
     }
 
     @Test(timeout = 2_000L)
@@ -704,19 +712,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         em.getEntityManagerFactory().getCache().evictAll();
     }
 
-    private long countAndClearQueue() throws SQLException {
-        long rows = -1;
-        try (Connection connection = env().getDatasource().getConnection() ;
-             Statement stmt = connection.createStatement() ;
-             ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) FROM queue")) {
-            if (resultSet.next()) {
-                rows = resultSet.getLong(1);
-            }
-            stmt.executeUpdate("TRUNCATE QUEUE");
-        }
-        return rows;
-    }
-
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
 
         BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#3", "work:update", "unit:update", "prod:update", deleted, makeIndexKeys(), "track:update");
@@ -751,7 +746,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT", null);
+        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", "v0.1", false, Collections.EMPTY_MAP, "IT", null);
         modifier.accept(entity);
         return jsonbContext.marshall(entity);
     }

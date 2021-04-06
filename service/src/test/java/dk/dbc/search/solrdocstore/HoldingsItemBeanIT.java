@@ -52,25 +52,32 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> {
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
-        assertThat(clearQueue(), contains("870970-basis:25912233=false")); // Not postponed
+        assertThat(clearQueue(), contains( // Not postponed
+                   "870970-basis:25912233=false",
+                   "work:1=false"));
 
         env().getPersistenceContext().run(() -> {
             hol.setHoldingsKeys(jsonRequestHold("710100-25912233"));
         });
-        assertThat(clearQueue(), contains("870970-basis:25912233=false")); // Not postponed
+        assertThat(clearQueue(), contains( // Not postponed
+                   "870970-basis:25912233=false",
+                   "work:1=false"));
 
         hol.enqueueSupplier = new EnqueueSupplierBean() {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {
                 return Arrays.asList(
-                        new QueueRuleEntity("a", QueueType.HOLDING, 100_000));
+                        new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
+                        new QueueRuleEntity("b", QueueType.WORK, 0));
             }
         };
         hol.enqueueSupplier.entityManager = env.getEntityManager();
         env().getPersistenceContext().run(() -> {
             hol.setHoldingsKeys(jsonRequestHold("710100-25912233"));
         });
-        assertThat(clearQueue(), contains("870970-basis:25912233=true")); // Postponed
+        assertThat(clearQueue(), contains(
+                   "870970-basis:25912233=true", // Postponed
+                   "work:1=false")); // Not postponed
     }
 
     private HashSet<String> clearQueue() throws SQLException {

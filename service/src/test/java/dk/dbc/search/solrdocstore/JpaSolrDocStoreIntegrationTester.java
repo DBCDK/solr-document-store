@@ -13,12 +13,19 @@ import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.EntityManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
+
+    private static final Logger log = LoggerFactory.getLogger(JpaSolrDocStoreIntegrationTester.class);
 
     protected static final ObjectMapper O = new ObjectMapper();
 
@@ -51,10 +58,10 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         String postgresqlPort = System.getProperty("postgresql.port");
         if (postgresqlPort != null && postgresqlPort.length() > 1) {
             datasource.setDatabaseName("docstore");
-            datasource.setPortNumbers(new int[]{Integer.parseInt(System.getProperty("postgresql.port", "5432"))});
+            datasource.setPortNumbers(new int[] {Integer.parseInt(System.getProperty("postgresql.port", "5432"))});
         } else {
             datasource.setDatabaseName(System.getProperty("user.name"));
-            datasource.setPortNumbers(new int[]{5432});
+            datasource.setPortNumbers(new int[] {5432});
         }
         datasource.setUser(System.getProperty("user.name"));
         datasource.setPassword(System.getProperty("user.name"));
@@ -143,6 +150,22 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
             JsonNode tree = O.readTree(is);
             return O.writeValueAsString(tree);
         }
+    }
+
+    protected Set<String> queueContentAndClear() {
+        HashSet<String> enqueued = new HashSet<>();
+        try (Connection connection = env().getDatasource().getConnection() ;
+             Statement stmt = connection.createStatement() ;
+             ResultSet resultSet = stmt.executeQuery("DELETE FROM queue RETURNING consumer || ',' || jobid")) {
+            while (resultSet.next()) {
+                enqueued.add(resultSet.getString(1));
+            }
+        } catch (SQLException ex) {
+            log.error("Cannot exec query: {}", ex.getMessage());
+            log.debug("Cannot exec query: ", ex);
+        }
+        log.debug("enqueued = {}", enqueued);
+        return enqueued;
     }
 
 }
