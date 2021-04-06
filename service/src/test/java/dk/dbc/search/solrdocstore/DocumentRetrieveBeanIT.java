@@ -1,11 +1,16 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
-import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.type.TypeReference;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -15,16 +20,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.persistence.EntityManager;
-import org.hamcrest.Matchers;
-
-import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
-import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
-import static org.hamcrest.Matchers.is;
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createBibliographicBean;
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createDocumentRetrieveBean;
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsItemBean;
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsToBibliographicBean;
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.COMMON_AGENCY;
+import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -125,6 +130,24 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .collect(Collectors.toSet());
         assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
+
+    @Test
+    public void getWorkWithHoldings() throws Exception {
+        System.out.println("getWorkWithHoldings");
+        List<DocumentRetrieveResponse> resp = env().getPersistenceContext().run(() -> {
+            build(300055).holdings(ON_SHELF);
+            build(800055).holdings(ON_SHELF);
+            build(710001, "CBA").holdings(ON_SHELF);
+            return bean.getDocumentsForWork("w:0", true);
+        });
+        assertThat(resp, is(not(empty())));
+        DocumentRetrieveResponse r = resp.get(0);
+        Set<String> holdings = r.holdingsItemRecords.stream()
+                .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
+                .collect(Collectors.toSet());
+        assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
+    }
+
 
     private static List<Map<String, List<String>>> indexKeys(String json) {
         try {

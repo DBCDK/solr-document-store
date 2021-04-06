@@ -7,6 +7,7 @@ import org.eclipse.persistence.annotations.Mutable;
 import javax.persistence.Basic;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.NamedAttributeNode;
@@ -163,5 +164,11 @@ public class HoldingsItemEntity implements Serializable {
                     .flatMap(m -> m.getOrDefault("holdingsitem.status", Collections.emptyList()).stream())
                     .anyMatch(s -> !s.equals("Decommissioned"));
         }
+    }
+
+    public static HoldingsItemEntity trimForPresentation(HoldingsItemEntity h, EntityManager em) {
+        em.detach(h);
+        h.indexKeys = null;
+        return h;
     }
 }
