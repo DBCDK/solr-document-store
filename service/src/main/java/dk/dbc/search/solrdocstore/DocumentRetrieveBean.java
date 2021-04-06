@@ -1,12 +1,12 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
-import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
-import dk.dbc.log.LogWith;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
