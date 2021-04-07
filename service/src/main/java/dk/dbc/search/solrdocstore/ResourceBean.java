@@ -78,7 +78,7 @@ public class ResourceBean {
             }
             try {
                 EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
-                bibliographicEntities.forEach(e -> enqueue.add(e, QueueType.RESOURCE));
+                bibliographicEntities.forEach(e -> enqueue.add(e, QueueType.RESOURCE, QueueType.WORKRESOURCE));
                 enqueue.commit();
             } catch (SQLException ex) {
                 log.error("Unable to commit queue entries: {}", ex.getMessage());

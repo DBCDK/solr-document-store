@@ -136,7 +136,7 @@ public class BibliographicBean {
                 // A new record, should not respect the skipQueue flag
                 enqueue = enqueueSupplier.getEnqueueCollector();
             }
-            enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
+            enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
             // Record creates queue even id said not to
@@ -164,9 +164,9 @@ public class BibliographicBean {
                     if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
                         deleteSuperseded(bibliographicEntity.getBibliographicRecordId());
                     }
-                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION_DELETED);
+                    enqueue.add(dbbe, QueueType.MANIFESTATION_DELETED, QueueType.WORK);
                 } else {
-                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
                 }
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
@@ -181,7 +181,7 @@ public class BibliographicBean {
                     h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
                 }
             } else {
-                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
+                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
                 // Simple update
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
             }
@@ -288,22 +288,22 @@ public class BibliographicBean {
                 log.info("Strange: {}:{} has multiple holdings ({}) pointing to it (002/b2b issue?)", agency, recordId, holdingsItems);
             }
             holdingsItems.forEach(holdingsItem ->
-                    addHoldingsToBibliographic(agency, holdingsItem, agency, recordId, enqueue, QueueType.MANIFESTATION)
+                    addHoldingsToBibliographic(agency, holdingsItem, agency, recordId, enqueue, QueueType.MANIFESTATION, QueueType.WORK)
             );
         }
     }
 
-    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, EnqueueCollector enqueue, QueueType enqueueSource) {
-        addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId, enqueue, enqueueSource);
+    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, EnqueueCollector enqueue, QueueType... enqueueSources) {
+        addHoldingsToBibliographic(agency, recordId, holdingsAgency, recordId, enqueue, enqueueSources);
     }
 
-    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId, EnqueueCollector enqueue, QueueType enqueueSource) {
+    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, String bibliographicRecordId, EnqueueCollector enqueue, QueueType... enqueueSources) {
         LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
         boolean isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
         HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                 holdingsAgency, recordId, agency, bibliographicRecordId, isCommonDerived
         );
-        h2bBean.attachToAgency(h2b, enqueue, enqueueSource);
+        h2bBean.attachToAgency(h2b, enqueue, enqueueSources);
     }
 
     private void deleteSuperseded(String bibliographicRecordId) {

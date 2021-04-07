@@ -33,31 +33,31 @@ public class HoldingsToBibliographicBean {
     BibliographicRetrieveBean brBean;
 
     @Timed(reusable = true)
-    public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId, EnqueueCollector enqueue, QueueType enqueueSource) {
+    public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId, EnqueueCollector enqueue, QueueType... enqueueSources) {
         log.info("Update HoldingsToBibliographic for {} {}", hAgencyId, hBibliographicRecordId);
         LibraryType libraryType = openAgency.lookup(hAgencyId).getLibraryType();
 
         switch (libraryType) {
             case NonFBS:
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, false, enqueue, enqueueSource, hAgencyId);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, hBibliographicRecordId, false, enqueue, enqueueSources, hAgencyId);
                 break;
 
             case FBS: {
                 String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
                 boolean isCommonDerived = bibliographicEntityExists(870970, liveBibliographicRecordId);
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, enqueue, enqueueSource, hAgencyId, LibraryType.COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, isCommonDerived, enqueue, enqueueSources, hAgencyId, LibraryType.COMMON_AGENCY);
                 break;
             }
             case FBSSchool: {
                 String liveBibliographicRecordId = findLiveBibliographicRecordId(hBibliographicRecordId);
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, enqueue, enqueueSource, hAgencyId, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
+                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, liveBibliographicRecordId, false, enqueue, enqueueSources, hAgencyId, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
                 break;
             }
         }
     }
 
     @Timed(reusable = true)
-    public void recalcAttachments(String newRecordId, Set<String> supersededRecordIds, EnqueueCollector enqueue, QueueType enqueueSource) {
+    public void recalcAttachments(String newRecordId, Set<String> supersededRecordIds, EnqueueCollector enqueue, QueueType... enqueueSources) {
         Map<Integer, LibraryType> map = new HashMap<>();
 
         for (String supersededRecordId : supersededRecordIds) {
@@ -70,11 +70,11 @@ public class HoldingsToBibliographicBean {
                         break;
                     case FBS: {
                         boolean isCommonDerived = bibliographicEntityExists(870970, newRecordId);
-                        attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, enqueue, enqueueSource, h2b.getBibliographicAgencyId(), LibraryType.COMMON_AGENCY);
+                        attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, isCommonDerived, enqueue, enqueueSources, h2b.getBibliographicAgencyId(), LibraryType.COMMON_AGENCY);
                         break;
                     }
                     case FBSSchool:
-                        attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, enqueue, enqueueSource, h2b.getBibliographicAgencyId(), LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
+                        attachToBibliographicRecord(h2b.getHoldingsAgencyId(), h2b.getHoldingsBibliographicRecordId(), newRecordId, false, enqueue, enqueueSources, h2b.getBibliographicAgencyId(), LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
                         break;
                     default:
                         throw new AssertionError("Enum has unknown value" + libraryType);
@@ -116,7 +116,7 @@ public class HoldingsToBibliographicBean {
         }
     }
 
-    private void attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType enqueueSource, int... bibliographicAgencyPriorities) {
+    private void attachToBibliographicRecord(int holdingsAgencyId, String holdingsBibliographicRecordId, String bibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType[] enqueueSources, int... bibliographicAgencyPriorities) {
         for (int i = 0 ; i < bibliographicAgencyPriorities.length ; i++) {
 
             boolean didAttach = attachIfExists(
@@ -126,17 +126,17 @@ public class HoldingsToBibliographicBean {
                     holdingsBibliographicRecordId,
                     isCommonDerived,
                     enqueue,
-                    enqueueSource);
+                    enqueueSources);
             if (didAttach) {
                 return;
             }
         }
     }
 
-    private boolean attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType enqueueSource) {
+    private boolean attachIfExists(int bibliographicAgencyId, String bibliographicRecordId, int holdingAgencyId, String holdingBibliographicRecordId, boolean isCommonDerived, EnqueueCollector enqueue, QueueType[] enqueueSources) {
         if (bibliographicEntityExists(bibliographicAgencyId, bibliographicRecordId)) {
             HoldingsToBibliographicEntity expectedState = new HoldingsToBibliographicEntity(holdingAgencyId, holdingBibliographicRecordId, bibliographicAgencyId, bibliographicRecordId, isCommonDerived);
-            attachToAgency(expectedState, enqueue, enqueueSource);
+            attachToAgency(expectedState, enqueue, enqueueSources);
             return true;
         }
         return false;
@@ -147,15 +147,15 @@ public class HoldingsToBibliographicBean {
         return e != null && !e.isDeleted();
     }
 
-    public void attachToAgency(HoldingsToBibliographicEntity expectedState, EnqueueCollector enqueue, QueueType enqueueSource) {
+    public void attachToAgency(HoldingsToBibliographicEntity expectedState, EnqueueCollector enqueue, QueueType[] enqueueSources) {
         HoldingsToBibliographicEntity foundEntity = entityManager.find(HoldingsToBibliographicEntity.class, expectedState.asKey());
 
         if (foundEntity != null && !foundEntity.equals(expectedState)) {
             List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(foundEntity.getBibliographicAgencyId(), foundEntity.getBibliographicRecordId());
-            entitiesAffected.forEach(e -> enqueue.add(e, enqueueSource));
+            entitiesAffected.forEach(e -> enqueue.add(e, enqueueSources));
         }
         List<BibliographicEntity> entitiesAffected = brBean.getBibliographicEntities(expectedState.getBibliographicAgencyId(), expectedState.getBibliographicRecordId());
-        entitiesAffected.forEach(e -> enqueue.add(e, enqueueSource));
+        entitiesAffected.forEach(e -> enqueue.add(e, enqueueSources));
         entityManager.merge(expectedState);
     }
 
