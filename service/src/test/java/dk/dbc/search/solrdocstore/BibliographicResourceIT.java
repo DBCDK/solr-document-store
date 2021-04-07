@@ -63,7 +63,8 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(890890, "classifier1", "45454545"),
                    queueItem(890890, "classifier2", "45454545"),
-                   queueItem(890890, "classifier3", "45454545")));
+                   queueItem(890890, "classifier3", "45454545"),
+                   queueItem("work:1")));
     }
 
     @Test
@@ -118,7 +119,8 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(870970, "classifier1", "12121212"),
                    queueItem(300000, "classifier1", "12121212"),
                    queueItem(610610, "classifier2", "12121212"),
-                   queueItem(312000, "classifier3", "12121212")
+                   queueItem(312000, "classifier3", "12121212"),
+                   queueItem("work:1")
            ));
     }
 

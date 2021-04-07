@@ -38,7 +38,8 @@ public enum QueueType {
     FIRSTLASTHOLDING("firstlastholding", JobType.MANIFESTATION),
     RESOURCE("resource", JobType.MANIFESTATION),
     WORK("work", JobType.WORK),
-    WORKFIRSTLASTHOLDING("workfirstlastholding", JobType.WORK);
+    WORKFIRSTLASTHOLDING("workfirstlastholding", JobType.WORK),
+    WORKRESOURCE("workresource", JobType.WORK);
 
     public enum JobType {
         MANIFESTATION,
