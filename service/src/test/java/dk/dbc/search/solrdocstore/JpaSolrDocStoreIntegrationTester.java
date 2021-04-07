@@ -168,4 +168,20 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         return enqueued;
     }
 
+    protected Set<String> queueRemovePostponed() {
+        HashSet<String> enqueued = new HashSet<>();
+        try (Connection connection = env().getDatasource().getConnection() ;
+             Statement stmt = connection.createStatement() ;
+             ResultSet resultSet = stmt.executeQuery("DELETE FROM queue WHERE dequeueafter > NOW() RETURNING consumer || ',' || jobid")) {
+            while (resultSet.next()) {
+                enqueued.add(resultSet.getString(1));
+            }
+        } catch (SQLException ex) {
+            log.error("Cannot exec query: {}", ex.getMessage());
+            log.debug("Cannot exec query: ", ex);
+        }
+        log.debug("enqueued (postponed) = {}", enqueued);
+        return enqueued;
+    }
+
 }

@@ -139,11 +139,11 @@ public class HoldingsItemEntity implements Serializable {
         this.trackingId = trackingId;
     }
 
-    public Boolean getHasLiveHoldings() {
+    public boolean getHasLiveHoldings() {
         return hasLiveHoldings;
     }
 
-    public void setHasLiveHoldings(Boolean hasLiveHoldings) {
+    public void setHasLiveHoldings(boolean hasLiveHoldings) {
         this.hasLiveHoldings = hasLiveHoldings;
     }
 

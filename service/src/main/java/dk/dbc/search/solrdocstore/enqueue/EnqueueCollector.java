@@ -103,7 +103,7 @@ public class EnqueueCollector {
                 .filter(type.asPredicate())
                 .collect(toList());
         if (targets.isEmpty()) {
-            log.info("No queues defined for target: {}", type);
+            log.debug("No queues defined for target: {}", type);
             return new EnqueueTargetNull();
         }
         return new EnqueueTargetCollector(connection, targets);

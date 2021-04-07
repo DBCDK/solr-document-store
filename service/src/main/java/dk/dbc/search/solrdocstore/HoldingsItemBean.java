@@ -51,7 +51,7 @@ public class HoldingsItemBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed(reusable = true)
-    public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException  {
+    public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         if (hi.getTrackingId() == null)
@@ -81,9 +81,22 @@ public class HoldingsItemBean {
     public void setHoldingsKeys(HoldingsItemEntity hi) throws SQLException {
         EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
 
+        List<HoldingsItemEntity> his = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", HoldingsItemEntity.class)
+                .setParameter("agency", hi.getAgencyId())
+                .setParameter("bibId", hi.getBibliographicRecordId())
+                .getResultList();
+        boolean hadLiveHoldings = !his.isEmpty() && his.get(0).getHasLiveHoldings();
+        boolean hasLiveHoldings = hi.getHasLiveHoldings();
+
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
-        h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue, QueueType.HOLDING, QueueType.WORK);
+        if (hadLiveHoldings == hasLiveHoldings) {
+            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
+                                                     QueueType.HOLDING, QueueType.WORK);
+        } else {
+            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
+                                                     QueueType.HOLDING, QueueType.WORK, QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+        }
         enqueue.commit();
     }
 
