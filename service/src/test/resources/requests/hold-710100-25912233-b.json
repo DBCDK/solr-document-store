@@ -3,5 +3,9 @@
     "bibliographicRecordId": "25912233",
     "producerVersion": "any",
     "indexKeys": [
+        {
+            "holdingsitem.brandhId": ["123456"],
+            "holdingsitem.status": ["OnLoan"]
+        }
     ]
 }

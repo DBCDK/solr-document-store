@@ -369,7 +369,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) throws SQLException {
-        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Collections.EMPTY_LIST, "IT");
+        // Dummy holding - ensure enqueue from non existing to this
+        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Arrays.asList(Collections.EMPTY_MAP), "IT");
         holdingsItemBean.setHoldingsKeys(e);
         return e;
     }

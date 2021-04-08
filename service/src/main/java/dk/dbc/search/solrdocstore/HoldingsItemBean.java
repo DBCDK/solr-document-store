@@ -25,9 +25,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static dk.dbc.log.LogWith.track;
+import static java.util.Collections.EMPTY_SET;
 
 @Stateless
 @Path("holdings")
@@ -87,15 +89,24 @@ public class HoldingsItemBean {
                 .getResultList();
         boolean hadLiveHoldings = !his.isEmpty() && his.get(0).getHasLiveHoldings();
         boolean hasLiveHoldings = hi.getHasLiveHoldings();
+        Set<String> oldLocations = his.isEmpty() ? EMPTY_SET : his.get(0).getLocations();
 
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         entityManager.merge(hi);
-        if (hadLiveHoldings == hasLiveHoldings) {
+        if (!hadLiveHoldings && !hasLiveHoldings) { // No holdings before or now
+            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue);
+        } else if (hadLiveHoldings != hasLiveHoldings) { // holdings existance change
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
-                                                     QueueType.HOLDING, QueueType.WORK);
+                                                     QueueType.HOLDING, QueueType.WORK,
+                                                     QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                                     QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+        } else if (!oldLocations.equals(hi.getLocations())) { // holdings accessability change
+            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
+                                                     QueueType.HOLDING, QueueType.WORK,
+                                                     QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
         } else {
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
-                                                     QueueType.HOLDING, QueueType.WORK, QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+                                                     QueueType.HOLDING, QueueType.WORK);
         }
         enqueue.commit();
     }

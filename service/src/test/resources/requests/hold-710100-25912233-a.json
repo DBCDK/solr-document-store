@@ -4,6 +4,7 @@
     "producerVersion": "any",
     "indexKeys": [
         {
+            "holdingsitem.brandhId": ["123456"],
             "holdingsitem.status": ["OnShelf"]
         }
     ]

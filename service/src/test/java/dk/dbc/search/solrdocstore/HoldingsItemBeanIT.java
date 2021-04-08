@@ -59,7 +59,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:1"));
 
         env().getPersistenceContext().run(() -> {
-            holWithoutDelay.setHoldingsKeys(jsonRequestHold("710100-25912233"));
+            holWithoutDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
         });
         assertThat(queueRemovePostponed(), empty());
         assertThat(queueContentAndClear(), containsInAnyOrder(
@@ -67,7 +67,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:1"));
 
         env().getPersistenceContext().run(() -> {
-            holWithDelay.setHoldingsKeys(jsonRequestHold("710100-25912233"));
+            holWithDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
         });
         assertThat(queueRemovePostponed(), containsInAnyOrder(
                    "a,870970-basis:25912233")); // Postponed
@@ -116,6 +116,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:1"));
     }
 
+
+    @Test(timeout = 2_000L)
     public void testFirstLastNoneToNone() throws Exception {
         System.out.println("testFirstLastNoneToNone");
 
@@ -145,6 +147,46 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), empty());
     }
+
+        @Test(timeout = 2_000L)
+    public void testMajorHoldingsChange() throws Exception {
+        System.out.println("testMajorHoldingsChange");
+
+        JpaTestEnvironment env = env();
+
+        BibliographicBean bib = createBibliographicBean(env);
+        HoldingsItemBean hol = holdingsItemBeanWithRules(
+                env,
+                new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("fw", QueueType.WORKFIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
+                new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
+
+        env().getPersistenceContext().run(() -> {
+            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
+        });
+
+        queueContentAndClear();
+
+        // From non existing to OnShelf
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "fm,870970-basis:25912233",
+                   "fw,work:1",
+                   "mm,870970-basis:25912233",
+                   "mw,work:1"));
+
+        // From OnShelf to OnLoan
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "mm,870970-basis:25912233",
+                   "mw,work:1"));
+    }
+
 
     private static HoldingsItemBean holdingsItemBeanWithRules(JpaTestEnvironment env, QueueRuleEntity... rules) {
         HoldingsItemBean hol = createHoldingsItemBean(env);
