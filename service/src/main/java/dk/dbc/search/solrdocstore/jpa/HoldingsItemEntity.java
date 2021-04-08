@@ -1,7 +1,6 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import java.io.Serializable;
-import java.util.Collections;
 import org.eclipse.persistence.annotations.Mutable;
 
 import javax.persistence.Basic;
@@ -14,9 +13,14 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.toSet;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
@@ -29,6 +33,7 @@ public class HoldingsItemEntity implements Serializable {
     private static final long serialVersionUID = 2469572172167117328L;
 
     public HoldingsItemEntity() {
+        this.hasLiveHoldings = false;
     }
 
     @Id
@@ -72,39 +77,20 @@ public class HoldingsItemEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 41 * hash + this.agencyId;
-        hash = 41 * hash + Objects.hashCode(this.bibliographicRecordId);
-        hash = 41 * hash + Objects.hashCode(this.producerVersion);
-        hash = 41 * hash + Objects.hashCode(this.trackingId);
-        return hash;
+        return Objects.hash(3, agencyId, bibliographicRecordId, trackingId, indexKeys);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null || getClass() != obj.getClass())
             return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
         final HoldingsItemEntity other = (HoldingsItemEntity) obj;
-        if (this.agencyId != other.agencyId) {
-            return false;
-        }
-        if (!Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId)) {
-            return false;
-        }
-        if (!Objects.equals(this.producerVersion, other.producerVersion)) {
-            return false;
-        }
-        if (!Objects.equals(this.trackingId, other.trackingId)) {
-            return false;
-        }
-        return true;
+        return this.agencyId == other.agencyId &&
+               Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId) &&
+               Objects.equals(this.trackingId, other.trackingId) &&
+               Objects.equals(this.indexKeys, other.indexKeys);
     }
 
     public int getAgencyId() {
@@ -139,6 +125,14 @@ public class HoldingsItemEntity implements Serializable {
         this.trackingId = trackingId;
     }
 
+    /**
+     * Explain if any holdings are present for this agency
+     * <p>
+     * Decommissioned is no longer in index-keys, so presence of any holdings
+     * constitutes a live holding
+     *
+     * @return true/false
+     */
     public boolean getHasLiveHoldings() {
         return hasLiveHoldings;
     }
@@ -156,14 +150,40 @@ public class HoldingsItemEntity implements Serializable {
         this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
     }
 
-    private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
+    public Set<String> getLocations() {
         if (indexKeys == null) {
-            return false;
-        } else {
-            return indexKeys.stream()
-                    .flatMap(m -> m.getOrDefault("holdingsitem.status", Collections.emptyList()).stream())
-                    .anyMatch(s -> !s.equals("Decommissioned"));
+            return EMPTY_SET;
         }
+        return indexKeys.stream()
+                .flatMap(holding -> {
+                    return holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
+                            .stream()
+                            .map(status -> status.toLowerCase(Locale.ROOT))
+                            .flatMap(status -> {
+                                switch (status) {
+                                    case "online":
+                                        return Stream.of(agencyId + "-online");
+                                    case "onshelf":
+                                    case "notforloan":
+                                        return Stream.concat(
+                                                Stream.of(agencyId + "-" + status),
+                                                holding.getOrDefault("holdingsitem.branchId", (List<String>) EMPTY_LIST)
+                                                        .stream()
+                                                        .map((String branchId) -> agencyId + "-" + branchId + "-" + status));
+                                    default:
+                                        return Stream.empty();
+                                }
+                            });
+                })
+                .collect(toSet());
+    }
+
+    public void setLocations(Set<String> locations) {
+        throw new IllegalStateException("Cannot set locations on holdings - synthetic field");
+    }
+
+    private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
+        return indexKeys != null && !indexKeys.isEmpty();
     }
 
     public static HoldingsItemEntity trimForPresentation(HoldingsItemEntity h, EntityManager em) {
