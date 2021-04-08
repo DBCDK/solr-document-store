@@ -36,9 +36,11 @@ public enum QueueType {
     MANIFESTATION_DELETED("manifestation_deleted", JobType.MANIFESTATION),
     HOLDING("holding", JobType.MANIFESTATION),
     FIRSTLASTHOLDING("firstlastholding", JobType.MANIFESTATION),
+    MAJORHOLDING("majorholding", JobType.MANIFESTATION),
     RESOURCE("resource", JobType.MANIFESTATION),
     WORK("work", JobType.WORK),
     WORKFIRSTLASTHOLDING("workfirstlastholding", JobType.WORK),
+    WORKMAJORHOLDING("workmajorholding", JobType.WORK),
     WORKRESOURCE("workresource", JobType.WORK);
 
     public enum JobType {
