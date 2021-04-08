@@ -136,7 +136,10 @@ public class BibliographicBean {
                 // A new record, should not respect the skipQueue flag
                 enqueue = enqueueSupplier.getEnqueueCollector();
             }
-            enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+            // Going from non existing to deleted shouldn't result in queue jobs
+            if (!bibliographicEntity.isDeleted()) {
+                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+            }
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
             // Record creates queue even id said not to
