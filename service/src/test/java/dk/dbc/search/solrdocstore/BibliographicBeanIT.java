@@ -146,10 +146,17 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", null, null, "prod:update", true, makeIndexKeys(), "track:update");
         String updatedD = jsonbContext.marshall(d);
 
-        Response rd = env().getPersistenceContext()
+        Response rd1 = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(false, updatedD)
                 );
-        assertThat(rd.getStatus(), is(200));
+        assertThat(rd1.getStatus(), is(200));
+
+        // resend deleted record:
+        Response rd2 = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(false, updatedD)
+                );
+        assertThat(rd2.getStatus(), is(200));
+
     }
 
     @Test
