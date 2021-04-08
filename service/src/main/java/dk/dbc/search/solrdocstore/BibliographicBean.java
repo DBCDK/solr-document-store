@@ -181,7 +181,7 @@ public class BibliographicBean {
                     h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
                 }
             } else {
-                // Going fro deleted to deleted shouldn't result in queue jobs
+                // Going from deleted to deleted shouldn't result in queue jobs
                 if (!bibliographicEntity.isDeleted()) {
                     enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
                 }
