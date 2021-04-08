@@ -20,15 +20,9 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import javax.sql.DataSource;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
@@ -46,52 +40,163 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("enqueueWhenHoldingsItemSet");
         JpaTestEnvironment env = env();
 
-        HoldingsItemBean hol = createHoldingsItemBean(env);
         BibliographicBean bib = createBibliographicBean(env);
+        HoldingsItemBean holWithoutDelay = holdingsItemBeanWithRules(
+                env,
+                new QueueRuleEntity("a", QueueType.HOLDING, 0),
+                new QueueRuleEntity("b", QueueType.WORK, 0));
+        HoldingsItemBean holWithDelay = holdingsItemBeanWithRules(
+                env,
+                new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
+                new QueueRuleEntity("b", QueueType.WORK, 0));
 
         env().getPersistenceContext().run(() -> {
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
-        assertThat(clearQueue(), contains( // Not postponed
-                   "870970-basis:25912233=false",
-                   "work:1=false"));
+        assertThat(queueRemovePostponed(), empty());
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", // Not postponed
+                   "b,work:1"));
 
         env().getPersistenceContext().run(() -> {
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233"));
+            holWithoutDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
         });
-        assertThat(clearQueue(), contains( // Not postponed
-                   "870970-basis:25912233=false",
-                   "work:1=false"));
+        assertThat(queueRemovePostponed(), empty());
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", // Not postponed
+                   "b,work:1"));
 
+        env().getPersistenceContext().run(() -> {
+            holWithDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
+        });
+        assertThat(queueRemovePostponed(), containsInAnyOrder(
+                   "a,870970-basis:25912233")); // Postponed
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "b,work:1")); // Not postponed
+    }
+
+    @Test(timeout = 2_000L)
+    public void testFirstLast() throws Exception {
+        System.out.println("testFirstLast");
+
+        JpaTestEnvironment env = env();
+
+        BibliographicBean bib = createBibliographicBean(env);
+        HoldingsItemBean hol = holdingsItemBeanWithRules(
+                env,
+                new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("b", QueueType.WORKFIRSTLASTHOLDING, 0));
+
+        env().getPersistenceContext().run(() -> {
+            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
+        });
+
+        queueContentAndClear();
+
+        // From non existing to live holdings
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233",
+                   "b,work:1"));
+
+        // From live holdings to live holdings
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+        });
+        assertThat(queueContentAndClear(), empty());
+
+        // From live holdings to no holdings
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233",
+                   "b,work:1"));
+    }
+
+
+    @Test(timeout = 2_000L)
+    public void testFirstLastNoneToNone() throws Exception {
+        System.out.println("testFirstLastNoneToNone");
+
+        JpaTestEnvironment env = env();
+
+        BibliographicBean bib = createBibliographicBean(env);
+        HoldingsItemBean hol = holdingsItemBeanWithRules(
+                env,
+                new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("b", QueueType.WORKFIRSTLASTHOLDING, 0));
+
+        env().getPersistenceContext().run(() -> {
+            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
+        });
+
+        queueContentAndClear();
+
+        // From non existing to no holdings
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
+        });
+        assertThat(queueContentAndClear(), empty());
+
+        // From no holdings to no holdings
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
+        });
+        assertThat(queueContentAndClear(), empty());
+    }
+
+        @Test(timeout = 2_000L)
+    public void testMajorHoldingsChange() throws Exception {
+        System.out.println("testMajorHoldingsChange");
+
+        JpaTestEnvironment env = env();
+
+        BibliographicBean bib = createBibliographicBean(env);
+        HoldingsItemBean hol = holdingsItemBeanWithRules(
+                env,
+                new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("fw", QueueType.WORKFIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
+                new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
+
+        env().getPersistenceContext().run(() -> {
+            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
+        });
+
+        queueContentAndClear();
+
+        // From non existing to OnShelf
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "fm,870970-basis:25912233",
+                   "fw,work:1",
+                   "mm,870970-basis:25912233",
+                   "mw,work:1"));
+
+        // From OnShelf to OnLoan
+        env().getPersistenceContext().run(() -> {
+            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "mm,870970-basis:25912233",
+                   "mw,work:1"));
+    }
+
+
+    private static HoldingsItemBean holdingsItemBeanWithRules(JpaTestEnvironment env, QueueRuleEntity... rules) {
+        HoldingsItemBean hol = createHoldingsItemBean(env);
         hol.enqueueSupplier = new EnqueueSupplierBean() {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {
-                return Arrays.asList(
-                        new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
-                        new QueueRuleEntity("b", QueueType.WORK, 0));
+                return Arrays.asList(rules);
             }
         };
         hol.enqueueSupplier.entityManager = env.getEntityManager();
-        env().getPersistenceContext().run(() -> {
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233"));
-        });
-        assertThat(clearQueue(), contains(
-                   "870970-basis:25912233=true", // Postponed
-                   "work:1=false")); // Not postponed
-    }
-
-    private HashSet<String> clearQueue() throws SQLException {
-        HashSet<String> ret = new HashSet<>();
-        DataSource dataSource = this.env().getDatasource();
-        try (Connection connection = dataSource.getConnection() ;
-             Statement stmt = connection.createStatement() ;
-             ResultSet resultSet = stmt.executeQuery("DELETE FROM queue RETURNING jobid, dequeueAfter > now() AS postponed")) {
-            while (resultSet.next()) {
-                String jobid = resultSet.getString(1);
-                boolean postponed = resultSet.getBoolean(2);
-                ret.add(jobid + "=" + postponed);
-            }
-            return ret;
-        }
+        return hol;
     }
 }
