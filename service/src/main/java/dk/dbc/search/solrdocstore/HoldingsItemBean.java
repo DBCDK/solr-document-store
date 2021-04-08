@@ -95,12 +95,12 @@ public class HoldingsItemBean {
         entityManager.merge(hi);
         if (!hadLiveHoldings && !hasLiveHoldings) { // No holdings before or now
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue);
-        } else if (hadLiveHoldings != hasLiveHoldings) { // holdings existance change
+        } else if (hadLiveHoldings != hasLiveHoldings) { // holdings existence change
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
                                                      QueueType.HOLDING, QueueType.WORK,
                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
                                                      QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
-        } else if (!oldLocations.equals(hi.getLocations())) { // holdings accessability change
+        } else if (!oldLocations.equals(hi.getLocations())) { // holdings accessibility change
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
                                                      QueueType.HOLDING, QueueType.WORK,
                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
