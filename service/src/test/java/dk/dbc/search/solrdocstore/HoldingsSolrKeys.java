@@ -13,9 +13,9 @@ import java.util.Map;
 public class HoldingsSolrKeys {
 
     private static final ObjectMapper O = new ObjectMapper();
-    public static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"Decommissioned\"]}]");
+    public static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[]");
     public static final List<Map<String, List<String>>> ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
-    public static final List<Map<String, List<String>>> ON_SHELF_AND_DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\", \"Decommissioned\"]}]");
+    public static final List<Map<String, List<String>>> ON_SHELF_AND_DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
 
     private static List<Map<String, List<String>>> indexKeys(String json) {
         try {

@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.not;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    private static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"Decommissioned\"]}]");
+    private static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[]");
     private static final List<Map<String, List<String>>> ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
     private static final Map<String, List<String>> EXCLUDE = indexKeysB("{\"rec.excludeFromUnionCatalogue\":[\"true\"]}");
     private static final Map<String, List<String>> NOTEXCLUDE = indexKeysB("{\"rec.excludeFromUnionCatalogue\":[\"false\"]}");

@@ -116,7 +116,6 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:1"));
     }
 
-    @Test(timeout = 2_000L)
     public void testFirstLastNoneToNone() throws Exception {
         System.out.println("testFirstLastNoneToNone");
 
