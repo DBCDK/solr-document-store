@@ -601,9 +601,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(false, a870970d));
         assertThat(r.getStatus(), is(200));
 
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-clazzifier:new",
-                   "b,work:0"));
+        assertThat(queueContentAndClear(), empty()); // From non-existing -> deleted
 
         r = env().getPersistenceContext()
                 .run(() -> bean.addBibliographicKeys(false, a870970));
