@@ -153,7 +153,7 @@ public class BibliographicBean {
             }
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
-                if(!queueAll) {
+                if (!queueAll) {
                     // The record, changed delete status - should not respect the skipQueue flag
                     enqueue = enqueueSupplier.getEnqueueCollector();
                 }
@@ -181,7 +181,11 @@ public class BibliographicBean {
                     h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getHoldingsBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
                 }
             } else {
-                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+                if (bibliographicEntity.isDeleted()) {
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION);
+                } else {
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+                }
                 // Simple update
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
             }
