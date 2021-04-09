@@ -47,7 +47,6 @@ describe("Related resource reducer unit tests", () => {
     let item = {
       bibliographicRecordId: "4321",
       agencyId: "1234",
-      producerVersion: "1990",
       deleted: false,
       trackingId: "ag:10"
     };

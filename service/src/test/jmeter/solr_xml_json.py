@@ -35,7 +35,6 @@ output = {
     "bibliographicRecordId": "1234",
     "work": "work:1",
     "unit": "unit:2",
-    "producerVersion": "1234",
     "deleted": False,
     "indexKeys": keys,
     "trackingId": ""

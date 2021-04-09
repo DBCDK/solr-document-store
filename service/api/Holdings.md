@@ -8,7 +8,6 @@ Endpoint for updating holdings-items records.
 
 * `agencyId`: (integer) containing the official library-number
 * `bibliographicRecordId`: (string) the record identifier
-* `producerVersion`: (string) identifying the JavaScript version
 * `indexKeys`: (list-of-map-of-string-to-list-of-strings)
   The list entries represents different holdings for this agencyId/bibliographicRecordId combination
   The map contains SolR index values

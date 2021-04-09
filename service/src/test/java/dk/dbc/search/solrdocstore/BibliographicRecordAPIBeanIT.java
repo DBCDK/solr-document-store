@@ -83,7 +83,7 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         BibliographicFrontendResponse res = (BibliographicFrontendResponse) result.getEntity();
         Map<String, List<String>> map = new HashMap<>();
         map.put("rec.repositoryId", Collections.singletonList("p-o"));
-        BibliographicEntity b = new BibliographicEntity(103862, "clazzifier", "page-order", "p-o", "work:2", "unit:6", "producer:3", false, map, "track:8");
+        BibliographicEntity b = new BibliographicEntity(103862, "clazzifier", "page-order", "p-o", "work:2", "unit:6", false, map, "track:8");
         Assert.assertEquals(res, new BibliographicFrontendResponse(b, "0639423"));
     }
 
@@ -122,23 +122,12 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
     @Test
     public void testAgencyIdOrderingBibliographicRecordId() {
         String bibliographicRecordId = "page-order";
-        // Sort by producerVersion in descending order
+        // Sort by agencyId in descending order
         List<Integer> result = getColumnOfBib(bibliographicRecordId, "agencyId", false, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(103862, 207130, 305421, 401685, 504758, 602306, 706244, 808077));
-        // Sort by producerVersion in ascending order
+        // Sort by agencyId in ascending order
         result = getColumnOfBib(bibliographicRecordId, "agencyId", true, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(808077, 706244, 602306, 504758, 401685, 305421, 207130, 103862));
-    }
-
-    @Test
-    public void testProducerVersionOrderingBibliographicRecordId() {
-        String bibliographicRecordId = "page-order";
-        // Sort by agencyId in descending order
-        List<String> result = getColumnOfBib(bibliographicRecordId, "producerVersion", false, bibItem -> bibItem.getProducerVersion());
-        assertEquals(result, Arrays.asList("producer:1", "producer:2", "producer:3", "producer:4", "producer:5", "producer:6", "producer:7", "producer:8"));
-        // Sort by agencyId in ascending order
-        result = getColumnOfBib(bibliographicRecordId, "producerVersion", true, bibItem -> bibItem.getProducerVersion());
-        assertEquals(result, Arrays.asList("producer:8", "producer:7", "producer:6", "producer:5", "producer:4", "producer:3", "producer:2", "producer:1"));
     }
 
     @Test
@@ -163,23 +152,12 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
     @Test
     public void testAgencyIdOrderingRepositoryId() throws JsonProcessingException {
         String repositoryId = "p-o";
-        // Sort by producerVersion in descending order
+        // Sort by bibliographicRecordId in descending order
         List<Integer> result = getColumnOfRepo(repositoryId, "agencyId", false, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(103862, 207130, 305421, 401685, 504758, 602306, 706244, 808077));
-        // Sort by producerVersion in ascending order
+        // Sort by bibliographicRecordId in ascending order
         result = getColumnOfRepo(repositoryId, "agencyId", true, bibItem -> bibItem.getAgencyId());
         assertEquals(result, Arrays.asList(808077, 706244, 602306, 504758, 401685, 305421, 207130, 103862));
-    }
-
-    @Test
-    public void testProducerVersionOrderingRepositoryId() throws JsonProcessingException {
-        String repositoryId = "p-o";
-        // Sort by agencyId in descending order
-        List<String> result = getColumnOfRepo(repositoryId, "producerVersion", false, bibItem -> bibItem.getProducerVersion());
-        assertEquals(result, Arrays.asList("producer:1", "producer:2", "producer:3", "producer:4", "producer:5", "producer:6", "producer:7", "producer:8"));
-        // Sort by agencyId in ascending order
-        result = getColumnOfRepo(repositoryId, "producerVersion", true, bibItem -> bibItem.getProducerVersion());
-        assertEquals(result, Arrays.asList("producer:8", "producer:7", "producer:6", "producer:5", "producer:4", "producer:3", "producer:2", "producer:1"));
     }
 
     @Test
@@ -235,7 +213,7 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
     }
 
     private BibliographicEntity createBibliographicEntity(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", false, Collections.EMPTY_MAP, "IT");
         em.persist(b);
         return b;
     }
@@ -246,9 +224,8 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         Map<String, List<String>> keyMap = new HashMap<>();
         keyMap.put("def", keys);
         indexKeys.add(keyMap);
-        String producerVersion = "1";
         String trackingId = "1234";
-        HoldingsItemEntity e = new HoldingsItemEntity(agencyId, bibliographicRecordId, producerVersion, indexKeys, trackingId);
+        HoldingsItemEntity e = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, trackingId);
         em.persist(e);
         return e;
     }

@@ -30,7 +30,7 @@ public class HoldingsItemEntityIT extends JpaSolrDocStoreIntegrationTester {
             doc2.put("titel", Collections.singletonList("unix bogen"));
             doc2.put("id", Collections.singletonList("argle"));
             doc2.put("dyr", Collections.singletonList("hest"));
-            em.persist(new HoldingsItemEntity(200, "1234", "v0.1", Arrays.asList(doc1, doc2), ""));
+            em.persist(new HoldingsItemEntity(200, "1234", Arrays.asList(doc1, doc2), ""));
         });
 
         Object key = new AgencyItemKey(200, "1234");
@@ -52,7 +52,6 @@ public class HoldingsItemEntityIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(be.getAgencyId(), is(300));
         assertThat(be.getBibliographicRecordId(), is("4321"));
 
-        assertThat(be.getProducerVersion(), is("revision"));
         ArrayList<Map<String, List<String>>> expected = new ArrayList<>();
 
         Map<String, List<String>> doc1 = new HashMap<>();

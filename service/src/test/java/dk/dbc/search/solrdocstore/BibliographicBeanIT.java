@@ -113,7 +113,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void updateExistingBibliographicPost() throws JSONBException {
-        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#1", "work:update", "unit:update", "prod:update", false, makeIndexKeys(), "track:update");
+        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#1", "work:update", "unit:update", false, makeIndexKeys(), "track:update");
         String updatedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
@@ -135,7 +135,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void updateExistingBibliographicPostToDeleted() throws JSONBException {
-        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", "work:update", "unit:update", "prod:update", false, makeIndexKeys(), "track:update");
+        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", "work:update", "unit:update", false, makeIndexKeys(), "track:update");
         String updatedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
@@ -143,7 +143,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 );
         assertThat(r.getStatus(), is(200));
 
-        BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", null, null, "prod:update", true, makeIndexKeys(), "track:update");
+        BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", null, null, true, makeIndexKeys(), "track:update");
         String updatedD = jsonbContext.marshall(d);
 
         Response rd1 = env().getPersistenceContext()
@@ -161,7 +161,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void updateExistingBibliographicPostToDeletedIsDelayed() throws JSONBException, SQLException {
-        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "delay", "id#2", "work:delay", "unit:delay", "prod:delay", true, makeIndexKeys(), "track:delay");
+        BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "delay", "id#2", "work:delay", "unit:delay", true, makeIndexKeys(), "track:delay");
         String updatedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
@@ -169,7 +169,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 );
         assertThat(r.getStatus(), is(200));
         // Record what time the bib entity was queued
-        Date now = new Date();
         try (Connection conn = env().getDatasource().getConnection() ;
              Statement statement = conn.createStatement() ;
              ResultSet resultSet = statement.executeQuery("SELECT consumer, dequeueafter > now() FROM queue")) {
@@ -515,7 +514,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Setup holding pointint to 870970:a
         env().getPersistenceContext()
                 .run(() -> {
-                    em.persist(new HoldingsItemEntity(700000, "a", "V1", Collections.EMPTY_LIST, "T#1"));
+                    em.persist(new HoldingsItemEntity(700000, "a", Collections.EMPTY_LIST, "T#1"));
                 });
         env().getPersistenceContext()
                 .run(() -> {
@@ -623,7 +622,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // live holdings
         env().getPersistenceContext()
                 .run(() -> env().getEntityManager().merge(
-                        new HoldingsItemEntity(700000, "new", "any",
+                        new HoldingsItemEntity(700000, "new",
                                                new ArrayList<Map<String, List<String>>>() {
                                            {
                                                add(new HashMap<String, List<String>>() {
@@ -683,7 +682,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testOverwriteWithOlder() throws Exception {
         System.out.println("testOverwriteWithOlder");
 
-        BibliographicEntity bYoung = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", "prod:v0", true, makeIndexKeys("rec.fedoraStreamDate=2019-12-31T23:59:59Z"), "track:too-old");
+        BibliographicEntity bYoung = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", true, makeIndexKeys("rec.fedoraStreamDate=2019-12-31T23:59:59Z"), "track:too-old");
         String updatedYoung = jsonbContext.marshall(bYoung);
 
         Response rYoung = env().getPersistenceContext()
@@ -696,7 +695,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 );
         assertThat(rYoungAgain.getStatus(), is(200));
 
-        BibliographicEntity bOld = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", "prod:v0", true, makeIndexKeys("rec.fedoraStreamDate=2019-01-01T00:00:00Z"), "track:too-old");
+        BibliographicEntity bOld = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", true, makeIndexKeys("rec.fedoraStreamDate=2019-01-01T00:00:00Z"), "track:too-old");
         String updatedOld = jsonbContext.marshall(bOld);
 
         Response rOld = env().getPersistenceContext()
@@ -719,7 +718,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
 
-        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#3", "work:update", "unit:update", "prod:update", deleted, makeIndexKeys(), "track:update");
+        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#3", "work:update", "unit:update", deleted, makeIndexKeys(), "track:update");
         String deletedB = jsonbContext.marshall(b);
 
         Response r = env().getPersistenceContext()
@@ -751,7 +750,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", "v0.1", false, Collections.EMPTY_MAP, "IT", null);
+        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", false, Collections.EMPTY_MAP, "IT", null);
         modifier.accept(entity);
         return jsonbContext.marshall(entity);
     }

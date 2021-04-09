@@ -8,7 +8,7 @@ public class BibliographicFrontendResponse extends BibliographicEntity {
     private String supersedeId;
 
     BibliographicFrontendResponse(BibliographicEntity b, String liveId) {
-        super(b.getAgencyId(), b.getClassifier(), b.getBibliographicRecordId(), b.getRepositoryId(), b.getWork(), b.getUnit(), b.getProducerVersion(), b.isDeleted(), b.getIndexKeys(), b.getTrackingId());
+        super(b.getAgencyId(), b.getClassifier(), b.getBibliographicRecordId(), b.getRepositoryId(), b.getWork(), b.getUnit(), b.isDeleted(), b.getIndexKeys(), b.getTrackingId());
         supersedeId = liveId;
     }
 

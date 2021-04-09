@@ -367,8 +367,7 @@
                 "830370-katalog:112284389",
                 "830370-katalog:112284389-830370-katalog"
             ]
-        },
-        "producerVersion": "xxx"
+        }
     },
     "holdingsItemRecords": [
         {
@@ -410,7 +409,6 @@
                     "holdingsitem.accessionDate": [ "2020-02-25T00:00:00.000Z" ],
                     "holdingsitem.circulationRule": [ "0 dage" ],
                     "holdingsitem.bibliographicRecordId": [ "49435169" ] } ],
-            "producerVersion": "holdings-items-solr-indexer:1.1.4-SNAPSHOT#e2620cb4c5892b41449cc6bdf8deed479ba4e862",
             "trackingId": "eca0ba07-5376-4cc1-8877-a8201db37d23" }
     ]
 }

@@ -12,7 +12,6 @@ Endpoint for updating bibliographic records.
 * `repositoryId`: (string) the identifier of the generating record
 * `work`: (string) the work identifier
 * `unit`: (string) the unit identifier
-* `producerVersion`: (string) identifies the JavaScript version
 * `deleted`: (boolean) whether the record is deleted
 * `indexKeys`: (map-of-string-to-list-of-strings, optional)
   If `deleted` is **false** then this key is required

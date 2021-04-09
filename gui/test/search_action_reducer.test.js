@@ -71,8 +71,7 @@ describe("Search actions", () => {
       agencyId: "794591",
       indexKeys: {
         "rec.reposityoryId": ["6747565-basis:2347623"]
-      },
-      producerVersion: "8358923"
+      }
     };
     let desiredAction = {
       type: actions.SEARCH_BIB_ITEM_SUCCESS,
@@ -228,8 +227,7 @@ describe("Search reducer", () => {
       agencyId: "203910",
       indexKeys: {
         "rec.reposityoryId": ["23952332-basis:203910"]
-      },
-      producerVersion: "673946sdj"
+      }
     };
     let desiredState = produceInitialState();
     desiredState.searchResults = [desiredBibItem];

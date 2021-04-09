@@ -358,7 +358,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed) throws SQLException {
         List<String> superseedList = superseed.orElse(Collections.emptyList());
-        BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "work:0", "unit:0", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "work:0", "unit:0", false, Collections.EMPTY_MAP, "IT");
         bibliographicBean.addBibliographicKeys(e, superseedList, true);
         return e;
     }
@@ -370,7 +370,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) throws SQLException {
         // Dummy holding - ensure enqueue from non existing to this
-        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, "v0.1", Arrays.asList(Collections.EMPTY_MAP), "IT");
+        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, Arrays.asList(Collections.EMPTY_MAP), "IT");
         holdingsItemBean.setHoldingsKeys(e);
         return e;
     }
@@ -405,11 +405,6 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         public BibliographicEntityBuilder withTrackingId(String trackingId) {
             setTrackingId(trackingId);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withProducerVersion(String producerVersion) {
-            setProducerVersion(producerVersion);
             return this;
         }
 

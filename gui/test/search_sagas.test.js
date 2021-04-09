@@ -29,7 +29,6 @@ let testSearchResponse = {
       bibliographicRecordId: "4321",
       agencyId: "870970",
       trackingId: "367290634",
-      producerVersion: "283572395",
       deleted: false
     }
   ],

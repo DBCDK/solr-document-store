@@ -53,9 +53,9 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
-            em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
-            em.merge(new BibliographicEntity(890890, "classifier2", "45454545", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
-            em.merge(new BibliographicEntity(890890, "classifier3", "45454545", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(890890, "classifier2", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(890890, "classifier3", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicResourceEntity(890890, "45454545", "hasCoverUrl", true));
             bean.addResource(jsonbContext.marshall(request));
         });
@@ -103,13 +103,13 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new OpenAgencyEntity(300000, LibraryType.NonFBS, false, false, false));
             em.merge(new OpenAgencyEntity(610610, LibraryType.FBS, false, false, false));
             em.merge(new OpenAgencyEntity(312000, LibraryType.FBSSchool, false, false, false));
-            em.merge(new BibliographicEntity(870970, "classifier1", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
-            em.merge(new BibliographicEntity(300000, "classifier1", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
-            em.merge(new BibliographicEntity(610610, "classifier2", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
-            em.merge(new BibliographicEntity(312000, "classifier3", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(870970, "classifier1", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(300000, "classifier1", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(610610, "classifier2", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
+            em.merge(new BibliographicEntity(312000, "classifier3", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
             // Elements that should not be enqueued
-            em.merge(new BibliographicEntity(312000, "classifier3", "21212121", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1")); // Non-matching bibliographicRecordId
-            em.merge(new BibliographicEntity(890890, "classifier3", "12121212", "repo", "work:1", "unit:1", "producer:1", false, null, "track:1")); // NonFBS should not be enqueued
+            em.merge(new BibliographicEntity(312000, "classifier3", "21212121", "repo", "work:1", "unit:1", false, null, "track:1")); // Non-matching bibliographicRecordId
+            em.merge(new BibliographicEntity(890890, "classifier3", "12121212", "repo", "work:1", "unit:1", false, null, "track:1")); // NonFBS should not be enqueued
             // Resource
             em.merge(new BibliographicResourceEntity(300000, "12121212", "hasCoverUrl", true));
             bean.addResource(jsonbContext.marshall(request));

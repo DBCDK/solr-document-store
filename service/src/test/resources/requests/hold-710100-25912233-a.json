@@ -1,7 +1,6 @@
 {
     "agencyId": 710100,
     "bibliographicRecordId": "25912233",
-    "producerVersion": "any",
     "indexKeys": [
         {
             "holdingsitem.branchId": ["123456"],

@@ -429,7 +429,6 @@
             "book"
          ]
       },
-      "producerVersion" : "solr-indexer-cloud-worker-javascript:1.0-SNAPSHOT#119091",
       "bibliographicRecordId" : "21784206",
       "trackingId" : "SolrWorker:870970-basis:21784206<Hive:830370-katalog,Batch:2165115,Entry:21892538<bulk-20170524132904-21784206",
       "deleted" : false,
@@ -446,7 +445,6 @@
       {
          "bibliographicRecordId" : "21784206",
          "hasLiveHoldings" : true,
-         "producerVersion" : "holdings-items-solr-indexer:1.1.2-SNAPSHOT#${env.SVN_REVISION}",
          "indexKeys" : [
             {
                "holdingsitem.expectedDelivery" : [
@@ -569,7 +567,6 @@
                ]
             }
          ],
-         "producerVersion" : "holdings-items-solr-indexer:1.1.2-SNAPSHOT#${env.SVN_REVISION}",
          "bibliographicRecordId" : "21784206",
          "hasLiveHoldings" : true,
          "trackingId" : "",
@@ -637,14 +634,12 @@
                ]
             }
          ],
-         "producerVersion" : "holdings-items-solr-indexer:1.1.2-SNAPSHOT#${env.SVN_REVISION}",
          "agencyId" : 785100,
          "trackingId" : ""
       },
       {
          "bibliographicRecordId" : "21784206",
          "hasLiveHoldings" : true,
-         "producerVersion" : "holdings-items-solr-indexer:1.1.2-SNAPSHOT#${env.SVN_REVISION}",
          "indexKeys" : [
             {
                "holdingsitem.branch" : [

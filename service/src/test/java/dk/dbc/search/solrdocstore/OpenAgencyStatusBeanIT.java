@@ -74,9 +74,9 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("purgeEnqueuesWhenHasLiveHoldings");
 
         Object status = env().getPersistenceContext().run(() -> {
-            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", "", false, Collections.EMPTY_MAP, ""));
+            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, Collections.EMPTY_MAP, ""));
             em.persist(new HoldingsToBibliographicEntity(711111, "23645500", 870970, "23645564", true));
-            em.persist(new HoldingsItemEntity(711111, "23645500", "", ON_SHELF, ""));
+            em.persist(new HoldingsItemEntity(711111, "23645500", ON_SHELF, ""));
             return openAgencyStatus.purgeAgency(711111, "").getEntity();
         });
 
@@ -90,9 +90,9 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("purgeDoesntEnqueueWithoutHasLiveHoldings");
 
         Object status = env().getPersistenceContext().run(() -> {
-            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", "", false, Collections.EMPTY_MAP, ""));
+            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, Collections.EMPTY_MAP, ""));
             em.persist(new HoldingsToBibliographicEntity(711111, "23645500", 870970, "23645564", true));
-            em.persist(new HoldingsItemEntity(711111, "23645500", "", DECOMMISSIONED, ""));
+            em.persist(new HoldingsItemEntity(711111, "23645500", DECOMMISSIONED, ""));
             return openAgencyStatus.purgeAgency(711111, "").getEntity();
         });
 

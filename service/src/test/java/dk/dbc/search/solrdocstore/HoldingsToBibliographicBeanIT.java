@@ -300,7 +300,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     }
 
     private void createBibRecord(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity e = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", "v0.1", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", false, Collections.EMPTY_MAP, "IT");
         em.merge(e);
     }
 

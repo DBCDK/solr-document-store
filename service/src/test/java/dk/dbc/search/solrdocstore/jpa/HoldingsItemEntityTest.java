@@ -43,7 +43,7 @@ public class HoldingsItemEntityTest {
     public void verifySyntheticHasLiveHoldings() throws Exception {
         System.out.println("asHoldingsItemEntity");
 
-        HoldingsItemEntity he = new HoldingsItemEntity(0, "A", "", indexKeys("[{}]"), "");
+        HoldingsItemEntity he = new HoldingsItemEntity(0, "A", indexKeys("[{}]"), "");
         assertTrue(he.getHasLiveHoldings());
         he.setIndexKeys(indexKeys("[]"));
         assertFalse(he.getHasLiveHoldings());

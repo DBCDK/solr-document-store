@@ -16,7 +16,6 @@
         "Mitt liv som hund"
       ]
     },
-    "producerVersion": "corepo-indexer-worker:1.1-SNAPSHOT#126462",
     "repositoryId": "870970-basis:06778925",
     "trackingId": "20200504-all",
     "unit": "unit:455180",
@@ -87,7 +86,6 @@
           ]
         }
       ],
-      "producerVersion": "holdings-items-solr-indexer:1.1.4-SNAPSHOT#e2620cb4c5892b41449cc6bdf8deed479ba4e862",
       "trackingId": "2c0cec00-2cd2-4e95-807a-18dbc8864c57"
     },
     {
@@ -152,7 +150,6 @@
           ]
         }
       ],
-      "producerVersion": "holdings-items-solr-indexer:1.1.4-SNAPSHOT#2eb82b768d136eb925ccbeafb4e19034f930922e",
       "trackingId": "3f157a47-d75e-4010-9432-2dffc07d79ae"
     },
     {
@@ -282,7 +279,6 @@
           ]
         }
       ],
-      "producerVersion": "holdings-items-solr-indexer:1.2-SNAPSHOT#3ee1dca5878c3ecef0e64ca41e20bcd3f1dddec5",
       "trackingId": "f1a02cff-08af-48a6-9d88-045ddf2f2eec"
     }
   ],

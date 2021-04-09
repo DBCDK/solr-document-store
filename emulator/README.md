@@ -42,7 +42,6 @@ where the `bib.json` file looks like this.
     "repositoryId": "repo",
     "work": "work:1",
     "unit": "unit:1",
-    "producerVersion": "producer:1",
     "deleted": "false",
     "indexKeys": {},
     "trackingId": "track1"

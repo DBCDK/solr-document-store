@@ -7,7 +7,6 @@ let desiredItem = {
   bibliographicRecordId: "31582395",
   agencyId: "31589235",
   trackingId: "35235-235sdfgh",
-  producerVersion: "3578923-wrwtsdtr:23589",
   deleted: false
 };
 
@@ -68,7 +67,6 @@ describe("Docstore gui global reducer unit test", () => {
     let neitherIdsAction = {
       type: SELECT_BIB_RECORD,
       item: {
-        producerVersion: "ag:19",
         deleted: true
       }
     };

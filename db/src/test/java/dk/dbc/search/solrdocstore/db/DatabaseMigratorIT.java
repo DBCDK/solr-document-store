@@ -37,7 +37,7 @@ public class DatabaseMigratorIT {
                 System.out.println("version = " + version);
             }
         }
-        assertEquals(23, version);
+        assertEquals(24, version);
     }
 
     private static PGSimpleDataSource getDataSource() {
