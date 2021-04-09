@@ -58,7 +58,6 @@ describe("SearchField interactions properly updates global state", () => {
       bibliographicRecordId: "1-22",
       work: "work:1",
       unit: "unit:2",
-      producerVersion: "1234",
       deleted: false,
       indexKeys: {
         submitter: ["150005"],
@@ -70,7 +69,6 @@ describe("SearchField interactions properly updates global state", () => {
       bibliographicRecordId: "10-31",
       work: "work:1",
       unit: "unit:2",
-      producerVersion: "4567",
       deleted: false,
       indexKeys: {
         "unit.primaryObject": ["150005-anmeld:120102"],

@@ -22,7 +22,6 @@ let testHoldingsItems = [
   {
     agencyId: 131030,
     bibliographicRecordId: "23645564",
-    producerVersion: "holdings-items-solr-indexer:1.1.2-SNAPSHOT#118382",
     indexKeys: [
       {
         _version_: ["239045802345802394850923458903458"],
@@ -89,7 +88,6 @@ let testHoldingsItems = [
   {
     agencyId: 761500,
     bibliographicRecordId: "23645564",
-    producerVersion: "holdings-items-solr-indexer:1.1.2-SNAPSHOT#118382",
     indexKeys: [
       {
         "rec.trackingId": ["", "bb613be6-86ae-4caa-9639-4198865227f2"],
@@ -249,7 +247,6 @@ describe("RelatedHoldingsExplorer properly displays based on global state", () =
         // missing index keys, ensures we can handle missing fields
       },
       {
-        producerVersion: "",
         indexKeys: [],
         trackingId: "",
         commitWithin: ""
@@ -257,7 +254,6 @@ describe("RelatedHoldingsExplorer properly displays based on global state", () =
       {
         agencyId: "",
         indexKeys: [],
-        producerVersion: ""
       }
     ];
     let store = configureStore({ relatedHoldings: initialState });
@@ -272,14 +268,10 @@ describe("RelatedHoldingsExplorer properly displays based on global state", () =
     let initialState = produceInitialState();
     let agencyId = "unique:agencyId";
     let trackingId = "unique:trackingId";
-    let producerVersion = "unique:producerVersion";
-    let commitWithin = "unique:producerVersion";
     initialState.relatedHoldings = [
       {
         agencyId: agencyId,
-        trackingId: trackingId,
-        producerVersion: producerVersion,
-        commitWithin: commitWithin
+        trackingId: trackingId
       }
     ];
     let store = configureStore({ relatedHoldings: initialState });
@@ -288,8 +280,6 @@ describe("RelatedHoldingsExplorer properly displays based on global state", () =
     expect(text).toContain(agencyId);
     // These are no longer shown, as they are not important to users
     //expect(text).toContain(trackingId);
-    //expect(text).toContain(producerVersion);
-    //expect(text).toContain(commitWithin);
   });
   test("Related holdings show the correct number of related holdings items", () => {
     sagaTester.dispatch(pullSuccess(testHoldingsItems));

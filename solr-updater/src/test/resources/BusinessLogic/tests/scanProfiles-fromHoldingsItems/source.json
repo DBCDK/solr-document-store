@@ -2,7 +2,6 @@
         "bibliographicRecordId": "25912233",
         "repositoryId": "870970-basis:25912233", "work": "work:837840",
         "unit": "unit:1007058",
-        "producerVersion": "solr-indexer-cloud-worker-javascript:1.0-SNAPSHOT#119761",
         "deleted": false, "indexKeys": { "ti": [ "any" ],
             "scan.lti": [ "foo" ], "scan.lfo": [ "bar" ],
             "scan.nope": [ "nah" ] }, "trackingId": "sone" },
@@ -10,7 +9,6 @@
         {
             "bibliographicRecordId": "",
             "hasLiveHoldings": true,
-            "producerVersion": "",
             "indexKeys": [ ],
             "agencyId": 102030,
             "trackingId": ""
@@ -18,7 +16,6 @@
         {
             "bibliographicRecordId": "",
             "hasLiveHoldings": false,
-            "producerVersion": "",
             "indexKeys": [ ],
             "agencyId": 876543,
             "trackingId": ""

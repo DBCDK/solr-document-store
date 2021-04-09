@@ -42,8 +42,6 @@ public class HoldingsItemEntity implements Serializable {
     @Id
     private String bibliographicRecordId;
 
-    private String producerVersion;
-
     @SuppressWarnings("JpaAttributeTypeInspection")
     @Basic(fetch = LAZY)
     @Mutable
@@ -54,10 +52,9 @@ public class HoldingsItemEntity implements Serializable {
 
     private boolean hasLiveHoldings;
 
-    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId) {
+    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, List<Map<String, List<String>>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
-        this.producerVersion = producerVersion;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
         this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
@@ -72,7 +69,7 @@ public class HoldingsItemEntity implements Serializable {
         if (getClass().equals(HoldingsItemEntity.class)) {
             return this;
         }
-        return new HoldingsItemEntity(agencyId, bibliographicRecordId, producerVersion, indexKeys, trackingId);
+        return new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, trackingId);
     }
 
     @Override
@@ -107,14 +104,6 @@ public class HoldingsItemEntity implements Serializable {
 
     public void setBibliographicRecordId(String bibliographicRecordId) {
         this.bibliographicRecordId = bibliographicRecordId;
-    }
-
-    public String getProducerVersion() {
-        return producerVersion;
-    }
-
-    public void setProducerVersion(String producerVersion) {
-        this.producerVersion = producerVersion;
     }
 
     public String getTrackingId() {

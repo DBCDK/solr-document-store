@@ -17,10 +17,6 @@ const columns = [
     accessor: "bibliographicRecordId"
   },
   {
-    Header: "Producer Version",
-    accessor: "producerVersion"
-  },
-  {
     Header: "Deleted",
     accessor: "deleted",
     Cell: props => "" + props.value

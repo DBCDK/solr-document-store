@@ -35,7 +35,7 @@ import static javax.persistence.FetchType.LAZY;
 public class BibliographicEntity implements Serializable {
 
     public static final List<String> sortableColumns = Collections.unmodifiableList(Arrays.asList(
-            "agencyId", "bibliographicRecordId", "producerVersion", "deleted", "trackingId"));
+            "agencyId", "bibliographicRecordId", "deleted", "trackingId"));
 
     private static final long serialVersionUID = -2773872842011755768L;
 
@@ -54,7 +54,6 @@ public class BibliographicEntity implements Serializable {
     private String repositoryId;
     private String work;
     private String unit;
-    private String producerVersion;
     private boolean deleted;
 
     @SuppressWarnings("JpaAttributeTypeInspection")
@@ -65,14 +64,13 @@ public class BibliographicEntity implements Serializable {
 
     private String trackingId;
 
-    public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
+    public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
         this.repositoryId = repositoryId;
         this.work = work;
         this.unit = unit;
-        this.producerVersion = producerVersion;
         this.deleted = deleted;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
@@ -87,7 +85,6 @@ public class BibliographicEntity implements Serializable {
         hash = 43 * hash + Objects.hashCode(this.repositoryId);
         hash = 43 * hash + Objects.hashCode(this.work);
         hash = 43 * hash + Objects.hashCode(this.unit);
-        hash = 43 * hash + Objects.hashCode(this.producerVersion);
         hash = 43 * hash + ( this.deleted ? 1 : 0 );
         hash = 43 * hash + Objects.hashCode(this.trackingId);
         return hash;
@@ -108,7 +105,6 @@ public class BibliographicEntity implements Serializable {
                Objects.equals(repositoryId, that.repositoryId) &&
                Objects.equals(work, that.work) &&
                Objects.equals(unit, that.unit) &&
-               Objects.equals(producerVersion, that.producerVersion) &&
                deleted == that.deleted &&
                Objects.equals(trackingId, that.trackingId);
     }
@@ -122,7 +118,7 @@ public class BibliographicEntity implements Serializable {
         if (getClass().equals(BibliographicEntity.class)) {
             return this;
         }
-        return new BibliographicEntity(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, producerVersion, deleted, indexKeys, trackingId);
+        return new BibliographicEntity(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, deleted, indexKeys, trackingId);
 
     }
 
@@ -174,14 +170,6 @@ public class BibliographicEntity implements Serializable {
         this.unit = unit;
     }
 
-    public String getProducerVersion() {
-        return producerVersion;
-    }
-
-    public void setProducerVersion(String producerVersion) {
-        this.producerVersion = producerVersion;
-    }
-
     public String getTrackingId() {
         return trackingId;
     }
@@ -209,7 +197,6 @@ public class BibliographicEntity implements Serializable {
     public AgencyClassifierItemKey asAgencyClassifierItemKey() {
         return new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId);
     }
-
 
     public QueueJob asQueueJobFor(QueueType supplier) {
         switch (supplier.getType()) {

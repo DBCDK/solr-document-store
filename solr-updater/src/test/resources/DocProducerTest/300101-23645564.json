@@ -7,7 +7,6 @@
         "deleted": false,
         "work": "work:754877",
         "unit": "unit:893270",
-        "producerVersion": "solr-indexer-cloud-worker-javascript:1.0-SNAPSHOT#116975",
         "indexKeys": {
             "rec.repositoryId": [ "300101-katalog:23645564" ],
             "dkcclterm.po": [ "Haruki", "Murakami" ],
@@ -20,7 +19,6 @@
     "holdingsItemRecords": [ {
             "agencyId": 300102,
             "bibliographicRecordId": "23645564",
-            "producerVersion": "",
             "hasLiveHoldings": true,
             "indexKeys": [ {
                     "holdingsitem.agencyId": [ "300102" ],
@@ -32,7 +30,6 @@
         }, {
             "agencyId": 300101,
             "bibliographicRecordId": "23645564",
-            "producerVersion": "",
             "hasLiveHoldings": true,
             "indexKeys": [ {
                     "holdingsitem.agencyId": [ "300102" ],
@@ -49,7 +46,6 @@
         }, {
             "agencyId": 300103,
             "bibliographicRecordId": "23645564",
-            "producerVersion": "",
             "hasLiveHoldings": false,
             "indexKeys": [ {
                     "holdingsitem.agencyId": [ "300103" ],
@@ -61,7 +57,6 @@
         }, {
             "agencyId": 300104,
             "bibliographicRecordId": "23645564",
-            "producerVersion": "",
             "hasLiveHoldings": true,
             "indexKeys": [ {
                     "holdingsitem.agencyId": [ "300104" ],
@@ -83,7 +78,6 @@
         }, {
             "agencyId": 300102,
             "bibliographicRecordId": "23645564",
-            "producerVersion": "",
             "hasLiveHoldings": false,
             "indexKeys": [ ],
             "trackingId": "",

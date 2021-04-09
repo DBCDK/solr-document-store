@@ -120,7 +120,7 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> {
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", "", DECOMMISSIONED, ""));
+            em.persist(new HoldingsItemEntity(711100, "1", DECOMMISSIONED, ""));
             em.persist(new HoldingsToBibliographicEntity(711100, "1", COMMON_AGENCY, "1", true));
             em.flush();
             openAgency.verifyOpenAgencyCache(); // loads 711100.json
@@ -148,7 +148,7 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext().run(() -> {
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", "", ON_SHELF_AND_DECOMMISSIONED, ""));
+            em.persist(new HoldingsItemEntity(711100, "1", ON_SHELF_AND_DECOMMISSIONED, ""));
             em.flush();
             openAgency.verifyOpenAgencyCache();
 

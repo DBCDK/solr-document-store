@@ -23,7 +23,7 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
             Map<String, List<String>> indexKeys = new HashMap<>();
             indexKeys.put("titel", Collections.singletonList("unix bogen"));
             indexKeys.put("id", Collections.singletonList("argle"));
-            BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1", "work:1", "unit:2", "1234", false, indexKeys, "");
+            BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1", "work:1", "unit:2", false, indexKeys, "");
             em.persist(be);
         });
 
@@ -50,7 +50,6 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(be.getBibliographicRecordId(), is("4321"));
         assertThat(be.getWork(), is("work:3"));
         assertThat(be.getUnit(), is("unit:3"));
-        assertThat(be.getProducerVersion(), is("5544"));
         assertThat(be.isDeleted(), is(true));
         Map<String, List<String>> expected = new HashMap<>();
         expected.put("ti", Arrays.asList("isdnBogen", "title2"));

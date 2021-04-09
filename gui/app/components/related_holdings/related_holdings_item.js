@@ -10,7 +10,6 @@ class RelatedHoldingsItem extends React.PureComponent {
     let { relatedHoldingItem } = this.props;
     let {
       agencyId
-      //producerVersion,
       //trackingId,
       //commitWithin
     } = relatedHoldingItem;
@@ -34,7 +33,6 @@ class RelatedHoldingsItem extends React.PureComponent {
     );
   }
   /*
-    <div style={{ flex: "1" }}>Producer version: {producerVersion}</div>
     <div style={{ flex: "1" }}>tracking id: {trackingId}</div>
     <div style={{ flex: "1" }}>commit within: {commitWithin}</div>
   */

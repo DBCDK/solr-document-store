@@ -18,7 +18,7 @@ public class HoldingsItemEntityRequest extends HoldingsItemEntity {
     }
 
     public HoldingsItemEntityRequest(int agencyId, String bibliographicRecordId, String producerVersion, List<Map<String, List<String>>> indexKeys, String trackingId, Integer commitWithin) {
-        super(agencyId, bibliographicRecordId, producerVersion, indexKeys, trackingId);
+        super(agencyId, bibliographicRecordId, indexKeys, trackingId);
         this.commitWithin = commitWithin;
     }
 
@@ -28,6 +28,9 @@ public class HoldingsItemEntityRequest extends HoldingsItemEntity {
 
     public void setCommitWithin(Integer commitWithin) {
         this.commitWithin = commitWithin;
+    }
+
+    public void setProducerVersion(String producerVersion) {
     }
 
     @Override
