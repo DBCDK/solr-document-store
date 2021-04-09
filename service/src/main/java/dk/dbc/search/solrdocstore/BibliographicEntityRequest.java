@@ -14,7 +14,7 @@ public class BibliographicEntityRequest extends BibliographicEntity {
     public BibliographicEntityRequest() {
     }
 
-    public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, String producerVersion, boolean deleted, Map<String, List<String>> indexKeys, String trackingId, List<String> supersedes) {
+    public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, Map<String, List<String>> indexKeys, String trackingId, List<String> supersedes) {
         super(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, deleted, indexKeys, trackingId);
         this.supersedes = supersedes;
     }
