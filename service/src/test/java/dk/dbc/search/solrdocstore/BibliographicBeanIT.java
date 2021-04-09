@@ -750,7 +750,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", "v0.1", false, Collections.EMPTY_MAP, "IT", null);
+        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", false, Collections.EMPTY_MAP, "IT", null);
         modifier.accept(entity);
         return jsonbContext.marshall(entity);
     }
