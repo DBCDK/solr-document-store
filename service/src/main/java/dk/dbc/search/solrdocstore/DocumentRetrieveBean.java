@@ -160,7 +160,8 @@ public class DocumentRetrieveBean {
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsObjs.stream()
                     .filter(ho -> ho.holdingsToBibliographicEntity.getBibliographicAgencyId() == b.getAgencyId()
                             && ho.holdingsToBibliographicEntity.getBibliographicRecordId().equals(b.getBibliographicRecordId()))
-                    .map(h -> includeHoldingsItemsIndexKeys ? h.holdingsItemEntity : HoldingsItemEntity.trimForPresentation(h.holdingsItemEntity, entityManager))
+                    .map(h -> h.holdingsItemEntity)
+                    .map(h -> includeHoldingsItemsIndexKeys ? h : h.copyForLightweightPresentation())
                     .collect(Collectors.toList());
             List<Integer> partOfDanbib = b.getAgencyId() == LibraryType.COMMON_AGENCY
                     ? getPartOfDanbibCommon(b.getBibliographicRecordId())

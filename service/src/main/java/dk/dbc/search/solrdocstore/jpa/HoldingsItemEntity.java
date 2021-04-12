@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.*;
@@ -25,8 +26,8 @@ import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
-@NamedEntityGraph(name = "holdingItemsWithIndexKeys", attributeNodes =
-                  @NamedAttributeNode("indexKeys"))
+@NamedEntityGraph(name = "holdingItemsWithIndexKeys",
+                  attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
@@ -144,40 +145,55 @@ public class HoldingsItemEntity implements Serializable {
             return EMPTY_SET;
         }
         return indexKeys.stream()
-                .flatMap(holding -> {
-                    return holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
-                            .stream()
-                            .map(status -> status.toLowerCase(Locale.ROOT))
-                            .flatMap(status -> {
-                                switch (status) {
-                                    case "online":
-                                        return Stream.of(agencyId + "-online");
-                                    case "onshelf":
-                                    case "notforloan":
-                                        return Stream.concat(
-                                                Stream.of(agencyId + "-" + status),
-                                                holding.getOrDefault("holdingsitem.branchId", (List<String>) EMPTY_LIST)
-                                                        .stream()
-                                                        .map((String branchId) -> agencyId + "-" + branchId + "-" + status));
-                                    default:
-                                        return Stream.empty();
-                                }
-                            });
-                })
+                .flatMap(holding -> holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
+                        .stream()
+                        .map(status -> status.toLowerCase(Locale.ROOT))
+                        .flatMap(status -> {
+                            switch (status) {
+                                case "online":
+                                    return Stream.of(agencyId + "-online");
+                                case "onshelf":
+                                case "notforloan":
+                                    return Stream.concat(
+                                            Stream.of(agencyId + "-" + status),
+                                            holding.getOrDefault("holdingsitem.branchId", (List<String>) EMPTY_LIST)
+                                                    .stream()
+                                                    .map((String branchId) -> agencyId + "-" + branchId + "-" + status));
+                                default:
+                                    return Stream.empty();
+                            }
+                        }))
                 .collect(toSet());
     }
 
-    public void setLocations(Set<String> locations) {
-        throw new IllegalStateException("Cannot set locations on holdings - synthetic field");
+    public Map<String, Long> getStatusCount() {
+        if (indexKeys == null)
+            return EMPTY_MAP;
+        return indexKeys.stream()
+                .flatMap(holding -> holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
+                        .stream())
+                .map(status -> status.toLowerCase(Locale.ROOT))
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
     }
 
     private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
         return indexKeys != null && !indexKeys.isEmpty();
     }
 
-    public static HoldingsItemEntity trimForPresentation(HoldingsItemEntity h, EntityManager em) {
-        em.detach(h);
-        h.indexKeys = null;
-        return h;
+    public HoldingsItemEntity copyForLightweightPresentation() {
+        Set<String> locationsCopy = getLocations();
+        Map<String, Long> statusCountCopy = getStatusCount();
+
+        return new HoldingsItemEntity(agencyId, bibliographicRecordId, null, trackingId) {
+            @Override
+            public Set<String> getLocations() {
+                return locationsCopy;
+            }
+
+            @Override
+            public Map<String, Long> getStatusCount() {
+                return statusCountCopy;
+            }
+        };
     }
 }
