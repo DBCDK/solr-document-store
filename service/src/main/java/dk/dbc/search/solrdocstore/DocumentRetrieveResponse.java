@@ -23,6 +23,9 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static java.util.stream.Collectors.*;
 
 /**
  *
@@ -42,11 +45,22 @@ public class DocumentRetrieveResponse {
 
     public Map<String, Map<Integer, Boolean>> attachedResources;
 
+    public Map<String, Integer> totalStatusCount;
+
     public DocumentRetrieveResponse(BibliographicEntity bibliographicRecord, List<HoldingsItemEntity> holdingsItemRecords, List<Integer> partOfDanbib, Map<String, Map<Integer, Boolean>> attachedResources) {
         this.bibliographicRecord = bibliographicRecord;
         this.holdingsItemRecords = holdingsItemRecords;
         this.partOfDanbib = partOfDanbib;
         this.attachedResources = attachedResources;
+        this.totalStatusCount = summarizedStatusCount(holdingsItemRecords);
     }
 
+    static Map<String, Integer> summarizedStatusCount(List<HoldingsItemEntity> holdingsItemRecords) {
+        return holdingsItemRecords.stream()
+                .map(HoldingsItemEntity::getStatusCount)
+                .map(Map::entrySet)
+                .flatMap(Set::stream)
+                .collect(groupingBy(Map.Entry::getKey,
+                                    summingInt(Map.Entry::getValue)));
+    }
 }

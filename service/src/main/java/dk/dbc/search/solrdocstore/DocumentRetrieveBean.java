@@ -135,7 +135,7 @@ public class DocumentRetrieveBean {
         log.debug("Fetching manifestations for work {}, includeHIIK: {}", workId, includeHoldingsItemsIndexKeys);
         try(LogWith logWith = track(null)) {
             List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId, includeHoldingsItemsIndexKeys);
-            if (responses == null || responses.size() == 0) {
+            if (responses == null || responses.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Work not found").build();
             }
             final WorkRetrieveResponse res = new WorkRetrieveResponse(workId, responses);

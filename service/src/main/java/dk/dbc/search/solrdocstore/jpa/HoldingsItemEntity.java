@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
 import org.eclipse.persistence.annotations.Mutable;
 
 import javax.persistence.Basic;
@@ -16,11 +17,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.*;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
@@ -165,14 +165,18 @@ public class HoldingsItemEntity implements Serializable {
                 .collect(toSet());
     }
 
-    public Map<String, Long> getStatusCount() {
+    public Map<String, Integer> getStatusCount() {
         if (indexKeys == null)
             return EMPTY_MAP;
         return indexKeys.stream()
-                .flatMap(holding -> holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
-                        .stream())
-                .map(status -> status.toLowerCase(Locale.ROOT))
-                .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+                .flatMap(holding -> {
+                    int itemCount = holding.getOrDefault("holdingsitem.itemId", (List<String>) EMPTY_LIST).size();
+                    int count = Integer.max(1, itemCount); // Ensure atleast one item
+                    return holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
+                            .stream()
+                            .map(status -> new AbstractMap.SimpleEntry<>(status.toLowerCase(Locale.ROOT), count));
+                })
+                .collect(groupingBy(Map.Entry::getKey, summingInt(Map.Entry::getValue)));
     }
 
     private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
@@ -181,7 +185,7 @@ public class HoldingsItemEntity implements Serializable {
 
     public HoldingsItemEntity copyForLightweightPresentation() {
         Set<String> locationsCopy = getLocations();
-        Map<String, Long> statusCountCopy = getStatusCount();
+        Map<String, Integer> statusCountCopy = getStatusCount();
 
         return new HoldingsItemEntity(agencyId, bibliographicRecordId, null, trackingId) {
             @Override
@@ -190,7 +194,7 @@ public class HoldingsItemEntity implements Serializable {
             }
 
             @Override
-            public Map<String, Long> getStatusCount() {
+            public Map<String, Integer> getStatusCount() {
                 return statusCountCopy;
             }
         };
