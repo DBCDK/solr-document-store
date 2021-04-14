@@ -135,7 +135,7 @@ public class DocumentRetrieveBean {
         log.debug("Fetching manifestations for work {}, includeHIIK: {}", workId, includeHoldingsItemsIndexKeys);
         try(LogWith logWith = track(null)) {
             List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId, includeHoldingsItemsIndexKeys);
-            if (responses == null || responses.size() == 0) {
+            if (responses == null || responses.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Work not found").build();
             }
             final WorkRetrieveResponse res = new WorkRetrieveResponse(workId, responses);
@@ -160,7 +160,8 @@ public class DocumentRetrieveBean {
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsObjs.stream()
                     .filter(ho -> ho.holdingsToBibliographicEntity.getBibliographicAgencyId() == b.getAgencyId()
                             && ho.holdingsToBibliographicEntity.getBibliographicRecordId().equals(b.getBibliographicRecordId()))
-                    .map(h -> includeHoldingsItemsIndexKeys ? h.holdingsItemEntity : HoldingsItemEntity.trimForPresentation(h.holdingsItemEntity, entityManager))
+                    .map(h -> h.holdingsItemEntity)
+                    .map(h -> includeHoldingsItemsIndexKeys ? h : h.copyForLightweightPresentation())
                     .collect(Collectors.toList());
             List<Integer> partOfDanbib = b.getAgencyId() == LibraryType.COMMON_AGENCY
                     ? getPartOfDanbibCommon(b.getBibliographicRecordId())

@@ -1,12 +1,12 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
 import org.eclipse.persistence.annotations.Mutable;
 
 import javax.persistence.Basic;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.NamedAttributeNode;
@@ -20,13 +20,13 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.*;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "holdingsItemsSolrKeys")
-@NamedEntityGraph(name = "holdingItemsWithIndexKeys", attributeNodes =
-                  @NamedAttributeNode("indexKeys"))
+@NamedEntityGraph(name = "holdingItemsWithIndexKeys",
+                  attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
@@ -144,40 +144,59 @@ public class HoldingsItemEntity implements Serializable {
             return EMPTY_SET;
         }
         return indexKeys.stream()
-                .flatMap(holding -> {
-                    return holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
-                            .stream()
-                            .map(status -> status.toLowerCase(Locale.ROOT))
-                            .flatMap(status -> {
-                                switch (status) {
-                                    case "online":
-                                        return Stream.of(agencyId + "-online");
-                                    case "onshelf":
-                                    case "notforloan":
-                                        return Stream.concat(
-                                                Stream.of(agencyId + "-" + status),
-                                                holding.getOrDefault("holdingsitem.branchId", (List<String>) EMPTY_LIST)
-                                                        .stream()
-                                                        .map((String branchId) -> agencyId + "-" + branchId + "-" + status));
-                                    default:
-                                        return Stream.empty();
-                                }
-                            });
-                })
+                .flatMap(holding -> holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
+                        .stream()
+                        .map(status -> status.toLowerCase(Locale.ROOT))
+                        .flatMap(status -> {
+                            switch (status) {
+                                case "online":
+                                    return Stream.of(agencyId + "-online");
+                                case "onshelf":
+                                case "notforloan":
+                                    return Stream.concat(
+                                            Stream.of(agencyId + "-" + status),
+                                            holding.getOrDefault("holdingsitem.branchId", (List<String>) EMPTY_LIST)
+                                                    .stream()
+                                                    .map((String branchId) -> agencyId + "-" + branchId + "-" + status));
+                                default:
+                                    return Stream.empty();
+                            }
+                        }))
                 .collect(toSet());
     }
 
-    public void setLocations(Set<String> locations) {
-        throw new IllegalStateException("Cannot set locations on holdings - synthetic field");
+    public Map<String, Integer> getStatusCount() {
+        if (indexKeys == null)
+            return EMPTY_MAP;
+        return indexKeys.stream()
+                .flatMap(holding -> {
+                    int itemCount = holding.getOrDefault("holdingsitem.itemId", (List<String>) EMPTY_LIST).size();
+                    int count = Integer.max(1, itemCount); // Ensure at least one item
+                    return holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
+                            .stream()
+                            .map(status -> new AbstractMap.SimpleEntry<>(status.toLowerCase(Locale.ROOT), count));
+                })
+                .collect(groupingBy(Map.Entry::getKey, summingInt(Map.Entry::getValue)));
     }
 
     private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
         return indexKeys != null && !indexKeys.isEmpty();
     }
 
-    public static HoldingsItemEntity trimForPresentation(HoldingsItemEntity h, EntityManager em) {
-        em.detach(h);
-        h.indexKeys = null;
-        return h;
+    public HoldingsItemEntity copyForLightweightPresentation() {
+        Set<String> locationsCopy = getLocations();
+        Map<String, Integer> statusCountCopy = getStatusCount();
+
+        return new HoldingsItemEntity(agencyId, bibliographicRecordId, null, trackingId) {
+            @Override
+            public Set<String> getLocations() {
+                return locationsCopy;
+            }
+
+            @Override
+            public Map<String, Integer> getStatusCount() {
+                return statusCountCopy;
+            }
+        };
     }
 }

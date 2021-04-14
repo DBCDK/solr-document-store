@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
@@ -52,8 +53,8 @@ public class HoldingsItemEntityTest {
     }
 
     @Test(timeout = 2_000L)
-    public void test1() throws Exception {
-        System.out.println("test1");
+    public void testLocations() throws Exception {
+        System.out.println("testLocations");
 
         HoldingsItemEntity hi = new HoldingsItemEntity();
         hi.setAgencyId(777777);
@@ -91,6 +92,43 @@ public class HoldingsItemEntityTest {
                    "777777-bcd-notforloan",
                    "777777-cde-notforloan",
                    "777777-online"));
+    }
+
+    @Test(timeout = 2_000L)
+    public void testStatusCodes() throws Exception {
+        System.out.println("testStatusCodes");
+        HoldingsItemEntity hi = new HoldingsItemEntity();
+        hi.setAgencyId(777777);
+
+        List<Map<String, List<String>>> values = indexKeys(
+                "[" +
+                " {" +
+                "  'holdingsitem.itemId': [ 'abc' ]," +
+                "  'holdingsitem.status': [ 'OnShelf' ]" +
+                " }," +
+                " {" +
+                "  'holdingsitem.itemId': [ 'bcd' ]," +
+                "  'holdingsitem.status': [ 'OnShelf' ]" +
+                " }," +
+                " {" +
+                "  'holdingsitem.itemId': [ 'cde', 'def' ]," +
+                "  'holdingsitem.status': [ 'OnLoan' ]" +
+                " }," +
+                " {" +
+                "  'holdingsitem.status': [ 'Online' ]" +
+                " }" +
+                "]");
+        hi.setIndexKeys(values);
+        System.out.println("values = " + hi.getLocations());
+        Map<String, Integer> statusCount = hi.getStatusCount();
+        List<String> status = statusCount.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(toList());
+
+        assertThat(status, containsInAnyOrder(
+                   "onshelf=2",
+                   "onloan=2",
+                   "online=1"));
     }
 
     private static List<Map<String, List<String>>> indexKeys(String json) throws Exception {
