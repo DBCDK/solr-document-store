@@ -171,7 +171,7 @@ public class HoldingsItemEntity implements Serializable {
         return indexKeys.stream()
                 .flatMap(holding -> {
                     int itemCount = holding.getOrDefault("holdingsitem.itemId", (List<String>) EMPTY_LIST).size();
-                    int count = Integer.max(1, itemCount); // Ensure atleast one item
+                    int count = Integer.max(1, itemCount); // Ensure at least one item
                     return holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
                             .stream()
                             .map(status -> new AbstractMap.SimpleEntry<>(status.toLowerCase(Locale.ROOT), count));
