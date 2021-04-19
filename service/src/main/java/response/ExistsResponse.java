@@ -18,6 +18,7 @@
  */
 package response;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
@@ -25,6 +26,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 @Schema(name = ExistsResponse.NAME)
+@SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
 public class ExistsResponse {
     public static final String NAME = "existance-response";
 
