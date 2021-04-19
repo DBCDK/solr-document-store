@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import response.ExistsResponse;
 
-import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createExistanceBean;
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createExistenceBean;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -35,15 +35,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class ExistanceBeanIT extends JpaSolrDocStoreIntegrationTester {
+public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private EntityManager em;
-    private ExistanceBean bean;
+    private ExistenceBean bean;
 
     @Before
     public void before() {
         em = env().getEntityManager();
-        bean = createExistanceBean(jpaTestEnvironment);
+        bean = createExistenceBean(jpaTestEnvironment);
     }
 
     @Test(timeout = 2_000L)

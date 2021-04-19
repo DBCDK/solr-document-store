@@ -57,9 +57,9 @@ import response.ExistsResponse;
                 version = "1.0",
                 description = "This service allows checking if a record exists and is not 'delete'",
                 contact = @Contact(url = "mailto:dbc@dbc.dk")))
-public class ExistanceBean {
+public class ExistenceBean {
 
-    private static final Logger log = LoggerFactory.getLogger(ExistanceBean.class);
+    private static final Logger log = LoggerFactory.getLogger(ExistenceBean.class);
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;

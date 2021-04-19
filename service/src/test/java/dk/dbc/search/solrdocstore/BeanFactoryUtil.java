@@ -143,8 +143,8 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static ExistanceBean createExistanceBean(JpaTestEnvironment env) {
-        ExistanceBean bean = new ExistanceBean();
+    public static ExistenceBean createExistenceBean(JpaTestEnvironment env) {
+        ExistenceBean bean = new ExistenceBean();
         bean.entityManager = env.getEntityManager();
         return bean;
     }
