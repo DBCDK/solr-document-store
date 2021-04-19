@@ -49,59 +49,59 @@ public class ExistanceBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test(timeout = 2_000L)
     public void testBibliographicNonExisting() throws Exception {
         System.out.println("testBibliographicNonExisting");
-        ExistsResponse existance = jpa(em -> {
+        ExistsResponse existence = jpa(em -> {
             return bean.bibliographicExists(870970, "clazzifier", "12345678");
         });
-        assertThat(existance.exists, is(false));
+        assertThat(existence.exists, is(false));
     }
 
     @Test(timeout = 2_000L)
     public void testBibliographicExisting() throws Exception {
         System.out.println("testBibliographicExisting");
-        ExistsResponse existance = jpa(em -> {
+        ExistsResponse existence = jpa(em -> {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "repo", "work:1", "unit:1", false, null, "track:1"));
             return bean.bibliographicExists(870970, "clazzifier", "12345678");
         });
-        assertThat(existance.exists, is(true));
+        assertThat(existence.exists, is(true));
     }
 
     @Test(timeout = 2_000L)
     public void testBibliographicDeleted() throws Exception {
         System.out.println("testBibliographicDeleted");
-        ExistsResponse existance = jpa(em -> {
+        ExistsResponse existence = jpa(em -> {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "repo", null, null, true, null, "track:1"));
             return bean.bibliographicExists(870970, "clazzifier", "12345678");
         });
-        assertThat(existance.exists, is(false));
+        assertThat(existence.exists, is(false));
     }
 
     @Test(timeout = 2_000L)
     public void testHoldingsNonExisting() throws Exception {
         System.out.println("testHoldingsNonExisting");
-        ExistsResponse existance = jpa(em -> {
+        ExistsResponse existence = jpa(em -> {
             return bean.holdingExists(777777, "12345678");
         });
-        assertThat(existance.exists, is(false));
+        assertThat(existence.exists, is(false));
     }
 
     @Test(timeout = 2_000L)
     public void testHoldingsExisting() throws Exception {
         System.out.println("testHoldingsExisting");
-        ExistsResponse existance = jpa(em -> {
+        ExistsResponse existence = jpa(em -> {
             em.merge(new HoldingsItemEntity(777777, "12345678", Arrays.asList(Collections.EMPTY_MAP), "track:1"));
             return bean.holdingExists(777777, "12345678");
         });
-        assertThat(existance.exists, is(true));
+        assertThat(existence.exists, is(true));
     }
 
     @Test(timeout = 2_000L)
     public void testHoldingsNoneAlive() throws Exception {
         System.out.println("testHoldingsNoneAlive");
-        ExistsResponse existance = jpa(em -> {
+        ExistsResponse existence = jpa(em -> {
             em.merge(new HoldingsItemEntity(777777, "12345678", Collections.EMPTY_LIST, "track:1"));
             return bean.holdingExists(777777, "12345678");
         });
 
-        assertThat(existance.exists, is(false));
+        assertThat(existence.exists, is(false));
     }
 }

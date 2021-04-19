@@ -28,7 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Schema(name = ExistsResponse.NAME)
 @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
 public class ExistsResponse {
-    public static final String NAME = "existance-response";
+    public static final String NAME = "existence-response";
 
     @Schema(description = "If an item exists and can be fetched")
     public boolean exists;

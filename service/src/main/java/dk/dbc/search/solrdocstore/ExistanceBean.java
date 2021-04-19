@@ -92,7 +92,7 @@ public class ExistanceBean {
     public ExistsResponse bibliographicExists(@PathParam("agencyId") Integer agencyId,
                                               @PathParam("classifier") String classifier,
                                               @PathParam("bibliographicRecordId") String bibliographicRecordId) {
-        log.info("Checking existance of bibliographic item {}-{}:{}", agencyId, classifier, bibliographicRecordId);
+        log.info("Checking existence of bibliographic item {}-{}:{}", agencyId, classifier, bibliographicRecordId);
         ExistsResponse response = new ExistsResponse();
         BibliographicEntity entity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId));
         if (entity == null) {
@@ -127,7 +127,7 @@ public class ExistanceBean {
                    required = true)})
     public ExistsResponse holdingExists(@PathParam("agencyId") Integer agencyId,
                                         @PathParam("bibliographicRecordId") String bibliographicRecordId) {
-        log.info("Checking existance of holdings item {}:{}", agencyId, bibliographicRecordId);
+        log.info("Checking existence of holdings item {}:{}", agencyId, bibliographicRecordId);
         ExistsResponse response = new ExistsResponse();
         HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
         if (entity == null) {
