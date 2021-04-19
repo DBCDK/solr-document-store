@@ -16,6 +16,7 @@ import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createResourceBean;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -45,6 +46,18 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         query.setParameter("bibId", request.getBibliographicRecordId());
         query.setParameter("field", request.getField());
         assertEquals(query.getSingleResult(), request.asBibliographicResource());
+    }
+
+    @Test(timeout = 2_000L)
+    public void testAddResourceOntoDeleted() throws Exception {
+        System.out.println("testAddResourceOntoDeleted");
+        AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
+        jpa(em -> {
+            em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
+            em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", null, null, true, null, "track:1"));
+            bean.addResource(jsonbContext.marshall(request));
+        });
+        assertThat(queueContentAndClear(), empty());
     }
 
     @Test
