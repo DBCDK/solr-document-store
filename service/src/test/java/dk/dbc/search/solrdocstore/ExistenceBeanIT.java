@@ -20,12 +20,11 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import java.util.Arrays;
-import java.util.Collections;
+import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
 import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
-import response.ExistsResponse;
+import dk.dbc.search.solrdocstore.response.ExistsResponse;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createExistenceBean;
 import static org.hamcrest.CoreMatchers.*;
@@ -88,7 +87,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsExisting() throws Exception {
         System.out.println("testHoldingsExisting");
         ExistsResponse existence = jpa(em -> {
-            em.merge(new HoldingsItemEntity(777777, "12345678", Arrays.asList(Collections.EMPTY_MAP), "track:1"));
+            em.merge(new HoldingsItemEntity(777777, "12345678", HoldingsSolrKeys.ON_SHELF, "track:1"));
             return bean.holdingExists(777777, "12345678");
         });
         assertThat(existence.exists, is(true));
@@ -98,10 +97,9 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsNoneAlive() throws Exception {
         System.out.println("testHoldingsNoneAlive");
         ExistsResponse existence = jpa(em -> {
-            em.merge(new HoldingsItemEntity(777777, "12345678", Collections.EMPTY_LIST, "track:1"));
+            em.merge(new HoldingsItemEntity(777777, "12345678", new IndexKeysList(), "track:1"));
             return bean.holdingExists(777777, "12345678");
         });
-
         assertThat(existence.exists, is(false));
     }
 }

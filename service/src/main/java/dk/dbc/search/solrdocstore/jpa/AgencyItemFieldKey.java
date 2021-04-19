@@ -1,45 +1,34 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class AgencyClassifierItemKey implements Serializable {
+public class AgencyItemFieldKey implements Serializable {
 
     private static final long serialVersionUID = -2054293971622143423L;
 
     private int agencyId;
-    private String classifier;
     private String bibliographicRecordId;
-    // Property used to communicate to enqueuer if bib entity is being deleted
-    @Transient
-    private boolean deleteMarked;
+    private String field;
 
-    public AgencyClassifierItemKey() {
+    public AgencyItemFieldKey() {
     }
 
-    public AgencyClassifierItemKey(int agencyId, String classifier, String bibliographicRecordId) {
+    public AgencyItemFieldKey(int agencyId, String bibliographicRecordId, String field) {
         this.agencyId = agencyId;
-        this.classifier = classifier;
+        this.field = field;
         this.bibliographicRecordId = bibliographicRecordId;
-        this.deleteMarked = false;
     }
 
-    public AgencyClassifierItemKey(int agencyId, String classifier, String bibliographicRecordId, boolean deleteMarked) {
-        this.agencyId = agencyId;
-        this.classifier = classifier;
-        this.bibliographicRecordId = bibliographicRecordId;
-        this.deleteMarked = deleteMarked;
-    }
 
     @Override
     public int hashCode() {
         int hash = 3;
         hash = 43 * hash + this.agencyId;
-        hash = 43 * hash + Objects.hashCode(this.classifier);
         hash = 43 * hash + Objects.hashCode(this.bibliographicRecordId);
+        hash = 43 * hash + Objects.hashCode(this.field);
         return hash;
     }
 
@@ -54,14 +43,14 @@ public class AgencyClassifierItemKey implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AgencyClassifierItemKey other = (AgencyClassifierItemKey) obj;
+        final AgencyItemFieldKey other = (AgencyItemFieldKey) obj;
         if (this.agencyId != other.agencyId) {
             return false;
         }
-        if (!Objects.equals(this.classifier, other.classifier)) {
+        if (!Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId)) {
             return false;
         }
-        if (!Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId)) {
+        if (!Objects.equals(this.field, other.field)) {
             return false;
         }
         return true;
@@ -69,10 +58,10 @@ public class AgencyClassifierItemKey implements Serializable {
 
     @Override
     public String toString() {
-        return "AgencyItemKey{" +
+        return "AgencyBibliographicFieldKey{" +
                "agencyId=" + agencyId +
-               ", classifier=" + classifier +
                ", bibliographicRecordId='" + bibliographicRecordId + '\'' +
+               ", field=" + field +
                '}';
     }
 
@@ -85,11 +74,11 @@ public class AgencyClassifierItemKey implements Serializable {
     }
 
     public String getClassifier() {
-        return classifier;
+        return field;
     }
 
     public void setClassifier(String classifier) {
-        this.classifier = classifier;
+        this.field = classifier;
     }
 
     public String getBibliographicRecordId() {
@@ -98,13 +87,5 @@ public class AgencyClassifierItemKey implements Serializable {
 
     public void setBibliographicRecordId(String bibliographicRecordId) {
         this.bibliographicRecordId = bibliographicRecordId;
-    }
-
-    public boolean isDeleteMarked() {
-        return deleteMarked;
-    }
-
-    public void setDeleteMarked(boolean deleteMarked) {
-        this.deleteMarked = deleteMarked;
     }
 }

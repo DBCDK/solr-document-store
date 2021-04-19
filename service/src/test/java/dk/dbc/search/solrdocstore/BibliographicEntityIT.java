@@ -2,14 +2,12 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,7 +18,7 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
     public void StoreEntity() {
         EntityManager em = env().getEntityManager();
         env().getPersistenceContext().run(() -> {
-            Map<String, List<String>> indexKeys = new HashMap<>();
+            IndexKeys indexKeys = new IndexKeys();
             indexKeys.put("titel", Collections.singletonList("unix bogen"));
             indexKeys.put("id", Collections.singletonList("argle"));
             BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1", "work:1", "unit:2", false, indexKeys, "");
@@ -51,12 +49,11 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(be.getWork(), is("work:3"));
         assertThat(be.getUnit(), is("unit:3"));
         assertThat(be.isDeleted(), is(true));
-        Map<String, List<String>> expected = new HashMap<>();
+        IndexKeys expected = new IndexKeys();
         expected.put("ti", Arrays.asList("isdnBogen", "title2"));
         expected.put("001", Collections.singletonList("argle"));
         assertThat(be.getIndexKeys(), is(expected));
 
         assertThat(be.getTrackingId(), is("track"));
-
     }
 }

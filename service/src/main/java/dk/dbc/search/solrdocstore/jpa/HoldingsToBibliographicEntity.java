@@ -113,5 +113,4 @@ public class HoldingsToBibliographicEntity implements Serializable {
     public void setIsCommonDerived(boolean isCommonDerived) {
         this.isCommonDerived = isCommonDerived;
     }
-
 }

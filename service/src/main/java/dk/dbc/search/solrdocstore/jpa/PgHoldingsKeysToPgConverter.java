@@ -28,20 +28,17 @@ import dk.dbc.commons.jsonb.JSONBException;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.List;
 
 /**
  * Handles mapping from/to String to/from PostgreSQL JSON type
  */
 @Converter
-public class PgHoldingsKeysToPgConverter implements AttributeConverter<List<Map<String, List<String>>>, PGobject> {
+public class PgHoldingsKeysToPgConverter implements AttributeConverter<IndexKeysList, PGobject> {
 
     private final JSONBContext context = new JSONBContext();
 
     @Override
-    public PGobject convertToDatabaseColumn(List<Map<String, List<String>>> content) throws IllegalStateException {
+    public PGobject convertToDatabaseColumn(IndexKeysList content) throws IllegalStateException {
         final PGobject pgObject = new PGobject();
         pgObject.setType("jsonb");
         try {
@@ -53,12 +50,12 @@ public class PgHoldingsKeysToPgConverter implements AttributeConverter<List<Map<
     }
 
     @Override
-    public List<Map<String, List<String>>> convertToEntityAttribute(PGobject pgObject) {
+    public IndexKeysList convertToEntityAttribute(PGobject pgObject) {
         if (pgObject == null) {
             return null;
         }
         try {
-            return context.unmarshall(pgObject.getValue(), ArrayList.class);
+            return context.unmarshall(pgObject.getValue(), IndexKeysList.class);
         } catch (JSONBException e) {
             throw new IllegalStateException(e);
         }

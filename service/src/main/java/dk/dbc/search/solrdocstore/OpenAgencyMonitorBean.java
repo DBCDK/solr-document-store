@@ -61,5 +61,4 @@ public class OpenAgencyMonitorBean {
             log.debug("Error processing openagency validation: ", ex);
         }
     }
-
 }

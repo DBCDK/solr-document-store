@@ -18,13 +18,12 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.Test;
 
@@ -38,8 +37,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 public class DocumentRetrieveResponseTest {
 
     private static final ObjectMapper O = new ObjectMapper();
-    private static final TypeReference<List<Map<String, List<String>>>> TYPE_REFERENCE = new TypeReference<List<Map<String, List<String>>>>() {
-    };
 
     @Test(timeout = 2_000L)
     public void testCase() throws Exception {
@@ -68,7 +65,6 @@ public class DocumentRetrieveResponseTest {
     }
 
     private static HoldingsItemEntity hiEntityWith(String json) throws JsonProcessingException {
-        List<Map<String, List<String>>> indexKeys = O.readValue(json.replaceAll("'", "\""), TYPE_REFERENCE);
-        return new HoldingsItemEntity(0, "", indexKeys, "");
+        return new HoldingsItemEntity(0, "", HoldingsSolrKeys.indexKeys(json), "");
     }
 }

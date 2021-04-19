@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.response.OpenAgencyStatusResponse;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;

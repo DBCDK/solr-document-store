@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import java.time.Instant;
@@ -116,7 +117,6 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:1"));
     }
 
-
     @Test(timeout = 2_000L)
     public void testFirstLastNoneToNone() throws Exception {
         System.out.println("testFirstLastNoneToNone");
@@ -148,7 +148,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), empty());
     }
 
-        @Test(timeout = 2_000L)
+    @Test(timeout = 2_000L)
     public void testMajorHoldingsChange() throws Exception {
         System.out.println("testMajorHoldingsChange");
 
@@ -186,7 +186,6 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "mm,870970-basis:25912233",
                    "mw,work:1"));
     }
-
 
     private static HoldingsItemBean holdingsItemBeanWithRules(JpaTestEnvironment env, QueueRuleEntity... rules) {
         HoldingsItemBean hol = createHoldingsItemBean(env);

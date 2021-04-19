@@ -183,5 +183,4 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
         log.debug("enqueued (postponed) = {}", enqueued);
         return enqueued;
     }
-
 }

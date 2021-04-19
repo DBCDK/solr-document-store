@@ -28,6 +28,7 @@ import org.postgresql.ds.PGSimpleDataSource;
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 public class UnpooledDataSource {
+
     private static final Pattern POSTGRES_URL_REGEX = Pattern.compile("(?:postgres(?:ql)?://)?(?:([^:@]+)(?::([^@]*))@)?([^:/]+)(?::([1-9][0-9]*))?/(.+)");
 
     public static DataSource dataSourceOf(String connectionName) {
@@ -42,12 +43,11 @@ public class UnpooledDataSource {
             if (matcher.group(2) != null)
                 ds.setPassword(matcher.group(2));
         }
-        ds.setServerNames(new String[]{matcher.group(3)});
+        ds.setServerNames(new String[] {matcher.group(3)});
         if (matcher.group(4) != null)
-            ds.setPortNumbers(new int[]{Integer.parseUnsignedInt(matcher.group(4))});
+            ds.setPortNumbers(new int[] {Integer.parseUnsignedInt(matcher.group(4))});
         ds.setDatabaseName(matcher.group(5));
         ds.setApplicationName("SolrDocStore-" + connectionName);
         return ds;
     }
-
 }

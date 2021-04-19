@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore.jpa;
 
-import dk.dbc.search.solrdocstore.QueueType;
 import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Column;

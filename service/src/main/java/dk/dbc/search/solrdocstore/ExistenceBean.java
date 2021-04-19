@@ -43,7 +43,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import response.ExistsResponse;
+import dk.dbc.search.solrdocstore.response.ExistsResponse;
 
 /**
  *
@@ -137,5 +137,4 @@ public class ExistenceBean {
         }
         return response;
     }
-
 }

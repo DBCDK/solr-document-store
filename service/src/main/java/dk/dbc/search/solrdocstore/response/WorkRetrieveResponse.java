@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.response;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

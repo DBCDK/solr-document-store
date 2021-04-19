@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.response;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import java.util.Objects;
@@ -7,7 +7,7 @@ public class BibliographicFrontendResponse extends BibliographicEntity {
 
     private String supersedeId;
 
-    BibliographicFrontendResponse(BibliographicEntity b, String liveId) {
+    public BibliographicFrontendResponse(BibliographicEntity b, String liveId) {
         super(b.getAgencyId(), b.getClassifier(), b.getBibliographicRecordId(), b.getRepositoryId(), b.getWork(), b.getUnit(), b.isDeleted(), b.getIndexKeys(), b.getTrackingId());
         supersedeId = liveId;
     }
@@ -37,5 +37,4 @@ public class BibliographicFrontendResponse extends BibliographicEntity {
         return super.equals(obj) &&
                Objects.equals(this.supersedeId, other.supersedeId);
     }
-
 }

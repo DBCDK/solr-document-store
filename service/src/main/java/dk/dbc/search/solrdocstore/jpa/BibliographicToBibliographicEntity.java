@@ -62,5 +62,4 @@ public class BibliographicToBibliographicEntity implements Serializable {
     public String toString() {
         return "BibliographicToBibliographicEntity{" + "deadBibliographicRecordId=" + deadBibliographicRecordId + ", liveBibliographicRecordId=" + liveBibliographicRecordId + '}';
     }
-
 }

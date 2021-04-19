@@ -12,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
-    public void StoreEntity() {
+    public void storeEntity() {
         executeScriptResource("/entityTestData.sql");
         EntityManager em = env().getEntityManager();
 
@@ -28,7 +28,7 @@ public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationT
     }
 
     @Test
-    public void LoadEntity() {
+    public void loadEntity() {
         executeScriptResource("/entityTestData.sql");
 
         EntityManager em = env().getEntityManager();

@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.request.BibliographicEntityRequest;
 import dk.dbc.commons.jsonb.JSONBContext;
 import org.junit.Test;
 
@@ -44,5 +45,4 @@ public class BibliographicEntityRequestTest {
         BibliographicEntityRequest beNew = context.unmarshall(jsonContentNew, BibliographicEntityRequest.class);
         assertThat(beNew.getSupersedes(), containsInAnyOrder("a"));
     }
-
 }
