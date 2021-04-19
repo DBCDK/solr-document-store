@@ -143,6 +143,12 @@ public class BeanFactoryUtil {
         return bean;
     }
 
+    public static ExistanceBean createExistanceBean(JpaTestEnvironment env) {
+        ExistanceBean bean = new ExistanceBean();
+        bean.entityManager = env.getEntityManager();
+        return bean;
+    }
+
     public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em, OpenAgencyBean openAgency, EnqueueSupplierBean queue, BibliographicRetrieveBean brBean) {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
         bean.entityManager = em;
