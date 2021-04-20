@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -58,5 +59,4 @@ public class OpenAgencyProxyBean {
             throw new EJBException(e);
         }
     }
-
 }

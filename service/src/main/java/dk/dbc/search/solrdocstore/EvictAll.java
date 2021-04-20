@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.response.StatusResponse;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -41,9 +42,7 @@ public class EvictAll {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response evictAll() {
-
         entityManager.getEntityManagerFactory().getCache().evictAll();
-        return Response.ok("{\"ok\": true}").build();
+        return Response.ok(new StatusResponse()).build();
     }
-
 }

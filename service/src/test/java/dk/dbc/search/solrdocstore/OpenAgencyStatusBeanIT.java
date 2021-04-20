@@ -1,11 +1,13 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.response.OpenAgencyStatusResponse;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.net.URLEncoder;
-import java.util.Collections;
 import javax.persistence.EntityManager;
 import org.junit.After;
 import org.junit.Before;
@@ -74,7 +76,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("purgeEnqueuesWhenHasLiveHoldings");
 
         Object status = env().getPersistenceContext().run(() -> {
-            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, Collections.EMPTY_MAP, ""));
+            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, new IndexKeys(), ""));
             em.persist(new HoldingsToBibliographicEntity(711111, "23645500", 870970, "23645564", true));
             em.persist(new HoldingsItemEntity(711111, "23645500", ON_SHELF, ""));
             return openAgencyStatus.purgeAgency(711111, "").getEntity();
@@ -90,7 +92,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("purgeDoesntEnqueueWithoutHasLiveHoldings");
 
         Object status = env().getPersistenceContext().run(() -> {
-            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, Collections.EMPTY_MAP, ""));
+            em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, new IndexKeys(), ""));
             em.persist(new HoldingsToBibliographicEntity(711111, "23645500", 870970, "23645564", true));
             em.persist(new HoldingsItemEntity(711111, "23645500", DECOMMISSIONED, ""));
             return openAgencyStatus.purgeAgency(711111, "").getEntity();

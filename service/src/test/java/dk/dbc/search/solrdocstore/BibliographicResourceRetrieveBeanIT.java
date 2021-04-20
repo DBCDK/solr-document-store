@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.util.List;

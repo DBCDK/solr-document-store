@@ -1,8 +1,8 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.request;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class BibliographicEntityRequest extends BibliographicEntity {
@@ -14,7 +14,7 @@ public class BibliographicEntityRequest extends BibliographicEntity {
     public BibliographicEntityRequest() {
     }
 
-    public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, Map<String, List<String>> indexKeys, String trackingId, List<String> supersedes) {
+    public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, IndexKeys indexKeys, String trackingId, List<String> supersedes) {
         super(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, deleted, indexKeys, trackingId);
         this.supersedes = supersedes;
     }
@@ -57,5 +57,4 @@ public class BibliographicEntityRequest extends BibliographicEntity {
         return super.equals(obj) &&
                Objects.equals(this.supersedes, other.supersedes);
     }
-
 }

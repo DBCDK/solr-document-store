@@ -1,11 +1,15 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +20,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,12 +36,12 @@ import static org.hamcrest.Matchers.not;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    private static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[]");
-    private static final List<Map<String, List<String>>> ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
-    private static final Map<String, List<String>> EXCLUDE = indexKeysB("{\"rec.excludeFromUnionCatalogue\":[\"true\"]}");
-    private static final Map<String, List<String>> NOTEXCLUDE = indexKeysB("{\"rec.excludeFromUnionCatalogue\":[\"false\"]}");
-    private static final Map<String, List<String>> NOEXCLUDE = indexKeysB("{}");
-    private static final Map<String, List<String>> EMPTY = indexKeysB("{}");
+    private static final IndexKeysList DECOMMISSIONED = indexKeys("[]");
+    private static final IndexKeysList ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
+    private static final IndexKeys EXCLUDE = indexKeysB("{\"rec.excludeFromUnionCatalogue\":[\"true\"]}");
+    private static final IndexKeys NOTEXCLUDE = indexKeysB("{\"rec.excludeFromUnionCatalogue\":[\"false\"]}");
+    private static final IndexKeys NOEXCLUDE = indexKeysB("{}");
+    private static final IndexKeys EMPTY = indexKeysB("{}");
     private static final String ID = "ABC";
 
     private DocumentRetrieveBean bean;
@@ -62,10 +65,9 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void newCommonRecordWithExistingHoldings() throws Exception {
-
-        em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, Collections.EMPTY_MAP, "T1"));
-        em.merge(new HoldingsItemEntity(300101, "12345678", Collections.EMPTY_LIST, "T2"));
-        em.merge(new HoldingsItemEntity(300102, "12345678", Collections.EMPTY_LIST, "T3"));
+        em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
+        em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), "T2"));
+        em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), "T3"));
         em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
         em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
         DocumentRetrieveResponse doc = env().getPersistenceContext()
@@ -148,19 +150,18 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
 
-
-    private static List<Map<String, List<String>>> indexKeys(String json) {
+    private static IndexKeysList indexKeys(String json) {
         try {
-            return O.readValue(json, new TypeReference<List<Map<String, List<String>>>>() {
+            return O.readValue(json, new TypeReference<IndexKeysList>() {
                        });
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private static Map<String, List<String>> indexKeysB(String json) {
+    private static IndexKeys indexKeysB(String json) {
         try {
-            return O.readValue(json, new TypeReference<Map<String, List<String>>>() {
+            return O.readValue(json, new TypeReference<IndexKeys>() {
                        });
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -186,16 +187,15 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.persist(makeOpenAgencyEntity(holdingsAgencyId));
         }
 
-        private Build holdings(List<Map<String, List<String>>> content) throws SQLException {
+        private Build holdings(IndexKeysList content) throws SQLException {
             hold.setHoldingsKeys(new HoldingsItemEntity(holdingsAgencyId, holdingsId, content, "t1"));
             h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId, EnqueueCollector.VOID, QueueType.HOLDING);
             return this;
         }
 
-        private Build record(Map<String, List<String>> content) throws SQLException {
+        private Build record(IndexKeys content) throws SQLException {
             bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "work:1", "unit:1", false, content, "t0"), Collections.EMPTY_LIST, false);
             return this;
         }
     }
-
 }

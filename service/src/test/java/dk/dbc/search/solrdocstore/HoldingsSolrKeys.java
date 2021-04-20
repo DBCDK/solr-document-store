@@ -1,10 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -13,14 +11,13 @@ import java.util.Map;
 public class HoldingsSolrKeys {
 
     private static final ObjectMapper O = new ObjectMapper();
-    public static final List<Map<String, List<String>>> DECOMMISSIONED = indexKeys("[]");
-    public static final List<Map<String, List<String>>> ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
-    public static final List<Map<String, List<String>>> ON_SHELF_AND_DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
+    public static final IndexKeysList DECOMMISSIONED = indexKeys("[]");
+    public static final IndexKeysList ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
+    public static final IndexKeysList ON_SHELF_AND_DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
 
-    private static List<Map<String, List<String>>> indexKeys(String json) {
+    public static IndexKeysList indexKeys(String json) {
         try {
-            return O.readValue(json, new TypeReference<List<Map<String, List<String>>>>() {
-                       });
+            return O.readValue(json.replaceAll("'", "\""), IndexKeysList.class);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

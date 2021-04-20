@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.response.FrontendReturnListType;
+import dk.dbc.search.solrdocstore.response.BibliographicFrontendResponse;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -151,5 +153,4 @@ public class BibliographicRecordAPIBean {
             return Response.ok(new FrontendReturnListType<>(res, 0), MediaType.APPLICATION_JSON).build();
         }
     }
-
 }

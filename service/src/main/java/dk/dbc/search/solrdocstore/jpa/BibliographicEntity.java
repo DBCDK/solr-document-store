@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore.jpa;
 
-import dk.dbc.search.solrdocstore.QueueType;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.io.Serializable;
 import javax.persistence.Basic;
@@ -17,7 +16,6 @@ import javax.persistence.Table;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.persistence.annotations.Mutable;
@@ -60,11 +58,11 @@ public class BibliographicEntity implements Serializable {
     @Basic(fetch = LAZY)
     @Mutable
     @Convert(converter = PgMapOfStringsToJsonConverter.class)
-    private Map<String, List<String>> indexKeys;
+    private IndexKeys indexKeys;
 
     private String trackingId;
 
-    public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, Map<String, List<String>> indexKeys, String trackingId) {
+    public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, IndexKeys indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.classifier = classifier;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -186,11 +184,11 @@ public class BibliographicEntity implements Serializable {
         this.deleted = deleted;
     }
 
-    public Map<String, List<String>> getIndexKeys() {
+    public IndexKeys getIndexKeys() {
         return indexKeys;
     }
 
-    public void setIndexKeys(Map<String, List<String>> indexKeys) {
+    public void setIndexKeys(IndexKeys indexKeys) {
         this.indexKeys = indexKeys;
     }
 

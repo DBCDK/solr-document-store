@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.request.BibliographicEntityRequest;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
@@ -7,6 +8,8 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +19,6 @@ import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -514,7 +516,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Setup holding pointint to 870970:a
         env().getPersistenceContext()
                 .run(() -> {
-                    em.persist(new HoldingsItemEntity(700000, "a", Collections.EMPTY_LIST, "T#1"));
+                    em.persist(new HoldingsItemEntity(700000, "a", new IndexKeysList(), "T#1"));
                 });
         env().getPersistenceContext()
                 .run(() -> {
@@ -623,15 +625,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext()
                 .run(() -> env().getEntityManager().merge(
                         new HoldingsItemEntity(700000, "new",
-                                               new ArrayList<Map<String, List<String>>>() {
-                                           {
-                                               add(new HashMap<String, List<String>>() {
-                                                   {
-                                                       put("holdingsitem.status", Arrays.asList("OnShelf"));
-                                                   }
-                                               });
-                                           }
-                                       }, "test")));
+                                               HoldingsSolrKeys.ON_SHELF,
+                                 "test")));
 
         String a870970 = makeBibliographicRequestJson(
                 870970, e -> {
@@ -727,14 +722,15 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
     }
 
-    private static Map<String, List<String>> makeIndexKeys(String... keys) {
-        return Arrays.stream(keys)
-                .map(s -> s.split("=", 2))
-                .collect(Collectors.groupingBy(
-                        a -> a[0],
-                        Collectors.mapping(
-                                a -> a[1],
-                                Collectors.toList())));
+    private static IndexKeys makeIndexKeys(String... keys) {
+        return IndexKeys.from(
+                Arrays.stream(keys)
+                        .map(s -> s.split("=", 2))
+                        .collect(Collectors.groupingBy(
+                                a -> a[0],
+                                Collectors.mapping(
+                                        a -> a[1],
+                                        Collectors.toList()))));
     }
 
     public List<HoldingsToBibliographicEntity> getRelatedHoldings(String bibId) {
@@ -750,9 +746,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", false, Collections.EMPTY_MAP, "IT", null);
+        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT", null);
         modifier.accept(entity);
         return jsonbContext.marshall(entity);
     }
-
 }

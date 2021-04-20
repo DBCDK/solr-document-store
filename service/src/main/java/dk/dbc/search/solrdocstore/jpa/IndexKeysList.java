@@ -16,20 +16,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package response;
+package dk.dbc.search.solrdocstore.jpa;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-@Schema(name = ExistsResponse.NAME)
-@SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
-public class ExistsResponse {
-    public static final String NAME = "existence-response";
+@Schema(name = IndexKeysList.NAME, type = SchemaType.ARRAY, ref = IndexKeys.NAME, hidden = true)
+public class IndexKeysList extends ArrayList<IndexKeys> {
 
-    @Schema(description = "If an item exists and can be fetched")
-    public boolean exists;
+    private static final long serialVersionUID = 0x047574A122149A20L;
+
+    public static final String NAME = "index-keys-list";
+
+    public static IndexKeysList from(IndexKeys... indexKeys) {
+        return from(Arrays.asList(indexKeys));
+    }
+
+    public static IndexKeysList from(List<IndexKeys> indexKeys) {
+        IndexKeysList ret = new IndexKeysList();
+        ret.addAll(indexKeys);
+        return ret;
+    }
 }

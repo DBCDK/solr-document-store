@@ -18,12 +18,13 @@
  */
 package dk.dbc.search.solrdocstore.jpa;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.dbc.search.solrdocstore.HoldingsSolrKeys;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
+import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.indexKeys;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -59,7 +60,7 @@ public class HoldingsItemEntityTest {
         HoldingsItemEntity hi = new HoldingsItemEntity();
         hi.setAgencyId(777777);
 
-        List<Map<String, List<String>>> values = indexKeys(
+        IndexKeysList values = HoldingsSolrKeys.indexKeys(
                 "[" +
                 " {" +
                 "  'holdingsitem.branchId': [ 'abc' ]," +
@@ -100,7 +101,7 @@ public class HoldingsItemEntityTest {
         HoldingsItemEntity hi = new HoldingsItemEntity();
         hi.setAgencyId(777777);
 
-        List<Map<String, List<String>>> values = indexKeys(
+        IndexKeysList values = HoldingsSolrKeys.indexKeys(
                 "[" +
                 " {" +
                 "  'holdingsitem.itemId': [ 'abc' ]," +
@@ -130,10 +131,4 @@ public class HoldingsItemEntityTest {
                    "onloan=2",
                    "online=1"));
     }
-
-    private static List<Map<String, List<String>>> indexKeys(String json) throws Exception {
-        return O.readValue(json.replaceAll("'", "\""), new TypeReference<List<Map<String, List<String>>>>() {
-                   });
-    }
-
 }

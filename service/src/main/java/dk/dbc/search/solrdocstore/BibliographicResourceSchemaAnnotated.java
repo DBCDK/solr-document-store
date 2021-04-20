@@ -18,31 +18,31 @@
  */
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.jpa.QueueType;
-import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
-import java.sql.SQLException;
-import java.util.HashSet;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class MockEnqueueCollector extends EnqueueCollector {
+@Schema(name = BibliographicResourceSchemaAnnotated.NAME)
+public class BibliographicResourceSchemaAnnotated {
 
-    private final HashSet<String> jobs = new HashSet<>();
+    public static final String NAME = "resource";
 
-    @Override
-    public void add(BibliographicEntity entity, QueueType supplier) {
-        String jobName = supplier.toString() + ":" + entity.asQueueJobFor(supplier).getJobId();
-        jobs.add(jobName);
-    }
+    @Schema(description = "The agency that has this resource",
+            required = true)
+    public int agencyId;
 
-    @Override
-    public void commit() throws SQLException {
-    }
+    @Schema(description = "The identifier for this resource",
+            required = true)
+    public String bibliographicRecordId;
 
-    public HashSet<String> getJobs() {
-        return jobs;
-    }
+    @Schema(description = "The name of this resource",
+            required = true)
+    public String field;
+
+    @Schema(description = "If the resource is present or not",
+            required = true)
+    public boolean value;
+
 }

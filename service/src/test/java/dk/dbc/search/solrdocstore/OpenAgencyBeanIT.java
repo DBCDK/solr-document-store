@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
@@ -160,5 +161,4 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertTrue(changedAgencies.contains(711100));
         assertEquals(1, changedAgencies.size());
     }
-
 }

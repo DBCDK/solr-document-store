@@ -2,14 +2,12 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,7 +18,7 @@ public class BibliographicEntityTest {
 
     @Test
     public void simpleEncode() throws Exception {
-        Map<String, List<String>> indexKeys = new HashMap<>();
+        IndexKeys indexKeys = new IndexKeys();
         indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
         indexKeys.put("id", Collections.singletonList("argle"));
 
@@ -43,10 +41,9 @@ public class BibliographicEntityTest {
         assertThat(be.isDeleted(), is(false));
         assertThat(be.getTrackingId(), is(""));
 
-        Map<String, List<String>> expected = new HashMap<>();
+        IndexKeys expected = new IndexKeys();
         expected.put("title", Arrays.asList("unix bogen", "title2"));
         expected.put("id", Collections.singletonList("argle"));
         assertThat(be.getIndexKeys(), is(expected));
-
     }
 }

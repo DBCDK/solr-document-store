@@ -16,33 +16,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.response;
 
-import dk.dbc.search.solrdocstore.jpa.QueueType;
-import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
-import java.sql.SQLException;
-import java.util.HashSet;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class MockEnqueueCollector extends EnqueueCollector {
+@Schema(name = ExistsResponse.NAME)
+@SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
+public class ExistsResponse {
+    public static final String NAME = "existence-response";
 
-    private final HashSet<String> jobs = new HashSet<>();
-
-    @Override
-    public void add(BibliographicEntity entity, QueueType supplier) {
-        String jobName = supplier.toString() + ":" + entity.asQueueJobFor(supplier).getJobId();
-        jobs.add(jobName);
-    }
-
-    @Override
-    public void commit() throws SQLException {
-    }
-
-    public HashSet<String> getJobs() {
-        return jobs;
-    }
+    @Schema(description = "If an item exists and can be fetched")
+    public boolean exists;
 }

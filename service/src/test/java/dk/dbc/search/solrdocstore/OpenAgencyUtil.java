@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 
 /**
@@ -21,10 +22,10 @@ public class OpenAgencyUtil {
      * @return
      */
     public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId) {
-        if(agencyId == LibraryType.COMMON_AGENCY) {
+        if (agencyId == LibraryType.COMMON_AGENCY) {
             return makeOpenAgencyEntity(LibraryType.COMMON_AGENCY, true, false, true);
         }
-        if(agencyId == LibraryType.SCHOOL_COMMON_AGENCY) {
+        if (agencyId == LibraryType.SCHOOL_COMMON_AGENCY) {
             return makeOpenAgencyEntity(LibraryType.SCHOOL_COMMON_AGENCY, false, false, false);
         }
         boolean partOfDanbib = ( agencyId / 1 ) % 10 < 5;

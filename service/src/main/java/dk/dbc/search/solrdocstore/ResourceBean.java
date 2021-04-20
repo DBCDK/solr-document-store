@@ -1,5 +1,9 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.response.StatusResponse;
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.request.AddResourceRequest;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
@@ -27,6 +31,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import static dk.dbc.log.LogWith.track;
 
@@ -50,6 +58,17 @@ public class ResourceBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Path("add")
+    @Operation(
+            operationId = "add-resource",
+            summary = "Adds a resource to an item",
+            description = "This operation sets the resource and connect" +
+                          " it to a number of manifestations item, if possible.")
+    @APIResponses({
+        @APIResponse(name = "Success",
+                     responseCode = "200",
+                     description = "Resource has been added",
+                     ref = StatusResponse.NAME)})
+    @RequestBody(ref = BibliographicResourceSchemaAnnotated.NAME)
     public Response addResource(String jsonContent) throws JSONBException {
         try (LogWith logWith = track(UUID.randomUUID().toString())) {
             AddResourceRequest request = jsonbContext.unmarshall(jsonContent, AddResourceRequest.class);
@@ -61,7 +80,7 @@ public class ResourceBean {
                 OpenAgencyEntity oaEntity = openAgency.lookup(request.getAgencyId());
                 libraryType = oaEntity.getLibraryType();
             } catch (EJBException ex) {
-                return Response.ok().entity(new StatusBean.Resp("Unknown agency")).build();
+                return Response.ok().entity(new StatusResponse("Unknown agency")).build();
             }
 
             // Add resource
@@ -87,9 +106,9 @@ public class ResourceBean {
             } catch (SQLException ex) {
                 log.error("Unable to commit queue entries: {}", ex.getMessage());
                 log.debug("Unable to commit queue entries: ", ex);
-                return Response.status(Response.Status.BAD_REQUEST).entity(new StatusBean.Resp("Unable to commit queue entries")).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(new StatusResponse("Unable to commit queue entries")).build();
             }
-            return Response.ok().entity(new StatusBean.Resp()).build();
+            return Response.ok().entity(new StatusResponse()).build();
         }
     }
 

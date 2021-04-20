@@ -1,8 +1,7 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.request;
 
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import java.util.List;
-import java.util.Map;
+import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
 
 public class HoldingsItemEntityRequest extends HoldingsItemEntity {
 
@@ -11,7 +10,7 @@ public class HoldingsItemEntityRequest extends HoldingsItemEntity {
     public HoldingsItemEntityRequest() {
     }
 
-    public HoldingsItemEntityRequest(int agencyId, String bibliographicRecordId, List<Map<String, List<String>>> indexKeys, String trackingId) {
+    public HoldingsItemEntityRequest(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) {
         super(agencyId, bibliographicRecordId, indexKeys, trackingId);
     }
 

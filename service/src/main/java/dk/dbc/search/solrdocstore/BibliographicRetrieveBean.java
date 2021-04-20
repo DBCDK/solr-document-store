@@ -89,5 +89,4 @@ public class BibliographicRetrieveBean {
         return (long) queryTotal.getSingleResult();
 
     }
-
 }

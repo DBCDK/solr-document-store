@@ -51,5 +51,4 @@ public class HoldingsToBibliographicKey implements Serializable {
     public void setHoldingsBibliographicRecordId(String holdingsBibliographicRecordId) {
         this.holdingsBibliographicRecordId = holdingsBibliographicRecordId;
     }
-
 }

@@ -1,5 +1,8 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.jpa.RecordType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;

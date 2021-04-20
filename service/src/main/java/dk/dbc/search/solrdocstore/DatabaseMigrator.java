@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
@@ -104,5 +105,4 @@ public class DatabaseMigrator {
         }
 
     }
-
 }

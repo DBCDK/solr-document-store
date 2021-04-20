@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,5 +21,4 @@ public class DocStoreApplication extends Application {
 
         return props;
     }
-
 }

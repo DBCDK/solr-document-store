@@ -1,9 +1,9 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.response.StatusResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,22 +39,22 @@ public class StatusBean {
     @Produces({MediaType.APPLICATION_JSON})
     @Timed(reusable = true)
     public Response getStatus() {
-        log.info("getStatus called ");
+        log.trace("getStatus called ");
 
         try (Connection connection = getConnection() ;
              Statement stmt = connection.createStatement() ;
              ResultSet resultSet = stmt.executeQuery("SELECT NOW()")) {
             if (resultSet.next()) {
                 resultSet.getTimestamp(1);
-                log.info("status - ok");
-                return Response.ok().entity(new Resp()).build();
+                log.trace("status - ok");
+                return Response.ok().entity(new StatusResponse()).build();
             }
-            return Response.serverError().entity(new Resp("No rows when communicating with database")).build();
+            return Response.serverError().entity(new StatusResponse("No rows when communicating with database")).build();
 
         } catch (SQLException ex) {
             log.error("Error getting connection for status: {}", ex.getMessage());
             log.debug("Error getting connection for status: ", ex);
-            return Response.serverError().entity(new Resp("SQL Exception: " + ex.getMessage())).build();
+            return Response.serverError().entity(new StatusResponse("SQL Exception: " + ex.getMessage())).build();
         }
     }
 
@@ -73,23 +73,4 @@ public class StatusBean {
         obj.put("systemName", config.getSystemName());
         return Response.ok().entity(O.writeValueAsString(obj)).build();
     }
-
-    @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
-    public static class Resp {
-
-        public boolean ok;
-        public String text;
-
-        public Resp() {
-            this.ok = true;
-            this.text = "Success";
-        }
-
-        public Resp(String diag) {
-            this.ok = false;
-            this.text = diag;
-            log.error("Answering with diag: {}", diag);
-        }
-    }
-
 }

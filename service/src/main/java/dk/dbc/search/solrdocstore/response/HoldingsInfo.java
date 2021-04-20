@@ -16,33 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.response;
 
-import dk.dbc.search.solrdocstore.jpa.QueueType;
-import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
-import java.sql.SQLException;
-import java.util.HashSet;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 
 /**
- *
- * @author Morten Bøgeskov (mb@dbc.dk)
+ * Class for fetching HoldingsItemEntity and HoldingsToBibliographicEntity
+ * objects in
+ * the same query (in a human-readable way).
  */
-public class MockEnqueueCollector extends EnqueueCollector {
+public class HoldingsInfo {
 
-    private final HashSet<String> jobs = new HashSet<>();
+    public HoldingsItemEntity holdingsItemEntity;
+    public HoldingsToBibliographicEntity holdingsToBibliographicEntity;
 
-    @Override
-    public void add(BibliographicEntity entity, QueueType supplier) {
-        String jobName = supplier.toString() + ":" + entity.asQueueJobFor(supplier).getJobId();
-        jobs.add(jobName);
-    }
-
-    @Override
-    public void commit() throws SQLException {
-    }
-
-    public HashSet<String> getJobs() {
-        return jobs;
+    public HoldingsInfo(HoldingsItemEntity hie, HoldingsToBibliographicEntity hbe) {
+        holdingsItemEntity = hie;
+        holdingsToBibliographicEntity = hbe;
     }
 }

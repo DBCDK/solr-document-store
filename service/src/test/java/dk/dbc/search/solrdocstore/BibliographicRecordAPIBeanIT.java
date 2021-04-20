@@ -1,16 +1,19 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.response.FrontendReturnListType;
+import dk.dbc.search.solrdocstore.response.BibliographicFrontendResponse;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.commons.jsonb.JSONBContext;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.Function;
@@ -40,7 +43,7 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         env().getPersistenceContext().run(() -> {
             createBibAndHoldings(commonAgency, "ABC", holdingAgencies);
             createBibAndHoldings(commonAgency, "XYZ", holdingAgencies);
-            createBibliographicEntity(4711, "XYZ");
+            em.persist(new BibliographicEntity(4711, "clazzifier", "XYZ", "id#1", "w", "u", false, new IndexKeys(), "IT"));
         });
         executeScriptResource("/frontendIT.sql");
     }
@@ -63,8 +66,6 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         FrontendReturnListType<BibliographicFrontendResponse> frontendReturnListType =
                 (FrontendReturnListType<BibliographicFrontendResponse>) json.getEntity();
         Assert.assertEquals(2, frontendReturnListType.result.size());
-
-        return;
     }
 
     @Test
@@ -81,7 +82,7 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
     public void testGetBibliographicRecord() {
         Response result = bean.getBibliographicRecord("page-order", 103862);
         BibliographicFrontendResponse res = (BibliographicFrontendResponse) result.getEntity();
-        Map<String, List<String>> map = new HashMap<>();
+        IndexKeys map = new IndexKeys();
         map.put("rec.repositoryId", Collections.singletonList("p-o"));
         BibliographicEntity b = new BibliographicEntity(103862, "clazzifier", "page-order", "p-o", "work:2", "unit:6", false, map, "track:8");
         Assert.assertEquals(res, new BibliographicFrontendResponse(b, "0639423"));
@@ -195,39 +196,14 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         Assert.assertEquals(supersedeIdsRepo, Arrays.asList("0639423", "0639423", "0639423", "0639423", "0639423", "0639423", "0639423", "0639423"));
     }
 
-    private BibliographicEntity createBibAndHoldings(
-            int agencyId,
-            String bibliographicRecordId,
-            @NotNull int... agencies) {
-        BibliographicEntity b = createBibliographicEntity(agencyId, bibliographicRecordId);
-//        boolean isCommonDerived = Arrays.stream(agencies)
-//                .anyMatch(i -> i == commonAgency);
+    private void createBibAndHoldings(int agencyId, String bibliographicRecordId, int... agencies) {
+        em.persist(new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", false, new IndexKeys(), "IT"));
         for (int i = 0 ; i < agencies.length ; i++) {
-            createHoldingsItem(agencies[i], bibliographicRecordId);
+            em.persist(new HoldingsItemEntity(agencies[i], bibliographicRecordId, HoldingsSolrKeys.ON_SHELF, "track"));
             HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                     agencies[i], bibliographicRecordId, agencyId, false
             );
             em.persist(h2b);
         }
-        return b;
     }
-
-    private BibliographicEntity createBibliographicEntity(int agencyId, String bibliographicRecordId) {
-        BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", false, Collections.EMPTY_MAP, "IT");
-        em.persist(b);
-        return b;
-    }
-
-    private HoldingsItemEntity createHoldingsItem(int agencyId, String bibliographicRecordId) {
-        List<Map<String, List<String>>> indexKeys = new ArrayList<>();
-        List<String> keys = Arrays.asList(new String[] {"bla", "bla2"});
-        Map<String, List<String>> keyMap = new HashMap<>();
-        keyMap.put("def", keys);
-        indexKeys.add(keyMap);
-        String trackingId = "1234";
-        HoldingsItemEntity e = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, trackingId);
-        em.persist(e);
-        return e;
-    }
-
 }

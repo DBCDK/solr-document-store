@@ -20,7 +20,7 @@ package dk.dbc.search.solrdocstore.enqueue;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
-import dk.dbc.search.solrdocstore.QueueType;
+import dk.dbc.search.solrdocstore.jpa.QueueType;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -108,5 +108,4 @@ public class EnqueueCollector {
         }
         return new EnqueueTargetCollector(connection, targets);
     }
-
 }

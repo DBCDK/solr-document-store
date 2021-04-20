@@ -5,9 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
+import javax.persistence.IdClass;
 
 @Entity
 @Table(name = "resource")
+@IdClass(AgencyItemFieldKey.class)
 public class BibliographicResourceEntity implements Serializable {
 
     private static final long serialVersionUID = -2173176418488104877L;
@@ -94,5 +96,4 @@ public class BibliographicResourceEntity implements Serializable {
     public String toString() {
         return "BibliographicResourceEntity{" + "agencyId=" + agencyId + ", bibliographicRecordId=" + bibliographicRecordId + ", field=" + field + ", value=" + value + '}';
     }
-
 }

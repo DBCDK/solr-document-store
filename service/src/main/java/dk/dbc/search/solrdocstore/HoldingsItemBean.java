@@ -1,13 +1,14 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.request.HoldingsItemEntityRequest;
+import dk.dbc.search.solrdocstore.request.HoldingsItemEntitySchemaAnnotated;
 import java.sql.SQLException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -27,6 +28,11 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import dk.dbc.search.solrdocstore.response.StatusResponse;
 
 import static dk.dbc.log.LogWith.track;
 import static java.util.Collections.EMPTY_SET;
@@ -36,7 +42,6 @@ import static java.util.Collections.EMPTY_SET;
 public class HoldingsItemBean {
 
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
-    private static final ObjectMapper O = new ObjectMapper();
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
@@ -53,16 +58,42 @@ public class HoldingsItemBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed(reusable = true)
+    @Operation(
+            operationId = "set-holdings",
+            summary = "set holdingsitems solr documents",
+            description = "This operation sets the holdingsitems and connect" +
+                          " them to a bibliographic item, if possible.")
+    @APIResponses({
+        @APIResponse(name = "Success",
+                     responseCode = "200",
+                     description = "Holdings has been added",
+                     ref = StatusResponse.NAME),
+        @APIResponse(name = "Bad Request",
+                     responseCode = "400",
+                     description = "Holdings has NOT been added - invalid or missing parameters",
+                     ref = StatusResponse.NAME),
+        @APIResponse(name = "Internal Server Error",
+                     responseCode = "500",
+                     description = "Holdings has NOT been added - this really shouldn't happen",
+                     ref = StatusResponse.NAME)})
+    @RequestBody(ref = HoldingsItemEntitySchemaAnnotated.NAME)
     public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException {
 
         HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         if (hi.getTrackingId() == null)
             hi.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(hi.getTrackingId())) {
+            if (hi.getAgencyId() == 0 ||
+                hi.getBibliographicRecordId() == null ||
+                hi.getIndexKeys() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new StatusResponse("Missing or invalid required parameters"))
+                        .build();
+            }
 
             setHoldingsKeys(hi.asHoldingsItemEntity());
 
-            return Response.ok().entity("{ \"ok\": true }").build();
+            return Response.ok(new StatusResponse()).build();
         } catch (SQLException | RuntimeException ex) {
             log.error("setHoldingsKeys error: {}", ex.getMessage());
             log.debug("setHoldingsKeys error: ", ex);
@@ -72,11 +103,10 @@ public class HoldingsItemBean {
                 message = tw.getMessage();
                 tw = tw.getCause();
             }
-            ObjectNode err = O.createObjectNode();
-            err.put("ok", false);
-            err.put("intermittent", ex instanceof IntermittentErrorException);
-            err.put("message", message);
-            return Response.serverError().entity(O.writeValueAsString(err)).build();
+            boolean intermittent = ex instanceof IntermittentErrorException;
+            return Response.serverError()
+                    .entity(new StatusResponse(message, intermittent))
+                    .build();
         }
     }
 
@@ -128,7 +158,6 @@ public class HoldingsItemBean {
 
     public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId) {
         return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId).getResultList();
-
     }
 
     public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId) {

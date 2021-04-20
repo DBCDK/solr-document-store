@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
@@ -158,5 +160,4 @@ public class HoldingsToBibliographicBean {
         entitiesAffected.forEach(e -> enqueue.add(e, enqueueSources));
         entityManager.merge(expectedState);
     }
-
 }

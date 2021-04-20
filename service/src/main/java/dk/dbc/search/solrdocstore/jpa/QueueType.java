@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.jpa;
 
-import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
@@ -84,6 +83,5 @@ public enum QueueType {
                 return null;
             return LOOKUP.get(pgObject.toLowerCase(Locale.ROOT));
         }
-
     }
 }

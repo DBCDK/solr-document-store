@@ -1,5 +1,6 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.response;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
@@ -56,5 +57,4 @@ public class OpenAgencyStatusResponse {
     public OpenAgencyStatusResponse() {
         states = new HashMap<>();
     }
-
 }

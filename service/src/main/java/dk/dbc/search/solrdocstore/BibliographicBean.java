@@ -1,15 +1,19 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.request.BibliographicEntityRequest;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.request.BibliographicEntitySchemaAnnotated;
+import dk.dbc.search.solrdocstore.response.StatusResponse;
 import java.sql.SQLException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -34,12 +38,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import static dk.dbc.log.LogWith.track;
-import static dk.dbc.search.solrdocstore.RecordType.SingleRecord;
+import static dk.dbc.search.solrdocstore.jpa.RecordType.SingleRecord;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Stateless
@@ -47,7 +56,6 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 public class BibliographicBean {
 
     private static final Logger log = LoggerFactory.getLogger(BibliographicBean.class);
-    private static final ObjectMapper O = new ObjectMapper();
 
     private final JSONBContext jsonbContext = new JSONBContext();
 
@@ -90,6 +98,22 @@ public class BibliographicBean {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @Timed(reusable = true)
+    @Operation(
+            operationId = "set-manifestation",
+            summary = "set manifestation solr document",
+            description = "This operation sets the manifestation and connect" +
+                          " it to holdingsitems, if possible.")
+    @APIResponses({
+        @APIResponse(name = "Success",
+                     responseCode = "200",
+                     description = "Manifestation has been added",
+                     ref = StatusResponse.NAME)})
+    @Parameters({
+        @Parameter(name = "skipQueue",
+                   description = "If this is an update of an existing document," +
+                                 " the optionally skip queueing for further processing.")
+    })
+    @RequestBody(ref = BibliographicEntitySchemaAnnotated.NAME)
     public Response addBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
                                          String jsonContent) throws JSONBException, JsonProcessingException {
 
@@ -103,7 +127,7 @@ public class BibliographicBean {
                 return Response.status(BAD_REQUEST).entity("{ \"ok\": false, \"error\": \"You must have indexKeys when deleted is false\" }").build();
             }
             addBibliographicKeys(request.asBibliographicEntity(), request.getSupersedes(), !skipQueue);
-            return Response.ok().entity("{ \"ok\": true }").build();
+            return Response.ok().entity(new StatusResponse()).build();
         } catch (SQLException | RuntimeException ex) {
             log.error("addBibliographicKeys error: {}", ex.getMessage());
             log.debug("addBibliographicKeys error: ", ex);
@@ -113,11 +137,7 @@ public class BibliographicBean {
                 message = tw.getMessage();
                 tw = tw.getCause();
             }
-            ObjectNode err = O.createObjectNode();
-            err.put("ok", false);
-            err.put("intermittent", ex instanceof IntermittentErrorException);
-            err.put("message", message);
-            return Response.serverError().entity(O.writeValueAsString(err)).build();
+            return Response.serverError().entity(new StatusResponse(message, ex instanceof IntermittentErrorException)).build();
         }
     }
 
@@ -205,7 +225,7 @@ public class BibliographicBean {
     private Instant extractFedoraStreamDate(BibliographicEntity entity) {
         if (entity == null)
             return null;
-        Map<String, List<String>> indexKeys = entity.getIndexKeys();
+        IndexKeys indexKeys = entity.getIndexKeys();
         if (indexKeys == null)
             return null;
         List<String> dates = indexKeys.get("rec.fedoraStreamDate");

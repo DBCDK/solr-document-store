@@ -18,16 +18,18 @@
  */
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -358,7 +360,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private BibliographicEntity addBibliographic(int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed) throws SQLException {
         List<String> superseedList = superseed.orElse(Collections.emptyList());
-        BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "work:0", "unit:0", false, Collections.EMPTY_MAP, "IT");
+        BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "work:0", "unit:0", false, new IndexKeys(), "IT");
         bibliographicBean.addBibliographicKeys(e, superseedList, true);
         return e;
     }
@@ -370,7 +372,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private HoldingsItemEntity addHoldings(int holdingAgency, String holdingBibliographicId) throws SQLException {
         // Dummy holding - ensure enqueue from non existing to this
-        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, Arrays.asList(Collections.EMPTY_MAP), "IT");
+        HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, HoldingsSolrKeys.ON_SHELF, "IT");
         holdingsItemBean.setHoldingsKeys(e);
         return e;
     }
@@ -383,59 +385,12 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         return "b," + work;
     }
 
-    private BibliographicEntityBuilder entity(int agencyId, String classifier, String bibliogrephicRecordId, String work) {
-        return new BibliographicEntityBuilder()
-                .withAgencyId(agencyId)
-                .withClassifier(classifier)
-                .withBibliographicRecordId(bibliogrephicRecordId)
-                .withWork(work);
-    }
-
-    private static class BibliographicEntityBuilder extends BibliographicEntity {
-
-        public BibliographicEntityBuilder withIndexKeys(Map<String, List<String>> indexKeys) {
-            setIndexKeys(indexKeys);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withDeleted(boolean deleted) {
-            setDeleted(deleted);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withTrackingId(String trackingId) {
-            setTrackingId(trackingId);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withUnit(String unit) {
-            setUnit(unit);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withWork(String work) {
-            setWork(work);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withRepositoryId(String repositoryId) {
-            setRepositoryId(repositoryId);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withBibliographicRecordId(String bibliographicRecordId) {
-            setBibliographicRecordId(bibliographicRecordId);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withClassifier(String classifier) {
-            setClassifier(classifier);
-            return this;
-        }
-
-        public BibliographicEntityBuilder withAgencyId(int agencyId) {
-            setAgencyId(agencyId);
-            return this;
-        }
+    private BibliographicEntity entity(int agencyId, String classifier, String bibliogrephicRecordId, String work) {
+        BibliographicEntity bib = new BibliographicEntity();
+                bib.setAgencyId(agencyId);
+                bib.setClassifier(classifier);
+                bib.setBibliographicRecordId(bibliogrephicRecordId);
+                bib.setWork(work);
+        return bib;
     }
 }

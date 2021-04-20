@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.jpa.RecordType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
@@ -138,15 +140,11 @@ public class OpenAgencyBean {
         List<HoldingsToBibliographicEntity> h2b = entityManager.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.holdingsAgencyId = :agencyId", HoldingsToBibliographicEntity.class)
                 .setParameter("agencyId", agencyId)
                 .getResultList();
-        for (HoldingsToBibliographicEntity entity : h2b) {
-            entityManager.remove(entity);
-        }
+        h2b.forEach(entityManager::remove);
         List<HoldingsItemEntity> h = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId", HoldingsItemEntity.class)
                 .setParameter("agencyId", agencyId)
                 .getResultList();
-        for (HoldingsItemEntity entity : h) {
-            entityManager.remove(entity);
-        }
+        h.forEach(entityManager::remove);
     }
 
     /**

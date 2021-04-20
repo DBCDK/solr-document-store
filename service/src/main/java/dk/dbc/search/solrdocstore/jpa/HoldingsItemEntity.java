@@ -29,12 +29,7 @@ import static javax.persistence.FetchType.LAZY;
                   attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
-
     private static final long serialVersionUID = 2469572172167117328L;
-
-    public HoldingsItemEntity() {
-        this.hasLiveHoldings = false;
-    }
 
     @Id
     private int agencyId;
@@ -46,13 +41,17 @@ public class HoldingsItemEntity implements Serializable {
     @Basic(fetch = LAZY)
     @Mutable
     @Convert(converter = PgHoldingsKeysToPgConverter.class)
-    private List<Map<String, List<String>>> indexKeys;
+    private IndexKeysList indexKeys;
 
     private String trackingId;
 
     private boolean hasLiveHoldings;
 
-    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, List<Map<String, List<String>>> indexKeys, String trackingId) {
+    public HoldingsItemEntity() {
+        this.hasLiveHoldings = false;
+    }
+
+    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.indexKeys = indexKeys;
@@ -130,11 +129,11 @@ public class HoldingsItemEntity implements Serializable {
         this.hasLiveHoldings = hasLiveHoldings;
     }
 
-    public List<Map<String, List<String>>> getIndexKeys() {
+    public IndexKeysList getIndexKeys() {
         return indexKeys;
     }
 
-    public void setIndexKeys(List<Map<String, List<String>>> indexKeys) {
+    public void setIndexKeys(IndexKeysList indexKeys) {
         this.indexKeys = indexKeys;
         this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
     }
@@ -179,7 +178,7 @@ public class HoldingsItemEntity implements Serializable {
                 .collect(groupingBy(Map.Entry::getKey, summingInt(Map.Entry::getValue)));
     }
 
-    private static boolean calcHasLiveHoldings(List<Map<String, List<String>>> indexKeys) {
+    private static boolean calcHasLiveHoldings(IndexKeysList indexKeys) {
         return indexKeys != null && !indexKeys.isEmpty();
     }
 
