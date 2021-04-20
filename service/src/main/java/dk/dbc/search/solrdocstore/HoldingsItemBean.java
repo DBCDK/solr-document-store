@@ -67,6 +67,14 @@ public class HoldingsItemBean {
         @APIResponse(name = "Success",
                      responseCode = "200",
                      description = "Holdings has been added",
+                     ref = StatusResponse.NAME),
+        @APIResponse(name = "Bad Request",
+                     responseCode = "400",
+                     description = "Holdings has NOT been added - invalid or missing parameters",
+                     ref = StatusResponse.NAME),
+        @APIResponse(name = "Internal Server Error",
+                     responseCode = "500",
+                     description = "Holdings has NOT been added - this really shouldn't happen",
                      ref = StatusResponse.NAME)})
     @RequestBody(ref = HoldingsItemEntitySchemaAnnotated.NAME)
     public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException {
@@ -75,6 +83,13 @@ public class HoldingsItemBean {
         if (hi.getTrackingId() == null)
             hi.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(hi.getTrackingId())) {
+            if (hi.getAgencyId() == 0 ||
+                hi.getBibliographicRecordId() == null ||
+                hi.getIndexKeys() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new StatusResponse("Missing or invalid required parameters"))
+                        .build();
+            }
 
             setHoldingsKeys(hi.asHoldingsItemEntity());
 
@@ -88,7 +103,10 @@ public class HoldingsItemBean {
                 message = tw.getMessage();
                 tw = tw.getCause();
             }
-            return Response.serverError().entity(new StatusResponse(message, ex instanceof IntermittentErrorException)).build();
+            boolean intermittent = ex instanceof IntermittentErrorException;
+            return Response.serverError()
+                    .entity(new StatusResponse(message, intermittent))
+                    .build();
         }
     }
 
