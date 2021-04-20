@@ -10,7 +10,7 @@ public class HoldingsItemEntitySchemaAnnotated {
 
     public static final String NAME = "holdings-items";
 
-    @Schema(description = "The agency that own the holdingsitems")
+    @Schema(description = "The agency that owns the holdingsitems")
     public int agencyId;
 
     @Schema(description = "The item to which these holdingsitems are related")
