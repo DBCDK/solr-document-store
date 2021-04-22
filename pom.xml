@@ -32,6 +32,7 @@
         <module>postgresql</module>
         <module>monitor</module>
         <module>emulator</module>
+        <module>updater-business-logic</module>
     </modules>
 
     <groupId>dk.dbc</groupId>
