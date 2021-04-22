@@ -103,9 +103,8 @@ public class HoldingsItemBean {
                 message = tw.getMessage();
                 tw = tw.getCause();
             }
-            boolean intermittent = ex instanceof IntermittentErrorException;
             return Response.serverError()
-                    .entity(new StatusResponse(message, intermittent))
+                    .entity(new StatusResponse(message))
                     .build();
         }
     }
