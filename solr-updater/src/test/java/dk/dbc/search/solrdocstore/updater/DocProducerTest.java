@@ -24,17 +24,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.OpenAgencyProfile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Set;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import static org.junit.Assert.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -57,6 +60,7 @@ public class DocProducerTest {
                                    "queues=Not-Relevant",
                                    "openAgencyUrl=Not-Relevant",
                                    "vipCoreEndpoint=Not-Relevant",
+                                   "workPresentationEndpoint=not-relevant",
                                    "scanProfiles=102030-magic,123456-basic",
                                    "scanDefaultFields=abc,def") {
             @Override

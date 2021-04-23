@@ -401,6 +401,7 @@
                             <environmentVariables>
                                 <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/solrdocstore</DOCSTORE_POSTGRES_URL>
                                 <VIPCORE_ENDPOINT>${vipcore.endpoint}</VIPCORE_ENDPOINT>
+                                <WORK_PRESENTATION_ENDPOINT>${work-presentation.endpoint}</WORK_PRESENTATION_ENDPOINT>
                             </environmentVariables>
                             <executable>java</executable>
                             <arguments>

@@ -24,6 +24,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Iterables;
 import dk.dbc.search.solrdocstore.updater.profile.OpenAgencyProfile;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import javax.ws.rs.client.Client;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -40,18 +48,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import javax.ws.rs.client.Client;
 
-import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import static org.hamcrest.Matchers.*;
-
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /**
  *
@@ -173,6 +172,7 @@ public class BusinessLogicTest {
                                           "queues=Not-Relevant",
                                           "openAgencyUrl=Not-Relevant",
                                           "vipCoreEndpoint=Not-Relevant",
+                                          "workPresentationEndpoint=not-relevant",
                                           "scanProfiles=102030-magic,102030-self,123456-basic,876543-self",
                                           "scanDefaultFields=scan.lti,scan.lfo") {
             @Override
