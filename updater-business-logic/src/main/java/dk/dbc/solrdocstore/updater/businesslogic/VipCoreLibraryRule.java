@@ -42,6 +42,11 @@ public class VipCoreLibraryRule {
     private final Map<String, Boolean> booleans;
     private final LibraryType libraryType;
 
+    protected VipCoreLibraryRule() {
+        this.booleans = null;
+        this.libraryType = null;
+    }
+
     public VipCoreLibraryRule(LibraryRulesResponse libraryRulesResponse) {
         this(rulesFromResponse(libraryRulesResponse));
     }
@@ -60,11 +65,11 @@ public class VipCoreLibraryRule {
         return booleans.getOrDefault("auth_create_common_record", false);
     }
 
-    public boolean useEnrichments() {
+    public boolean usesEnrichments() {
         return booleans.getOrDefault("use_enrichments", false);
     }
 
-    public boolean useHoldingsItem() {
+    public boolean usesHoldingsItem() {
         return booleans.getOrDefault("use_holdings_item", false);
     }
 

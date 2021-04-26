@@ -41,7 +41,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -90,10 +90,10 @@ public class BusinessLogicTest {
         BusinessLogic businessLogicNull =
                 BusinessLogic.builder(new FeatureSwitch("none"), ALL_SOLR_FIELDS)
                         .build();
-        SolrDocument beforeSolrDocument = businessLogicNull.process(SolrDocStoreResponse.from(source));
+        SolrInputDocument beforeSolrInputDocument = businessLogicNull.process(SolrDocStoreResponse.from(source));
 
         try (OutputStream os = new FileOutputStream(directory.resolve("before.json").toFile())) {
-            os.write(O.writeValueAsString(solrDocumentToJson(beforeSolrDocument)).getBytes(UTF_8));
+            os.write(O.writeValueAsString(SolrInputDocumentToJson(beforeSolrInputDocument)).getBytes(UTF_8));
         }
 
         /*
@@ -108,10 +108,10 @@ public class BusinessLogicTest {
                         .enablePersistentWorkId(new PersistentWorkIdProviderMock())
                         .build();
 
-        SolrDocument afterSolrDocument = businessLogic.process(SolrDocStoreResponse.from(source));
+        SolrInputDocument afterSolrInputDocument = businessLogic.process(SolrDocStoreResponse.from(source));
 
         try (OutputStream os = new FileOutputStream(directory.resolve("after.json").toFile())) {
-            os.write(O.writeValueAsString(solrDocumentToJson(afterSolrDocument)).getBytes(UTF_8));
+            os.write(O.writeValueAsString(SolrInputDocumentToJson(afterSolrInputDocument)).getBytes(UTF_8));
         }
 
         /*
@@ -136,24 +136,24 @@ public class BusinessLogicTest {
         assertThat("expected.txt == actual.txt", equals, is(true));
     }
 
-    private ObjectNode solrDocumentToJson(SolrDocument afterSolrDocument) {
+    private ObjectNode SolrInputDocumentToJson(SolrInputDocument afterSolrInputDocument) {
         ObjectNode root = O.createObjectNode();
-        addSolrDocumentToObjectNode(afterSolrDocument, root);
-        if (afterSolrDocument.hasChildDocuments()) {
+        addSolrInputDocumentToObjectNode(afterSolrInputDocument, root);
+        if (afterSolrInputDocument.hasChildDocuments()) {
             ArrayNode nested = root.putArray("_childDocuments_");
-            for (SolrDocument childDocument : afterSolrDocument.getChildDocuments()) {
-                addSolrDocumentToObjectNode(childDocument, nested.addObject());
+            for (SolrInputDocument childDocument : afterSolrInputDocument.getChildDocuments()) {
+                addSolrInputDocumentToObjectNode(childDocument, nested.addObject());
             }
         }
         return root;
     }
 
-    private void addSolrDocumentToObjectNode(SolrDocument solrDocument, ObjectNode root) {
-        solrDocument.getFieldNames().stream()
+    private void addSolrInputDocumentToObjectNode(SolrInputDocument SolrInputDocument, ObjectNode root) {
+        SolrInputDocument.getFieldNames().stream()
                 .sorted()
                 .forEach(fieldName -> {
                     ArrayNode array = root.putArray(fieldName);
-                    solrDocument.getFieldValues(fieldName).stream()
+                    SolrInputDocument.getFieldValues(fieldName).stream()
                             .sorted()
                             .forEach(fieldValue -> {
                                 array.addPOJO(fieldValue);

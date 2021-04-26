@@ -42,7 +42,7 @@ public class VipCoreLibraryRuleTest {
         VipCoreLibraryRule libraryRule = new VipCoreLibraryRule(libraryRulesResponse);
 
         assertThat(libraryRule.isPartOfBibdk(), is(false));
-        assertThat(libraryRule.useEnrichments(), is(true));
+        assertThat(libraryRule.usesEnrichments(), is(true));
         assertThat(libraryRule.isFbsLibrary(), is(true));
         assertThat(libraryRule.isResearchLibrary(), is(false));
     }

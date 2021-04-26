@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public class BusinessLogic {
         }
 
         public Builder enablePersistentWorkId(PersistentWorkIdProvider persistentWorkIdProvider) {
-            if (profileProvider == null)
+            if (persistentWorkIdProvider == null)
                 throw new IllegalArgumentException("PersistentWorkIdProvider cannot be null");
             if (this.persistentWorkIdProvider != null)
                 throw new IllegalStateException("PersistentWorkId has already been enabled");
@@ -153,13 +153,13 @@ public class BusinessLogic {
         this.scanAgencyProfiles = scanAgencyProfiles;
     }
 
-    public SolrDocument processAndAddIds(String rootId, SolrDocStoreResponse source) {
-        SolrDocument doc = process(source);
-        addIdToSolrDocument(rootId, doc);
+    public SolrInputDocument processAndAddIds(String rootId, SolrDocStoreResponse source) {
+        SolrInputDocument doc = process(source);
+        addIdToSolrInputDocument(rootId, doc);
         return doc;
     }
 
-    public SolrDocument process(SolrDocStoreResponse source) {
+    public SolrInputDocument process(SolrDocStoreResponse source) {
 
         Map<String, List<String>> indexKeys = source.getIndexKeys();
         Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys = source.getHoldingsItemsIndexKeys();
@@ -205,7 +205,7 @@ public class BusinessLogic {
                 addPersistentWorkId(indexKeys, source);
             }
         }
-        return solrDocument(indexKeys, holdingsItemsIndexKeys);
+        return SolrInputDocument(indexKeys, holdingsItemsIndexKeys);
     }
 
     private void addType(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
@@ -230,7 +230,7 @@ public class BusinessLogic {
                 break;
             VipCoreLibraryRule libraryRules = libraryRuleProvider.libraryRulesFor(agencyId);
             if (libraryRules.isResearchLibrary() &&
-                libraryRules.useHoldingsItem()) {
+                libraryRules.usesHoldingsItem()) {
                 shouldHaveBibDk = shouldHaveBibDk || libraryRules.isPartOfBibdk();
                 shouldHaveDanbib = shouldHaveDanbib || libraryRules.isPartOfDanbib();
             }
@@ -276,11 +276,13 @@ public class BusinessLogic {
     }
 
     private void addHoldingsStats(Map<String, List<String>> indexKeys, SolrDocStoreResponse source) {
-        int onShelf = source.totalStatusCount.getOrDefault("onshelf", 0);
-        int onLoan = source.totalStatusCount.getOrDefault("onloan", 0);
-        int totalForLoan = onShelf + onLoan;
-        indexKeys.computeIfAbsent(REC_HOLDINGS_COUNT, list()).add(String.valueOf(totalForLoan));
-        indexKeys.computeIfAbsent(REC_HOLDINGS_ON_LOAN, list()).add(String.valueOf((float) onLoan / (float) totalForLoan));
+        if (source.totalStatusCount != null) {
+            int onShelf = source.totalStatusCount.getOrDefault("onshelf", 0);
+            int onLoan = source.totalStatusCount.getOrDefault("onloan", 0);
+            int totalForLoan = onShelf + onLoan;
+            indexKeys.computeIfAbsent(REC_HOLDINGS_COUNT, list()).add(String.valueOf(totalForLoan));
+            indexKeys.computeIfAbsent(REC_HOLDINGS_ON_LOAN, list()).add(String.valueOf((float) onLoan / (float) totalForLoan));
+        }
     }
 
     private void addPartOfDanbib(Map<String, List<String>> indexKeys, List<Integer> partOfDanbib, SolrDocStoreResponse source) {
@@ -410,25 +412,25 @@ public class BusinessLogic {
                 .collect(toSet());
     }
 
-    public SolrDocument solrDocument(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsIndexKeys) {
-        SolrDocument solrDocument = indexKeysToSolrDocument(indexKeys);
+    public SolrInputDocument SolrInputDocument(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsIndexKeys) {
+        SolrInputDocument SolrInputDocument = indexKeysToSolrInputDocument(indexKeys);
         holdingsIndexKeys.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey()) // In order for easyunittest
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .map(this::indexKeysToSolrDocument)
-                .forEach(solrDocument::addChildDocument);
-        return solrDocument;
+                .map(this::indexKeysToSolrInputDocument)
+                .forEach(SolrInputDocument::addChildDocument);
+        return SolrInputDocument;
     }
 
-    private SolrDocument indexKeysToSolrDocument(Map<String, List<String>> indexKeys) {
-        SolrDocument solrDocument = new SolrDocument();
+    private SolrInputDocument indexKeysToSolrInputDocument(Map<String, List<String>> indexKeys) {
+        SolrInputDocument SolrInputDocument = new SolrInputDocument();
         indexKeys.forEach((k, vs) -> {
             if (knownSolrFields.isKnownField(k)) {
-                solrDocument.addField(k, trimFieldLengths(vs));
+                SolrInputDocument.addField(k, trimFieldLengths(vs));
             }
         });
-        return solrDocument;
+        return SolrInputDocument;
     }
 
     private static List<String> trimFieldLengths(List<String> values) {
@@ -446,12 +448,12 @@ public class BusinessLogic {
                 .collect(toList());
     }
 
-    private static void addIdToSolrDocument(String rootId, SolrDocument doc) {
+    private static void addIdToSolrInputDocument(String rootId, SolrInputDocument doc) {
         doc.setField("id", rootId);
         if (doc.hasChildDocuments()) {
             int i = 0;
-            for (SolrDocument child : doc.getChildDocuments()) {
-                addIdToSolrDocument(rootId + "#" + i++, child);
+            for (SolrInputDocument child : doc.getChildDocuments()) {
+                addIdToSolrInputDocument(rootId + "#" + i++, child);
             }
         }
     }
