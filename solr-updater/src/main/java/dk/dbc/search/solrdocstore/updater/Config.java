@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -122,6 +123,10 @@ public class Config {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }
         workPresentationEndpoint = get("workPresentationEndpoint", "WORK_PRESENTATION_ENDPOINT", null);
+        workPresentationEndpoint = UriBuilder.fromPath(workPresentationEndpoint)
+                .path("api/work-presentation/getPersistentWorkId")
+                .build()
+                .toString();
         if (workPresentationEndpoint == null || workPresentationEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOINT must be set");
         }

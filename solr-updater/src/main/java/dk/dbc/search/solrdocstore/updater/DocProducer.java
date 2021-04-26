@@ -2,6 +2,9 @@ package dk.dbc.search.solrdocstore.updater;
 
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.solrdocstore.updater.businesslogic.BusinessLogic;
+import dk.dbc.solrdocstore.updater.businesslogic.LibraryRuleProvider;
+import dk.dbc.solrdocstore.updater.businesslogic.PersistentWorkIdProvider;
+import dk.dbc.solrdocstore.updater.businesslogic.ProfileProvider;
 import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -39,13 +42,13 @@ public class DocProducer {
     Config config;
 
     @Inject
-    ProfileProviderBean profileProvider;
+    ProfileProvider profileProvider;
 
     @Inject
-    LibraryRuleProviderBean libraryRuleProvider;
+    LibraryRuleProvider libraryRuleProvider;
 
     @Inject
-    PersistenWorkIdProviderBean persistenWorkIdProvider;
+    PersistentWorkIdProvider persistentWorkIdProvider;
 
     private Client client;
     private UriBuilder uriTemplate;
@@ -65,7 +68,7 @@ public class DocProducer {
         if (businessLogic == null) {
             businessLogic = BusinessLogic.builder(collection.getFeatures(), collection.getSolrFields())
                     .enable800000AndRole(libraryRuleProvider)
-                    .enablePersistentWorkId(persistenWorkIdProvider)
+                    .enablePersistentWorkId(persistentWorkIdProvider)
                     .enableScan(profileProvider, config.getScanDefaultFields(), config.getScanProfiles())
                     .build();
             collection.setBusinessLogic(businessLogic);

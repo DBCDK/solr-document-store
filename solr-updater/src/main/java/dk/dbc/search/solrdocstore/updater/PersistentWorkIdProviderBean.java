@@ -18,13 +18,17 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.solrdocstore.updater.businesslogic.PersistentWorkIdProvider;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +36,9 @@ import javax.ws.rs.core.MediaType;
  */
 @Singleton
 @Lock(LockType.READ)
-public class PersistenWorkIdProviderBean implements PersistentWorkIdProvider {
+public class PersistentWorkIdProviderBean implements PersistentWorkIdProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(PersistentWorkIdProviderBean.class);
 
     @Inject
     Config config;
@@ -41,9 +47,15 @@ public class PersistenWorkIdProviderBean implements PersistentWorkIdProvider {
     public String persistentWorkIdFor(String corepoWorkId) {
         Client client = config.getClient();
         String wpUri = config.getWorkPresentationEndpoint();
-        return client.target(wpUri)
-                .queryParam("corepoWorkId", corepoWorkId)
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .get(String.class);
+        try {
+            return client.target(wpUri)
+                    .queryParam("corepoWorkId", corepoWorkId)
+                    .request(MediaType.APPLICATION_JSON_TYPE)
+                    .get(String.class);
+        } catch (WebApplicationException ex) {
+            log.error("Error fetching persistentWorkId for: {} : {}", corepoWorkId, ex.getMessage());
+            log.debug("Error fetching persistentWorkId for: {} : ", corepoWorkId, ex);
+            throw new RethrowableException(new PostponedNonFatalQueueError(1000L));
+        }
     }
 }

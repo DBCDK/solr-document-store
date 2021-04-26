@@ -134,7 +134,7 @@ public class DocProducerTest {
             }
         };
 
-        docProducer.persistenWorkIdProvider = new PersistenWorkIdProviderBean() {
+        docProducer.persistentWorkIdProvider = new PersistentWorkIdProviderBean() {
             @Override
             public String persistentWorkIdFor(String corepoWorkId) {
                 return "persistent-for-" + corepoWorkId;

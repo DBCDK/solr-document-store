@@ -143,15 +143,16 @@ public class DocProducerIT {
                 }
             }
         };
-        docProducer.persistenWorkIdProvider = new PersistenWorkIdProviderBean() {
+        docProducer.persistentWorkIdProvider = new PersistentWorkIdProviderBean() {
             @Override
             public String persistentWorkIdFor(String corepoWorkId) {
                 return "xxx";
             }
         };
-        docProducer.profileProvider = new ProfileProviderBean();
-        docProducer.profileProvider.config = config;
-        docProducer.profileProvider.vipCoreHttpClient = new VipCoreHttpClient();
+        ProfileProviderBean profileProviderBean = new ProfileProviderBean();
+        profileProviderBean.config = config;
+        profileProviderBean.vipCoreHttpClient = new VipCoreHttpClient();
+        docProducer.profileProvider = profileProviderBean;
 
         docProducer.init();
     }
