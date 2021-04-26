@@ -127,7 +127,7 @@ public class Config {
         }
         workPresentationEndpoint = get("workPresentationEndpoint", "WORK_PRESENTATION_ENDPOINT", null);
         if (workPresentationEndpoint == null || workPresentationEndpoint.isEmpty()) {
-            throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOITN must be set");
+            throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOINT must be set");
         }
     }
 
