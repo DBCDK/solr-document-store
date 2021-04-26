@@ -1,0 +1,8 @@
+{
+++>   "scan.any" : [ "bar", "foo", "nah" ], <++
+++>   "scan.default" : [ "bar", "foo" ], <++
+  "scan.lfo" : [ "bar" ],
+  "scan.lti" : [ "foo" ],
+  "scan.nope" : [ "nah" ],
+  "t" : [ "m" ],
+  "ti" : [ "any" ]

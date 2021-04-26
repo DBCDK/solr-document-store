@@ -1,0 +1,47 @@
+/*
+ * Copyright (C) 2021 DBC A/S (http://dbc.dk/)
+ *
+ * This is part of solr-doc-store-updater-business-logic
+ *
+ * solr-doc-store-updater-business-logic is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * solr-doc-store-updater-business-logic is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package dk.dbc.solrdocstore.updater.businesslogic;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ *
+ * @author Morten Bøgeskov (mb@dbc.dk)
+ */
+public class LibraryRuleProviderMock implements LibraryRuleProvider {
+
+    private static final ObjectMapper O = new ObjectMapper();
+
+    @Override
+    public VipCoreLibraryRule libraryRulesFor(String agencyId) {
+        String path = "vipcore/libraryrule/" + agencyId + ".json";
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new IllegalStateException("Cannot find: " + path);
+            }
+            LibraryRulesResponse response = O.readValue(is, LibraryRulesResponse.class);
+            return new VipCoreLibraryRule(response);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+}

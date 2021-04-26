@@ -1,0 +1,11 @@
+  "rec.collectionIdentifier" : [ "150013-palle", "870970-basis", "870970-bibdk" ],
+  "rec.createdDate" : [ "2005-09-20T00:00:00Z" ],
+  "rec.excludeFromUnionCatalogue" : [ "false" ],
+  "rec.excludeFromWorldCat" : [ "false" ],
+  "rec.fedoraStreamDate" : [ "2018-05-13T08:29:27.513Z" ],
+++>   "rec.hasCoverUrl" : [ "true" ], <++
+  "rec.id" : [ "25912233|870970", "870970-basis:25912233", "870970-basis:25912233-870970-basis" ],
+  "rec.modifiedDate" : [ "2017-08-30T00:00:00Z" ],
+  "rec.repositoryId" : [ "870970-basis:25912233" ],
+  "rec.trackingId" : [ "SolrWorker:870970-basis:25912233&lt;Hive:300730-katalog,Batch:5040647,Entry:43125419&lt;bulk-20160902175112-25912233" ],
+  "rec.unitId" : [ "unit:1007058" ],

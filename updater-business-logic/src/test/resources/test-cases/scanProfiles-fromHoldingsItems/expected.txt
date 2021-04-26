@@ -1,0 +1,21 @@
+{
+++>   "scan.any" : [ "bar", "foo", "nah" ], <++
+++>   "scan.any_102030_magic" : [ "bar", "foo", "nah" ], <++
+++>   "scan.any_102030_self" : [ "bar", "foo", "nah" ], <++
+++>   "scan.default" : [ "bar", "foo" ], <++
+++>   "scan.default_102030_magic" : [ "bar", "foo" ], <++
+++>   "scan.default_102030_self" : [ "bar", "foo" ], <++
+  "scan.lfo" : [ "bar" ],
+++>   "scan.lfo_102030_magic" : [ "bar" ], <++
+++>   "scan.lfo_102030_self" : [ "bar" ], <++
+  "scan.lti" : [ "foo" ],
+++>   "scan.lti_102030_magic" : [ "foo" ], <++
+++>   "scan.lti_102030_self" : [ "foo" ], <++
+  "scan.nope" : [ "nah" ],
+++>   "scan.nope_102030_magic" : [ "nah" ], <++
+++>   "scan.nope_102030_self" : [ "nah" ], <++
+  "t" : [ "m" ],
+  "ti" : [ "any" ],
+  "_childDocuments_" : [ {
+    "t" : [ "h" ]
+  } ]

@@ -1,0 +1,763 @@
+{
+   "bibliographicRecord" : {
+      "unit" : "unit:788819",
+      "classifier" : "basis",
+      "work" : "work:669347",
+      "repositoryId" : "870970-basis:21784206",
+      "indexKeys" : {
+         "dkcclterm.db" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "dkcclterm.ht" : [
+            "Kulturpædagogik"
+         ],
+         "dkcclterm.år" : [
+            "1996"
+         ],
+         "scanterm.subject" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "rankphrase.subject" : [
+            "folkeskolen",
+            "kultur",
+            "Undervisning i alm.",
+            "pædagogik",
+            "læreprocesser",
+            "37.1"
+         ],
+         "rec.excludeFromUnionCatalogue" : [
+            "false"
+         ],
+         "rec.childDocId" : [
+            "870970-basis:21784206",
+            "870970-bibdk"
+         ],
+         "dkcclterm.ok" : [
+            "37.1"
+         ],
+         "term.workType" : [
+            "literature"
+         ],
+         "id" : [
+            "870970-basis:21784206-870970-basis"
+         ],
+         "facet.genreCategory" : [
+            "nonfiktion"
+         ],
+         "rankterm.description" : [
+            "Finn Horn: Optakt til kulturpædagogik / Finn Horn og Claus Jantzen ; Hvorfor er kulturpædagogik interessant nu?. Birthe Bjørslev: Fra massekultur til samværskultur. Bente Støvring: Udvikling af social kompetence via fjernundervisning. Carsten Jensen: Projekt Flag Fen eller Iris-engene. Jørgen Kuhlmann: Det er vigtigt at komme til orde og blive lyttet til. Anne Marie Fjord Jensen: Mellem folkeskole og projektmiljøer. Søren Torp Nielsen: Kulturpædagogik i skolen som lokalt kulturcenter. Birte Sørensen: En bestemt kultur - eller -?"
+         ],
+         "sort.title" : [
+            "Kulturpædagogik"
+         ],
+         "facet.nonFictionSubject" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "rankphrase.title" : [
+            "Kulturpædagogik",
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "facet.literaryForm" : [
+            "faglitteratur"
+         ],
+         "display.title" : [
+            "Kulturpædagogik"
+         ],
+         "sort.acquisitionDate" : [
+            "20160709"
+         ],
+         "rankterm.subject" : [
+            "folkeskolen",
+            "kultur",
+            "Undervisning i alm.",
+            "pædagogik",
+            "læreprocesser",
+            "37.1"
+         ],
+         "rec.trackingId" : [
+            "SolrWorker:870970-basis:21784206<Hive:830370-katalog,Batch:2165115,Entry:21892538<bulk-20170524132904-21784206"
+         ],
+         "submitter" : [
+            "870970"
+         ],
+         "dkcclterm.sf" : [
+            "s"
+         ],
+         "sort.recordOwner" : [
+            "a870970"
+         ],
+         "rec.workId" : [
+            "work:669347"
+         ],
+         "rec.fedoraStreamDate" : [
+            "2017-08-29T14:32:18.381Z"
+         ],
+         "scanterm.mainTitle" : [
+            "Kulturpædagogik"
+         ],
+         "dkcclterm.ma" : [
+            "xx",
+            "te",
+            "sæ",
+            "bå"
+         ],
+         "unit.primaryObject" : [
+            "870970-basis:21784206"
+         ],
+         "facet.type" : [
+            "Bog"
+         ],
+         "dkcclterm.id" : [
+            "21784206"
+         ],
+         "dkcclphrase.mti" : [
+            "Kulturpædagogik synsvinkler på kulturskabende læreprocesser rapport fra en studiekreds #245"
+         ],
+         "sort.dk5" : [
+            "37.1"
+         ],
+         "term.language" : [
+            "dan",
+            "Dansk"
+         ],
+         "rec.modifiedDate" : [
+            "2017-08-30T00:00:00Z"
+         ],
+         "dkcclphrase.lti" : [
+            "Kulturpædagogik synsvinkler på kulturskabende læreprocesser rapport fra en studiekreds"
+         ],
+         "scanterm.title" : [
+            "Kulturpædagogik",
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "unit.isPrimaryObject" : [
+            "true"
+         ],
+         "rec.repositoryId" : [
+            "870970-basis:21784206"
+         ],
+         "phrase.genre" : [
+            "nonfiktion"
+         ],
+         "dkcclterm.ti" : [
+            "Kulturpædagogik synsvinkler på kulturskabende læreprocesser rapport fra en studiekreds"
+         ],
+         "phrase.subject" : [
+            "folkeskolen",
+            "kultur",
+            "Undervisning i alm.",
+            "pædagogik",
+            "læreprocesser",
+            "37.1"
+         ],
+         "display.language" : [
+            "Dansk"
+         ],
+         "dkcclphrase.ldf" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "rankterm.title" : [
+            "Kulturpædagogik",
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "scanphrase.subject" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "display.titleFull" : [
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "dkcclterm.dk" : [
+            "37.1"
+         ],
+         "phrase.type" : [
+            "Bog"
+         ],
+         "dkcclterm.em" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "dkcclterm.ln" : [
+            "870970"
+         ],
+         "term.isbn" : [
+            "8788320316",
+            "87-88320-31-6"
+         ],
+         "dkcclterm.sp" : [
+            "dan"
+         ],
+         "dkcclterm.no" : [
+            "Finn Horn: Optakt til kulturpædagogik / Finn Horn og Claus Jantzen ; Hvorfor er kulturpædagogik interessant nu?. Birthe Bjørslev: Fra massekultur til samværskultur. Bente Støvring: Udvikling af social kompetence via fjernundervisning. Carsten Jensen: Projekt Flag Fen eller Iris-engene. Jørgen Kuhlmann: Det er vigtigt at komme til orde og blive lyttet til. Anne Marie Fjord Jensen: Mellem folkeskole og projektmiljøer. Søren Torp Nielsen: Kulturpædagogik i skolen som lokalt kulturcenter. Birte Sørensen: En bestemt kultur - eller -?"
+         ],
+         "term.title" : [
+            "Kulturpædagogik",
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "display.type" : [
+            "Bog"
+         ],
+         "dkcclphrase.lok" : [
+            "37.1"
+         ],
+         "term.description" : [
+            "Finn Horn: Optakt til kulturpædagogik / Finn Horn og Claus Jantzen ; Hvorfor er kulturpædagogik interessant nu?. Birthe Bjørslev: Fra massekultur til samværskultur. Bente Støvring: Udvikling af social kompetence via fjernundervisning. Carsten Jensen: Projekt Flag Fen eller Iris-engene. Jørgen Kuhlmann: Det er vigtigt at komme til orde og blive lyttet til. Anne Marie Fjord Jensen: Mellem folkeskole og projektmiljøer. Søren Torp Nielsen: Kulturpædagogik i skolen som lokalt kulturcenter. Birte Sørensen: En bestemt kultur - eller -?"
+         ],
+         "scanphrase.mainTitle" : [
+            "Kulturpædagogik"
+         ],
+         "dkcclterm.hm" : [
+            "xx",
+            "te"
+         ],
+         "term.category" : [
+            "voksenmaterialer"
+         ],
+         "term.publisher" : [
+            "Danmarks Lærerhøjskole"
+         ],
+         "dkcclterm.ej" : [
+            "DBC"
+         ],
+         "dkcclphrase.lke" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "dkcclterm.df" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "dkcclterm.kk" : [
+            "DBF199736",
+            "SFD199736"
+         ],
+         "facet.dk5" : [
+            "37.1"
+         ],
+         "facet.date" : [
+            "1996"
+         ],
+         "display.accessType" : [
+            "physical"
+         ],
+         "term.literaryForm" : [
+            "nonfiktion"
+         ],
+         "facet.category" : [
+            "voksenmaterialer"
+         ],
+         "dkcclterm.is" : [
+            "87-88320-31-6"
+         ],
+         "dkcclterm.cl" : [
+            "37.1"
+         ],
+         "dkcclphrase.lem" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "rec.bibliographicRecordId" : [
+            "21784206"
+         ],
+         "dkcclphrase.lcl" : [
+            "37.1"
+         ],
+         "dkcclterm.ka" : [
+            "s"
+         ],
+         "phrase.title" : [
+            "Kulturpædagogik",
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "rec.unitId" : [
+            "unit:788819"
+         ],
+         "sort.complexKey" : [
+            "Bog  a  9999  2004  a"
+         ],
+         "term.mainTitle" : [
+            "Kulturpædagogik"
+         ],
+         "rec.createdDate" : [
+            "1997-07-30T00:00:00Z"
+         ],
+         "dkcclterm.aj" : [
+            "20170830030300"
+         ],
+         "term.type" : [
+            "Bog"
+         ],
+         "term.primaryLanguage" : [
+            "dan"
+         ],
+         "scanphrase.title" : [
+            "Kulturpædagogik",
+            "Kulturpædagogik : synsvinkler på kulturskabende læreprocesser : rapport fra en studiekreds"
+         ],
+         "facet.publisher" : [
+            "Danmarks Lærerhøjskole"
+         ],
+         "sort.workType" : [
+            "aliterature"
+         ],
+         "dkcclterm.ke" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "dkcclterm.fb" : [
+            "redigeret af Finn Horn og Anne Marie Fjord Jensen"
+         ],
+         "term.identifier" : [
+            "8788320316",
+            "87-88320-31-6"
+         ],
+         "rec.excludeFromWorldCat" : [
+            "false"
+         ],
+         "dkcclterm.fl" : [
+            "Danmarks Lærerhøjskole"
+         ],
+         "term.subject" : [
+            "folkeskolen",
+            "kultur",
+            "Undervisning i alm.",
+            "pædagogik",
+            "læreprocesser",
+            "37.1"
+         ],
+         "dkcclterm.ib" : [
+            "87-88320-31-6"
+         ],
+         "rankphrase.description" : [
+            "Finn Horn: Optakt til kulturpædagogik / Finn Horn og Claus Jantzen ; Hvorfor er kulturpædagogik interessant nu?. Birthe Bjørslev: Fra massekultur til samværskultur. Bente Støvring: Udvikling af social kompetence via fjernundervisning. Carsten Jensen: Projekt Flag Fen eller Iris-engene. Jørgen Kuhlmann: Det er vigtigt at komme til orde og blive lyttet til. Anne Marie Fjord Jensen: Mellem folkeskole og projektmiljøer. Søren Torp Nielsen: Kulturpædagogik i skolen som lokalt kulturcenter. Birte Sørensen: En bestemt kultur - eller -?"
+         ],
+         "dkcclterm.pu" : [
+            "Kbh."
+         ],
+         "term.acSource" : [
+            "Bibliotekskatalog"
+         ],
+         "facet.acSource" : [
+            "Bibliotekskatalog"
+         ],
+         "dkcclterm.ul" : [
+            "dk"
+         ],
+         "dkcclphrase.ldk" : [
+            "37.1"
+         ],
+         "term.typeCategory" : [
+            "mono"
+         ],
+         "term.date" : [
+            "1996"
+         ],
+         "term.genre" : [
+            "nonfiktion"
+         ],
+         "facet.subject" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "dkcclterm.op" : [
+            "19970730"
+         ],
+         "rec.collectionIdentifier" : [
+            "870970-bibdk",
+            "870970-basis"
+         ],
+         "term.accessType" : [
+            "physical"
+         ],
+         "dkcclphrase.lht" : [
+            "Kulturpædagogik"
+         ],
+         "dkcclterm.nr" : [
+            "21784206",
+            "87-88320-31-6"
+         ],
+         "sort.genreCategory" : [
+            "nonfiktion"
+         ],
+         "rec.id" : [
+            "870970-basis:21784206",
+            "870970-basis:21784206-870970-basis",
+            "21784206|870970"
+         ],
+         "dkcclphrase.ldb" : [
+            "folkeskolen",
+            "kultur",
+            "pædagogik",
+            "læreprocesser"
+         ],
+         "sort.date" : [
+            "1996"
+         ],
+         "original_format" : [
+            "basis"
+         ],
+         "facet.language" : [
+            "Dansk"
+         ],
+         "display.workType" : [
+            "book"
+         ]
+      },
+      "bibliographicRecordId" : "21784206",
+      "trackingId" : "SolrWorker:870970-basis:21784206<Hive:830370-katalog,Batch:2165115,Entry:21892538<bulk-20170524132904-21784206",
+      "deleted" : false,
+      "agencyId" : 870970
+   },
+   "partOfDanbib" : [
+      763000,
+      765700,
+      785100,
+      830190,
+      830380
+   ],
+   "holdingsItemRecords" : [
+      {
+         "bibliographicRecordId" : "21784206",
+         "hasLiveHoldings" : true,
+         "indexKeys" : [
+            {
+               "holdingsitem.expectedDelivery" : [
+                  "2018-03-19T23:00:00Z"
+               ],
+               "holdingsitem.department" : [
+                  "Voksen"
+               ],
+               "holdingsitem.agencyId" : [
+                  "763000"
+               ],
+               "holdingsitem.accessionDate" : [
+                  "1997-12-02T00:00:00.000Z"
+               ],
+               "holdingsitem.itemId" : [
+                  "750670091"
+               ],
+               "holdingsitem.issueId" : [
+                  ""
+               ],
+               "holdingsitem.readyForLoan" : [
+                  "1"
+               ],
+               "holdingsitem.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.issueText" : [
+                  ""
+               ],
+               "holdingsitem.collectionId" : [
+                  "763000-21784206"
+               ],
+               "holdingsitem.location" : [
+                  "depot"
+               ],
+               "rec.trackingId" : [
+                  "",
+                  "eb2bbf1a-198d-4570-9b08-48f9017997a5"
+               ],
+               "holdingsitem.note" : [
+                  ""
+               ],
+               "holdingsitem.status" : [
+                  "OnShelf"
+               ],
+               "holdingsitem.subLocation" : [
+                  "Faglitteratur"
+               ],
+               "holdingsitem.circulationRule" : [
+                  "31"
+               ],
+               "holdingsitem.branch" : [
+                  "Vejle"
+               ],
+               "rec.bibliographicRecordId" : [
+                  "21784206"
+               ]
+            }
+         ],
+         "agencyId" : 763000,
+         "trackingId" : ""
+      },
+      {
+         "indexKeys" : [
+            {
+               "holdingsitem.issueId" : [
+                  ""
+               ],
+               "holdingsitem.readyForLoan" : [
+                  "1"
+               ],
+               "holdingsitem.expectedDelivery" : [
+                  "2018-01-19T23:00:00Z"
+               ],
+               "holdingsitem.agencyId" : [
+                  "765700"
+               ],
+               "holdingsitem.department" : [
+                  "Voksen"
+               ],
+               "holdingsitem.accessionDate" : [
+                  "1997-11-19T00:00:00.000Z"
+               ],
+               "holdingsitem.itemId" : [
+                  "3374775528"
+               ],
+               "holdingsitem.subLocation" : [
+                  ""
+               ],
+               "holdingsitem.status" : [
+                  "OnShelf"
+               ],
+               "holdingsitem.branch" : [
+                  "Herning"
+               ],
+               "holdingsitem.circulationRule" : [
+                  "28dage"
+               ],
+               "rec.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.location" : [
+                  "Faglitteratur"
+               ],
+               "holdingsitem.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.issueText" : [
+                  ""
+               ],
+               "holdingsitem.collectionId" : [
+                  "765700-21784206"
+               ],
+               "rec.trackingId" : [
+                  "",
+                  "63de5814-5351-45f2-9eca-824927e91fed"
+               ],
+               "holdingsitem.note" : [
+                  ""
+               ]
+            }
+         ],
+         "bibliographicRecordId" : "21784206",
+         "hasLiveHoldings" : true,
+         "trackingId" : "",
+         "agencyId" : 765700
+      },
+      {
+         "bibliographicRecordId" : "21784206",
+         "hasLiveHoldings" : true,
+         "indexKeys" : [
+            {
+               "holdingsitem.issueId" : [
+                  ""
+               ],
+               "holdingsitem.readyForLoan" : [
+                  "1"
+               ],
+               "holdingsitem.expectedDelivery" : [
+                  "2018-01-12T23:00:00Z"
+               ],
+               "holdingsitem.itemId" : [
+                  "3321982548"
+               ],
+               "holdingsitem.accessionDate" : [
+                  "1997-10-06T00:00:00.000Z"
+               ],
+               "holdingsitem.agencyId" : [
+                  "785100"
+               ],
+               "holdingsitem.department" : [
+                  "Voksen"
+               ],
+               "holdingsitem.status" : [
+                  "OnShelf"
+               ],
+               "holdingsitem.subLocation" : [
+                  ""
+               ],
+               "holdingsitem.circulationRule" : [
+                  "Standard"
+               ],
+               "holdingsitem.branch" : [
+                  "Hovedbiblioteket"
+               ],
+               "rec.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.location" : [
+                  "Magasin"
+               ],
+               "holdingsitem.collectionId" : [
+                  "785100-21784206"
+               ],
+               "holdingsitem.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.issueText" : [
+                  ""
+               ],
+               "holdingsitem.note" : [
+                  ""
+               ],
+               "rec.trackingId" : [
+                  "",
+                  "a826a336-8911-45af-83d8-db7d123c4662"
+               ]
+            }
+         ],
+         "agencyId" : 785100,
+         "trackingId" : ""
+      },
+      {
+         "bibliographicRecordId" : "21784206",
+         "hasLiveHoldings" : true,
+         "indexKeys" : [
+            {
+               "holdingsitem.branch" : [
+                  "Skolevangen"
+               ],
+               "holdingsitem.circulationRule" : [
+                  "Bog"
+               ],
+               "rec.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.subLocation" : [
+                  ""
+               ],
+               "holdingsitem.status" : [
+                  "Decommissioned"
+               ],
+               "rec.trackingId" : [
+                  "",
+                  "b9ee71f0-ecbd-40c8-b78b-8ac3da186e57"
+               ],
+               "holdingsitem.note" : [
+                  ""
+               ],
+               "holdingsitem.location" : [
+                  "Bibliotek"
+               ],
+               "holdingsitem.issueText" : [
+                  ""
+               ],
+               "holdingsitem.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.collectionId" : [
+                  "830380-21784206"
+               ],
+               "holdingsitem.readyForLoan" : [
+                  "2"
+               ],
+               "holdingsitem.issueId" : [
+                  ""
+               ],
+               "holdingsitem.itemId" : [
+                  "3312240970"
+               ],
+               "holdingsitem.accessionDate" : [
+                  "2007-02-01T00:00:00.000Z"
+               ],
+               "holdingsitem.department" : [
+                  "UCN"
+               ],
+               "holdingsitem.agencyId" : [
+                  "830380"
+               ],
+               "holdingsitem.expectedDelivery" : [
+                  "2018-01-15T23:00:00Z"
+               ]
+            },
+            {
+               "holdingsitem.branch" : [
+                  "Mylius Erichsens Vej"
+               ],
+               "rec.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.circulationRule" : [
+                  "Bog"
+               ],
+               "holdingsitem.subLocation" : [
+                  ""
+               ],
+               "holdingsitem.status" : [
+                  "OnShelf"
+               ],
+               "rec.trackingId" : [
+                  "",
+                  "b9ee71f0-ecbd-40c8-b78b-8ac3da186e57"
+               ],
+               "holdingsitem.note" : [
+                  ""
+               ],
+               "holdingsitem.location" : [
+                  "Magasin"
+               ],
+               "holdingsitem.collectionId" : [
+                  "830380-21784206"
+               ],
+               "holdingsitem.bibliographicRecordId" : [
+                  "21784206"
+               ],
+               "holdingsitem.issueText" : [
+                  ""
+               ],
+               "holdingsitem.readyForLoan" : [
+                  "2"
+               ],
+               "holdingsitem.issueId" : [
+                  ""
+               ],
+               "holdingsitem.itemId" : [
+                  "450003216956"
+               ],
+               "holdingsitem.accessionDate" : [
+                  "2005-05-03T00:00:00.000Z"
+               ],
+               "holdingsitem.department" : [
+                  "UCN"
+               ],
+               "holdingsitem.agencyId" : [
+                  "830380"
+               ],
+               "holdingsitem.expectedDelivery" : [
+                  "2018-01-15T23:00:00Z"
+               ]
+            }
+         ],
+         "agencyId" : 830380,
+         "trackingId" : ""
+      }
+   ]
+}
