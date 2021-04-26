@@ -63,6 +63,7 @@ public class Config {
     private Set<String> scanDefaultFields;
     private String jsonStash;
     private String appId;
+    private String workPresentationEndpoint;
     private Client client;
 
     public Config() {
@@ -123,6 +124,10 @@ public class Config {
         vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", null);
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
+        }
+        workPresentationEndpoint = get("workPresentationEndpoint", "WORK_PRESENTATION_ENDPOINT", null);
+        if (workPresentationEndpoint == null || workPresentationEndpoint.isEmpty()) {
+            throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOINT must be set");
         }
     }
 
@@ -233,6 +238,10 @@ public class Config {
 
     public String getJsonStash() {
         return jsonStash;
+    }
+
+    public String getWorkPresentationEndpoint() {
+        return workPresentationEndpoint;
     }
 
     public Client getClient() {

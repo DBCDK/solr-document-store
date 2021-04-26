@@ -23,16 +23,6 @@ import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -44,7 +34,20 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -78,6 +81,7 @@ public class WorkerIT {
                             "maxTries=1",
                             "emptyQueueSleep=10ms",
                             "scanProfiles=102030-magic,123456-basic",
+                            "workPresentationEndpoint=not-relevant",
                             "scanDefaultFields=scan.abc,scan.def") {
             @Override
             public Client getClient() {

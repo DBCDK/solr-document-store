@@ -23,15 +23,6 @@ import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.MediaType;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -43,7 +34,17 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -71,6 +72,7 @@ public class DocProducerIT {
         config = new Config("queues=test",
                             "scanProfiles=102030-magic,123456-basic",
                             "vipCoreEndpoint=Not-Relevant",
+                            "workPresentationEndpoint=not-relevant",
                             "scanDefaultFields=abc,def") {
             @Override
             public Client getClient() {

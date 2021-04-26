@@ -4,22 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -32,7 +16,27 @@ import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dk.dbc.search.solrdocstore.updater.DocHelpers.*;
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static dk.dbc.search.solrdocstore.updater.DocHelpers.addField;
+import static dk.dbc.search.solrdocstore.updater.DocHelpers.find;
+import static dk.dbc.search.solrdocstore.updater.DocHelpers.getField;
+import static dk.dbc.search.solrdocstore.updater.DocHelpers.setField;
 
 /**
  *
@@ -54,6 +58,8 @@ public class DocProducer {
     private Client client;
     private UriBuilder uriTemplate;
 
+    private UriBuilder wpUriTemplate;
+
     @PostConstruct
     public void init() {
         log.info("Building DocProducer");
@@ -62,6 +68,10 @@ public class DocProducer {
         log.debug("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.uriTemplate = UriBuilder.fromUri(solrDocStoreUrl)
                 .path("api/retrieve/combined/{agencyId}/{classifier}/{bibliographicRecordId}");
+        String workPresentationUrl = config.getWorkPresentationEndpoint();
+        log.debug("work-presentation url = {}", workPresentationUrl);
+        this.wpUriTemplate = UriBuilder.fromUri(workPresentationUrl)
+            .path("api/work-presentation/getPersistentWorkId");
     }
 
     /**
@@ -257,6 +267,7 @@ public class DocProducer {
 
             JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
             String repositoryId = getField(indexKeys, "rec.repositoryId");
+            final String workId = getField(indexKeys, "rec.workId");
             if (repositoryId == null) {
                 throw new IllegalStateException("Cannot get rec.repositoryId from document");
             }
@@ -271,7 +282,18 @@ public class DocProducer {
             businessLogic.addHoldingsItemRole(sourceDoc, solrCollection);
             businessLogic.addScan(sourceDoc, solrCollection);
             businessLogic.attachedResources(sourceDoc, solrCollection);
-
+            if (workId != null && !workId.isEmpty()) {
+                log.debug("looking up persistent work id for corepo work id {}", workId);
+                URI wpUri = wpUriTemplate.build();
+                final String persistentWorkId = client.target(wpUri)
+                        .queryParam("corepoWorkId", workId)
+                        .request(MediaType.APPLICATION_JSON_TYPE)
+                        .get(String.class);
+                log.debug("Setting persistent work id {} in solr document", persistentWorkId);
+                if (persistentWorkId != null && !persistentWorkId.isEmpty()) {
+                    addField(indexKeys, "rec.persistentWorkId", persistentWorkId);
+                }
+            }
             SolrInputDocument doc = solrCollection.getSolrFields().newDocumentFromIndexKeys(indexKeys);
             businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, solrCollection, repositoryId);
 
