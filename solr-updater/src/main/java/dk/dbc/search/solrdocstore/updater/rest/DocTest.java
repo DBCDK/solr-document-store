@@ -1,11 +1,10 @@
 package dk.dbc.search.solrdocstore.updater.rest;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.search.solrdocstore.updater.Config;
 import dk.dbc.search.solrdocstore.updater.DocProducer;
 import dk.dbc.search.solrdocstore.updater.SolrCollection;
+import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
@@ -51,9 +50,8 @@ public class DocTest {
                            @QueryParam("collection") String collection) throws InterruptedException, ExecutionException, IOException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
         try {
-            JsonNode node = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, classifier, bibliographicRecordId));
-            boolean deleted = docProducer.isDeleted(node);
-            if (deleted) {
+            SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, classifier, bibliographicRecordId));
+            if (sourceDoc.bibliographicRecord.deleted) {
                 return Response.noContent().build();
             }
             Set<SolrCollection> solrCollections = config.getSolrCollections();
@@ -68,11 +66,11 @@ public class DocTest {
             if (!solrCollection.isPresent())
                 throw new InternalServerErrorException("Cannot find collection");
 
-            SolrInputDocument document = docProducer.inputDocument(node, solrCollection.get());
+            SolrInputDocument document = docProducer.createSolrDocument(sourceDoc, solrCollection.get());
             String xml = ClientUtils.toXML(document);
 
             return Response.ok(xml, MediaType.APPLICATION_XML_TYPE).build();
-        } catch (IOException | PostponedNonFatalQueueError | RuntimeException ex) {
+        } catch (IOException | RuntimeException ex) {
             log.error("Exception: {}", ex.getMessage());
             log.debug("Exception:", ex);
             return Response.ok(ex.getMessage(), MediaType.TEXT_PLAIN).build();

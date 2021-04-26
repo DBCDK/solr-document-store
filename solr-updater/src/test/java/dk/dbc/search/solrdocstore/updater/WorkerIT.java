@@ -19,14 +19,14 @@
 package dk.dbc.search.solrdocstore.updater;
 
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
+import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.pgqueue.PreparedQueueSupplier;
 import dk.dbc.pgqueue.QueueSupplier;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
+import dk.dbc.solrdocstore.updater.businesslogic.VipCoreLibraryRule;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -69,7 +69,7 @@ public class WorkerIT {
     @BeforeClass
     public static void setUpClass() throws Exception {
 
-        solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
+        solrDocStoreUrl = System.getenv().getOrDefault("SOLR_DOC_STORE_URL", "http://localhost:8080/");
 
         pg = new PostgresITDataSource("solrdocstore");
         dataSource = pg.getDataSource();
@@ -87,7 +87,6 @@ public class WorkerIT {
             public Client getClient() {
                 return CLIENT;
             }
-
         };
     }
 
@@ -114,31 +113,48 @@ public class WorkerIT {
 
         worker = new Worker();
         worker.config = config;
+
+        String solrDocStoreUrl1 = config.getSolrDocStoreUrl();
+        System.out.println("solrDocStoreUrl1 = " + solrDocStoreUrl1);
+
         worker.dataSource = dataSource;
-        worker.docProducer = new DocProducer();
-        worker.docProducer.config = config;
         worker.es = Executors.newCachedThreadPool();
-        worker.docProducer.businessLogic = new BusinessLogic();
-        worker.docProducer.businessLogic.config = config;
-        worker.docProducer.businessLogic.oa = new OpenAgency() {
+
+        DocProducer docProducer = worker.docProducer = new DocProducer();
+        docProducer.config = config;
+        docProducer.libraryRuleProvider = new LibraryRuleProviderBean() {
             @Override
-            public OpenAgencyLibraryRule libraryRule(String agencyId) {
-                return new OpenAgencyLibraryRule(true, true, true, true, false, true);
+            public VipCoreLibraryRule libraryRulesFor(String agencyId) {
+                switch (agencyId) {
+                    case "300000":
+                    case "300101":
+                    case "300102":
+                    case "300103":
+                    case "300104":
+                    case "777777":
+                        return new VipCoreLibraryRuleMockResponse(true, true, false, true, false, true, true);
+                    default:
+                        throw new IllegalArgumentException("Don't know library rules for: " + agencyId);
+                }
             }
         };
-        worker.docProducer.businessLogic.profileService = new ProfileServiceBean();
-        worker.docProducer.businessLogic.profileService.config = config;
-        worker.docProducer.init();
-        worker.metrics = null;
-        worker.docStasher = new DocStasher() {
+        docProducer.persistenWorkIdProvider = new PersistenWorkIdProviderBean() {
             @Override
-            public void store(String pid, SolrInputDocument doc) {
+            public String persistentWorkIdFor(String corepoWorkId) {
+                return "xxx";
             }
         };
+
+        docProducer.profileProvider = new ProfileProviderBean();
+        docProducer.profileProvider.config = config;
+        docProducer.profileProvider.vipCoreHttpClient = new VipCoreHttpClient();
+
+        docProducer.init();
+
         worker.init();
 
-        try (Connection connection = dataSource.getConnection();
-            Statement stmt = connection.createStatement()) {
+        try (Connection connection = dataSource.getConnection() ;
+             Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("TRUNCATE queue");
             stmt.executeUpdate("TRUNCATE queue_error");
         }
@@ -188,9 +204,9 @@ public class WorkerIT {
                 assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 5, count);
             });
         }
-        try (Connection connection = dataSource.getConnection();
-            Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT jobid, diag FROM queue_error ORDER BY jobid")) {
+        try (Connection connection = dataSource.getConnection() ;
+             Statement stmt = connection.createStatement() ;
+             ResultSet resultSet = stmt.executeQuery("SELECT jobid, diag FROM queue_error ORDER BY jobid")) {
             assertTrue("Atleast one in queue_error", resultSet.next());
             System.out.println("resultSet.getString(1) = " + resultSet.getString(1));
             System.out.println("resultSet.getString(2) = " + resultSet.getString(2));

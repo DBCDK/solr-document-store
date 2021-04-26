@@ -61,7 +61,6 @@ public class Config {
     private long openAgencyFailureAge;
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
-    private String jsonStash;
     private String appId;
     private String workPresentationEndpoint;
     private Client client;
@@ -118,9 +117,6 @@ public class Config {
                                          Collectors.toSet(),
                                          Collections::unmodifiableSet);
 
-        jsonStash = get("jsonStash", "JSON_STASH", "");
-        if (!jsonStash.isEmpty() && solrCollections.size() != 1)
-            throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
         vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", null);
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
@@ -234,10 +230,6 @@ public class Config {
 
     public Set<String> getScanDefaultFields() {
         return scanDefaultFields;
-    }
-
-    public String getJsonStash() {
-        return jsonStash;
     }
 
     public String getWorkPresentationEndpoint() {

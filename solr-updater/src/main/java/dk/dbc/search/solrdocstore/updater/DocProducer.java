@@ -1,16 +1,11 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
+import dk.dbc.solrdocstore.updater.businesslogic.BusinessLogic;
+import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -21,22 +16,15 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static dk.dbc.search.solrdocstore.updater.DocHelpers.addField;
-import static dk.dbc.search.solrdocstore.updater.DocHelpers.find;
-import static dk.dbc.search.solrdocstore.updater.DocHelpers.getField;
-import static dk.dbc.search.solrdocstore.updater.DocHelpers.setField;
+import javax.ws.rs.WebApplicationException;
 
 /**
  *
@@ -47,18 +35,20 @@ public class DocProducer {
 
     private static final Logger log = LoggerFactory.getLogger(DocProducer.class);
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     @Inject
     Config config;
 
     @Inject
-    BusinessLogic businessLogic;
+    ProfileProviderBean profileProvider;
+
+    @Inject
+    LibraryRuleProviderBean libraryRuleProvider;
+
+    @Inject
+    PersistenWorkIdProviderBean persistenWorkIdProvider;
 
     private Client client;
     private UriBuilder uriTemplate;
-
-    private UriBuilder wpUriTemplate;
 
     @PostConstruct
     public void init() {
@@ -68,10 +58,19 @@ public class DocProducer {
         log.debug("solrDocStoreUrl = {}", solrDocStoreUrl);
         this.uriTemplate = UriBuilder.fromUri(solrDocStoreUrl)
                 .path("api/retrieve/combined/{agencyId}/{classifier}/{bibliographicRecordId}");
-        String workPresentationUrl = config.getWorkPresentationEndpoint();
-        log.debug("work-presentation url = {}", workPresentationUrl);
-        this.wpUriTemplate = UriBuilder.fromUri(workPresentationUrl)
-            .path("api/work-presentation/getPersistentWorkId");
+    }
+
+    public BusinessLogic getBusinessLogicFor(SolrCollection collection) {
+        BusinessLogic businessLogic = collection.getBusinessLogic();
+        if (businessLogic == null) {
+            businessLogic = BusinessLogic.builder(collection.getFeatures(), collection.getSolrFields())
+                    .enable800000AndRole(libraryRuleProvider)
+                    .enablePersistentWorkId(persistenWorkIdProvider)
+                    .enableScan(profileProvider, config.getScanDefaultFields(), config.getScanProfiles())
+                    .build();
+            collection.setBusinessLogic(businessLogic);
+        }
+        return businessLogic;
     }
 
     /**
@@ -115,22 +114,15 @@ public class DocProducer {
      * _root_:${biblShardId}
      *
      * @param bibliographicShardId the root id of the document to purge
-     * @param netstedDocumentCount id's to delete from SolR
      * @param solrCollection       connection to solr collection
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
     @Timed(reusable = true)
-    public void deleteSolrDocuments(String bibliographicShardId, int netstedDocumentCount, SolrCollection solrCollection) throws IOException, SolrServerException {
-        int deleteCount = netstedDocumentCount * 2 + 100; // Ensure all old documents gets deleted, even if an uncommitted request has many more than is currently searchable
+    public void deleteSolrDocuments(String bibliographicShardId, SolrCollection solrCollection) throws IOException, SolrServerException {
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.setParam("appId", config.getAppId());
-        ArrayList<String> docIdList = new ArrayList<>(deleteCount + 1);
-        docIdList.add(bibliographicShardId);
-        for (int i = 0 ; i < deleteCount ; i++) {
-            docIdList.add(bibliographicShardId + "@" + i);
-        }
-        updateRequest.deleteById(docIdList);
+        updateRequest.deleteById(bibliographicShardId);
 
         UpdateResponse resp = updateRequest.process(solrCollection.getSolrClient());
         if (resp.getStatus() != 0) {
@@ -146,52 +138,18 @@ public class DocProducer {
      *                       {@link #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)}
      * @param solrCollection description of known fields in the solr collection
      * @return null if deleted otherwise a expanded solr document
-     * @throws PostponedNonFatalQueueError if unable to communicate with
-     *                                     profile-service
      */
     @Timed(reusable = true)
-    public SolrInputDocument createSolrDocument(JsonNode sourceDoc, SolrCollection solrCollection) throws PostponedNonFatalQueueError {
-        boolean deleted = isDeleted(sourceDoc);
+    public SolrInputDocument createSolrDocument(SolrDocStoreResponse sourceDoc, SolrCollection solrCollection) {
+        boolean deleted = sourceDoc.bibliographicRecord.deleted;
         log.trace("deleted = {}", deleted);
         SolrInputDocument doc = null;
         if (!deleted) {
-            doc = inputDocument(sourceDoc, solrCollection);
+            BusinessLogic businessLogic = getBusinessLogicFor(solrCollection);
+            String id = bibliographicShardId(sourceDoc);
+            return businessLogic.processAndAddIds(id, sourceDoc);
         }
         return doc;
-    }
-
-    /**
-     * Find the number of nested documents
-     * <p>
-     * Nested document ids are of the format: document-id@sequential-number
-     *
-     * @param id             the document-id, that has nested documents
-     * @param solrCollection the collection to query
-     * @return number of nested documents
-     * @throws IOException         see
-     *                             {@link SolrClient#query(org.apache.solr.common.params.SolrParams)}
-     * @throws SolrServerException see
-     *                             {@link SolrClient#query(org.apache.solr.common.params.SolrParams)}
-     */
-    @Timed(reusable = true)
-    public int getNestedDocumentCount(String id, SolrCollection solrCollection) throws IOException, SolrServerException {
-        // Delete by query:
-        // http://lucene.472066.n3.nabble.com/Nested-documents-deleting-the-whole-subtree-td4294557.html
-        // Converted to nested to delete subdocuments only, then delete owner by id
-        String query = "{!child of=\"t:m\"}id:" + ClientUtils.escapeQueryChars(id);
-        log.debug("Find nested count - Select: count({})", query);
-        SolrQuery req = new SolrQuery(query);
-        req.setFields("id");
-        req.setRows(0);
-        req.set("appId", config.getAppId());
-        req.setStart(0);
-        QueryResponse resp = solrCollection.getSolrClient().query(req);
-        if (resp.getStatus() != 0) {
-            throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on count nested");
-        }
-        int nestedDocumentCount = (int) resp.getResults().getNumFound();
-        log.debug("nestedDocumentCount = {}", nestedDocumentCount);
-        return nestedDocumentCount;
     }
 
     /**
@@ -202,26 +160,18 @@ public class DocProducer {
      * @throws IOException In case of http errors
      */
     @Timed(reusable = true)
-    public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
+    public SolrDocStoreResponse fetchSourceDoc(QueueJob job) throws IOException {
         URI uri = uriTemplate.buildFromMap(mapForUri(job));
         log.debug("Fetching: {}", uri);
-        Response response = client.target(uri)
+        try (InputStream is = client.target(uri)
                 .request(MediaType.APPLICATION_JSON_TYPE)
-                .get();
-        Response.StatusType status = response.getStatusInfo();
-        if (status.getStatusCode() != HttpURLConnection.HTTP_OK) {
-            throw new IOException("Could not access document " + uri + ": " + status);
+                .get(InputStream.class)) {
+            return SolrDocStoreResponse.from(is);
+        } catch (WebApplicationException ex) {
+            log.error("Error fetching document {} from solr-doc-store: {}", job.getJobId(), ex.getMessage());
+            log.debug("Error fetching document {} from solr-doc-store: ", job.getJobId(), ex);
+            throw ex;
         }
-        if (!response.bufferEntity()) {
-            throw new IOException("Could read document " + uri + ": not of buffer entity type");
-        }
-        Object entity = response.getEntity();
-        if (!( entity instanceof InputStream )) {
-            throw new IOException("Could read document " + uri + ": not of inputstream type");
-        }
-        JsonNode sourceDoc = OBJECT_MAPPER.readTree((InputStream) entity);
-        log.trace("sourceDoc = {}", sourceDoc);
-        return sourceDoc;
     }
 
     /**
@@ -240,92 +190,16 @@ public class DocProducer {
     }
 
     /**
-     * Check if a document is deleted
-     *
-     * @param collection from {@link #fetchSourceDoc(dk.dbc.search.solrdocstore.queue.QueueJob)
-     *                   }
-     * @return if it's deleted or not
-     */
-    public boolean isDeleted(JsonNode collection) {
-        return find(collection, "bibliographicRecord", "deleted").asBoolean();
-    }
-
-    /**
-     * Construct a solr input document from solr-doc-store content
-     *
-     * @param sourceDoc      docstore collection
-     * @param solrCollection description of known fields in the solr collection
-     * @return solr document
-     * @throws PostponedNonFatalQueueError if unable to communicate with
-     *                                     openagency
-     */
-    public SolrInputDocument inputDocument(JsonNode sourceDoc, SolrCollection solrCollection) throws PostponedNonFatalQueueError {
-        try {
-            String id = bibliographicShardId(sourceDoc);
-
-            businessLogic.filterOutDecommissioned(sourceDoc);
-
-            JsonNode indexKeys = find(sourceDoc, "bibliographicRecord", "indexKeys");
-            String repositoryId = getField(indexKeys, "rec.repositoryId");
-            final String workId = getField(indexKeys, "rec.workId");
-            if (repositoryId == null) {
-                throw new IllegalStateException("Cannot get rec.repositoryId from document");
-            }
-
-            setField(indexKeys, "id", id);
-            setField(indexKeys, "t", "m"); // Manifestation type
-
-            businessLogic.addRecHoldingsAgencyId(sourceDoc, solrCollection);
-            businessLogic.addRecHoldingsStats(sourceDoc, solrCollection);
-            businessLogic.addFromPartOfDanbib(sourceDoc, solrCollection);
-            businessLogic.addCollectionIdentifier800000(sourceDoc, solrCollection);
-            businessLogic.addHoldingsItemRole(sourceDoc, solrCollection);
-            businessLogic.addScan(sourceDoc, solrCollection);
-            businessLogic.attachedResources(sourceDoc, solrCollection);
-            if (workId != null && !workId.isEmpty()) {
-                log.debug("looking up persistent work id for corepo work id {}", workId);
-                URI wpUri = wpUriTemplate.build();
-                final String persistentWorkId = client.target(wpUri)
-                        .queryParam("corepoWorkId", workId)
-                        .request(MediaType.APPLICATION_JSON_TYPE)
-                        .get(String.class);
-                log.debug("Setting persistent work id {} in solr document", persistentWorkId);
-                if (persistentWorkId != null && !persistentWorkId.isEmpty()) {
-                    addField(indexKeys, "rec.persistentWorkId", persistentWorkId);
-                }
-            }
-            SolrInputDocument doc = solrCollection.getSolrFields().newDocumentFromIndexKeys(indexKeys);
-            businessLogic.addNestedHoldingsDocuments(doc, sourceDoc, solrCollection, repositoryId);
-
-            return doc;
-        } catch (RuntimeException ex) {
-            log.error("Exception: {}", ex.getMessage());
-            log.debug("Exception: ", ex);
-            throw ex;
-        }
-    }
-
-    /**
      * Construct an id string with sharding info using bibliographicrecordid
      *
      * @param sourceDoc Json source document from solr-doc-store
      * @return string of parts joined with '-'
      */
-    public static String bibliographicShardId(JsonNode sourceDoc) {
-        JsonNode bibliographicRecord = find(sourceDoc, "bibliographicRecord");
-        return shardId(bibliographicRecord);
-    }
-
-    /**
-     * Construct an id string with sharding info using bibliographicrecordid
-     *
-     * @param bibliographicRecord Json source document from solr-doc-store
-     * @return string of parts joined with '-'
-     */
-    static String shardId(JsonNode bibliographicRecord) {
-        String agencyId = find(bibliographicRecord, "agencyId").asText();
-        String classifier = find(bibliographicRecord, "classifier").asText();
-        String bibliographicRecordId = find(bibliographicRecord, "bibliographicRecordId").asText();
-        return bibliographicRecordId + "/32!" + String.join("-", agencyId, classifier, bibliographicRecordId);
+    public static String bibliographicShardId(SolrDocStoreResponse sourceDoc) {
+        return sourceDoc.bibliographicRecord.bibliographicRecordId + "/32!" +
+               String.join("-",
+                           String.valueOf(sourceDoc.bibliographicRecord.agencyId),
+                           sourceDoc.bibliographicRecord.classifier,
+                           sourceDoc.bibliographicRecord.bibliographicRecordId);
     }
 }

@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.hazelcast.util.executor.ManagedExecutorService;
 import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.log.LogWith;
@@ -11,6 +10,7 @@ import dk.dbc.pgqueue.consumer.NonFatalQueueError;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.pgqueue.consumer.QueueWorker;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.Collections;
@@ -55,9 +55,6 @@ public class Worker {
 
     @Inject
     DocProducer docProducer;
-
-    @Inject
-    DocStasher docStasher;
 
     @Inject
     MetricRegistry metrics;
@@ -113,7 +110,7 @@ public class Worker {
 
                 String pid = job.getJobId();
 
-                JsonNode sourceDoc = docProducer.fetchSourceDoc(job);
+                SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(job);
                 List<Runnable> tasks = solrCollections.stream()
                         .map(solrCollection -> processForOneCollection(sourceDoc.deepCopy(), solrCollection, pid))
                         .collect(Collectors.toList());
@@ -170,28 +167,21 @@ public class Worker {
         };
     }
 
-    public Runnable processForOneCollection(JsonNode sourceDoc, SolrCollection collection, String pid) {
+    public Runnable processForOneCollection(SolrDocStoreResponse sourceDoc, SolrCollection collection, String pid) {
         return () -> {
             try (DBCTrackedLogContext logContext = new DBCTrackedLogContext()
                     .with("pid", pid)
                     .with("solrCollection", collection.getName())) {
                 log.info("Building document");
-                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, collection);
                 String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-                int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, collection);
 
-                docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, collection);
+                SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, collection);
+
+                docProducer.deleteSolrDocuments(bibliographicShardId, collection);
 
                 docProducer.deploy(solrDocument, collection);
-                int count = 1;
-                if (solrDocument != null && solrDocument.hasChildDocuments()) {
-                    List<SolrInputDocument> childDocuments = solrDocument.getChildDocuments();
-                    if (childDocuments != null)
-                        count += childDocuments.size();
-                }
-                log.info("Deleted {} record(s) and added {} to SolR", nestedDocumentCount + 1, count);
-                docStasher.store(pid, solrDocument);
-            } catch (PostponedNonFatalQueueError | IOException | SolrServerException ex) {
+                log.info("Added {} to SolR", bibliographicShardId);
+            } catch (IOException | SolrServerException ex) {
                 throw new RethrowableException(ex);
             }
         };

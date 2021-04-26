@@ -1,14 +1,14 @@
 {
     "bibliographicRecord": {
-        "agencyId": 300101,
-        "classifier": "clazzifier",
+        "agencyId": 870970,
+        "classifier": "basis",
         "bibliographicRecordId": "23645564",
-        "repositoryId": "300101-katalog:23645564",
+        "repositoryId": "870970-basis:23645564",
         "deleted": false,
         "work": "work:754877",
         "unit": "unit:893270",
         "indexKeys": {
-            "rec.repositoryId": [ "300101-katalog:23645564" ],
+            "rec.repositoryId": [ "870970-basis:23645564" ],
             "dkcclterm.po": [ "Haruki", "Murakami" ],
             "unknown.field": [ "Haruki", "Murakami" ]
         },
@@ -47,11 +47,7 @@
             "agencyId": 300103,
             "bibliographicRecordId": "23645564",
             "hasLiveHoldings": false,
-            "indexKeys": [ {
-                    "holdingsitem.agencyId": [ "300103" ],
-                    "holdingsitem.itemId": [ "300103_1" ],
-                    "holdingsitem.status": [ "Decommissioned" ]
-                } ],
+            "indexKeys": [ ],
             "trackingId": "",
             "commitWithin": 0
         }, {
@@ -67,19 +63,7 @@
                     "holdingsitem.agencyId": [ "300104" ],
                     "holdingsitem.itemId": [ "300104_2" ],
                     "holdingsitem.status": [ "OnShelf" ]
-                },
-                {
-                    "holdingsitem.agencyId": [ "300104" ],
-                    "holdingsitem.itemId": [ "300104_3" ],
-                    "holdingsitem.status": [ "Decommissioned" ]
                 } ],
-            "trackingId": "",
-            "commitWithin": 0
-        }, {
-            "agencyId": 300102,
-            "bibliographicRecordId": "23645564",
-            "hasLiveHoldings": false,
-            "indexKeys": [ ],
             "trackingId": "",
             "commitWithin": 0
         } ],
