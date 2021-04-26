@@ -240,7 +240,9 @@ public class Config {
         return jsonStash;
     }
 
-    public String getWorkPresentationEndpoint() { return workPresentationEndpoint; }
+    public String getWorkPresentationEndpoint() {
+        return workPresentationEndpoint;
+    }
 
     public Client getClient() {
         return client;
