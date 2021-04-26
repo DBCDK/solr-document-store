@@ -271,8 +271,8 @@ public class BusinessLogic {
 
     private boolean shouldAddholdingsItemRole(boolean partOf, boolean excludeFromUnionCatalogue,
                                               boolean authCreateCommonRecord, boolean commonRecord) {
-        return ( partOf && !excludeFromUnionCatalogue ||
-                 !partOf && authCreateCommonRecord && commonRecord );
+        return partOf && !excludeFromUnionCatalogue ||
+               !partOf && authCreateCommonRecord && commonRecord;
     }
 
     private void addHoldingsStats(Map<String, List<String>> indexKeys, SolrDocStoreResponse source) {
