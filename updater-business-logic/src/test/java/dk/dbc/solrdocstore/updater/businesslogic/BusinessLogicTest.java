@@ -165,21 +165,17 @@ public class BusinessLogicTest {
         File featureFile = directory.resolve("features").toFile();
         if (!featureFile.exists())
             throw new IllegalArgumentException("No such featureFile: " + featureFile);
-        try (InputStream is = new FileInputStream(featureFile)) {
-            byte[] readAllBytes = is.readAllBytes();
-            String featureString = new String(readAllBytes, UTF_8).trim();
-            return new FeatureSwitch(featureString);
-        }
+        byte[] readAllBytes = Files.readAllBytes(featureFile.toPath());
+        String featureString = new String(readAllBytes, UTF_8).trim();
+        return new FeatureSwitch(featureString);
     }
 
     private String readExpected() throws IOException {
         File expectedFile = directory.resolve("expected.txt").toFile();
         if (!expectedFile.exists())
             throw new IllegalArgumentException("No such expectedFile: " + expectedFile);
-        try (InputStream is = new FileInputStream(expectedFile)) {
-            byte[] readAllBytes = is.readAllBytes();
-            return new String(readAllBytes, UTF_8);
-        }
+        byte[] readAllBytes = Files.readAllBytes(expectedFile.toPath());
+        return new String(readAllBytes, UTF_8);
     }
 
     private JsonNode readJson(String fileName) throws IOException {
@@ -210,7 +206,7 @@ public class BusinessLogicTest {
             return "";
 
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream() ;
-             PrintStream printStream = new PrintStream(bos, true, UTF_8)) {
+             PrintStream printStream = new PrintStream(bos, true, UTF_8.name())) {
 
             Deque<String> queue = new LinkedList<>();
             int extra = 0;
@@ -229,7 +225,7 @@ public class BusinessLogicTest {
                         queue.remove();
                 }
             }
-            return bos.toString(UTF_8);
+            return bos.toString(UTF_8.name());
         }
     }
 
