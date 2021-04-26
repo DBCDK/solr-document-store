@@ -22,6 +22,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,11 +46,27 @@ public class SolrDocStoreResponse {
         return O.treeToValue(sourceDoc, SolrDocStoreResponse.class);
     }
 
+    public static SolrDocStoreResponse from(InputStream is) throws JsonProcessingException, IOException {
+        return O.readValue(is, SolrDocStoreResponse.class);
+    }
+
     public BibliographicRecord bibliographicRecord;
     public List<HoldingsItemRecord> holdingsItemRecords;
     public List<Integer> partOfDanbib;
     public Map<String, Map<Integer, Boolean>> attachedResources;
     public Map<String, Integer> totalStatusCount;
+
+    public SolrDocStoreResponse deepCopy() {
+        SolrDocStoreResponse copy = new SolrDocStoreResponse();
+        copy.bibliographicRecord = bibliographicRecord.deepCopy();
+        copy.holdingsItemRecords = new ArrayList<>();
+        holdingsItemRecords.forEach(h -> copy.holdingsItemRecords.add(h.deepCopy()));
+        copy.partOfDanbib = new ArrayList<>(partOfDanbib);
+        copy.attachedResources = new HashMap<>();
+        attachedResources.forEach((k, vs) -> copy.attachedResources.put(k, new HashMap<>(vs)));
+        copy.totalStatusCount = new HashMap<>(totalStatusCount);
+        return copy;
+    }
 
     public Map<String, List<String>> getIndexKeys() {
         return bibliographicRecord.indexKeys;
@@ -55,7 +76,14 @@ public class SolrDocStoreResponse {
         if (holdingsItemRecords == null)
             return EMPTY_MAP;
         return holdingsItemRecords.stream()
-                .collect(toMap(h -> String.valueOf(h.agencyId), h -> h.indexKeys));
+                .flatMap(h -> h.indexKeys.stream()
+                        .map(i -> new AbstractMap.SimpleEntry<>(String.valueOf(h.agencyId), i)))
+                .collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toList())));
+    }
+
+    @Override
+    public String toString() {
+        return "SolrDocStoreResponse{" + "bibliographicRecord=" + bibliographicRecord + ", holdingsItemRecords=" + holdingsItemRecords + ", partOfDanbib=" + partOfDanbib + ", attachedResources=" + attachedResources + ", totalStatusCount=" + totalStatusCount + '}';
     }
 
     public static class BibliographicRecord {
@@ -68,6 +96,24 @@ public class SolrDocStoreResponse {
         public String unit;
         public boolean deleted;
         public Map<String, List<String>> indexKeys;
+
+        private BibliographicRecord deepCopy() {
+            BibliographicRecord copy = new BibliographicRecord();
+            copy.agencyId = agencyId;
+            copy.classifier = classifier;
+            copy.bibliographicRecordId = bibliographicRecordId;
+            copy.repositoryId = repositoryId;
+            copy.work = work;
+            copy.unit = unit;
+            copy.indexKeys = new HashMap<>();
+            indexKeys.forEach((k, vs) -> copy.indexKeys.put(k, new ArrayList<>(vs)));
+            return copy;
+        }
+
+        @Override
+        public String toString() {
+            return "BibliographicRecord{" + "agencyId=" + agencyId + ", classifier=" + classifier + ", bibliographicRecordId=" + bibliographicRecordId + ", repositoryId=" + repositoryId + ", work=" + work + ", unit=" + unit + ", deleted=" + deleted + '}';
+        }
     }
 
     public static class HoldingsItemRecord {
@@ -75,6 +121,23 @@ public class SolrDocStoreResponse {
         public int agencyId;
         public String bibliographicRecordId;
         public List<Map<String, List<String>>> indexKeys;
-    }
 
+        private HoldingsItemRecord deepCopy() {
+            HoldingsItemRecord copy = new HoldingsItemRecord();
+            copy.agencyId = agencyId;
+            copy.bibliographicRecordId = bibliographicRecordId;
+            copy.indexKeys = new ArrayList<>();
+            indexKeys.forEach(map -> {
+                HashMap<String, List<String>> mapCopy = new HashMap<>();
+                map.forEach((k, vs) -> mapCopy.put(k, new ArrayList<>(vs)));
+                copy.indexKeys.add(mapCopy);
+            });
+            return copy;
+        }
+
+        @Override
+        public String toString() {
+            return "HoldingsItemRecord{" + "agencyId=" + agencyId + ", bibliographicRecordId=" + bibliographicRecordId + '}';
+        }
+    }
 }
