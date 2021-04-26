@@ -205,7 +205,7 @@ public class BusinessLogic {
                 addPersistentWorkId(indexKeys, source);
             }
         }
-        return SolrInputDocument(indexKeys, holdingsItemsIndexKeys);
+        return solrInputDocument(indexKeys, holdingsItemsIndexKeys);
     }
 
     private void addType(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
@@ -412,7 +412,7 @@ public class BusinessLogic {
                 .collect(toSet());
     }
 
-    public SolrInputDocument SolrInputDocument(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsIndexKeys) {
+    private SolrInputDocument solrInputDocument(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsIndexKeys) {
         SolrInputDocument SolrInputDocument = indexKeysToSolrInputDocument(indexKeys);
         holdingsIndexKeys.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey()) // In order for easyunittest
