@@ -28,16 +28,12 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
 /**
+ * Representation the fields, from a vipcore libraryrules, that are needed for
+ * pre-processing the records.
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 public class VipCoreLibraryRule {
-
-    public static final String AUTH_CREATE_COMMON_RECORD = "auth_create_common_record";
-    public static final String PART_OF_BIBLIOTEK_DK = "part_of_bibliotek_dk";
-    public static final String PART_OF_DANBIB = "part_of_danbib";
-    public static final String USE_HOLDINGS_ITEM = "use_holdings_item";
-    public static final String USE_LOCALDATA_STREAM = "use_localdata_stream";
 
     private final Map<String, Boolean> booleans;
     private final LibraryType libraryType;
@@ -63,10 +59,6 @@ public class VipCoreLibraryRule {
 
     public boolean authCreateComonRecord() {
         return booleans.getOrDefault("auth_create_common_record", false);
-    }
-
-    public boolean usesEnrichments() {
-        return booleans.getOrDefault("use_enrichments", false);
     }
 
     public boolean usesHoldingsItem() {

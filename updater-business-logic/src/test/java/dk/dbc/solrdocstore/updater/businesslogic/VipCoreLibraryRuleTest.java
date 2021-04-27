@@ -37,12 +37,12 @@ public class VipCoreLibraryRuleTest {
     public void testLibraryRuleFromVip() throws Exception {
         System.out.println("testLibraryRuleFromVip");
 
-        String content = "{'libraryRules':[{'agencyId':'number','agencyType':'Skolebibliotek','libraryRule':[{'name':'create_enrichments','bool':true},{'name':'use_enrichments','bool':true},{'name':'auth_root','bool':false},{'name':'auth_common_subjects','bool':false},{'name':'auth_common_notes','bool':false},{'name':'auth_dbc_records','bool':false},{'name':'auth_public_lib_common_record','bool':false},{'name':'auth_ret_record','bool':false},{'name':'auth_agency_common_record','bool':true},{'name':'auth_export_holdings','bool':false},{'name':'use_localdata_stream','bool':false},{'name':'use_holdings_item','bool':false},{'name':'part_of_bibliotek_dk','bool':false},{'name':'auth_create_common_record','bool':false},{'name':'ims_library','bool':false},{'name':'worldcat_synchronize','bool':true},{'name':'worldcat_resource_sharing','bool':false},{'name':'cataloging_template_set','string':'dbc'},{'name':'part_of_danbib','bool':false},{'name':'auth_add_dk5_to_phd','bool':false},{'name':'auth_metacompass','bool':false},{'name':'view_metacompass','bool':false},{'name':'use_central_faust','bool':true}]}]}";
+        String content = "{'libraryRules':[{'agencyId':'number','agencyType':'Skolebibliotek','libraryRule':[{'name':'create_enrichments','bool':true},{'name':'use_enrichments','bool':true},{'name':'auth_root','bool':false},{'name':'auth_common_subjects','bool':false},{'name':'auth_common_notes','bool':false},{'name':'auth_dbc_records','bool':false},{'name':'auth_public_lib_common_record','bool':false},{'name':'auth_ret_record','bool':false},{'name':'auth_agency_common_record','bool':true},{'name':'auth_export_holdings','bool':false},{'name':'use_localdata_stream','bool':false},{'name':'use_holdings_item','bool':true},{'name':'part_of_bibliotek_dk','bool':false},{'name':'auth_create_common_record','bool':false},{'name':'ims_library','bool':false},{'name':'worldcat_synchronize','bool':true},{'name':'worldcat_resource_sharing','bool':false},{'name':'cataloging_template_set','string':'dbc'},{'name':'part_of_danbib','bool':false},{'name':'auth_add_dk5_to_phd','bool':false},{'name':'auth_metacompass','bool':false},{'name':'view_metacompass','bool':false},{'name':'use_central_faust','bool':true}]}]}";
         LibraryRulesResponse libraryRulesResponse = O.readValue(content.replaceAll("'", "\""), LibraryRulesResponse.class);
         VipCoreLibraryRule libraryRule = new VipCoreLibraryRule(libraryRulesResponse);
 
         assertThat(libraryRule.isPartOfBibdk(), is(false));
-        assertThat(libraryRule.usesEnrichments(), is(true));
+        assertThat(libraryRule.usesHoldingsItem(), is(true));
         assertThat(libraryRule.isFbsLibrary(), is(true));
         assertThat(libraryRule.isResearchLibrary(), is(false));
     }
