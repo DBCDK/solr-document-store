@@ -146,15 +146,20 @@ public class Worker {
                                 throw rex;
                         }
                     }
-                } catch (RethrowableException ex) {
-                    while (ex.getCause() instanceof RethrowableException) {
-                        ex = (RethrowableException) ex.getCause();
+                } catch (RuntimeException ex) {
+                    Throwable cause = ex;
+                    while (cause != null) {
+                        if (cause instanceof RethrowableException) {
+                            RethrowableException ex1 = (RethrowableException) cause;
+                            ex1.throwAs(IOException.class);
+                            ex1.throwAs(SolrServerException.class);
+                            ex1.throwAs(FatalQueueError.class);
+                            ex1.throwAs(NonFatalQueueError.class);
+                            ex1.throwAs(PostponedNonFatalQueueError.class);
+                            throw new FatalQueueError(ex);
+                        }
+                        cause = cause.getCause();
                     }
-                    ex.throwAs(IOException.class);
-                    ex.throwAs(SolrServerException.class);
-                    ex.throwAs(FatalQueueError.class);
-                    ex.throwAs(NonFatalQueueError.class);
-                    ex.throwAs(PostponedNonFatalQueueError.class);
                     throw new FatalQueueError(ex);
                 }
             } catch (IOException ex) {
