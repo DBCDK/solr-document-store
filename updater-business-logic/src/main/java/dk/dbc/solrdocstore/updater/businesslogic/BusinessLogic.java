@@ -32,7 +32,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -205,7 +205,11 @@ public class BusinessLogic {
                 addPersistentWorkId(indexKeys, source);
             }
         }
-        return solrInputDocument(indexKeys, holdingsItemsIndexKeys);
+        if (should(Feature.NESTED_HOLDINGS_DOCUMENTS)) {
+            return solrInputDocument(indexKeys, holdingsItemsIndexKeys);
+        } else {
+            return solrInputDocument(indexKeys, EMPTY_MAP);
+        }
     }
 
     private void addType(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {

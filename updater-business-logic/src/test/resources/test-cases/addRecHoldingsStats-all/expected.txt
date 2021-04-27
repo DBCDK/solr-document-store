@@ -4,7 +4,5 @@
 ++>   "rec.holdingsCount" : [ "4" ], <++
 ++>   "rec.holdingsOnLoan" : [ "0.25" ], <++
   "t" : [ "m" ],
-  "term.mainCreator" : [ "Jönsson Reidar" ],
-  "_childDocuments_" : [ {
-    "holdingsitem.accessionDate" : [ "1980-11-11T00:00:00.000Z" ],
-    "holdingsitem.agencyId" : [ "746100" ],
+  "term.mainCreator" : [ "Jönsson Reidar" ]
+}

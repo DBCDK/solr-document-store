@@ -15,7 +15,5 @@
 ++>   "scan.nope_102030_magic" : [ "nah" ], <++
 ++>   "scan.nope_102030_self" : [ "nah" ], <++
   "t" : [ "m" ],
-  "ti" : [ "any" ],
-  "_childDocuments_" : [ {
-    "t" : [ "h" ]
-  } ]
+  "ti" : [ "any" ]
+}

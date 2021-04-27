@@ -1,7 +1,0 @@
-{
-  "t" : [ "m" ],
-  "_childDocuments_" : [ {
-++>     "holdingsitem.role" : [ "bibdk" ], <++
-    "t" : [ "h" ]
-  } ]
-}
