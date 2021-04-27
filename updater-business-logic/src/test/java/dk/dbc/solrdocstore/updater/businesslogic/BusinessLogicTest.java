@@ -83,14 +83,14 @@ public class BusinessLogicTest {
         FeatureSwitch features = readFeatures();
         JsonNode source = readJson("source.json");
 
-
         /*
          * Build document without any features
          */
         BusinessLogic businessLogicNull =
                 BusinessLogic.builder(new FeatureSwitch("none"), ALL_SOLR_FIELDS)
                         .build();
-        SolrInputDocument beforeSolrInputDocument = businessLogicNull.process(SolrDocStoreResponse.from(source));
+        SolrDocStoreResponse solrDocStoreResponse = SolrDocStoreResponse.from(source);
+        SolrInputDocument beforeSolrInputDocument = businessLogicNull.process(solrDocStoreResponse.deepCopy());
 
         try (OutputStream os = new FileOutputStream(directory.resolve("before.json").toFile())) {
             os.write(O.writeValueAsString(SolrInputDocumentToJson(beforeSolrInputDocument)).getBytes(UTF_8));
@@ -108,7 +108,7 @@ public class BusinessLogicTest {
                         .enablePersistentWorkId(new PersistentWorkIdProviderMock())
                         .build();
 
-        SolrInputDocument afterSolrInputDocument = businessLogic.process(SolrDocStoreResponse.from(source));
+        SolrInputDocument afterSolrInputDocument = businessLogic.process(solrDocStoreResponse.deepCopy());
 
         try (OutputStream os = new FileOutputStream(directory.resolve("after.json").toFile())) {
             os.write(O.writeValueAsString(SolrInputDocumentToJson(afterSolrInputDocument)).getBytes(UTF_8));

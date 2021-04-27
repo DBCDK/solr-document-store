@@ -34,6 +34,7 @@ import static java.util.Collections.EMPTY_MAP;
 import static java.util.stream.Collectors.*;
 
 /**
+ * Class representing (DTO) the manuifestation response form solr-doc-store
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -42,10 +43,27 @@ public class SolrDocStoreResponse {
     private static final ObjectMapper O = new ObjectMapper()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
+    /**
+     * Construct a SolrDocStoreResponse from a jackson parsed tree
+     *
+     * @param sourceDoc the JSON as tree nodes
+     * @return SolrDocStoreResponse
+     * @throws JsonProcessingException if the tree is inconsistent or doesn't
+     *                                 match the SolrDocStoreResponse structure
+     */
     public static SolrDocStoreResponse from(JsonNode sourceDoc) throws JsonProcessingException {
         return O.treeToValue(sourceDoc, SolrDocStoreResponse.class);
     }
 
+    /**
+     * Construct a SolrDocStoreResponse from an inputstream
+     *
+     * @param is the JSON as a stream of bytes
+     * @return SolrDocStoreResponse
+     * @throws JsonProcessingException if the tree is inconsistent or doesn't
+     *                                 match the SolrDocStoreResponse structure
+     * @throws IOException             if the inputstream is bad
+     */
     public static SolrDocStoreResponse from(InputStream is) throws JsonProcessingException, IOException {
         return O.readValue(is, SolrDocStoreResponse.class);
     }
@@ -56,22 +74,47 @@ public class SolrDocStoreResponse {
     public Map<String, Map<Integer, Boolean>> attachedResources;
     public Map<String, Integer> totalStatusCount;
 
+    /**
+     * Make a copy of the structure, to avoid cross-contamination of different
+     * SolR instances has different feature-sets
+     *
+     * @return a copy of SolrDocStoreResponse, which is totally isolated from
+     *         the original
+     */
     public SolrDocStoreResponse deepCopy() {
         SolrDocStoreResponse copy = new SolrDocStoreResponse();
         copy.bibliographicRecord = bibliographicRecord.deepCopy();
-        copy.holdingsItemRecords = new ArrayList<>();
-        holdingsItemRecords.forEach(h -> copy.holdingsItemRecords.add(h.deepCopy()));
-        copy.partOfDanbib = new ArrayList<>(partOfDanbib);
-        copy.attachedResources = new HashMap<>();
-        attachedResources.forEach((k, vs) -> copy.attachedResources.put(k, new HashMap<>(vs)));
-        copy.totalStatusCount = new HashMap<>(totalStatusCount);
+        if (holdingsItemRecords != null) {
+            copy.holdingsItemRecords = new ArrayList<>();
+            holdingsItemRecords.forEach(h -> copy.holdingsItemRecords.add(h.deepCopy()));
+        }
+        if (partOfDanbib != null) {
+            copy.partOfDanbib = new ArrayList<>(partOfDanbib);
+        }
+        if (attachedResources != null) {
+            copy.attachedResources = new HashMap<>();
+            attachedResources.forEach((k, vs) -> copy.attachedResources.put(k, new HashMap<>(vs)));
+        }
+        if (totalStatusCount != null) {
+            copy.totalStatusCount = new HashMap<>(totalStatusCount);
+        }
         return copy;
     }
 
+    /**
+     * The bibliographic indexkeys (quick access)
+     *
+     * @return indexkeys
+     */
     public Map<String, List<String>> getIndexKeys() {
         return bibliographicRecord.indexKeys;
     }
 
+    /**
+     * The holdings-items indexkeys as a map of agencies, and lists of holdings
+     *
+     * @return map of agencies and indexkeys
+     */
     public Map<String, List<Map<String, List<String>>>> getHoldingsItemsIndexKeys() {
         if (holdingsItemRecords == null)
             return EMPTY_MAP;
