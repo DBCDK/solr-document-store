@@ -31,7 +31,6 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  *       }
  * </pre>
  * And use it like this:
- * <p>
  * <pre>
  *       \@Inject
  *       PersistentWorkIdProvider provider;
