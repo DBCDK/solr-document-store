@@ -213,10 +213,10 @@ public class BusinessLogic {
     }
 
     private void addType(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
-        indexKeys.put("t", Collections.singletonList("m"));
+        indexKeys.put("t", singletonList("m"));
         holdingsItemsIndexKeysList.values().stream()
                 .flatMap(Collection::stream)
-                .forEach(i -> i.put("t", Collections.singletonList("h")));
+                .forEach(i -> i.put("t", singletonList("h")));
     }
 
     private void add800000CollectionIdenitifers(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
@@ -302,7 +302,7 @@ public class BusinessLogic {
             throw new IllegalStateException("Cannot add persistent-work-id, since no corepo-work-id is present");
         String persistentWorkId = persistentWorkIdProvider.persistentWorkIdFor(corepoWorkId);
         log.trace("setting " + REC_PERSISTENT_WORK_ID + " to {}", persistentWorkId);
-        indexKeys.put(REC_PERSISTENT_WORK_ID, Collections.singletonList(persistentWorkId));
+        indexKeys.put(REC_PERSISTENT_WORK_ID, singletonList(persistentWorkId));
     }
 
     private void addResources(Map<String, List<String>> indexKeys, Map<String, Map<Integer, Boolean>> resources, int agencyId) {
