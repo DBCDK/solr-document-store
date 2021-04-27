@@ -23,8 +23,8 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * 
  * In a ".war" it is used implemented this:
  * <pre>
- *       @Singleton
- *       @Lock(LockType.READ)
+ *       \@Singleton
+ *       \@Lock(LockType.READ)
  *       public class LibraryRuleProviderBean implements LibraryRuleProvider {
  *           ... implementation of interface
  *       }
@@ -32,7 +32,7 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * And use it like this:
  * 
  * <pre>
- *       @Inject
+ *       \@Inject
  *       LibraryRulesProvider provider;
  * </pre>
  *

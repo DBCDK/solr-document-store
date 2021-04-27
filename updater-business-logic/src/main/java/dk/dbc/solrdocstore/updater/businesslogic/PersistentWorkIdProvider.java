@@ -24,8 +24,8 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * <p>
  * In a ".war" it is implemented like this:
  * <pre>
- *       @Singleton
- *       @Lock(LockType.READ)
+ *       \@Singleton
+ *       \@Lock(LockType.READ)
  *       public class PersistentWorkIdProviderBean implements PersistentWorkIdProvider {
  *           ... implementation of interface
  *       }
@@ -33,7 +33,7 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * And use it like this:
  * <p>
  * <pre>
- *       @Inject
+ *       \@Inject
  *       PersistentWorkIdProvider provider;
  * </pre>
  *

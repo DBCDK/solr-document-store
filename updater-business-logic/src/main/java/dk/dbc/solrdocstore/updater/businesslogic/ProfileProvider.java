@@ -23,8 +23,8 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  *
  * In a ".war" it is implemented like this:
  * <pre>
- *       @Singleton
- *       @Lock(LockType.READ)
+ *       \@Singleton
+ *       \@Lock(LockType.READ)
  *       public class ProfileProviderBean implements ProfileProvider {
  *           ... implementation of interface
  *       }
@@ -33,7 +33,7 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * And use it like this:
  *
  * <pre>
- *       @Inject
+ *       \@Inject
  *       ProfileProvider provider;
  * </pre>
  *
