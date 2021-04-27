@@ -21,7 +21,6 @@ package dk.dbc.solrdocstore.updater.businesslogic;
 import dk.dbc.solrdocstore.updater.businesslogic.FeatureSwitch.Feature;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
