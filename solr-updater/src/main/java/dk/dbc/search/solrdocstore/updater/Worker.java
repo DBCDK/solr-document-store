@@ -147,6 +147,9 @@ public class Worker {
                         }
                     }
                 } catch (RethrowableException ex) {
+                    while (ex.getCause() instanceof RethrowableException) {
+                        ex = (RethrowableException) ex.getCause();
+                    }
                     ex.throwAs(IOException.class);
                     ex.throwAs(SolrServerException.class);
                     ex.throwAs(FatalQueueError.class);

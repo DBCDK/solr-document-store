@@ -22,6 +22,7 @@ import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import dk.dbc.vipcore.marshallers.LibraryType;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,9 @@ import static java.util.stream.Collectors.toMap;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class VipCoreLibraryRule {
+public class VipCoreLibraryRule implements Serializable {
+
+    private static final long serialVersionUID = 0x8AB5E83AAD0849B0L;
 
     private final Map<String, Boolean> booleans;
     private final LibraryType libraryType;
