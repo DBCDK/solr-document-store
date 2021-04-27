@@ -148,6 +148,7 @@ public class SolrDocStoreResponse {
             copy.repositoryId = repositoryId;
             copy.work = work;
             copy.unit = unit;
+            copy.deleted = deleted;
             copy.indexKeys = new HashMap<>();
             indexKeys.forEach((k, vs) -> copy.indexKeys.put(k, new ArrayList<>(vs)));
             return copy;
