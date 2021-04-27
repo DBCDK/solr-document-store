@@ -39,7 +39,6 @@ public class VipCoreProfile implements Serializable {
     public VipCoreProfile(boolean includeOwnHoldings, String... collectionIdentifiers) {
         this.includeOwnHoldings = includeOwnHoldings;
         this.collectionIdentifiers = Arrays.asList(collectionIdentifiers);
-
     }
 
     public VipCoreProfile(ProfileServiceResponse vipCoreProfileResponse) {

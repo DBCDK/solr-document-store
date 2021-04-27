@@ -34,10 +34,10 @@ public class FeatureSwitchTest {
         System.out.println("testNoFeaturesDefined");
 
         FeatureSwitch featureSwitch1 = new FeatureSwitch(null);
-        assertThat(featureSwitch1.shound(FeatureSwitch.Feature.SCAN), is(true));
+        assertThat(featureSwitch1.should(FeatureSwitch.Feature.SCAN), is(true));
 
         FeatureSwitch featureSwitch2 = new FeatureSwitch("");
-        assertThat(featureSwitch2.shound(FeatureSwitch.Feature.SCAN), is(true));
+        assertThat(featureSwitch2.should(FeatureSwitch.Feature.SCAN), is(true));
     }
 
     @Test(timeout = 2_000L)
@@ -45,9 +45,9 @@ public class FeatureSwitchTest {
         System.out.println("testOnlyAdd");
 
         FeatureSwitch featureSwitch = new FeatureSwitch("role+800000");
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.SCAN), is(false));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(true));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(true));
     }
 
     @Test(timeout = 2_000L)
@@ -55,9 +55,9 @@ public class FeatureSwitchTest {
         System.out.println("testOnlyAddExplicit");
 
         FeatureSwitch featureSwitch = new FeatureSwitch("+role+800000");
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.SCAN), is(false));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(true));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(true));
     }
 
     @Test(timeout = 2_000L)
@@ -65,9 +65,9 @@ public class FeatureSwitchTest {
         System.out.println("testRemove");
 
         FeatureSwitch featureSwitch = new FeatureSwitch("-role-800000");
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.SCAN), is(true));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(false));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(true));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(false));
     }
 
     @Test(timeout = 2_000L)
@@ -75,8 +75,8 @@ public class FeatureSwitchTest {
         System.out.println("testNone");
 
         FeatureSwitch featureSwitch = new FeatureSwitch("none");
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.SCAN), is(false));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(false));
-        assertThat(featureSwitch.shound(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(false));
     }
 }

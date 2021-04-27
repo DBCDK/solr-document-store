@@ -97,7 +97,7 @@ public class BusinessLogicTest {
         }
 
         /*
-         * Build document wth the enabled feafures
+         * Build document with the enabled features
          */
         BusinessLogic businessLogic =
                 BusinessLogic.builder(features, ALL_SOLR_FIELDS)

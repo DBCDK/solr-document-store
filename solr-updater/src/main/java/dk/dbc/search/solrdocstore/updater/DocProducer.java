@@ -146,13 +146,12 @@ public class DocProducer {
     public SolrInputDocument createSolrDocument(SolrDocStoreResponse sourceDoc, SolrCollection solrCollection) {
         boolean deleted = sourceDoc.bibliographicRecord.deleted;
         log.trace("deleted = {}", deleted);
-        SolrInputDocument doc = null;
         if (!deleted) {
             BusinessLogic businessLogic = getBusinessLogicFor(solrCollection);
             String id = bibliographicShardId(sourceDoc);
             return businessLogic.processAndAddIds(id, sourceDoc);
         }
-        return doc;
+        return null;
     }
 
     /**

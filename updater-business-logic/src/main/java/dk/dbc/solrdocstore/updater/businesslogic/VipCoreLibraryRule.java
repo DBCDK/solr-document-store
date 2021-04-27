@@ -57,7 +57,7 @@ public class VipCoreLibraryRule {
         this.libraryType = LibraryType.fromValue(libraryRules.getAgencyType());
     }
 
-    public boolean authCreateComonRecord() {
+    public boolean authCreateCommonRecord() {
         return booleans.getOrDefault("auth_create_common_record", false);
     }
 

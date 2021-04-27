@@ -262,7 +262,7 @@ public class BusinessLogic {
         boolean commonRecord = source.bibliographicRecord.repositoryId.startsWith(COMMON_RECORD_ID_PREFIX);
         holdingsItemsIndexKeys.forEach((agencyId, hiIndexKeys) -> {
             VipCoreLibraryRule libraryRules = libraryRuleProvider.libraryRulesFor(agencyId);
-            boolean authCreateComonRecord = libraryRules.authCreateComonRecord();
+            boolean authCreateComonRecord = libraryRules.authCreateCommonRecord();
             if (shouldAddholdingsItemRole(libraryRules.isPartOfBibdk(), excludeFromUnionCatalogue, authCreateComonRecord, commonRecord)) {
                 hiIndexKeys.forEach(hi -> hi.computeIfAbsent(HOLDINGSITEM_ROLE, list()).add("bibdk"));
             }
@@ -383,7 +383,7 @@ public class BusinessLogic {
     }
 
     private boolean should(Feature feature) {
-        return featureSwitch.shound(feature);
+        return featureSwitch.should(feature);
     }
 
     private static <T, R> Function<T, List<R>> list() {

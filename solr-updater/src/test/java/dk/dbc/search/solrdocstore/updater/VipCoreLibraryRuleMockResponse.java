@@ -68,7 +68,7 @@ public class VipCoreLibraryRuleMockResponse extends VipCoreLibraryRule {
     }
 
     @Override
-    public boolean authCreateComonRecord() {
+    public boolean authCreateCommonRecord() {
         return authCreateComonRecord;
     }
 

@@ -121,7 +121,7 @@ public class FeatureSwitch {
         }
     }
 
-    public boolean shound(Feature feature) {
+    public boolean should(Feature feature) {
         return featureSet.contains(feature);
     }
 

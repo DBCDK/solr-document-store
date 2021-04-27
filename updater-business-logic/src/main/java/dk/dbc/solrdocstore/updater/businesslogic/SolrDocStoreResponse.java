@@ -34,7 +34,7 @@ import static java.util.Collections.EMPTY_MAP;
 import static java.util.stream.Collectors.*;
 
 /**
- * Class representing (DTO) the manuifestation response form solr-doc-store
+ * Class representing (DTO) the manifestation response form solr-doc-store
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
