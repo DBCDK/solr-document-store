@@ -55,7 +55,9 @@ public class PersistentWorkIdProviderBean implements PersistentWorkIdProvider {
         } catch (WebApplicationException ex) {
             log.error("Error fetching persistentWorkId for: {} : {}", corepoWorkId, ex.getMessage());
             log.debug("Error fetching persistentWorkId for: {} : ", corepoWorkId, ex);
-            throw new RethrowableException(new PostponedNonFatalQueueError("Error fetching persistentWorkId for: " + corepoWorkId, 1500L));
+            throw new RethrowableException(
+                    new PostponedNonFatalQueueError("Error fetching persistentWorkId for: " + corepoWorkId,
+                                                    config.getPersistentWorkIdFailurePostpone()));
         }
     }
 }

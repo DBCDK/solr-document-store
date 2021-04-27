@@ -65,6 +65,7 @@ public class Config {
     private String appId;
     private String workPresentationEndpoint;
     private Client client;
+    private long persistentWorkIdFailurePostpone;
 
     public Config() {
         props = findProperties("solr-doc-store-updater");
@@ -130,6 +131,7 @@ public class Config {
         if (workPresentationEndpoint == null || workPresentationEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOINT must be set");
         }
+        persistentWorkIdFailurePostpone = Long.max(1000, milliseconds(get("persistentWorkIdFailurePostpone", "PERSISTENT_WORK_ID_FAILURE_POSTPONE", "5s")));
     }
 
     protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
@@ -239,6 +241,10 @@ public class Config {
 
     public String getWorkPresentationEndpoint() {
         return workPresentationEndpoint;
+    }
+
+    public long getPersistentWorkIdFailurePostpone() {
+        return persistentWorkIdFailurePostpone;
     }
 
     public Client getClient() {
