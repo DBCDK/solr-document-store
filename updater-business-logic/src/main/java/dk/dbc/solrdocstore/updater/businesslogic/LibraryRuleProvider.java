@@ -19,6 +19,22 @@
 package dk.dbc.solrdocstore.updater.businesslogic;
 
 /**
+ * Interface for class that provides access to vipcore libraryrules endpoint.
+ * 
+ * In a ".war" it is used implemented this:
+ * {@code
+ *       @Singleton
+ *       @Lock(LockType.READ)
+ *       public class LibraryRuleProviderBean implements LibraryRuleProvider {
+ *           ... implementation of interface
+ *       }
+ * }
+ * And use it like this:
+ * 
+ * {@code 
+ *       @Inject
+ *       LibraryRulesProvider provider;
+ * }
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */

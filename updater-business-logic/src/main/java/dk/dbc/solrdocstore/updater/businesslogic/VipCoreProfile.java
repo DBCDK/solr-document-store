@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
+ * Representation of the vipcore profile (search) response.
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */

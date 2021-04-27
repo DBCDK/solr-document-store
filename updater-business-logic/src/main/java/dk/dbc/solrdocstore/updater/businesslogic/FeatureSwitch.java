@@ -25,6 +25,10 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
 /**
+ * A collection of features implemented, each and everyone, can be individually
+ * switched no or off. Just remember to enable the feature in
+ * {@link dk.dbc.solrdocstore.updater.businesslogic.BusinessLogic.Builder}, if
+ * it needs special providers.
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
@@ -35,16 +39,47 @@ public class FeatureSwitch {
     public enum Feature {
         /**
          * Add 800000-danbib/800000-bibdk to rec.collectionIdentifier, if is
-         * part of those collections based upon libraryrules and holdings
+         * part of those collections based upon libraryrules and holdings.
          */
         COLLECTION_IDENTIFIER_800000("800000"),
+        /**
+         * Add "rec.holdingsAgencyId" for each and everyone of the agencies,
+         * that have holdings.
+         */
         HOLDINGS_AGENCY("holdingsAgency"),
+        /**
+         * Adds "rec.holdingsCount" for those that are available for loan
+         * (OnShelf and OnLoan), and "rec.holdingsOnLoan" as a fraction of those
+         * available for loan, that are actually with borrowers.
+         */
         HOLDINGS_STATS("holdingsStats"),
+        /**
+         * Add holdings-items-documents as nested documents.
+         */
         NESTED_HOLDINGS_DOCUMENTS("nested"),
+        /**
+         * Add "holdingsitem.role" for those holdingsitems that are part of
+         * danbib or bibdk.
+         */
         HOLDING_ITEMS_ROLE("role"),
+        /**
+         * Add those that are part of danbib, according to solr-doc-store. Only
+         * to common records, and across manifestations.
+         */
         PART_OF_DANBIB("partOfDanbib"),
+        /**
+         * Add "has.*" for resources registered in solr-doc-store.
+         */
         ATTACH_RESOURCES("resources"),
+        /**
+         * Expand "scan.*" fields making any and default, and special registers
+         * for those profiles that are enabled.
+         */
         SCAN("scan"),
+        /**
+         * Extract a persistent work-id from work-presentation and set it as
+         * "rec.persistentWorkId".
+         */
         PERSISTENT_WORK_ID("persistentWorkId");
 
         private final String name;

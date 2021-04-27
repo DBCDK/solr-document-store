@@ -19,6 +19,23 @@
 package dk.dbc.solrdocstore.updater.businesslogic;
 
 /**
+ * Interface for class that provides access to translation of corepoWorkId to
+ * persistentWorkId.
+ * <p>
+ * In a ".war" it is implemented like this:
+ * {@code
+ *       @Singleton
+ *       @Lock(LockType.READ)
+ *       public class PersistentWorkIdProviderBean implements PersistentWorkIdProvider {
+ *           ... implementation of interface
+ *       }
+ * }
+ * And use it like this:
+ * <p>
+ * {@code
+ *       @Inject
+ *       PersistentWorkIdProvider provider;
+ * }
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */

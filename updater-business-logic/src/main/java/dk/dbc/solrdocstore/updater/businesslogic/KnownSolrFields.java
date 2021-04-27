@@ -15,6 +15,14 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 /**
+ * This class represents the fields declared in schema.xml.
+ * <p>
+ * It parses schema.xml for fields tags, and dynamicField tags. When a field is
+ * tested if it is known. If the class doesn't already know about this field, it
+ * tries all the dynamicField definitions to see if any matches, and the result
+ * is saved for future use.
+ * <p>
+ * Only one instance of this pr SolR collection is needed.
  *
  * @author DBC {@literal <dbc.dk>}
  */
