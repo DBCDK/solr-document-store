@@ -18,23 +18,25 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
+import dk.dbc.solrdocstore.updater.businesslogic.BusinessLogic;
+import dk.dbc.solrdocstore.updater.businesslogic.FeatureSwitch;
+import dk.dbc.solrdocstore.updater.businesslogic.KnownSolrFields;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.ejb.EJBException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -42,7 +44,6 @@ import org.apache.solr.common.cloud.ClusterState;
 import org.apache.solr.common.cloud.Replica;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
@@ -55,13 +56,12 @@ public class SolrCollection {
 
     private static final Logger log = LoggerFactory.getLogger(SolrCollection.class);
 
-    private static final DocumentBuilder DOCUMENT_BUILDER = newDocumentBuilder();
-
     private final SolrClient solrClient;
-    private final SolrFields solrFields;
-    private final EnumSet<FeatureSwitch> features;
+    private final KnownSolrFields solrFields;
+    private final FeatureSwitch features;
     private final String collectionAddress;
     private final String name;
+    private BusinessLogic businessLogic;
 
     // Only used in testing
     protected SolrCollection() {
@@ -84,17 +84,17 @@ public class SolrCollection {
      * @param fieldsProvider function that given a http-client and a solr-client
      *                       resolves known fields in the solr-collection
      */
-    private SolrCollection(Client client, String solrUrl, BiFunction<Client, SolrClient, SolrFields> fieldsProvider) {
+    private SolrCollection(Client client, String solrUrl, BiFunction<Client, SolrClient, KnownSolrFields> fieldsProvider) {
         int idx = solrUrl.indexOf('=');
         if (idx > 0) {
             this.collectionAddress = solrUrl.substring(0, idx);
-            this.features = FeatureSwitch.featureSet(solrUrl.substring(idx + 1));
+            this.features = new FeatureSwitch(solrUrl.substring(idx + 1));
         } else {
             this.collectionAddress = solrUrl;
-            this.features = FeatureSwitch.featureSet("all");
+            this.features = new FeatureSwitch("all");
         }
         this.name = collectionAddress.substring(collectionAddress.lastIndexOf('/') + 1);
-        this.solrClient = SolrApi.makeSolrClient(collectionAddress);
+        this.solrClient = makeSolrClient(collectionAddress);
         this.solrFields = fieldsProvider.apply(client, solrClient);
     }
 
@@ -115,12 +115,20 @@ public class SolrCollection {
         return solrClient;
     }
 
-    public SolrFields getSolrFields() {
+    public KnownSolrFields getSolrFields() {
         return solrFields;
     }
 
-    public boolean hasFeature(FeatureSwitch feature) {
-        return features.contains(feature);
+    public FeatureSwitch getFeatures() {
+        return features;
+    }
+
+    public BusinessLogic getBusinessLogic() {
+        return businessLogic;
+    }
+
+    public void setBusinessLogic(BusinessLogic businessLogic) {
+        this.businessLogic = businessLogic;
     }
 
     @Override
@@ -180,7 +188,7 @@ public class SolrCollection {
         throw new IllegalStateException("Don't know about this solr client type: " + client.getClass().getSimpleName());
     }
 
-    private static SolrFields makeSolrFields(Client client, SolrClient solrClient) {
+    private static KnownSolrFields makeSolrFields(Client client, SolrClient solrClient) {
         String httpUrl = getHttpUrl(solrClient);
         URI uri = UriBuilder.fromPath(httpUrl)
                 .path("admin/file")
@@ -191,36 +199,31 @@ public class SolrCollection {
                 .target(uri)
                 .request(MediaType.APPLICATION_XML_TYPE)
                 .get(InputStream.class)) {
-            Document doc = docFromStream(is);
-            return new SolrFields(doc);
+            return new KnownSolrFields(is);
         } catch (IOException | SAXException ex) {
             throw new IllegalStateException("Could not create SolrFields from: " + httpUrl, ex);
         }
     }
 
-    static Document docFromStream(InputStream is) throws IOException, SAXException {
-        return DOCUMENT_BUILDER.parse(is);
-    }
+    private static final Pattern ZK = Pattern.compile("zk://([^/]*)(/.*)?/([^/]*)");
 
-    /**
-     * Construct an xml parser
-     *
-     * @return new document builder
-     */
-    private static DocumentBuilder newDocumentBuilder() {
-        try {
-            synchronized (DocumentBuilderFactory.class) {
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                factory.setIgnoringComments(true);
-                factory.setNamespaceAware(true);
-                factory.setCoalescing(true);
-                factory.setIgnoringElementContentWhitespace(true);
-                factory.setValidating(false);
-                factory.setXIncludeAware(false);
-                return factory.newDocumentBuilder();
+    public static SolrClient makeSolrClient(String solrUrl) {
+        Matcher zkMatcher = ZK.matcher(solrUrl);
+        if (zkMatcher.matches()) {
+            Optional<String> zkChroot = Optional.empty();
+            if (zkMatcher.group(2) != null) {
+                zkChroot = Optional.of(zkMatcher.group(2));
             }
-        } catch (ParserConfigurationException ex) {
-            throw new EJBException("Error making a XML parser", ex);
+            List<String> zkHosts = Arrays.asList(zkMatcher.group(1).split(","));
+            CloudSolrClient solrClient = new CloudSolrClient.Builder(zkHosts, zkChroot)
+                    .build();
+
+            solrClient.setDefaultCollection(zkMatcher.group(3));
+
+            return solrClient;
+        } else {
+            return new HttpSolrClient.Builder(solrUrl)
+                    .build();
         }
     }
 

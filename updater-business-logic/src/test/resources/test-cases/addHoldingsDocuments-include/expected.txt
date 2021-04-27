@@ -1,0 +1,7 @@
+{
+  "t" : [ "m" ]++> ,
+  "_childDocuments_" : [ {
+    "holdingsitem.agencyId" : [ "xxx" ],
+    "t" : [ "h" ]
+  } ] <++
+}

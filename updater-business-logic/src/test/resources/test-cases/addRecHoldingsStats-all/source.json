@@ -1,0 +1,333 @@
+{
+  "attachedResources": {},
+  "bibliographicRecord": {
+    "agencyId": 870970,
+    "bibliographicRecordId": "06778925",
+    "classifier": "basis",
+    "deleted": false,
+    "indexKeys": {
+      "dkcclterm.po": [
+        "Jönsson Reidar"
+      ],
+      "term.mainCreator": [
+        "Jönsson Reidar"
+      ],
+      "phrase.originalTitle": [
+        "Mitt liv som hund"
+      ]
+    },
+    "repositoryId": "870970-basis:06778925",
+    "trackingId": "20200504-all",
+    "unit": "unit:455180",
+    "work": "work:401589"
+  },
+  "holdingsItemRecords": [
+    {
+      "agencyId": 746100,
+      "bibliographicRecordId": "06778925",
+      "hasLiveHoldings": true,
+      "indexKeys": [
+        {
+          "rec.trackingId": [
+            "2c0cec00-2cd2-4e95-807a-18dbc8864c57",
+            "e1e03562-c816-4fb4-b356-38ec01f8b1ec"
+          ],
+          "holdingsitem.note": [
+            ""
+          ],
+          "holdingsitem.branch": [
+            "Odense Hovedbibliotek"
+          ],
+          "holdingsitem.itemId": [
+            "439438061",
+            "439438037"
+          ],
+          "holdingsitem.status": [
+            "OnShelf"
+          ],
+          "holdingsitem.issueId": [
+            ""
+          ],
+          "holdingsitem.agencyId": [
+            "746100"
+          ],
+          "holdingsitem.location": [
+            "Depot,skønlitteratur"
+          ],
+          "holdingsitem.issueText": [
+            ""
+          ],
+          "holdingsitem.department": [
+            "Voksen"
+          ],
+          "holdingsitem.subLocation": [
+            ""
+          ],
+          "holdingsitem.collectionId": [
+            "746100-06778925"
+          ],
+          "holdingsitem.readyForLoan": [
+            "1"
+          ],
+          "rec.bibliographicRecordId": [
+            "06778925"
+          ],
+          "holdingsitem.accessionDate": [
+            "1980-11-11T00:00:00.000Z"
+          ],
+          "holdingsitem.circulationRule": [
+            "Standard"
+          ],
+          "holdingsitem.expectedDelivery": [
+            "2020-03-25T23:00:00Z"
+          ],
+          "holdingsitem.bibliographicRecordId": [
+            "06778925"
+          ]
+        }
+      ],
+      "trackingId": "2c0cec00-2cd2-4e95-807a-18dbc8864c57"
+    },
+    {
+      "agencyId": 747900,
+      "bibliographicRecordId": "06778925",
+      "hasLiveHoldings": true,
+      "indexKeys": [
+        {
+          "rec.trackingId": [
+            "3f157a47-d75e-4010-9432-2dffc07d79ae"
+          ],
+          "holdingsitem.note": [
+            ""
+          ],
+          "holdingsitem.branch": [
+            "Hovedbiblioteket"
+          ],
+          "holdingsitem.itemId": [
+            "188626998"
+          ],
+          "holdingsitem.status": [
+            "OnShelf"
+          ],
+          "holdingsitem.issueId": [
+            ""
+          ],
+          "holdingsitem.agencyId": [
+            "747900"
+          ],
+          "holdingsitem.location": [
+            "Magasin"
+          ],
+          "holdingsitem.issueText": [
+            ""
+          ],
+          "holdingsitem.department": [
+            "Voksen"
+          ],
+          "holdingsitem.subLocation": [
+            ""
+          ],
+          "holdingsitem.collectionId": [
+            "747900-06778925"
+          ],
+          "holdingsitem.readyForLoan": [
+            "1"
+          ],
+          "rec.bibliographicRecordId": [
+            "06778925"
+          ],
+          "holdingsitem.accessionDate": [
+            "1992-11-13T00:00:00.000Z"
+          ],
+          "holdingsitem.circulationRule": [
+            "31fast"
+          ],
+          "holdingsitem.expectedDelivery": [
+            "2019-10-24T22:00:00Z"
+          ],
+          "holdingsitem.bibliographicRecordId": [
+            "06778925"
+          ]
+        }
+      ],
+      "trackingId": "3f157a47-d75e-4010-9432-2dffc07d79ae"
+    },
+    {
+      "agencyId": 763000,
+      "bibliographicRecordId": "06778925",
+      "hasLiveHoldings": true,
+      "indexKeys": [
+        {
+          "rec.trackingId": [
+            "feb1f4fa-ffac-4d92-af72-c601954b6749",
+            "118f2dcd-154b-4978-bfa1-f6c3e796cdb1",
+            "f1a02cff-08af-48a6-9d88-045ddf2f2eec"
+          ],
+          "holdingsitem.note": [
+            ""
+          ],
+          "holdingsitem.branch": [
+            "Vejle"
+          ],
+          "holdingsitem.itemId": [
+            "770064686"
+          ],
+          "holdingsitem.status": [
+            "Decommissioned"
+          ],
+          "holdingsitem.issueId": [
+            ""
+          ],
+          "holdingsitem.agencyId": [
+            "763000"
+          ],
+          "holdingsitem.location": [
+            "depot"
+          ],
+          "holdingsitem.issueText": [
+            ""
+          ],
+          "holdingsitem.department": [
+            "Voksen"
+          ],
+          "holdingsitem.subLocation": [
+            "Skøn"
+          ],
+          "holdingsitem.collectionId": [
+            "763000-06778925"
+          ],
+          "holdingsitem.readyForLoan": [
+            "0"
+          ],
+          "rec.bibliographicRecordId": [
+            "06778925"
+          ],
+          "holdingsitem.accessionDate": [
+            "1995-02-16T00:00:00Z"
+          ],
+          "holdingsitem.circulationRule": [
+            "31"
+          ],
+          "holdingsitem.expectedDelivery": [
+            "2020-07-04T00:00:00Z"
+          ],
+          "holdingsitem.firstAccessionDate": [
+            "1993-01-12T00:00:00Z"
+          ],
+          "holdingsitem.bibliographicRecordId": [
+            "06778925"
+          ]
+        },
+        {
+          "rec.trackingId": [
+            "feb1f4fa-ffac-4d92-af72-c601954b6749",
+            "f1a02cff-08af-48a6-9d88-045ddf2f2eec"
+          ],
+          "holdingsitem.note": [
+            ""
+          ],
+          "holdingsitem.branch": [
+            "Vejle"
+          ],
+          "holdingsitem.itemId": [
+            "750240658"
+          ],
+          "holdingsitem.status": [
+            "OnLoan"
+          ],
+          "holdingsitem.issueId": [
+            ""
+          ],
+          "holdingsitem.agencyId": [
+            "763000"
+          ],
+          "holdingsitem.location": [
+            "Magasin"
+          ],
+          "holdingsitem.issueText": [
+            ""
+          ],
+          "holdingsitem.department": [
+            "Voksen"
+          ],
+          "holdingsitem.subLocation": [
+            "Skøn"
+          ],
+          "holdingsitem.collectionId": [
+            "763000-06778925"
+          ],
+          "holdingsitem.readyForLoan": [
+            "0"
+          ],
+          "rec.bibliographicRecordId": [
+            "06778925"
+          ],
+          "holdingsitem.accessionDate": [
+            "1993-01-12T00:00:00Z"
+          ],
+          "holdingsitem.circulationRule": [
+            "31"
+          ],
+          "holdingsitem.expectedDelivery": [
+            "2020-07-04T00:00:00Z"
+          ],
+          "holdingsitem.firstAccessionDate": [
+            "1993-01-12T00:00:00Z"
+          ],
+          "holdingsitem.bibliographicRecordId": [
+            "06778925"
+          ]
+        }
+      ],
+      "trackingId": "f1a02cff-08af-48a6-9d88-045ddf2f2eec"
+    }
+  ],
+  "partOfDanbib": [
+    911116,
+    700400,
+    710100,
+    715700,
+    715900,
+    716100,
+    716500,
+    717300,
+    720100,
+    721000,
+    721700,
+    725300,
+    726500,
+    731600,
+    732000,
+    732600,
+    735000,
+    737600,
+    740000,
+    741000,
+    744000,
+    746100,
+    747900,
+    756100,
+    757500,
+    760700,
+    761500,
+    762100,
+    763000,
+    765700,
+    766100,
+    767100,
+    770600,
+    770700,
+    774100,
+    774600,
+    776000,
+    777900,
+    784900,
+    785100
+  ],
+  "totalStatusCount": {
+    "decommissioned": 6,
+    "onloan": 1,
+    "onshelf": 3,
+    "notforloan": 4
+  }
+}

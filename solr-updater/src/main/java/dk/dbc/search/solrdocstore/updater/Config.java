@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -61,7 +62,6 @@ public class Config {
     private long openAgencyFailureAge;
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
-    private String jsonStash;
     private String appId;
     private String workPresentationEndpoint;
     private Client client;
@@ -118,14 +118,15 @@ public class Config {
                                          Collectors.toSet(),
                                          Collections::unmodifiableSet);
 
-        jsonStash = get("jsonStash", "JSON_STASH", "");
-        if (!jsonStash.isEmpty() && solrCollections.size() != 1)
-            throw new IllegalStateException("To use $JSON_STASH you need exactly ONE solr-collection");
         vipCoreEndpoint = get("vipCoreEndpoint", "VIPCORE_ENDPOINT", null);
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }
         workPresentationEndpoint = get("workPresentationEndpoint", "WORK_PRESENTATION_ENDPOINT", null);
+        workPresentationEndpoint = UriBuilder.fromPath(workPresentationEndpoint)
+                .path("api/work-presentation/getPersistentWorkId")
+                .build()
+                .toString();
         if (workPresentationEndpoint == null || workPresentationEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOINT must be set");
         }
@@ -234,10 +235,6 @@ public class Config {
 
     public Set<String> getScanDefaultFields() {
         return scanDefaultFields;
-    }
-
-    public String getJsonStash() {
-        return jsonStash;
     }
 
     public String getWorkPresentationEndpoint() {

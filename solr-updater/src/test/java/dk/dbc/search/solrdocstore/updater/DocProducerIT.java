@@ -18,11 +18,12 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
+import dk.dbc.openagency.http.VipCoreHttpClient;
 import dk.dbc.pgqueue.consumer.PostponedNonFatalQueueError;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
+import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
+import dk.dbc.solrdocstore.updater.businesslogic.VipCoreLibraryRule;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -65,14 +66,12 @@ public class DocProducerIT {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        solrDocStoreUrl = System.getenv("SOLR_DOC_STORE_URL");
+        solrDocStoreUrl = System.getenv().getOrDefault("SOLR_DOC_STORE_URL", "http://localhost:8080/");
 
         pg = new PostgresITDataSource("solrdocstore");
         dataSource = pg.getDataSource();
         config = new Config("queues=test",
                             "scanProfiles=102030-magic,123456-basic",
-                            "vipCoreEndpoint=Not-Relevant",
-                            "workPresentationEndpoint=not-relevant",
                             "scanDefaultFields=abc,def") {
             @Override
             public Client getClient() {
@@ -128,16 +127,33 @@ public class DocProducerIT {
 
         docProducer = new DocProducer();
         docProducer.config = config;
-        docProducer.businessLogic = new BusinessLogic();
-        docProducer.businessLogic.config = config;
-        docProducer.businessLogic.profileService = new ProfileServiceBean();
-        docProducer.businessLogic.profileService.config = config;
-        docProducer.businessLogic.oa = new OpenAgency() {
+        docProducer.libraryRuleProvider = new LibraryRuleProviderBean() {
             @Override
-            public OpenAgencyLibraryRule libraryRule(String agencyId) {
-                return new OpenAgencyLibraryRule(true, true, true, true, false, true);
+            public VipCoreLibraryRule libraryRulesFor(String agencyId) {
+                switch (agencyId) {
+                    case "300000":
+                    case "300101":
+                    case "300102":
+                    case "300103":
+                    case "300104":
+                    case "777777":
+                        return new VipCoreLibraryRuleMockResponse(true, true, false, true, false, true);
+                    default:
+                        throw new IllegalArgumentException("Don't know library rules for: " + agencyId);
+                }
             }
         };
+        docProducer.persistentWorkIdProvider = new PersistentWorkIdProviderBean() {
+            @Override
+            public String persistentWorkIdFor(String corepoWorkId) {
+                return "xxx";
+            }
+        };
+        ProfileProviderBean profileProviderBean = new ProfileProviderBean();
+        profileProviderBean.config = config;
+        profileProviderBean.vipCoreHttpClient = new VipCoreHttpClient();
+        docProducer.profileProvider = profileProviderBean;
+
         docProducer.init();
     }
 
@@ -184,16 +200,16 @@ public class DocProducerIT {
     }
 
     private void deployAndSearch(int agencyId, DocProducer docProducer, SolrCollection solrCollection, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
-        JsonNode sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, "clazzifier", "23645564"));
+        SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, "clazzifier", "23645564"));
         SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc, solrCollection);
         String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-        int nestedDocumentCount = docProducer.getNestedDocumentCount(bibliographicShardId, solrCollection);
-        docProducer.deleteSolrDocuments(bibliographicShardId, nestedDocumentCount, solrCollection);
+        docProducer.deleteSolrDocuments(bibliographicShardId, solrCollection);
         docProducer.deploy(doc, solrCollection);
         SolrClient solrClient = solrCollection.getSolrClient();
         solrClient.commit(true, true);
         QueryResponse response = solrClient.query(new SolrQuery("*:*"));
         System.out.println("response = " + response);
+        System.out.println("response = " + response.getResults());
         assertEquals(expected, response.getResults().getNumFound());
     }
 

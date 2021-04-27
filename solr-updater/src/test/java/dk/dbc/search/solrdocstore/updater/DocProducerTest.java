@@ -18,12 +18,14 @@
  */
 package dk.dbc.search.solrdocstore.updater;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
-import dk.dbc.search.solrdocstore.updater.profile.OpenAgencyProfile;
-import dk.dbc.search.solrdocstore.updater.profile.ProfileServiceBean;
+import dk.dbc.solrdocstore.updater.businesslogic.FeatureSwitch;
+import dk.dbc.solrdocstore.updater.businesslogic.KnownSolrFields;
+import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
+import dk.dbc.solrdocstore.updater.businesslogic.VipCoreLibraryRule;
+import dk.dbc.solrdocstore.updater.businesslogic.VipCoreProfile;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -45,7 +47,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class DocProducerTest {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true)
+            .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
+            .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final Client CLIENT = ClientBuilder.newClient();
 
     @Test
@@ -76,59 +82,64 @@ public class DocProducerTest {
 
         DocProducer docProducer = new DocProducer() {
             @Override
-            public JsonNode fetchSourceDoc(QueueJob job) throws IOException {
+            public SolrDocStoreResponse fetchSourceDoc(QueueJob job) throws IOException {
                 String file = "DocProducerTest/" + job.getAgencyId() + "-" + job.getBibliographicRecordId() + ".json";
+                System.out.println("file = " + file);
                 try (InputStream stream = DocProducerTest.class.getClassLoader().getResourceAsStream(file)) {
-                    return OBJECT_MAPPER.readTree(stream);
+                    return OBJECT_MAPPER.readValue(stream, SolrDocStoreResponse.class);
                 }
             }
         };
-
-        docProducer.businessLogic = new BusinessLogic();
-        docProducer.businessLogic.oa = new OpenAgency() {
+        docProducer.config = config;
+        docProducer.libraryRuleProvider = new LibraryRuleProviderBean() {
             @Override
-            public OpenAgencyLibraryRule libraryRule(String agencyId) {
-                return new OpenAgencyLibraryRule(true, true, true, true, false, true);
+            public VipCoreLibraryRule libraryRulesFor(String agencyId) {
+                return new VipCoreLibraryRuleMockResponse(true, true, true, true, false, true);
             }
         };
-        docProducer.businessLogic.config = config;
 
-        docProducer.businessLogic.profileService = new ProfileServiceBean() {
+        docProducer.persistentWorkIdProvider = new PersistentWorkIdProviderBean() {
             @Override
-            public OpenAgencyProfile getOpenAgencyProfile(String agencyId, String profile) {
+            public String persistentWorkIdFor(String corepoWorkId) {
+                return "persistent-for-" + corepoWorkId;
+            }
+        };
+
+        docProducer.profileProvider = new ProfileProviderBean() {
+            @Override
+            public VipCoreProfile profileFor(String agencyId, String profile) {
                 switch (agencyId + "-" + profile) {
                     case "102030-magic":
-                        return new OpenAgencyProfile(true, "220000-katalog");
+                        return new VipCoreProfile(true, "220000-katalog");
                     case "123456-basic":
-                        return new OpenAgencyProfile(false, "220000-katalog");
+                        return new VipCoreProfile(false, "220000-katalog");
                     default:
                         throw new AssertionError();
                 }
             }
         };
 
-        JsonNode node = docProducer.fetchSourceDoc(QueueJob.manifestation(300101, "clazzifier", "23645564"));
+        SolrDocStoreResponse node = docProducer.fetchSourceDoc(QueueJob.manifestation(300101, "clazzifier", "23645564"));
 
         System.out.println("node = " + node);
 
-        assertFalse(docProducer.isDeleted(node));
         SolrCollection solrCollection = new SolrCollection() {
             @Override
-            public SolrFields getSolrFields() {
-                try {
-                    return SolrFieldsTest.newSolrFields("schema.xml");
+            public FeatureSwitch getFeatures() {
+                return new FeatureSwitch("all");
+            }
+
+            @Override
+            public KnownSolrFields getSolrFields() {
+                try (InputStream is = getClass().getClassLoader().getResourceAsStream("schema.xml")) {
+                    return new KnownSolrFields(is);
                 } catch (IOException | SAXException ex) {
                     throw new RuntimeException(ex);
                 }
             }
-
-            @Override
-            public boolean hasFeature(FeatureSwitch feature) {
-                return true;
-            }
         };
 
-        SolrInputDocument document = docProducer.inputDocument(node, solrCollection);
+        SolrInputDocument document = docProducer.createSolrDocument(node, solrCollection);
         System.out.println("document = " + document);
         assertTrue(document.containsKey("dkcclterm.po"));
         assertFalse(document.containsKey("unknown.field"));
@@ -138,19 +149,11 @@ public class DocProducerTest {
         assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300102"));
         assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300104"));
 
-        assertTrue(document.get("rec.repositoryId").getValues().contains("300101-katalog:23645564"));
+        assertTrue(document.get("rec.repositoryId").getValues().contains("870970-basis:23645564"));
 
         assertTrue(document.containsKey("dkcclterm.ln"));
         assertTrue(document.get("dkcclterm.ln").getValues().contains("777777"));
 
         System.out.println("OK");
-    }
-
-    @Test
-    public void trimTexts() throws Exception {
-        JsonNode tree = OBJECT_MAPPER.readTree("{'a':['123','1234567890'],'b':['1234567890','567']}".replaceAll("'", "\""));
-        SolrFields.trimIndexFieldsLength((ObjectNode) tree, 5);
-        String text = OBJECT_MAPPER.writeValueAsString(tree);
-        assertEquals("{'a':['123','12345'],'b':['12345','567']}".replaceAll("'", "\""), text);
     }
 }

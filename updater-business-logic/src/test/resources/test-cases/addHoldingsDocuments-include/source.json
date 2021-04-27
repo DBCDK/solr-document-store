@@ -1,0 +1,27 @@
+{ "bibliographicRecord": {
+        "agencyId": 700001,
+        "classifier": "katalog",
+        "bibliographicRecordId": "25912233",
+        "repositoryId": "870970-basis:25912233",
+        "work": "work:837840",
+        "unit": "unit:1007058",
+        "deleted": false,
+        "indexKeys": { }
+    },
+    "holdingsItemRecords": [
+        {
+            "bibliographicRecordId": "",
+            "hasLiveHoldings": true,
+            "indexKeys": [ { "holdingsitem.agencyId": [ "xxx" ] } ],
+            "agencyId": 102030,
+            "trackingId": ""
+        },
+        {
+            "bibliographicRecordId": "",
+            "hasLiveHoldings": false,
+            "indexKeys": [ ],
+            "agencyId": 876543,
+            "trackingId": ""
+        }
+    ]
+}

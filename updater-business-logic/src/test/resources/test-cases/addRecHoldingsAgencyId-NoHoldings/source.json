@@ -1,0 +1,373 @@
+{
+   "partOfDanbib" : [],
+   "bibliographicRecord" : {
+      "repositoryId" : "830370-katalog:112284389",
+      "unit" : "unit:22142535",
+      "trackingId" : "SolrWorker:830370-katalog:112284389<Hive:830370-katalog,Batch:1071162,Entry:11202475<bulk-20170524132910-112284389",
+      "work" : "work:20150402",
+      "agencyId" : 830370,
+      "bibliographicRecordId" : "112284389",
+      "classifier" : "katalog",
+      "deleted" : false,
+      "indexKeys" : {
+         "display.accessType" : [
+            "physical"
+         ],
+         "dkcclphrase.lcl" : [
+            "29.1"
+         ],
+         "rec.fedoraStreamDate" : [
+            "2017-05-24T11:50:38.896Z"
+         ],
+         "term.date" : [
+            "1998"
+         ],
+         "dkcclterm.ln" : [
+            "830370"
+         ],
+         "dkcclterm.kl" : [
+            "tvvo0509"
+         ],
+         "rec.childDocId" : [
+            "830370-katalog:112284389"
+         ],
+         "facet.literaryForm" : [
+            "faglitteratur"
+         ],
+         "dkcclphrase.lem" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "dkcclterm.aj" : [
+            "20080307200138"
+         ],
+         "dkcclphrase.lso" : [
+            "Temalørdag"
+         ],
+         "phrase.subject" : [
+            "folkekirken",
+            "vækkelse",
+            "Sammenlignende religionsvidenskab",
+            "29.1"
+         ],
+         "display.workType" : [
+            "movie"
+         ],
+         "rec.excludeFromWorldCat" : [
+            "true"
+         ],
+         "scanphrase.title" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "sort.workType" : [
+            "emovie"
+         ],
+         "sort.title" : [
+            "En åndelig vejrudsigt"
+         ],
+         "dkcclterm.nr" : [
+            "112284389"
+         ],
+         "term.workType" : [
+            "movie"
+         ],
+         "facet.date" : [
+            "1998"
+         ],
+         "scanterm.title" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "rankterm.title" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "original_format" : [
+            "katalog"
+         ],
+         "term.category" : [
+            "voksenmaterialer"
+         ],
+         "sort.genreCategory" : [
+            "nonfiktion"
+         ],
+         "facet.language" : [
+            "Dansk"
+         ],
+         "rec.collectionIdentifier" : [
+            "830370-katalog"
+         ],
+         "rec.unitId" : [
+            "unit:22142535"
+         ],
+         "term.accessType" : [
+            "physical"
+         ],
+         "phrase.titleSeries" : [
+            "Temalørdag"
+         ],
+         "dkcclterm.sp" : [
+            "dan"
+         ],
+         "dkcclphrase.ldk" : [
+            "29.1"
+         ],
+         "dkcclphrase.lti" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag",
+            "åndelig vejrudsigt"
+         ],
+         "dkcclterm.se" : [
+            "Temalørdag"
+         ],
+         "dkcclterm.ok" : [
+            "29.1"
+         ],
+         "sort.date" : [
+            "1998"
+         ],
+         "rec.createdDate" : [
+            "2008-01-25T00:00:00Z"
+         ],
+         "display.title" : [
+            "En åndelig vejrudsigt"
+         ],
+         "dkcclterm.ma" : [
+            "mo",
+            "fi",
+            "nh"
+         ],
+         "term.primaryLanguage" : [
+            "dan"
+         ],
+         "dkcclterm.pu" : [
+            "Kbh."
+         ],
+         "rec.workId" : [
+            "work:20150402"
+         ],
+         "facet.category" : [
+            "voksenmaterialer"
+         ],
+         "phrase.genre" : [
+            "nonfiktion"
+         ],
+         "dkcclphrase.luk" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "dkcclphrase.lse" : [
+            "Temalørdag"
+         ],
+         "dkcclphrase.lht" : [
+            "En åndelig vejrudsigt"
+         ],
+         "unit.isPrimaryObject" : [
+            "true"
+         ],
+         "term.type" : [
+            "Video"
+         ],
+         "facet.publisher" : [
+            "DR2"
+         ],
+         "rankterm.description" : [
+            "Tema-aften om de nye vækkelser, der bringer folkekirken i modvind - fra husmenigheder over New Age til mandefestivaler."
+         ],
+         "facet.titleSeries" : [
+            "Temalørdag"
+         ],
+         "facet.acSource" : [
+            "Bibliotekskatalog"
+         ],
+         "rec.excludeFromUnionCatalogue" : [
+            "true"
+         ],
+         "dkcclterm.ul" : [
+            "dk"
+         ],
+         "term.language" : [
+            "dan",
+            "Dansk"
+         ],
+         "sort.complexKey" : [
+            "Video  a  9999  2002  b"
+         ],
+         "term.subject" : [
+            "folkekirken",
+            "vækkelse",
+            "Sammenlignende religionsvidenskab",
+            "29.1"
+         ],
+         "rankphrase.title" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "id" : [
+            "830370-katalog:112284389-830370-katalog"
+         ],
+         "sort.dk5" : [
+            "29.1"
+         ],
+         "rec.modifiedDate" : [
+            "2008-03-07T00:00:00Z"
+         ],
+         "dkcclphrase.mti" : [
+            "En åndelig vejrudsigt #245",
+            "åndelig vejrudsigt #245",
+            "Temalørdag #440"
+         ],
+         "term.publisher" : [
+            "DR2"
+         ],
+         "rec.repositoryId" : [
+            "830370-katalog:112284389"
+         ],
+         "dkcclterm.hm" : [
+            "fi",
+            "nh"
+         ],
+         "rec.trackingId" : [
+            "SolrWorker:830370-katalog:112284389<Hive:830370-katalog,Batch:1071162,Entry:11202475<bulk-20170524132910-112284389"
+         ],
+         "phrase.title" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "facet.genreCategory" : [
+            "nonfiktion"
+         ],
+         "display.titleFull" : [
+            "En åndelig vejrudsigt"
+         ],
+         "term.title" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "facet.type" : [
+            "Video"
+         ],
+         "term.genre" : [
+            "nonfiktion"
+         ],
+         "dkcclterm.ht" : [
+            "En åndelig vejrudsigt"
+         ],
+         "term.typeCategory" : [
+            "mono"
+         ],
+         "term.mainTitle" : [
+            "En åndelig vejrudsigt"
+         ],
+         "phrase.type" : [
+            "Video"
+         ],
+         "scanterm.subject" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "dkcclterm.uk" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "sort.acquisitionDate" : [
+            "20080124"
+         ],
+         "dkcclterm.dk" : [
+            "29.1"
+         ],
+         "dkcclterm.id" : [
+            "112284389"
+         ],
+         "rec.bibliographicRecordId" : [
+            "112284389"
+         ],
+         "rankphrase.subject" : [
+            "folkekirken",
+            "vækkelse",
+            "Sammenlignende religionsvidenskab",
+            "29.1"
+         ],
+         "scanterm.mainTitle" : [
+            "En åndelig vejrudsigt"
+         ],
+         "dkcclphrase.lok" : [
+            "29.1"
+         ],
+         "rankphrase.description" : [
+            "Tema-aften om de nye vækkelser, der bringer folkekirken i modvind - fra husmenigheder over New Age til mandefestivaler."
+         ],
+         "facet.subject" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "term.acSource" : [
+            "Bibliotekskatalog"
+         ],
+         "dkcclterm.år" : [
+            "1998"
+         ],
+         "scanphrase.mainTitle" : [
+            "En åndelig vejrudsigt"
+         ],
+         "submitter" : [
+            "830370"
+         ],
+         "term.description" : [
+            "Tema-aften om de nye vækkelser, der bringer folkekirken i modvind - fra husmenigheder over New Age til mandefestivaler."
+         ],
+         "dkcclterm.em" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "scanphrase.subject" : [
+            "folkekirken",
+            "vækkelse"
+         ],
+         "dkcclterm.no" : [
+            "Tema-aften om de nye vækkelser, der bringer folkekirken i modvind - fra husmenigheder over New Age til mandefestivaler."
+         ],
+         "dkcclterm.ti" : [
+            "En åndelig vejrudsigt",
+            "Temalørdag"
+         ],
+         "dkcclterm.cl" : [
+            "29.1"
+         ],
+         "rankterm.subject" : [
+            "folkekirken",
+            "vækkelse",
+            "Sammenlignende religionsvidenskab",
+            "29.1"
+         ],
+         "dkcclterm.op" : [
+            "20080125"
+         ],
+         "facet.dk5" : [
+            "29.1"
+         ],
+         "unit.primaryObject" : [
+            "830370-katalog:112284389"
+         ],
+         "dkcclterm.so" : [
+            "Temalørdag"
+         ],
+         "sort.recordOwner" : [
+            "e830370"
+         ],
+         "display.type" : [
+            "Video"
+         ],
+         "dkcclterm.fl" : [
+            "DR2"
+         ],
+         "rec.id" : [
+            "112284389|830370",
+            "830370-katalog:112284389",
+            "830370-katalog:112284389-830370-katalog"
+         ]
+      }
+   },
+   "holdingsItemRecords" : []
+}
