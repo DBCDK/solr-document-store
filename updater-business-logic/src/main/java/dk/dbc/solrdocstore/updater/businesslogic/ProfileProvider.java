@@ -22,20 +22,20 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * Interface for class that provides access to vipcore profile (search) endpoint.
  *
  * In a ".war" it is implemented like this:
- * {@code
+ * <pre>
  *       @Singleton
  *       @Lock(LockType.READ)
  *       public class ProfileProviderBean implements ProfileProvider {
  *           ... implementation of interface
  *       }
- * }
+ * </pre>
  *
  * And use it like this:
  *
- * {@code
+ * <pre>
  *       @Inject
  *       ProfileProvider provider;
- * }
+ * </pre>
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */

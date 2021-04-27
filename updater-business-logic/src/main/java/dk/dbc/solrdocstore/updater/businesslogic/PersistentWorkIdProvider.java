@@ -23,19 +23,19 @@ package dk.dbc.solrdocstore.updater.businesslogic;
  * persistentWorkId.
  * <p>
  * In a ".war" it is implemented like this:
- * {@code
+ * <pre>
  *       @Singleton
  *       @Lock(LockType.READ)
  *       public class PersistentWorkIdProviderBean implements PersistentWorkIdProvider {
  *           ... implementation of interface
  *       }
- * }
+ * </pre>
  * And use it like this:
  * <p>
- * {@code
+ * <pre>
  *       @Inject
  *       PersistentWorkIdProvider provider;
- * }
+ * </pre>
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
