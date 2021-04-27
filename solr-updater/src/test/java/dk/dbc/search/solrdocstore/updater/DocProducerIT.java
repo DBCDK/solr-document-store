@@ -137,7 +137,7 @@ public class DocProducerIT {
                     case "300103":
                     case "300104":
                     case "777777":
-                        return new VipCoreLibraryRuleMockResponse(true, true, false, true, false, true, true);
+                        return new VipCoreLibraryRuleMockResponse(true, true, false, true, false, true);
                     default:
                         throw new IllegalArgumentException("Don't know library rules for: " + agencyId);
                 }

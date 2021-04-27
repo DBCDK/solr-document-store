@@ -31,16 +31,14 @@ public class VipCoreLibraryRuleMockResponse extends VipCoreLibraryRule {
     private final boolean isPartOfDanbib;
     private final boolean isPartOfBibdk;
     private final boolean isResearchLibrary;
-    private final boolean usesEnrichments;
     private final boolean usesHoldingsItem;
 
-    public VipCoreLibraryRuleMockResponse(boolean authCreateComonRecord, boolean isFbsLibrary, boolean isPartOfDanbib, boolean isPartOfBibdk, boolean isResearchLibrary, boolean usesEnrichments, boolean usesHoldingsItem) {
+    public VipCoreLibraryRuleMockResponse(boolean authCreateComonRecord, boolean isFbsLibrary, boolean isPartOfDanbib, boolean isPartOfBibdk, boolean isResearchLibrary, boolean usesHoldingsItem) {
         this.authCreateComonRecord = authCreateComonRecord;
         this.isFbsLibrary = isFbsLibrary;
         this.isPartOfDanbib = isPartOfDanbib;
         this.isPartOfBibdk = isPartOfBibdk;
         this.isResearchLibrary = isResearchLibrary;
-        this.usesEnrichments = usesEnrichments;
         this.usesHoldingsItem = usesHoldingsItem;
     }
 
@@ -67,11 +65,6 @@ public class VipCoreLibraryRuleMockResponse extends VipCoreLibraryRule {
     @Override
     public boolean usesHoldingsItem() {
         return usesHoldingsItem;
-    }
-
-    @Override
-    public boolean usesEnrichments() {
-        return usesEnrichments;
     }
 
     @Override

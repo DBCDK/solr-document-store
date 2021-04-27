@@ -94,43 +94,7 @@ public class DocProducerTest {
         docProducer.libraryRuleProvider = new LibraryRuleProviderBean() {
             @Override
             public VipCoreLibraryRule libraryRulesFor(String agencyId) {
-                return new VipCoreLibraryRule() {
-
-                    @Override
-                    public boolean authCreateComonRecord() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean isFbsLibrary() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean isPartOfBibdk() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean isPartOfDanbib() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean isResearchLibrary() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean usesEnrichments() {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean usesHoldingsItem() {
-                        return true;
-                    }
-                };
+                return new VipCoreLibraryRuleMockResponse(true, true, true, true, false, true);
             }
         };
 
