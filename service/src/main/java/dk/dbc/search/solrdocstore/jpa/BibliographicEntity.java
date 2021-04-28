@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.EntityManager;
 
 import org.eclipse.persistence.annotations.Mutable;
 
@@ -36,6 +37,16 @@ public class BibliographicEntity implements Serializable {
             "agencyId", "bibliographicRecordId", "deleted", "trackingId"));
 
     private static final long serialVersionUID = -2773872842011755768L;
+
+    private static final String SELECT_MANIFESTATIONS_FOR_WORK_JPA =
+            "SELECT be FROM BibliographicEntity be" +
+            " WHERE be.work = :workId";
+
+    public static List<BibliographicEntity> fetchByWork(EntityManager entityManager, String workId) {
+        return entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class)
+                .setParameter("workId", workId)
+                .getResultList();
+    }
 
     public BibliographicEntity() {
     }
@@ -206,4 +217,5 @@ public class BibliographicEntity implements Serializable {
                 throw new AssertionError();
         }
     }
+
 }

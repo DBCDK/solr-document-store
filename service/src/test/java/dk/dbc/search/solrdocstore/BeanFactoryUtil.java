@@ -81,7 +81,9 @@ public class BeanFactoryUtil {
                         new QueueRuleEntity("a", QueueType.HOLDING, 0),
                         new QueueRuleEntity("a", QueueType.RESOURCE, 0),
                         new QueueRuleEntity("b", QueueType.WORK, 0),
-                        new QueueRuleEntity("b", QueueType.WORKRESOURCE, 0));
+                        new QueueRuleEntity("b", QueueType.WORKRESOURCE, 0),
+                        new QueueRuleEntity("e", QueueType.ENDPOINT, 0),
+                        new QueueRuleEntity("e", QueueType.WORKENDPOINT, 0));
             }
         };
         EntityManager entityManager = env.getEntityManager();
@@ -172,6 +174,13 @@ public class BeanFactoryUtil {
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = env.getEntityManager();
         bean.openAgency = openAgency;
+        bean.enqueueSupplier = createEnqueueSupplier(env);
+        return bean;
+    }
+
+    public static QueueBean createQueueBean(JpaTestEnvironment env) {
+        QueueBean bean = new QueueBean();
+        bean.entityManager = env.getEntityManager();
         bean.enqueueSupplier = createEnqueueSupplier(env);
         return bean;
     }

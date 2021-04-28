@@ -54,10 +54,6 @@ public class DocumentRetrieveBean {
             " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
             " AND h2b.bibliographicAgencyId = :agencyId";
 
-    private static final String SELECT_MANIFESTATIONS_FOR_WORK_JPA =
-            "SELECT be FROM BibliographicEntity be" +
-            " WHERE be.work = :workId";
-
     private static final String SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA =
             "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h" +
@@ -152,9 +148,7 @@ public class DocumentRetrieveBean {
 
     public List<DocumentRetrieveResponse> getDocumentsForWork(String workId, boolean includeHoldingsItemsIndexKeys) throws Exception {
         List<DocumentRetrieveResponse> res = new ArrayList<>();
-        List<BibliographicEntity> bibliographicEntities = entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class)
-                .setParameter("workId", workId)
-                .getResultList();
+        List<BibliographicEntity> bibliographicEntities = BibliographicEntity.fetchByWork(entityManager, workId);
         List<HoldingsInfo> holdingsObjs = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA, HoldingsInfo.class)
                 .setParameter("workId", workId)
                 .getResultList();

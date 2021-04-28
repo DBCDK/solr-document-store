@@ -48,6 +48,7 @@ public class BusinessLogic {
     private static final String REC_HOLDINGS_COUNT = "rec.holdingsCount";
     private static final String REC_HOLDINGS_ON_LOAN = "rec.holdingsOnLoan";
     private static final String REC_PERSISTENT_WORK_ID = "rec.persistentWorkId";
+    private static final String REC_REPOSITORY_ID = "rec.repositoryId";
     private static final String HOLDINGSITEM_ROLE = "holdingsitem.role";
     private static final String COMMON_RECORD_ID_PREFIX = "870970-basis:";
     private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
@@ -205,6 +206,7 @@ public class BusinessLogic {
             }
         }
         if (should(Feature.NESTED_HOLDINGS_DOCUMENTS)) {
+            addRecRepositoryIdToHoldings(holdingsItemsIndexKeys, source.bibliographicRecord.repositoryId);
             return solrInputDocument(indexKeys, holdingsItemsIndexKeys);
         } else {
             return solrInputDocument(indexKeys, EMPTY_MAP);
@@ -302,6 +304,13 @@ public class BusinessLogic {
         String persistentWorkId = persistentWorkIdProvider.persistentWorkIdFor(corepoWorkId);
         log.trace("setting " + REC_PERSISTENT_WORK_ID + " to {}", persistentWorkId);
         indexKeys.put(REC_PERSISTENT_WORK_ID, singletonList(persistentWorkId));
+    }
+
+    private void addRecRepositoryIdToHoldings(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys, String repositoryId) {
+        List<String> field = singletonList(repositoryId);
+        holdingsItemsIndexKeys.forEach((agencyId, holdingsList) -> {
+            holdingsList.forEach(holdingsitem -> holdingsitem.put(REC_REPOSITORY_ID, field));
+        });
     }
 
     private void addResources(Map<String, List<String>> indexKeys, Map<String, Map<Integer, Boolean>> resources, int agencyId) {
