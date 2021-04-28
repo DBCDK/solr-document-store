@@ -23,7 +23,6 @@ import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
-import dk.dbc.search.solrdocstore.response.ExistsResponse;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
 import java.sql.SQLException;
 import java.util.List;
