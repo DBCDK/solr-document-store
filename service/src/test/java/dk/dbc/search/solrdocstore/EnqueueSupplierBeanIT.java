@@ -98,11 +98,11 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "h,work:2"));
     }
 
-    private Integer nonfbsAgency = 800111;
-    private Integer schoolAgency = 300111;
-    private Integer fbsAgency = 600111;
-    private Integer commonAgency = LibraryType.COMMON_AGENCY;
-    private Integer schoolCommonAgency = LibraryType.SCHOOL_COMMON_AGENCY;
+    private static final Integer nonfbsAgency = 800111;
+    private static final Integer schoolAgency = 300111;
+    private static final Integer fbsAgency = 600111;
+    private static final Integer commonAgency = LibraryType.COMMON_AGENCY;
+    private static final Integer schoolCommonAgency = LibraryType.SCHOOL_COMMON_AGENCY;
 
     @Test(timeout = 2_000L)
     public void checkConfig() {
@@ -387,10 +387,10 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private BibliographicEntity entity(int agencyId, String classifier, String bibliogrephicRecordId, String work) {
         BibliographicEntity bib = new BibliographicEntity();
-                bib.setAgencyId(agencyId);
-                bib.setClassifier(classifier);
-                bib.setBibliographicRecordId(bibliogrephicRecordId);
-                bib.setWork(work);
+        bib.setAgencyId(agencyId);
+        bib.setClassifier(classifier);
+        bib.setBibliographicRecordId(bibliogrephicRecordId);
+        bib.setWork(work);
         return bib;
     }
 }
