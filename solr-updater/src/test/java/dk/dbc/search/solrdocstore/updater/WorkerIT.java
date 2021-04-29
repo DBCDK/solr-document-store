@@ -81,7 +81,7 @@ public class WorkerIT {
                             "maxTries=1",
                             "emptyQueueSleep=10ms",
                             "scanProfiles=102030-magic,123456-basic",
-                            "workPresentationEndpoint=not-relevant",
+                            "workPresentationUrl=not-relevant",
                             "scanDefaultFields=scan.abc,scan.def") {
             @Override
             public Client getClient() {

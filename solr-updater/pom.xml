@@ -405,7 +405,7 @@
                             <environmentVariables>
                                 <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/solrdocstore</DOCSTORE_POSTGRES_URL>
                                 <VIPCORE_ENDPOINT>${vipcore.endpoint}</VIPCORE_ENDPOINT>
-                                <WORK_PRESENTATION_ENDPOINT>${work-presentation.endpoint}</WORK_PRESENTATION_ENDPOINT>
+                                <WORK_PRESENTATION_URL>${work-presentation.endpoint}</WORK_PRESENTATION_URL>
                             </environmentVariables>
                             <executable>java</executable>
                             <arguments>
@@ -518,7 +518,7 @@ exit 1
                         <ZOOKEEPER_COLLECTIONS>corepo-b</ZOOKEEPER_COLLECTIONS>
                         <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
                         <VIPCORE_ENDPOINT>http://localhost:${wiremock.port}/vipcore/</VIPCORE_ENDPOINT>
-                        <WORK_PRESENTATION_ENDPOINT>http://localhost:${wiremock.port}/workpresentation/</WORK_PRESENTATION_ENDPOINT>
+                        <WORK_PRESENTATION_URL>http://localhost:${wiremock.port}/workpresentation/</WORK_PRESENTATION_URL>
                         <SOLR_APPID>solr-doc-store-updater</SOLR_APPID>
                     </environmentVariables>
                 </configuration>

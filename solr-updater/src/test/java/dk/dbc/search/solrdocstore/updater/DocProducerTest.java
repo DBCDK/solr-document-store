@@ -66,7 +66,7 @@ public class DocProducerTest {
                                    "queues=Not-Relevant",
                                    "openAgencyUrl=Not-Relevant",
                                    "vipCoreEndpoint=Not-Relevant",
-                                   "workPresentationEndpoint=not-relevant",
+                                   "workPresentationUrl=not-relevant",
                                    "scanProfiles=102030-magic,123456-basic",
                                    "scanDefaultFields=abc,def") {
             @Override

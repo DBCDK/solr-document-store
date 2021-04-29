@@ -63,7 +63,7 @@ public class Config {
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
     private String appId;
-    private String workPresentationEndpoint;
+    private String workPresentationUrl;
     private Client client;
     private long persistentWorkIdFailurePostpone;
 
@@ -123,13 +123,13 @@ public class Config {
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }
-        workPresentationEndpoint = get("workPresentationEndpoint", "WORK_PRESENTATION_ENDPOINT", null);
-        workPresentationEndpoint = UriBuilder.fromPath(workPresentationEndpoint)
+        workPresentationUrl = get("workPresentationUrl", "WORK_PRESENTATION_URL", null);
+        workPresentationUrl = UriBuilder.fromPath(workPresentationUrl)
                 .path("api/work-presentation/getPersistentWorkId")
                 .build()
                 .toString();
-        if (workPresentationEndpoint == null || workPresentationEndpoint.isEmpty()) {
-            throw new IllegalStateException("Environment variable WORK_PRESENTATION_ENDPOINT must be set");
+        if (workPresentationUrl == null || workPresentationUrl.isEmpty()) {
+            throw new IllegalStateException("Environment variable WORK_PRESENTATION_URL must be set");
         }
         persistentWorkIdFailurePostpone = Long.max(1000, milliseconds(get("persistentWorkIdFailurePostpone", "PERSISTENT_WORK_ID_FAILURE_POSTPONE", "5s")));
     }
@@ -240,7 +240,7 @@ public class Config {
     }
 
     public String getWorkPresentationEndpoint() {
-        return workPresentationEndpoint;
+        return workPresentationUrl;
     }
 
     public long getPersistentWorkIdFailurePostpone() {
