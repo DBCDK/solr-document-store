@@ -325,8 +325,7 @@ public class BusinessLogic {
                     break;
             }
             if (add) {
-                indexKeys.computeIfAbsent("rec." + resourceName, list())
-                        .add("true");
+                indexKeys.put("rec." + resourceName, singletonList("true"));
             }
         });
     }
