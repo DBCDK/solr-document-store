@@ -38,21 +38,6 @@ public class HoldingsItemEntityTest {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    /**
-     * Test of asHoldingsItemEntity method, of class HoldingsItemEntity.
-     */
-    @Test
-    public void verifySyntheticHasLiveHoldings() throws Exception {
-        System.out.println("asHoldingsItemEntity");
-
-        HoldingsItemEntity he = new HoldingsItemEntity(0, "A", indexKeys("[{}]"), "");
-        assertTrue(he.getHasLiveHoldings());
-        he.setIndexKeys(indexKeys("[]"));
-        assertFalse(he.getHasLiveHoldings());
-        he.setIndexKeys(null);
-        assertFalse(he.getHasLiveHoldings());
-    }
-
     @Test(timeout = 2_000L)
     public void testLocations() throws Exception {
         System.out.println("testLocations");

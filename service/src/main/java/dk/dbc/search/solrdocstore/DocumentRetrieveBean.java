@@ -180,7 +180,7 @@ public class DocumentRetrieveBean {
                 " JOIN OpenAgencyCache oa " +
                 "ON oa.agencyId = h2b.holdingsAgencyId AND oa.libraryType = 'FBS' AND (oa.partOfDanbib = TRUE OR oa.authCreateCommonRecord = TRUE)" +
                 " JOIN HoldingsItemsSolrKeys h " +
-                "ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId AND h.hasLiveHoldings = TRUE" +
+                "ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
                 " WHERE" +
                 "  h2b.isCommonDerived = TRUE" +
                 "  AND h2b.bibliographicRecordId = ?" +

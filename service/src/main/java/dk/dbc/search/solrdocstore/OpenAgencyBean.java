@@ -109,24 +109,22 @@ public class OpenAgencyBean {
      */
     void agencyHasChanged(OpenAgencyEntity oldEntry, OpenAgencyEntity newEntry) {
         int agencyId = oldEntry.getAgencyId();
-        List<Boolean> booleans = entityManager.createQuery("SELECT NEW java.lang.Boolean(h.hasLiveHoldings) FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId GROUP BY h.hasLiveHoldings", Boolean.class)
+        boolean hasNoHoldings = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId", HoldingsItemEntity.class)
                 .setParameter("agencyId", agencyId)
-                .getResultList();
-        log.debug("has live holdings for {} is {}", agencyId, booleans);
-        if (booleans.contains(true)) {
-            log.error("Cannot migrate OpenAgency entry for {}, has live holdings ({} -> {})", agencyId, oldEntry, newEntry);
-            oldEntry.setValid(false);
-            entityManager.merge(oldEntry);
-        } else if (booleans.contains(false)) {
-            log.warn("Migrate OpenAgency entry for {}, has no live holdings ({} -> {})", agencyId, oldEntry, newEntry);
-            purgeHoldingFor(agencyId);
-            entityManager.merge(newEntry);
-        } else {
+                .setMaxResults(1)
+                .getResultList()
+                .isEmpty();
+        log.debug("has live holdings for {} is {}", agencyId, !hasNoHoldings);
+        if (hasNoHoldings) {
             log.warn("Migrate OpenAgency entry for {}, has no holdings ({} -> {})", agencyId, oldEntry, newEntry);
             oldEntry.setFetched(newEntry.getFetched());
             oldEntry.setLibraryType(newEntry.getLibraryType());
             oldEntry.setPartOfBibDk(newEntry.getPartOfBibDk());
             oldEntry.setPartOfDanbib(newEntry.getPartOfDanbib());
+            entityManager.merge(oldEntry);
+        } else {
+            log.error("Cannot migrate OpenAgency entry for {}, has live holdings", agencyId, oldEntry, newEntry);
+            oldEntry.setValid(false);
             entityManager.merge(oldEntry);
         }
     }

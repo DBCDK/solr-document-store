@@ -130,11 +130,7 @@ public class ExistenceBean {
         log.info("Checking existence of holdings item {}:{}", agencyId, bibliographicRecordId);
         ExistsResponse response = new ExistsResponse();
         HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
-        if (entity == null) {
-            response.exists = false;
-        } else {
-            response.exists = entity.getHasLiveHoldings();
-        }
+        response.exists = entity != null;
         return response;
     }
 }

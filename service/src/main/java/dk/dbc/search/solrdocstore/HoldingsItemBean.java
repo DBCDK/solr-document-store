@@ -122,8 +122,8 @@ public class HoldingsItemBean {
                 .setParameter("agency", hi.getAgencyId())
                 .setParameter("bibId", hi.getBibliographicRecordId())
                 .getResultList();
-        boolean hadLiveHoldings = !his.isEmpty() && his.get(0).getHasLiveHoldings();
-        boolean hasLiveHoldings = hi.getHasLiveHoldings();
+        boolean hadLiveHoldings = !his.isEmpty();
+        boolean hasLiveHoldings = !hi.getIndexKeys().isEmpty();
         Set<String> oldLocations = his.isEmpty() ? EMPTY_SET : his.get(0).getLocations();
 
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());

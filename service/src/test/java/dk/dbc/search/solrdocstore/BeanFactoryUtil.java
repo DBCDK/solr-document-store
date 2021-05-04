@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.RecordType;
@@ -7,9 +8,11 @@ import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
@@ -117,19 +120,10 @@ public class BeanFactoryUtil {
     public static OpenAgencyProxyBean createOpenAgencyProxyBean() {
         return new OpenAgencyProxyBean() {
             @Override
-            public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
-                try {
-                    String resource = "openagency-" + agencyId + ".json";
-                    LibraryRulesResponse libraryRulesResponse =
-                            O.readValue(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource), LibraryRulesResponse.class);
-                    List<LibraryRules> libraryRules = libraryRulesResponse.getLibraryRules();
-                    if (libraryRules == null || libraryRules.isEmpty()) {
-                        return null;
-                    } else {
-                        return new OpenAgencyEntity(libraryRules.get(0));
-                    }
-                } catch (IOException ex) {
-                    throw new EJBException(ex);
+            protected LibraryRulesResponse getLibraryRuleResponse(int agencyId) throws OpenAgencyException, JsonProcessingException, IOException {
+                String resource = "openagency-" + agencyId + ".json";
+                try (InputStream is = OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource)) {
+                    return O.readValue(is, LibraryRulesResponse.class);
                 }
             }
         };

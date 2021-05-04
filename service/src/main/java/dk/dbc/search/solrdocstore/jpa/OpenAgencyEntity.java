@@ -72,8 +72,7 @@ public class OpenAgencyEntity implements Serializable {
     }
 
     public OpenAgencyEntity(LibraryRules libraryRules) {
-        Integer aId = Integer.valueOf(libraryRules.getAgencyId());
-        this.agencyId = aId == null ? -1 : aId;
+        this.agencyId = Integer.parseInt(libraryRules.getAgencyId());
         this.libraryType = getLibraryTypeFromLibraryRules(libraryRules);
         List<LibraryRule> libraryRuleList = libraryRules.getLibraryRule();
         this.authCreateCommonRecord = getLibraryRuleBoolean(libraryRuleList, "auth_create_common_record");
