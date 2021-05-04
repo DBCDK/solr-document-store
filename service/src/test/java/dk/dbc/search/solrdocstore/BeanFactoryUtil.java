@@ -48,6 +48,7 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = env.getEntityManager();
         bean.h2bBean = createHoldingsToBibliographicBean(env);
+        bean.brBean = createBibliographicRetrieveBean(env);
         bean.enqueueSupplier = createEnqueueSupplier(env);
         return bean;
     }
