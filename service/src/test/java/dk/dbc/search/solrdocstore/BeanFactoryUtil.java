@@ -6,15 +6,17 @@ import dk.dbc.search.solrdocstore.jpa.RecordType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import java.io.IOException;
 
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 
@@ -118,9 +120,14 @@ public class BeanFactoryUtil {
                 try {
                     String resource = "openagency-" + agencyId + ".json";
                     LibraryRulesResponse libraryRulesResponse =
-                            new ObjectMapper().readValue(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource), LibraryRulesResponse.class);
-                    return new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
-                } catch (Exception ex) {
+                            O.readValue(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource), LibraryRulesResponse.class);
+                    List<LibraryRules> libraryRules = libraryRulesResponse.getLibraryRules();
+                    if (libraryRules == null || libraryRules.isEmpty()) {
+                        return null;
+                    } else {
+                        return new OpenAgencyEntity(libraryRules.get(0));
+                    }
+                } catch (IOException ex) {
                     throw new EJBException(ex);
                 }
             }
@@ -159,13 +166,6 @@ public class BeanFactoryUtil {
         bean.entityManager = em;
         bean.openAgency = openAgency;
         bean.brBean = brBean;
-        return bean;
-    }
-
-    public static HoldingsItemBean createHoldingsItemBean(EntityManager em, EnqueueSupplierBean queue, HoldingsToBibliographicBean h2bBean) {
-        HoldingsItemBean bean = new HoldingsItemBean();
-        bean.entityManager = em;
-        bean.h2bBean = h2bBean;
         return bean;
     }
 
