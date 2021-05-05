@@ -117,7 +117,7 @@ public class OpenAgencyStatusBean {
                 " JOIN HoldingsItemEntity hi" +
                 " ON b.agencyId = h2b.bibliographicAgencyId AND b.bibliographicRecordId = h2b.bibliographicRecordId" +
                 " AND hi.agencyId = h2b.holdingsAgencyId AND hi.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
-                " WHERE h2b.holdingsAgencyId = :agencyId AND hi.hasLiveHoldings = TRUE", BibliographicEntity.class)
+                " WHERE h2b.holdingsAgencyId = :agencyId", BibliographicEntity.class)
                 .setParameter("agencyId", agencyId)
                 .getResultList()
                 .stream()

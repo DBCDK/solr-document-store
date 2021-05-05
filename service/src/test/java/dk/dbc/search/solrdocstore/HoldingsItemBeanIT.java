@@ -21,9 +21,14 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
+import javax.persistence.EntityManager;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
@@ -81,6 +86,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testFirstLast");
 
         JpaTestEnvironment env = env();
+        EntityManager em = env.getEntityManager();
 
         BibliographicBean bib = createBibliographicBean(env);
         HoldingsItemBean hol = holdingsItemBeanWithRules(
@@ -102,6 +108,12 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "a,870970-basis:25912233",
                    "b,work:1"));
 
+        HoldingsToBibliographicEntity htobA = env().getPersistenceContext().run(() -> {
+            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
+            return em.find(HoldingsToBibliographicEntity.class, key);
+        });
+        assertThat(htobA, notNullValue());
+
         // From live holdings to live holdings
         env().getPersistenceContext().run(() -> {
             hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
@@ -115,6 +127,19 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233",
                    "b,work:1"));
+
+        // Check that no h2b relation exists when no live holdings are present
+        HoldingsToBibliographicEntity htobD = env().getPersistenceContext().run(() -> {
+            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
+            return em.find(HoldingsToBibliographicEntity.class, key);
+        });
+        assertThat(htobD, nullValue());
+
+        HoldingsItemEntity hi = env().getPersistenceContext().run(() -> {
+            AgencyItemKey key = new AgencyItemKey(710100, "25912233");
+            return em.find(HoldingsItemEntity.class, key);
+        });
+        assertThat(hi, nullValue());
     }
 
     @Test(timeout = 2_000L)
@@ -122,6 +147,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testFirstLastNoneToNone");
 
         JpaTestEnvironment env = env();
+        EntityManager em = env.getEntityManager();
 
         BibliographicBean bib = createBibliographicBean(env);
         HoldingsItemBean hol = holdingsItemBeanWithRules(
@@ -140,6 +166,19 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
             hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
         });
         assertThat(queueContentAndClear(), empty());
+
+        // Check that no h2b relation exists when no live holdings are present
+        HoldingsToBibliographicEntity htob = env().getPersistenceContext().run(() -> {
+            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
+            return em.find(HoldingsToBibliographicEntity.class, key);
+        });
+        assertThat(htob, nullValue());
+        // and no holdings
+        HoldingsItemEntity hi = env().getPersistenceContext().run(() -> {
+            AgencyItemKey key = new AgencyItemKey(710100, "25912233");
+            return em.find(HoldingsItemEntity.class, key);
+        });
+        assertThat(hi, nullValue());
 
         // From no holdings to no holdings
         env().getPersistenceContext().run(() -> {
@@ -196,6 +235,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
             }
         };
         hol.enqueueSupplier.entityManager = env.getEntityManager();
+        hol.brBean = createBibliographicRetrieveBean(env);
         return hol;
     }
 }

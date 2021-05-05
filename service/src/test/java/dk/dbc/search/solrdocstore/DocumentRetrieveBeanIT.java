@@ -52,9 +52,9 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Before
     public void setupBean() {
-        bean = createDocumentRetrieveBean(env());
         JpaTestEnvironment env = env();
         em = env.getEntityManager();
+        bean = createDocumentRetrieveBean(env);
         bibl = createBibliographicBean(env);
         hold = createHoldingsItemBean(env);
         h2b = createHoldingsToBibliographicBean(env);

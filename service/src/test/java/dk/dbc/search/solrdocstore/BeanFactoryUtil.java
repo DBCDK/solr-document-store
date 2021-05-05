@@ -1,16 +1,18 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.RecordType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
+import java.io.IOException;
+import java.io.InputStream;
 
-import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -46,6 +48,7 @@ public class BeanFactoryUtil {
         HoldingsItemBean bean = new HoldingsItemBean();
         bean.entityManager = env.getEntityManager();
         bean.h2bBean = createHoldingsToBibliographicBean(env);
+        bean.brBean = createBibliographicRetrieveBean(env);
         bean.enqueueSupplier = createEnqueueSupplier(env);
         return bean;
     }
@@ -114,14 +117,10 @@ public class BeanFactoryUtil {
     public static OpenAgencyProxyBean createOpenAgencyProxyBean() {
         return new OpenAgencyProxyBean() {
             @Override
-            public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
-                try {
-                    String resource = "openagency-" + agencyId + ".json";
-                    LibraryRulesResponse libraryRulesResponse =
-                            new ObjectMapper().readValue(OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource), LibraryRulesResponse.class);
-                    return new OpenAgencyEntity(Iterables.getFirst(libraryRulesResponse.getLibraryRules(), null));
-                } catch (Exception ex) {
-                    throw new EJBException(ex);
+            protected LibraryRulesResponse getLibraryRuleResponse(int agencyId) throws OpenAgencyException, JsonProcessingException, IOException {
+                String resource = "openagency-" + agencyId + ".json";
+                try (InputStream is = OpenAgencyProxyBeanTest.class.getClassLoader().getResourceAsStream(resource)) {
+                    return O.readValue(is, LibraryRulesResponse.class);
                 }
             }
         };
@@ -159,13 +158,6 @@ public class BeanFactoryUtil {
         bean.entityManager = em;
         bean.openAgency = openAgency;
         bean.brBean = brBean;
-        return bean;
-    }
-
-    public static HoldingsItemBean createHoldingsItemBean(EntityManager em, EnqueueSupplierBean queue, HoldingsToBibliographicBean h2bBean) {
-        HoldingsItemBean bean = new HoldingsItemBean();
-        bean.entityManager = em;
-        bean.h2bBean = h2bBean;
         return bean;
     }
 

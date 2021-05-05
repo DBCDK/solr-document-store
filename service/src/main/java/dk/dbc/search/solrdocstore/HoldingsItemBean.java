@@ -7,6 +7,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.request.HoldingsItemEntityRequest;
 import dk.dbc.search.solrdocstore.request.HoldingsItemEntitySchemaAnnotated;
 import java.sql.SQLException;
@@ -47,6 +50,9 @@ public class HoldingsItemBean {
 
     @Inject
     HoldingsToBibliographicBean h2bBean;
+
+    @Inject
+    BibliographicRetrieveBean brBean;
 
     @Inject
     EnqueueSupplierBean enqueueSupplier;
@@ -116,28 +122,57 @@ public class HoldingsItemBean {
                 .setParameter("agency", hi.getAgencyId())
                 .setParameter("bibId", hi.getBibliographicRecordId())
                 .getResultList();
-        boolean hadLiveHoldings = !his.isEmpty() && his.get(0).getHasLiveHoldings();
-        boolean hasLiveHoldings = hi.getHasLiveHoldings();
+        boolean hadLiveHoldings = !his.isEmpty();
+        boolean hasLiveHoldings = !hi.getIndexKeys().isEmpty();
         Set<String> oldLocations = his.isEmpty() ? EMPTY_SET : his.get(0).getLocations();
 
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
-        entityManager.merge(hi);
         if (!hadLiveHoldings && !hasLiveHoldings) { // No holdings before or now
-            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue);
-        } else if (hadLiveHoldings != hasLiveHoldings) { // holdings existence change
+            log.debug("No holdings before or now");
+        } else if (hadLiveHoldings != hasLiveHoldings && hasLiveHoldings) { // holdings existence change -> exists
+            entityManager.merge(hi);
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
                                                      QueueType.HOLDING, QueueType.WORK,
                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
                                                      QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+        } else if (hadLiveHoldings != hasLiveHoldings && hadLiveHoldings) { // holdings existence change -> none
+            entityManager.remove(his.get(0)); // Remove existing
+            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(hi.getAgencyId(), hi.getBibliographicRecordId());
+            HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, key);
+            if (binding != null) {
+                entityManager.remove(binding);
+                queueRelatedBibliographic(binding, enqueue,
+                                          QueueType.HOLDING, QueueType.WORK,
+                                          QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                          QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+            }
         } else if (!oldLocations.equals(hi.getLocations())) { // holdings accessibility change
-            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
-                                                     QueueType.HOLDING, QueueType.WORK,
-                                                     QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
+            entityManager.merge(hi);
+            queueRelatedBibliographic(hi, enqueue,
+                                      QueueType.HOLDING, QueueType.WORK,
+                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
         } else {
-            h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
-                                                     QueueType.HOLDING, QueueType.WORK);
+            entityManager.merge(hi);
+            queueRelatedBibliographic(hi, enqueue,
+                                      QueueType.HOLDING, QueueType.WORK);
         }
         enqueue.commit();
+    }
+
+    private void queueRelatedBibliographic(HoldingsItemEntity hi, EnqueueCollector enqueue, QueueType... queues) {
+        HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(hi.getAgencyId(), hi.getBibliographicRecordId());
+        HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, key);
+        if (binding != null) {
+            queueRelatedBibliographic(binding, enqueue, queues);
+        }
+    }
+
+    private void queueRelatedBibliographic(HoldingsToBibliographicEntity binding, EnqueueCollector enqueue, QueueType... queues) {
+        BibliographicEntity e = brBean.getBibliographicEntity(binding.getBibliographicAgencyId(),
+                                                              binding.getBibliographicRecordId());
+        if (e != null) {
+            enqueue.add(e, queues);
+        }
     }
 
     private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {

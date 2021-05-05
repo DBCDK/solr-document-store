@@ -115,41 +115,13 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void openAgencyVerifyChangesCanMigrateDecommissioned() throws Exception {
-        System.out.println("openAgencyVerifyChangesCanMigrateDecommissioned");
-
-        env().getPersistenceContext().run(() -> {
-            em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
-            em.persist(makeOpenAgencyEntity(711100, true, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", DECOMMISSIONED, ""));
-            em.persist(new HoldingsToBibliographicEntity(711100, "1", COMMON_AGENCY, "1", true));
-            em.flush();
-            openAgency.verifyOpenAgencyCache(); // loads 711100.json
-
-            // Migrated
-            OpenAgencyEntity oae711100 = em.find(OpenAgencyEntity.class, 711100);
-            assertEquals(makeOpenAgencyEntity(711100), oae711100);
-            HoldingsItemEntity holding = em.find(HoldingsItemEntity.class, new AgencyItemKey(711100, "1"));
-            assertNull(holding);
-            HoldingsToBibliographicEntity relation = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(711100, "1"));
-            assertNull(relation);
-        });
-        System.out.println("changedAgencies = " + changedAgencies);
-        System.out.println("purgedAgencies = " + purgedAgencies);
-        assertTrue(changedAgencies.contains(711100));
-        assertEquals(1, changedAgencies.size());
-        assertTrue(purgedAgencies.contains(711100));
-        assertEquals(1, purgedAgencies.size());
-    }
-
-    @Test
     public void openAgencyVerifyChangesCantMigrate() throws Exception {
         System.out.println("openAgencyVerifyChangesCantMigrate");
 
         env().getPersistenceContext().run(() -> {
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", ON_SHELF_AND_DECOMMISSIONED, ""));
+            em.persist(new HoldingsItemEntity(711100, "1", ON_SHELF, ""));
             em.flush();
             openAgency.verifyOpenAgencyCache();
 

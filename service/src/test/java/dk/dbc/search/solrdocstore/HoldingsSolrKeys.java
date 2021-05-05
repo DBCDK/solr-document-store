@@ -11,9 +11,7 @@ import java.io.IOException;
 public class HoldingsSolrKeys {
 
     private static final ObjectMapper O = new ObjectMapper();
-    public static final IndexKeysList DECOMMISSIONED = indexKeys("[]");
     public static final IndexKeysList ON_SHELF = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
-    public static final IndexKeysList ON_SHELF_AND_DECOMMISSIONED = indexKeys("[{\"holdingsitem.status\":[\"OnShelf\"]}]");
 
     public static IndexKeysList indexKeys(String json) {
         try {

@@ -45,10 +45,8 @@ public class HoldingsItemEntity implements Serializable {
 
     private String trackingId;
 
-    private boolean hasLiveHoldings;
 
     public HoldingsItemEntity() {
-        this.hasLiveHoldings = false;
     }
 
     public HoldingsItemEntity(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) {
@@ -56,7 +54,6 @@ public class HoldingsItemEntity implements Serializable {
         this.bibliographicRecordId = bibliographicRecordId;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
-        this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
     }
 
     /**
@@ -113,29 +110,12 @@ public class HoldingsItemEntity implements Serializable {
         this.trackingId = trackingId;
     }
 
-    /**
-     * Explain if any holdings are present for this agency
-     * <p>
-     * Decommissioned is no longer in index-keys, so presence of any holdings
-     * constitutes a live holding
-     *
-     * @return true/false
-     */
-    public boolean getHasLiveHoldings() {
-        return hasLiveHoldings;
-    }
-
-    public void setHasLiveHoldings(boolean hasLiveHoldings) {
-        this.hasLiveHoldings = hasLiveHoldings;
-    }
-
     public IndexKeysList getIndexKeys() {
         return indexKeys;
     }
 
     public void setIndexKeys(IndexKeysList indexKeys) {
         this.indexKeys = indexKeys;
-        this.hasLiveHoldings = calcHasLiveHoldings(indexKeys);
     }
 
     public Set<String> getLocations() {
@@ -176,10 +156,6 @@ public class HoldingsItemEntity implements Serializable {
                             .map(status -> new AbstractMap.SimpleEntry<>(status.toLowerCase(Locale.ROOT), count));
                 })
                 .collect(groupingBy(Map.Entry::getKey, summingInt(Map.Entry::getValue)));
-    }
-
-    private static boolean calcHasLiveHoldings(IndexKeysList indexKeys) {
-        return indexKeys != null && !indexKeys.isEmpty();
     }
 
     public HoldingsItemEntity copyForLightweightPresentation() {
