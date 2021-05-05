@@ -9,17 +9,14 @@ import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.commons.persistence.JpaTestEnvironment;
 import dk.dbc.openagency.http.OpenAgencyException;
-import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 
