@@ -170,7 +170,7 @@ public class HoldingsItemBean {
     private void queueRelatedBibliographic(HoldingsToBibliographicEntity binding, EnqueueCollector enqueue, QueueType... queues) {
         BibliographicEntity e = brBean.getBibliographicEntity(binding.getBibliographicAgencyId(),
                                                               binding.getBibliographicRecordId());
-        if (e != null) {
+        if (e != null && !e.isDeleted()) {
             enqueue.add(e, queues);
         }
     }
