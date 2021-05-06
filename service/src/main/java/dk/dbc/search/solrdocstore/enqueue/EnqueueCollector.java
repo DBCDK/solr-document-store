@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore.enqueue;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -71,8 +72,11 @@ public class EnqueueCollector {
      * @param supplier the supplier (source of this queue event)
      */
     public void add(BibliographicEntity entity, QueueType supplier) {
-        targetTypes.computeIfAbsent(supplier, this::makeTarget)
-                .add(entity.asQueueJobFor(supplier));
+        QueueJob job = entity.asQueueJobFor(supplier);
+        if (job != null) {
+            targetTypes.computeIfAbsent(supplier, this::makeTarget)
+                    .add(job);
+        }
     }
 
     /**

@@ -20,6 +20,8 @@ import java.util.Objects;
 import javax.persistence.EntityManager;
 
 import org.eclipse.persistence.annotations.Mutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -32,6 +34,8 @@ import static javax.persistence.FetchType.LAZY;
     @ColumnResult(name = "supersede_id")})
 @IdClass(AgencyClassifierItemKey.class)
 public class BibliographicEntity implements Serializable {
+
+    private static final Logger log = LoggerFactory.getLogger(BibliographicEntity.class);
 
     public static final List<String> sortableColumns = Collections.unmodifiableList(Arrays.asList(
             "agencyId", "bibliographicRecordId", "deleted", "trackingId"));
@@ -212,10 +216,13 @@ public class BibliographicEntity implements Serializable {
             case MANIFESTATION:
                 return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
             case WORK:
+                if(deleted) {
+                    log.warn("Not queueing for WORK type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);
+                    return null;
+                }
                 return QueueJob.work(work);
             default:
                 throw new AssertionError();
         }
     }
-
 }
