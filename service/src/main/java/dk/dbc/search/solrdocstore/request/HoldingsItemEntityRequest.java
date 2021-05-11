@@ -13,7 +13,4 @@ public class HoldingsItemEntityRequest extends HoldingsItemEntity {
     public HoldingsItemEntityRequest(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) {
         super(agencyId, bibliographicRecordId, indexKeys, trackingId);
     }
-
-    public void setProducerVersion(String producerVersion) {
-    }
 }

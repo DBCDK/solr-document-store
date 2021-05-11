@@ -36,10 +36,6 @@ public class BibliographicEntityRequest extends BibliographicEntity {
         this.supersedes = supersedes;
     }
 
-    public void setProducerVersion(String producerVersion) {
-        // Not used
-    }
-
     @Override
     public int hashCode() {
         int hash = super.hashCode();
