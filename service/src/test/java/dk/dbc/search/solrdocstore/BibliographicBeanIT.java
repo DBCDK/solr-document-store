@@ -18,7 +18,9 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
 import java.sql.*;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -41,7 +43,12 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void setupBean() throws URISyntaxException {
         em = env().getEntityManager();
-        bean = createBibliographicBean(env());
+        bean = createBibliographicBean(env(), new Config() {
+            @Override
+            public long getRevivieOlderWhenDeletedForAtleast() {
+                return TimeUnit.HOURS.toMillis(8);
+            }
+        });
         executeScriptResource("/bibliographicUpdate.sql");
     }
 
@@ -158,7 +165,43 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(false, updatedD)
                 );
         assertThat(rd2.getStatus(), is(200));
+    }
 
+
+    @Test(timeout = 2_000L)
+    public void reviveDeletedRecordFail() throws Exception {
+        System.out.println("reviveDeletedRecordFail");
+
+        BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "id", "id#1", null, null, true, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now()), "track:deleted");
+        Response deleted = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(d))
+                );
+        assertThat(deleted.getStatus(), is(200));
+
+
+        BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:not-revive");
+        Response revive = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(r))
+                );
+        assertThat(revive.getStatus(), not(is(200)));
+    }
+
+    @Test(timeout = 2_000L)
+    public void reviveDeletedRecordSuccess() throws Exception {
+        System.out.println("reviveDeletedRecordSuccess");
+
+        BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "id", "id#1", null, null, true, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("1d"))), "track:deleted");
+        Response deleted = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(d))
+                );
+        assertThat(deleted.getStatus(), is(200));
+
+
+        BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:revive");
+        Response revive = env().getPersistenceContext()
+                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(r))
+                );
+        assertThat(revive.getStatus(), is(200));
     }
 
     @Test
@@ -671,33 +714,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
                    "b,work:0"));
-    }
-
-    @Test(timeout = 2_000L)
-    public void testOverwriteWithOlder() throws Exception {
-        System.out.println("testOverwriteWithOlder");
-
-        BibliographicEntity bYoung = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", true, makeIndexKeys("rec.fedoraStreamDate=2019-12-31T23:59:59Z"), "track:too-old");
-        String updatedYoung = jsonbContext.marshall(bYoung);
-
-        Response rYoung = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedYoung)
-                );
-        assertThat(rYoung.getStatus(), is(200));
-
-        Response rYoungAgain = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedYoung)
-                );
-        assertThat(rYoungAgain.getStatus(), is(200));
-
-        BibliographicEntity bOld = new BibliographicEntity(600100, "clazzifier", "00000001", "id#2", "work:1", "unit:1", true, makeIndexKeys("rec.fedoraStreamDate=2019-01-01T00:00:00Z"), "track:too-old");
-        String updatedOld = jsonbContext.marshall(bOld);
-
-        Response rOld = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedOld)
-                );
-        System.out.println("rOld = " + rOld.getEntity());
-        assertThat(rOld.getStatus(), is(500));
     }
 
     private void evictAll() throws SQLException {

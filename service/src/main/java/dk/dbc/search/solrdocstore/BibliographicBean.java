@@ -60,6 +60,9 @@ public class BibliographicBean {
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @Inject
+    Config config;
+
+    @Inject
     OpenAgencyBean openAgency;
 
     @Inject
@@ -169,10 +172,17 @@ public class BibliographicBean {
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
             if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
-                log.warn("Cannot update to an older stream date: pid = {}-{}:{}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}",
-                         bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId(),
-                         bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
-                throw new IntermittentErrorException("Cannot update to an older stream date");
+                if (dbbe.isDeleted() && dbTime.isBefore(Instant.now().minusMillis(config.getRevivieOlderWhenDeletedForAtleast()))) {
+                    log.warn("Updating to an older stream date: pid = {}-{}:{}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}",
+                             bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId(),
+                             bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
+                } else {
+                    log.warn("Cannot update to an older stream date: pid = {}-{}:{}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}",
+                             bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId(),
+                             bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
+                    throw new IntermittentErrorException("Cannot update to an older stream date");
+                }
+
             }
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {

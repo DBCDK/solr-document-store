@@ -24,10 +24,11 @@ public class BeanFactoryUtil {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    public static BibliographicBean createBibliographicBean(JpaTestEnvironment env) {
+    public static BibliographicBean createBibliographicBean(JpaTestEnvironment env, Config config) {
         BibliographicBean bean = new BibliographicBean();
         EntityManager em = env.getEntityManager();
         OpenAgencyBean openAgency = createOpenAgencyBean();
+        bean.config = config;
         bean.entityManager = em;
         bean.openAgency = openAgency;
         bean.h2bBean = createHoldingsToBibliographicBean(env);

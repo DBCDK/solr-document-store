@@ -46,7 +46,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("enqueueWhenHoldingsItemSet");
         JpaTestEnvironment env = env();
 
-        BibliographicBean bib = createBibliographicBean(env);
+        BibliographicBean bib = createBibliographicBean(env, null);
         HoldingsItemBean holWithoutDelay = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.HOLDING, 0),
@@ -88,7 +88,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         JpaTestEnvironment env = env();
         EntityManager em = env.getEntityManager();
 
-        BibliographicBean bib = createBibliographicBean(env);
+        BibliographicBean bib = createBibliographicBean(env, null);
         HoldingsItemBean hol = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
@@ -149,7 +149,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         JpaTestEnvironment env = env();
         EntityManager em = env.getEntityManager();
 
-        BibliographicBean bib = createBibliographicBean(env);
+        BibliographicBean bib = createBibliographicBean(env, null);
         HoldingsItemBean hol = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
@@ -193,7 +193,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         JpaTestEnvironment env = env();
 
-        BibliographicBean bib = createBibliographicBean(env);
+        BibliographicBean bib = createBibliographicBean(env, null);
         HoldingsItemBean hol = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),

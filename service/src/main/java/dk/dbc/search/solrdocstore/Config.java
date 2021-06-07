@@ -12,8 +12,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Stateless
 @Startup
@@ -25,6 +29,7 @@ public class Config {
     private String systemName;
     private int[] openAgencyValidateTime;
     private String vipCoreEndpoint;
+    private long revivieOlderWhenDeletedForAtleast;
 
     @PostConstruct
     public void loadProperties() {
@@ -35,6 +40,7 @@ public class Config {
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
         // Number of milliseconds to delay bib entities that are being deleted
         vipCoreEndpoint = getValue(props, "vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
+        revivieOlderWhenDeletedForAtleast = getValue(props, "revivieOlderWhenDeletedForAtleast", "REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST", "8h", null, Config::ms);
     }
 
     public String getVipCoreEndpoint() {
@@ -52,6 +58,10 @@ public class Config {
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public int[] getOpenAgencyValidateTime() {
         return openAgencyValidateTime;
+    }
+
+    public long getRevivieOlderWhenDeletedForAtleast() {
+        return revivieOlderWhenDeletedForAtleast;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
@@ -118,4 +128,45 @@ public class Config {
         }
         throw new IllegalArgumentException("Invalid time: " + time);
     }
+
+    private static final Pattern MS = Pattern.compile("(0|[1-9]\\d*)\\s*(\\D+)");
+
+    public static long ms(String duration) {
+        Matcher matcher = MS.matcher(duration);
+        if (!matcher.matches()) {
+            throw new EJBException("Duration: '" + duration + "' is not of format {number}{unit}");
+        }
+        long amount = Long.parseLong(matcher.group(1));
+        switch (matcher.group(2).toLowerCase(Locale.ROOT).trim()) {
+            case "d":
+            case "day":
+            case "dayss":
+                return TimeUnit.DAYS.toMillis(amount);
+            case "h":
+            case "hour":
+            case "hours":
+                return TimeUnit.HOURS.toMillis(amount);
+            case "m":
+            case "min":
+            case "mins":
+            case "minute":
+            case "minutes":
+                return TimeUnit.MINUTES.toMillis(amount);
+            case "s":
+            case "sec":
+            case "secs":
+            case "second":
+            case "seconds":
+                return TimeUnit.SECONDS.toMillis(amount);
+            case "ms":
+            case "milli":
+            case "millis":
+            case "millisecond":
+            case "milliseconds":
+                return TimeUnit.MILLISECONDS.toMillis(amount);
+            default:
+                throw new EJBException("Duration: '" + duration + "' with unknown unit (ms/s/m)");
+        }
+    }
+
 }
