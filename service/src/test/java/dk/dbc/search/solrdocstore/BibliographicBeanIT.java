@@ -45,7 +45,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         em = env().getEntityManager();
         bean = createBibliographicBean(env(), new Config() {
             @Override
-            public long getRevivieOlderWhenDeletedForAtleast() {
+            public long getReviveOlderWhenDeletedForAtleast() {
                 return TimeUnit.HOURS.toMillis(8);
             }
         });

@@ -172,7 +172,7 @@ public class BibliographicBean {
             Instant dbTime = extractFedoraStreamDate(dbbe);
             Instant reqTime = extractFedoraStreamDate(bibliographicEntity);
             if (reqTime != null && dbTime != null && dbTime.isAfter(reqTime)) {
-                if (dbbe.isDeleted() && dbTime.isBefore(Instant.now().minusMillis(config.getRevivieOlderWhenDeletedForAtleast()))) {
+                if (dbbe.isDeleted() && dbTime.isBefore(Instant.now().minusMillis(config.getReviveOlderWhenDeletedForAtleast()))) {
                     log.warn("Updating to an older stream date: pid = {}-{}:{}, request.repositoryId = {}, database.repositoryId = {}, database.time = {}, request.time = {}",
                              bibliographicEntity.getAgencyId(), bibliographicEntity.getClassifier(), bibliographicEntity.getBibliographicRecordId(),
                              bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);

@@ -29,7 +29,7 @@ public class Config {
     private String systemName;
     private int[] openAgencyValidateTime;
     private String vipCoreEndpoint;
-    private long revivieOlderWhenDeletedForAtleast;
+    private long reviveOlderWhenDeletedForAtleast;
 
     @PostConstruct
     public void loadProperties() {
@@ -40,7 +40,7 @@ public class Config {
         openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
         // Number of milliseconds to delay bib entities that are being deleted
         vipCoreEndpoint = getValue(props, "vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
-        revivieOlderWhenDeletedForAtleast = getValue(props, "revivieOlderWhenDeletedForAtleast", "REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST", "8h", null, Config::ms);
+        reviveOlderWhenDeletedForAtleast = getValue(props, "reviveOlderWhenDeletedForAtleast", "REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST", "8h", null, Config::ms);
     }
 
     public String getVipCoreEndpoint() {
@@ -60,8 +60,8 @@ public class Config {
         return openAgencyValidateTime;
     }
 
-    public long getRevivieOlderWhenDeletedForAtleast() {
-        return revivieOlderWhenDeletedForAtleast;
+    public long getReviveOlderWhenDeletedForAtleast() {
+        return reviveOlderWhenDeletedForAtleast;
     }
 
     private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
@@ -140,7 +140,7 @@ public class Config {
         switch (matcher.group(2).toLowerCase(Locale.ROOT).trim()) {
             case "d":
             case "day":
-            case "dayss":
+            case "days":
                 return TimeUnit.DAYS.toMillis(amount);
             case "h":
             case "hour":
