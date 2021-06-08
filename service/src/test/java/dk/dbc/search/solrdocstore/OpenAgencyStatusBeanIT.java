@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
-import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.*;
+import static dk.dbc.search.solrdocstore.SolrIndexKeys.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
