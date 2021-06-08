@@ -723,19 +723,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 });
         assertThat(h2b, notNullValue());
 
-//
-//        String a870970d = makeBibliographicRequestJson(
-//                870970, e -> {
-//            e.setDeleted(true);
-//        });
-//        String a870970 = makeBibliographicRequestJson(
-//                870970, e -> {
-//            e.setDeleted(false);
-//        });
-//        r = env().getPersistenceContext()
-//                .run(() -> bean.addBibliographicKeys(false, a870970d));
-//        assertThat(r.getStatus(), is(200));
-//
     }
 
     @Test(timeout = 20_000L)
