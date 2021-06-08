@@ -55,7 +55,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Before
     public void onTest() {
-        bibliographicBean = BeanFactoryUtil.createBibliographicBean(env());
+        bibliographicBean = BeanFactoryUtil.createBibliographicBean(env(), null);
         holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(env());
 
         em = env().getEntityManager();
