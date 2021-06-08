@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
+import static dk.dbc.search.solrdocstore.SolrIndexKeys.*;
+import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
@@ -44,11 +46,11 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void setupBean() throws URISyntaxException {
         em = env().getEntityManager();
         bean = createBibliographicBean(env(), new Config() {
-            @Override
-            public long getReviveOlderWhenDeletedForAtleast() {
-                return TimeUnit.HOURS.toMillis(8);
-            }
-        });
+                                   @Override
+                                   public long getReviveOlderWhenDeletedForAtleast() {
+                                       return TimeUnit.HOURS.toMillis(8);
+                                   }
+                               });
         executeScriptResource("/bibliographicUpdate.sql");
     }
 
@@ -167,7 +169,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(rd2.getStatus(), is(200));
     }
 
-
     @Test(timeout = 2_000L)
     public void reviveDeletedRecordFail() throws Exception {
         System.out.println("reviveDeletedRecordFail");
@@ -177,7 +178,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(d))
                 );
         assertThat(deleted.getStatus(), is(200));
-
 
         BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:not-revive");
         Response revive = env().getPersistenceContext()
@@ -195,7 +195,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(d))
                 );
         assertThat(deleted.getStatus(), is(200));
-
 
         BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:revive");
         Response revive = env().getPersistenceContext()
@@ -656,6 +655,89 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:0"));
     }
 
+    @Test(timeout = 2_000L)
+    public void resurrectRecordWithHoldings() throws Exception {
+        System.out.println("resurrectRecordWithHoldings");
+
+        HoldingsItemBean hb = createHoldingsItemBean(env());
+        HoldingsToBibliographicEntity h2b;
+
+        env().getPersistenceContext()
+                .run(() -> {
+                    hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-1"));
+                });
+
+        h2b = env().getPersistenceContext()
+                .run(() -> {
+                    return env().getEntityManager()
+                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+                });
+        assertThat(h2b, nullValue());
+
+        env().getPersistenceContext()
+                .run(() -> {
+                    bean.addBibliographicKeys(
+                            new BibliographicEntity(800010, "katalog", "12345678",
+                                                    "800010-katalog:12345678", "work:1", "unit:1",
+                                                    false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
+                });
+
+        h2b = env().getPersistenceContext()
+                .run(() -> {
+                    return env().getEntityManager()
+                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+                });
+        assertThat(h2b, notNullValue());
+
+        // Delete
+        env().getPersistenceContext()
+                .run(() -> {
+                    bean.addBibliographicKeys(
+                            new BibliographicEntity(800010, "katalog", "12345678",
+                                                    "800010-katalog:12345678", "work:1", "unit:1",
+                                                    true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), EMPTY_LIST, true);
+                    hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", NO_HOLDINGS, "h-2"));
+                });
+
+        h2b = env().getPersistenceContext()
+                .run(() -> {
+                    return env().getEntityManager()
+                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+                });
+        assertThat(h2b, nullValue());
+
+        // Resurrect
+        env().getPersistenceContext()
+                .run(() -> {
+                    hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-2"));
+                    bean.addBibliographicKeys(
+                            new BibliographicEntity(800010, "katalog", "12345678",
+                                                    "800010-katalog:12345678", "work:1", "unit:1",
+                                                    false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
+                });
+
+        h2b = env().getPersistenceContext()
+                .run(() -> {
+                    return env().getEntityManager()
+                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+                });
+        assertThat(h2b, notNullValue());
+
+//
+//        String a870970d = makeBibliographicRequestJson(
+//                870970, e -> {
+//            e.setDeleted(true);
+//        });
+//        String a870970 = makeBibliographicRequestJson(
+//                870970, e -> {
+//            e.setDeleted(false);
+//        });
+//        r = env().getPersistenceContext()
+//                .run(() -> bean.addBibliographicKeys(false, a870970d));
+//        assertThat(r.getStatus(), is(200));
+//
+    }
+
     @Test(timeout = 20_000L)
     public void skipQueueParameter() throws Exception {
         System.out.println("skipQueueParameter");
@@ -668,8 +750,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         env().getPersistenceContext()
                 .run(() -> env().getEntityManager().merge(
                         new HoldingsItemEntity(700000, "new",
-                                               HoldingsSolrKeys.ON_SHELF,
-                                 "test")));
+                                               SolrIndexKeys.ON_SHELF,
+                                               "test")));
 
         String a870970 = makeBibliographicRequestJson(
                 870970, e -> {

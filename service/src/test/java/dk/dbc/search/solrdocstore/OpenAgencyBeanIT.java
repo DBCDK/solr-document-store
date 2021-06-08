@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
-import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.*;
+import static dk.dbc.search.solrdocstore.SolrIndexKeys.*;
 
 import static org.junit.Assert.*;
 

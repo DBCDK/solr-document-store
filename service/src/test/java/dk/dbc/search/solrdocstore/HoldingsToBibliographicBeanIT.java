@@ -144,8 +144,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
             assertNotNull(e);
             assertEquals(agencyId, e.getBibliographicAgencyId());
             assertEquals(newRecordId, e.getBibliographicRecordId());
-        }
-        );
+        });
     }
 
     @Test

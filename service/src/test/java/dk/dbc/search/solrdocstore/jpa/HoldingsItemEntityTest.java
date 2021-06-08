@@ -19,16 +19,16 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.dbc.search.solrdocstore.HoldingsSolrKeys;
+import dk.dbc.search.solrdocstore.SolrIndexKeys;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
-import static dk.dbc.search.solrdocstore.HoldingsSolrKeys.indexKeys;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
+import static dk.dbc.search.solrdocstore.SolrIndexKeys.holdingsIndexKeys;
 
 /**
  *
@@ -45,7 +45,7 @@ public class HoldingsItemEntityTest {
         HoldingsItemEntity hi = new HoldingsItemEntity();
         hi.setAgencyId(777777);
 
-        IndexKeysList values = HoldingsSolrKeys.indexKeys(
+        IndexKeysList values = SolrIndexKeys.holdingsIndexKeys(
                 "[" +
                 " {" +
                 "  'holdingsitem.branchId': [ 'abc' ]," +
@@ -86,7 +86,7 @@ public class HoldingsItemEntityTest {
         HoldingsItemEntity hi = new HoldingsItemEntity();
         hi.setAgencyId(777777);
 
-        IndexKeysList values = HoldingsSolrKeys.indexKeys(
+        IndexKeysList values = SolrIndexKeys.holdingsIndexKeys(
                 "[" +
                 " {" +
                 "  'holdingsitem.itemId': [ 'abc' ]," +

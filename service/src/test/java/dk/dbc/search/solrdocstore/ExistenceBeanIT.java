@@ -87,7 +87,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsExisting() throws Exception {
         System.out.println("testHoldingsExisting");
         ExistsResponse existence = jpa(em -> {
-            em.merge(new HoldingsItemEntity(777777, "12345678", HoldingsSolrKeys.ON_SHELF, "track:1"));
+            em.merge(new HoldingsItemEntity(777777, "12345678", SolrIndexKeys.ON_SHELF, "track:1"));
             return bean.holdingExists(777777, "12345678");
         });
         assertThat(existence.exists, is(true));

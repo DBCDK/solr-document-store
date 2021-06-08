@@ -182,7 +182,6 @@ public class BibliographicBean {
                              bibliographicEntity.getRepositoryId(), dbbe.getRepositoryId(), dbTime, reqTime);
                     throw new IntermittentErrorException("Cannot update to an older stream date");
                 }
-
             }
             // If we delete or re-create, related holdings must be moved appropriately
             if (bibliographicEntity.isDeleted() != dbbe.isDeleted()) {
@@ -200,6 +199,7 @@ public class BibliographicBean {
                     enqueue.add(dbbe, QueueType.MANIFESTATION_DELETED, QueueType.WORK);
                 } else {
                     enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+                    updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
                 }
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 // We must flush since the tryAttach looks at the deleted field
