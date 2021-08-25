@@ -33,7 +33,7 @@ class Manifestation extends React.Component {
           <div style={{ flex: 1 }}>
             <div>
               <p>
-                <b>Item IDs:</b> {itemId.join(", ")}
+                <b>Item IDs:</b> {itemId?itemId.join(", "):""}
               </p>
             </div>
             <div>

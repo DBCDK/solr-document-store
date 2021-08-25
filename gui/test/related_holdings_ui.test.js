@@ -183,6 +183,18 @@ let testHoldingsItems = [
         "holdingsitem.bibliographicRecordId": ["23645564"]
       },
       {
+        "rec.javaScriptTime": [
+          "2021-06-18T12:25:34Z"
+        ],
+        "holdingsitem.status": ["Available"],
+        "holdingsitem.agencyId": [ "125420" ],
+        "holdingsitem.bibliographicOwnerAgencyId": ["125420"],
+        "rec.bibliographicRecordId": [ "27669726" ],
+        "rec.trackingId": ["ja7-ja7-ja7" ],
+        "holdingsitem.callNumber": [ ""  ],
+        "holdingsitem.bibliographicRecordId": [ "27669726" ]
+      },
+      {
         "rec.trackingId": ["", "bb613be6-86ae-4caa-9639-4198865227f2"],
         "holdingsitem.note": [""],
         "holdingsitem.branch": ["Horsens Bibliotek"],
