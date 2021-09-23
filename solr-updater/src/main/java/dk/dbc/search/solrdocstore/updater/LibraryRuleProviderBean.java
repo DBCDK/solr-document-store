@@ -31,6 +31,7 @@ import javax.ejb.EJB;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 @Singleton
+@Startup // to avoid: javax.ejb.EJBTransactionRolledbackException: Exception thrown from bean: java.lang.IllegalStateException: Cannot overwrite a Cache's CacheManager
 @Lock(LockType.READ)
 public class LibraryRuleProviderBean implements LibraryRuleProvider {
 
