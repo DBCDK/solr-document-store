@@ -46,6 +46,7 @@ public class Config {
     private Set<SolrCollection> solrCollections;
     private String solrDocStoreUrl;
 
+    private long startupDelay;
     private String[] queues;
     private String databaseConnectThrottle;
     private String failureThrottle;
@@ -94,6 +95,7 @@ public class Config {
                 }).build();
         solrCollections = makeSolrCollections(client);
         solrDocStoreUrl = get("solrDocStoreUrl", "SOLR_DOC_STORE_URL", null);
+        startupDelay = Long.max(100L, milliseconds(get("startupDelay", "STARTUP_DELAY", "5s")));
         queues = toCollection(get("queues", "QUEUES", null)).toArray(String[]::new);
         databaseConnectThrottle = get("databaseConnectThrottle", "DATABASE_CONNECT_THROTTLE", "1/s,5/m");
         failureThrottle = get("failureThrottle", "FAILURE_THROTTLE", "2/100ms,5/500ms,10/s,20/m");
@@ -177,6 +179,10 @@ public class Config {
 
     public String getSolrDocStoreUrl() {
         return solrDocStoreUrl;
+    }
+
+    public long getStartupDelay() {
+        return startupDelay;
     }
 
     public String[] getQueues() {
