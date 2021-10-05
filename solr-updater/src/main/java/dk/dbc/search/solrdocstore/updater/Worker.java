@@ -28,6 +28,10 @@ import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
+import javax.ejb.TimerService;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -44,7 +48,7 @@ import static dk.dbc.log.LogWith.track;
  */
 @Singleton
 @Startup
-@DependsOn(value = "DatabaseMigrator")
+@DependsOn(value = {"DatabaseMigrator", "LibraryRuleProviderBean", "ProfileProviderBean"})
 public class Worker {
 
     private static final Logger log = LoggerFactory.getLogger(Worker.class);
@@ -64,6 +68,9 @@ public class Worker {
 
     @Resource(type = ManagedExecutorService.class, lookup = "java:comp/DefaultManagedExecutorService")
     ExecutorService es;
+
+    @Resource
+    TimerService timerService;
 
     private Set<SolrCollection> solrCollections;
 
@@ -85,6 +92,19 @@ public class Worker {
                 .metricRegistryMicroProfile(metrics)
                 .build(config.getThreads(),
                        this::makeWorker);
+        if (timerService == null) {
+            // Unittest immediate startup
+            this.worker.start();
+        } else {
+            TimerConfig timerConfig = new TimerConfig();
+            timerConfig.setPersistent(false);
+            this.timerService.createSingleActionTimer(config.getStartupDelay(), timerConfig);
+        }
+    }
+
+    @Timeout
+    public void startupTimeout(Timer timer) {
+        log.info("Starting worker");
         this.worker.start();
     }
 
