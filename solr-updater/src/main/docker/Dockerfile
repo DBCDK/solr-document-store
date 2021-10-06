@@ -33,8 +33,7 @@ LABEL SOLR_URL="(zk-/httpurl[=features]) (semicolon seperated list) of solr-coll
       JSON_STASH="Path for storing posted documents as JSON for generating test data (optional)" \
       CACHE_TIMEOUT="profile-service cache timeout in seconds (default: 60)" \
       SCAN_PROFILES="Comma separated list of {agency}-{profile}, that can scan (required)" \
-      SCAN_DEFAULT_FIELDS="Comma separated list of scan.field that scan.ddefault covers (required)" \
-      STARTUP_DELAY="Wait duration before starting harvesting (default: 5s)" \
+      SCAN_DEFAULT_FIELDS="COmma separated list of scan.field that scan.ddefault covers (required)" \
       USER_AGENT="Useragent string to use for http-client" \
       SCOPE="Name of service (for cache identification)" \
       COLLECTION="Name of collection (for cache identification)" \
