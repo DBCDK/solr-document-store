@@ -32,6 +32,8 @@ import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
@@ -62,6 +64,7 @@ public class ProfileProviderBean implements ProfileProvider {
     VipCoreHttpClient vipCoreHttpClient;
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     @CacheResult(cacheName = "vipProfile",
                  exceptionCacheName = "vipProfileError",
                  cachedExceptions = {IllegalStateException.class,
