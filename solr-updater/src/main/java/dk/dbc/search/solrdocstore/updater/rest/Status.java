@@ -39,8 +39,8 @@ public class Status {
     @Inject
     Config config;
 
-    @Inject
-    HazelCastStatus hzStatus;
+//    @Inject
+//    HazelCastStatus hzStatus;
 
     @EJB
     Worker worker;
@@ -53,8 +53,8 @@ public class Status {
     public Response getStatus() {
         log.info("getStatus called");
 
-        if (!hzStatus.good())
-            return fail("Hazelcast is in bad state");
+//        if (!hzStatus.good())
+//            return fail("Hazelcast is in bad state");
         try (Connection connection = dataSource.getConnection() ;
              PreparedStatement stmt = connection.prepareStatement("SELECT clock_timestamp()") ;
              ResultSet resultSet = stmt.executeQuery()) {
