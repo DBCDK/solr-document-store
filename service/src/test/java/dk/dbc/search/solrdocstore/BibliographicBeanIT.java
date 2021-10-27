@@ -785,6 +785,41 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "b,work:0"));
     }
 
+    @Test(timeout = 2_000L)
+    public void testHoldingsUponCommonStaysIfDeletedManifestationIsCreated() throws Exception {
+        System.out.println("testHoldingsUponCommonStaysIfDeletedManifestationIsCreated");
+
+        Response r;
+        HoldingsToBibliographicEntity htob;
+
+        HoldingsItemBean hol = createHoldingsItemBean(env());
+
+        String a870970 = jsonbContext.marshall(new BibliographicEntityRequest(870970, "clazzifier", "25912233", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT", null));
+        String d710100 = jsonbContext.marshall(new BibliographicEntityRequest(710100, "clazzifier", "25912233", "id#0", "work:0", "unit:0", true, new IndexKeys(), "IT", null));
+        String h710100 = jsonRequestHold("710100-25912233-a");
+
+        r = env().getPersistenceContext().run(() -> bean.addBibliographicKeys(true, a870970));
+        assertThat(r.getStatus(), is(200));
+
+        r = env().getPersistenceContext().run(() -> hol.setHoldingsKeys(h710100));
+        assertThat(r.getStatus(), is(200));
+
+        htob = env().getPersistenceContext()
+                .run(() -> em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(710100, "25912233")));
+        System.out.println("htob = " + htob);
+        assertThat(htob, notNullValue());
+        assertThat(htob.getBibliographicAgencyId(), is(870970));
+
+        r = env().getPersistenceContext().run(() -> bean.addBibliographicKeys(true, d710100));
+        assertThat(r.getStatus(), is(200));
+
+        htob = env().getPersistenceContext()
+                .run(() -> em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(710100, "25912233")));
+        System.out.println("htob = " + htob);
+        assertThat(htob, notNullValue());
+        assertThat(htob.getBibliographicAgencyId(), is(870970));
+    }
+
     private void evictAll() throws SQLException {
         try (Connection connection = env().getDatasource().getConnection() ;
              Statement stmt = connection.createStatement()) {
