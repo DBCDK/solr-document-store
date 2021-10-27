@@ -164,7 +164,10 @@ public class BibliographicBean {
                 enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
             }
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
-            updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
+            if (!bibliographicEntity.isDeleted()) {
+                // Only update holdings for this, if manifestation isn't deleted
+                updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
+            }
             // Record creates queue even id said not to
         } else {
             log.info("AddBibliographicKeys - Updating existing entity");
