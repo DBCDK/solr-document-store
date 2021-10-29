@@ -11,6 +11,8 @@ import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.jpa.AgencyItemFieldKey;
+import dk.dbc.search.solrdocstore.request.ResourceRestRequest;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PUT;
+import javax.ws.rs.QueryParam;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -72,44 +77,111 @@ public class ResourceBean {
     public Response addResource(String jsonContent) throws JSONBException {
         try (LogWith logWith = track(UUID.randomUUID().toString())) {
             AddResourceRequest request = jsonbContext.unmarshall(jsonContent, AddResourceRequest.class);
-            log.debug("Added resource with key: {} - {} - {} having value: {}", request.getAgencyId(),
-                      request.getBibliographicRecordId(), request.getField(), request.getValue());
-            // Verify agency exists, throws exception if not exist
-            LibraryType libraryType;
-            try {
-                OpenAgencyEntity oaEntity = openAgency.lookup(request.getAgencyId());
-                libraryType = oaEntity.getLibraryType();
-            } catch (EJBException ex) {
-                return Response.ok().entity(new StatusResponse("Unknown agency")).build();
-            }
-
             // Add resource
             BibliographicResourceEntity resource = request.asBibliographicResource();
-            entityManager.merge(resource);
-            // Enqueue all related bib items
-            List<BibliographicEntity> bibliographicEntities;
-            if (LibraryType.COMMON_AGENCY == request.getAgencyId() ||
-                LibraryType.SCHOOL_COMMON_AGENCY == request.getAgencyId() ||
-                libraryType == LibraryType.FBS || libraryType == LibraryType.FBSSchool) {
-                bibliographicEntities = commonRelatedBibEntities(resource);
-            } else {
-                bibliographicEntities = nonFBSBibEntries(resource);
-            }
-            try {
-                EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
-                bibliographicEntities.forEach(e -> {
-                    if (!e.isDeleted()) {
-                        enqueue.add(e, QueueType.RESOURCE, QueueType.WORKRESOURCE);
-                    }
-                });
-                enqueue.commit();
-            } catch (SQLException ex) {
-                log.error("Unable to commit queue entries: {}", ex.getMessage());
-                log.debug("Unable to commit queue entries: ", ex);
-                return Response.status(Response.Status.BAD_REQUEST).entity(new StatusResponse("Unable to commit queue entries")).build();
-            }
-            return Response.ok().entity(new StatusResponse()).build();
+            log.debug("POST resource: {}", resource);
+            return storeResource(resource);
         }
+    }
+
+    @PUT
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("{fieldName}/{agencyId}:{bibliographicRecordId}")
+    @Operation(
+            operationId = "add/update-resource",
+            summary = "Adds/updates/removes a resource to/from an item",
+            description = "This operation sets/removes the resource and connected" +
+                          " manifestations item, are queued.")
+    @APIResponses({
+        @APIResponse(name = "Success",
+                     responseCode = "200",
+                     description = "Resource has been added",
+                     ref = StatusResponse.NAME)})
+    @RequestBody(ref = BibliographicResourceSchemaAnnotated.NAME)
+    public Response putResource(String jsonContent,
+                                @PathParam("fieldName") String fieldName,
+                                @PathParam("agencyId") Integer agencyId,
+                                @PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                @QueryParam("trackingId") String trackingId) throws JSONBException {
+        if (trackingId == null || trackingId.isEmpty())
+            trackingId = UUID.randomUUID().toString();
+        try (LogWith logWith = LogWith.track(trackingId)) {
+            ResourceRestRequest request = jsonbContext.unmarshall(jsonContent, ResourceRestRequest.class);
+            BibliographicResourceEntity resource = new BibliographicResourceEntity(agencyId, bibliographicRecordId, fieldName, request.getHas());
+            log.debug("PUT resource: {}", resource);
+            return storeResource(resource);
+        }
+    }
+
+    @DELETE
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("{fieldName}/{agencyId}:{bibliographicRecordId}")
+    @Operation(
+            operationId = "delete-resource",
+            summary = "Removes a resource to an item",
+            description = "This operation removed the resource and queues old connected" +
+                          " manifestations item, if any.")
+    @APIResponses({
+        @APIResponse(name = "Success",
+                     responseCode = "200",
+                     description = "Resource has been added",
+                     ref = StatusResponse.NAME)})
+    @RequestBody(ref = BibliographicResourceSchemaAnnotated.NAME)
+    public Response deleteResource(@PathParam("fieldName") String fieldName,
+                                   @PathParam("agencyId") Integer agencyId,
+                                   @PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                   @QueryParam("trackingId") String trackingId) throws JSONBException {
+        if (trackingId == null || trackingId.isEmpty())
+            trackingId = UUID.randomUUID().toString();
+        try (LogWith logWith = LogWith.track(trackingId)) {
+            BibliographicResourceEntity resource = new BibliographicResourceEntity(agencyId, bibliographicRecordId, fieldName, false);
+            log.debug("PUT resource: {}", resource);
+            return storeResource(resource);
+        }
+    }
+
+    private Response storeResource(BibliographicResourceEntity resource) {
+        // Verify agency exists, throws exception if not exist
+        LibraryType libraryType;
+        try {
+            OpenAgencyEntity oaEntity = openAgency.lookup(resource.getAgencyId());
+            libraryType = oaEntity.getLibraryType();
+        } catch (EJBException ex) {
+            return Response.ok().entity(new StatusResponse("Unknown agency")).build();
+        }
+
+        if (resource.getValue()) {
+            entityManager.merge(resource);
+        } else {
+            BibliographicResourceEntity entity = entityManager.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(resource.getAgencyId(), resource.getBibliographicRecordId(), resource.getField()));
+            if (entity != null)
+                entityManager.remove(entity);
+        }
+        // Enqueue all related bib items
+        List<BibliographicEntity> bibliographicEntities;
+        if (LibraryType.COMMON_AGENCY == resource.getAgencyId() ||
+            LibraryType.SCHOOL_COMMON_AGENCY == resource.getAgencyId() ||
+            libraryType == LibraryType.FBS || libraryType == LibraryType.FBSSchool) {
+            bibliographicEntities = commonRelatedBibEntities(resource);
+        } else {
+            bibliographicEntities = nonFBSBibEntries(resource);
+        }
+        try {
+            EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
+            bibliographicEntities.forEach(e -> {
+                if (!e.isDeleted()) {
+                    enqueue.add(e, QueueType.RESOURCE, QueueType.WORKRESOURCE);
+                }
+            });
+            enqueue.commit();
+        } catch (SQLException ex) {
+            log.error("Unable to commit queue entries: {}", ex.getMessage());
+            log.debug("Unable to commit queue entries: ", ex);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new StatusResponse("Unable to commit queue entries")).build();
+        }
+        return Response.ok().entity(new StatusResponse()).build();
     }
 
     private List<BibliographicEntity> commonRelatedBibEntities(BibliographicResourceEntity resource) {
