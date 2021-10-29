@@ -106,7 +106,7 @@ public class ResourceBean {
                                 @QueryParam("trackingId") String trackingId) throws JSONBException {
         if (trackingId == null || trackingId.isEmpty())
             trackingId = UUID.randomUUID().toString();
-        try (LogWith logWith = LogWith.track(trackingId)) {
+        try (LogWith logWith = track(trackingId)) {
             ResourceRestRequest request = jsonbContext.unmarshall(jsonContent, ResourceRestRequest.class);
             BibliographicResourceEntity resource = new BibliographicResourceEntity(agencyId, bibliographicRecordId, fieldName, request.getHas());
             log.debug("PUT resource: {}", resource);
@@ -135,7 +135,7 @@ public class ResourceBean {
                                    @QueryParam("trackingId") String trackingId) throws JSONBException {
         if (trackingId == null || trackingId.isEmpty())
             trackingId = UUID.randomUUID().toString();
-        try (LogWith logWith = LogWith.track(trackingId)) {
+        try (LogWith logWith = track(trackingId)) {
             BibliographicResourceEntity resource = new BibliographicResourceEntity(agencyId, bibliographicRecordId, fieldName, false);
             log.debug("PUT resource: {}", resource);
             return storeResource(resource);
