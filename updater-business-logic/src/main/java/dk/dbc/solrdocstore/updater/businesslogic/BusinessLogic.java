@@ -318,7 +318,7 @@ public class BusinessLogic {
             boolean add;
             switch (resourceName) {
                 case "hasCoverUrl": // Anyone has
-                case "hasDDBCoverUrl":
+                case "hasDDFCoverUrl":
                     add = owners.values().contains(Boolean.TRUE);
                     break;
                 default:

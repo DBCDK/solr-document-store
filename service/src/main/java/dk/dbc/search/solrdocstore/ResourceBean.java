@@ -137,7 +137,7 @@ public class ResourceBean {
             trackingId = UUID.randomUUID().toString();
         try (LogWith logWith = track(trackingId)) {
             BibliographicResourceEntity resource = new BibliographicResourceEntity(agencyId, bibliographicRecordId, fieldName, false);
-            log.debug("PUT resource: {}", resource);
+            log.debug("DELETE resource: {}", resource);
             return storeResource(resource);
         }
     }
