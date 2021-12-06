@@ -64,7 +64,7 @@ public class ExistenceBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    @Timed(reusable = true)
+    @Timed
     @GET
     @Path("bibliographicitem/{agencyId : \\d+}-{classifier : \\w+}:{bibliographicRecordId : .+}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -103,7 +103,7 @@ public class ExistenceBean {
         return response;
     }
 
-    @Timed(reusable = true)
+    @Timed
     @GET
     @Path("holdingsitem/{agencyId : \\d+}:{bibliographicRecordId : .+}")
     @Produces(MediaType.APPLICATION_JSON)

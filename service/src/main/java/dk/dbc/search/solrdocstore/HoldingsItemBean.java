@@ -63,7 +63,7 @@ public class HoldingsItemBean {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed(reusable = true)
+    @Timed
     @Operation(
             operationId = "set-holdings",
             summary = "set holdingsitems solr documents",

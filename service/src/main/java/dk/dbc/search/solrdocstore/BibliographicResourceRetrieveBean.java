@@ -15,7 +15,7 @@ public class BibliographicResourceRetrieveBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    @Timed(reusable = true)
+    @Timed
     public List<BibliographicResourceEntity> getResourcesFor(int agencyId, String bibliographicRecordId) {
         TypedQuery<BibliographicResourceEntity> query = entityManager.createQuery(
                 "SELECT br FROM BibliographicResourceEntity br" +
@@ -26,7 +26,7 @@ public class BibliographicResourceRetrieveBean {
                 .getResultList();
     }
 
-    @Timed(reusable = true)
+    @Timed
     public List<BibliographicResourceEntity> getResourcesForCommon(String bibliographicRecordId) {
         TypedQuery<BibliographicResourceEntity> query = entityManager.createQuery(
                 "SELECT br FROM BibliographicResourceEntity br" +

@@ -1,6 +1,5 @@
 package dk.dbc.search.solrdocstore.updater;
 
-import com.hazelcast.util.executor.ManagedExecutorService;
 import dk.dbc.log.DBCTrackedLogContext;
 import dk.dbc.log.LogWith;
 import dk.dbc.pgqueue.consumer.FatalQueueError;
@@ -28,6 +27,7 @@ import javax.annotation.Resource;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.apache.solr.client.solrj.SolrServerException;

@@ -33,7 +33,7 @@ public class OpenAgencyProxyBean {
     @Inject
     private VipCoreHttpClient vipCoreHttpClient;
 
-    @Timed(reusable = true)
+    @Timed
     public OpenAgencyEntity loadOpenAgencyEntry(int agencyId) {
         try {
             LibraryRulesResponse libraryRulesResponse = getLibraryRuleResponse(agencyId);

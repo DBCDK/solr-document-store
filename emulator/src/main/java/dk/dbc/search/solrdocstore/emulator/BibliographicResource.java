@@ -33,7 +33,7 @@ public class BibliographicResource {
     @Path("bibliographic")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed(reusable = true)
+    @Timed
     public Response forwardBibliographicKeys(@QueryParam("skipQueue") @DefaultValue("false") boolean skipQueue,
                                              String jsonContent) throws EJBException
     {

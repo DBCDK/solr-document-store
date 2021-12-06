@@ -77,7 +77,7 @@ public class DocumentRetrieveBean {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ classifier }/{ bibliographicRecordId : .*}")
-    @Timed(reusable = true)
+    @Timed
     public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
@@ -126,7 +126,7 @@ public class DocumentRetrieveBean {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("work/{ workid }")
-    @Timed(reusable = true)
+    @Timed
     public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
                                                       @PathParam("workid") String workId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys

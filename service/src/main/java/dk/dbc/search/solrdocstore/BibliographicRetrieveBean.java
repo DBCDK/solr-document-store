@@ -18,14 +18,14 @@ public class BibliographicRetrieveBean {
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
 
-    @Timed(reusable = true)
+    @Timed
     public List<BibliographicEntity> getBibliographicEntities(String bibliographicRecordId) {
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
                                                                           "WHERE b.bibliographicRecordId = :bibId", BibliographicEntity.class);
         return query.setParameter("bibId", bibliographicRecordId).getResultList();
     }
 
-    @Timed(reusable = true)
+    @Timed
     public BibliographicEntity getBibliographicEntity(int agencyId, String bibliographicRecordId) {
         List<BibliographicEntity> entities = getBibliographicEntities(agencyId, bibliographicRecordId);
         if (entities.isEmpty()) {
@@ -35,14 +35,14 @@ public class BibliographicRetrieveBean {
         }
     }
 
-    @Timed(reusable = true)
+    @Timed
     public List<BibliographicEntity> getBibliographicEntities(int agencyId, String bibliographicRecordId) {
         TypedQuery<BibliographicEntity> query = entityManager.createQuery("SELECT b FROM BibliographicEntity b " +
                                                                           "WHERE b.agencyId = :agencyId AND b.bibliographicRecordId = :bibId", BibliographicEntity.class);
         return query.setParameter("agencyId", agencyId).setParameter("bibId", bibliographicRecordId).getResultList();
     }
 
-    @Timed(reusable = true)
+    @Timed
     public BibliographicEntity getBibliographicEntity(AgencyItemKey key) {
         List<BibliographicEntity> entities = getBibliographicEntities(key);
         if (entities.isEmpty()) {
@@ -52,7 +52,7 @@ public class BibliographicRetrieveBean {
         }
     }
 
-    @Timed(reusable = true)
+    @Timed
     public List<BibliographicEntity> getBibliographicEntities(AgencyItemKey key) {
         return getBibliographicEntities(key.getAgencyId(), key.getBibliographicRecordId());
     }

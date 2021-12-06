@@ -37,7 +37,7 @@ public class StatusBean {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    @Timed(reusable = true)
+    @Timed
     public Response getStatus() {
         log.trace("getStatus called ");
 

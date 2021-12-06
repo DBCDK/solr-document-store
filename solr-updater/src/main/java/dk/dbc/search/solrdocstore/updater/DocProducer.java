@@ -87,7 +87,7 @@ public class DocProducer {
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    @Timed(reusable = true)
+    @Timed
     public void deploy(SolrInputDocument doc, SolrCollection solrCollection) throws IOException, SolrServerException {
 
         if (doc != null) {
@@ -121,7 +121,7 @@ public class DocProducer {
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
-    @Timed(reusable = true)
+    @Timed
     public void deleteSolrDocuments(String bibliographicShardId, SolrCollection solrCollection) throws IOException, SolrServerException {
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.setParam("appId", config.getAppId());
@@ -142,7 +142,7 @@ public class DocProducer {
      * @param solrCollection description of known fields in the solr collection
      * @return null if deleted otherwise a expanded solr document
      */
-    @Timed(reusable = true)
+    @Timed
     public SolrInputDocument createSolrDocument(SolrDocStoreResponse sourceDoc, SolrCollection solrCollection) {
         boolean deleted = sourceDoc.bibliographicRecord.deleted;
         log.trace("deleted = {}", deleted);
@@ -161,7 +161,7 @@ public class DocProducer {
      * @return the document collection
      * @throws IOException In case of http errors
      */
-    @Timed(reusable = true)
+    @Timed
     public SolrDocStoreResponse fetchSourceDoc(QueueJob job) throws IOException {
         URI uri = uriTemplate.buildFromMap(mapForUri(job));
         log.debug("Fetching: {}", uri);

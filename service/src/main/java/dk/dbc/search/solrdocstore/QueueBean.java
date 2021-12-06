@@ -99,7 +99,7 @@ public class QueueBean {
         @Parameter(name = "trackingId",
                    description = "For tracking the request",
                    required = false)})
-    @Timed(reusable = true)
+    @Timed
     public Response queueManifestation(@PathParam("agencyId") Integer agencyId,
                                        @PathParam("classifier") String classifier,
                                        @PathParam("bibliographicRecordId") String bibliographicRecordId,
@@ -136,7 +136,7 @@ public class QueueBean {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("work/{ workId : work:\\d+ }")
-    @Timed(reusable = true)
+    @Timed
     @Operation(
             summary = "Queue a manifestation",
             description = "This operation puts a work and its manifestations on queue.")
