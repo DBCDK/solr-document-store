@@ -18,8 +18,8 @@
  */
 package dk.dbc.search.solrdocstore.monitor;
 
-import dk.dbc.pgqueue.admin.process.Process;
-import dk.dbc.pgqueue.admin.process.Processes;
+import dk.dbc.pgqueue.ee.diags.Process;
+import dk.dbc.pgqueue.ee.diags.Processes;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

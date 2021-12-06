@@ -44,7 +44,7 @@ public class DatabaseMigrator {
             log.info("db task {} : {} from file '{}'", i.getVersion(), i.getDescription(), i.getScript());
         }
         flyway.migrate();
-        dk.dbc.pgqueue.DatabaseMigrator.migrate(dataSource);
+        dk.dbc.pgqueue.common.DatabaseMigrator.migrate(dataSource);
     }
 
 }

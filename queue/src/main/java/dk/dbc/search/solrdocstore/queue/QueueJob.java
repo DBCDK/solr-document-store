@@ -18,8 +18,8 @@
  */
 package dk.dbc.search.solrdocstore.queue;
 
-import dk.dbc.pgqueue.DeduplicateAbstraction;
-import dk.dbc.pgqueue.QueueStorageAbstraction;
+import dk.dbc.pgqueue.common.DeduplicateAbstraction;
+import dk.dbc.pgqueue.common.QueueStorageAbstraction;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

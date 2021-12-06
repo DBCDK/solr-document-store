@@ -20,8 +20,8 @@ package dk.dbc.search.solrdocstore.updater;
 
 import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.openagency.http.VipCoreHttpClient;
-import dk.dbc.pgqueue.PreparedQueueSupplier;
-import dk.dbc.pgqueue.QueueSupplier;
+import dk.dbc.pgqueue.supplier.PreparedQueueSupplier;
+import dk.dbc.pgqueue.supplier.QueueSupplier;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import dk.dbc.solrdocstore.updater.businesslogic.VipCoreLibraryRule;
 import org.apache.solr.client.solrj.SolrClient;

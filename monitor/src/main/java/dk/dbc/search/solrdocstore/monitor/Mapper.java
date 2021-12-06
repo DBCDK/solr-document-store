@@ -18,7 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.monitor;
 
-import dk.dbc.pgqueue.admin.process.JobLogMapper;
+import dk.dbc.pgqueue.ee.diags.JobLogMapper;
 import java.util.Locale;
 
 /**
