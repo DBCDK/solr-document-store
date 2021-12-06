@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore.updater;
 import dk.dbc.solrdocstore.updater.businesslogic.BusinessLogic;
 import dk.dbc.solrdocstore.updater.businesslogic.FeatureSwitch;
 import dk.dbc.solrdocstore.updater.businesslogic.KnownSolrFields;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -111,6 +112,7 @@ public class SolrCollection {
         return name;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public SolrClient getSolrClient() {
         return solrClient;
     }
@@ -123,10 +125,12 @@ public class SolrCollection {
         return features;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public BusinessLogic getBusinessLogic() {
         return businessLogic;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setBusinessLogic(BusinessLogic businessLogic) {
         this.businessLogic = businessLogic;
     }

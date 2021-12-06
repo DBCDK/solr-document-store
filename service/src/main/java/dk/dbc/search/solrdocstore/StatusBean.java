@@ -4,6 +4,7 @@ import dk.dbc.search.solrdocstore.response.StatusResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,6 +39,7 @@ public class StatusBean {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     public Response getStatus() {
         log.trace("getStatus called ");
 

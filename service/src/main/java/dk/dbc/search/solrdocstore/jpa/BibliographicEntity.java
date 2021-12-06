@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.ColumnResult;
@@ -77,6 +78,7 @@ public class BibliographicEntity implements Serializable {
 
     private String trackingId;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public BibliographicEntity(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, IndexKeys indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.classifier = classifier;
@@ -199,10 +201,12 @@ public class BibliographicEntity implements Serializable {
         this.deleted = deleted;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public IndexKeys getIndexKeys() {
         return indexKeys;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setIndexKeys(IndexKeys indexKeys) {
         this.indexKeys = indexKeys;
     }

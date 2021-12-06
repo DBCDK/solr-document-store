@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore.jpa;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import org.eclipse.persistence.annotations.Mutable;
@@ -49,6 +50,7 @@ public class HoldingsItemEntity implements Serializable {
     public HoldingsItemEntity() {
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public HoldingsItemEntity(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
@@ -110,10 +112,12 @@ public class HoldingsItemEntity implements Serializable {
         this.trackingId = trackingId;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public IndexKeysList getIndexKeys() {
         return indexKeys;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setIndexKeys(IndexKeysList indexKeys) {
         this.indexKeys = indexKeys;
     }

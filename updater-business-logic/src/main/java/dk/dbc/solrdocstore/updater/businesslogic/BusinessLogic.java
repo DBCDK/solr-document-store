@@ -19,6 +19,7 @@
 package dk.dbc.solrdocstore.updater.businesslogic;
 
 import dk.dbc.solrdocstore.updater.businesslogic.FeatureSwitch.Feature;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -106,6 +107,7 @@ public class BusinessLogic {
             return this;
         }
 
+        @SuppressFBWarnings("EI_EXPOSE_REP2")
         public Builder enableScan(ProfileProvider profileProvider, String scanDefaultFields, String scanAgencyProfiles) {
             if (this.profileProvider != null)
                 throw new IllegalStateException("Scan has already been enabled");
@@ -141,6 +143,7 @@ public class BusinessLogic {
         }
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public BusinessLogic(LibraryRuleProvider libraryRuleProvider, FeatureSwitch featureSwitch, KnownSolrFields knownSolrFields,
                          ProfileProvider profileProvider, Set<String> scanDefaultFields, Map<String, Set<String>> scanAgencyProfiles,
                          PersistentWorkIdProvider persistentWorkIdProvider) {

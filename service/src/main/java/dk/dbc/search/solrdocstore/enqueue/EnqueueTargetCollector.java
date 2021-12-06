@@ -22,6 +22,7 @@ import dk.dbc.pgqueue.supplier.PreparedQueueSupplier;
 import dk.dbc.pgqueue.supplier.QueueSupplier;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -41,6 +42,7 @@ public class EnqueueTargetCollector implements EnqueueTarget {
     private final Collection<QueueRuleEntity> targets;
     private final HashSet<QueueJob> jobs;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public EnqueueTargetCollector(Connection connection, Collection<QueueRuleEntity> targets) {
         this.connection = connection;
         this.targets = targets;

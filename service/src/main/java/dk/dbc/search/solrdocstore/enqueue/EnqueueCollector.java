@@ -22,6 +22,7 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.queue.QueueJob;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -59,6 +60,7 @@ public class EnqueueCollector {
         this.targetTypes = null;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public EnqueueCollector(Connection connection, Collection<QueueRuleEntity> queueRules) {
         this.connection = connection;
         this.queueRules = queueRules;

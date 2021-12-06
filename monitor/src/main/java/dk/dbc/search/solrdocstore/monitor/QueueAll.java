@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore.monitor;
 
 import dk.dbc.pgqueue.ee.diags.Process;
 import dk.dbc.pgqueue.ee.diags.Processes;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,6 +72,7 @@ public class QueueAll {
 
     @GET
     @Path("{consumer}/{trackingId}")
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     public Response queueAll(@Context UriInfo UriInfo,
                              @PathParam("consumer") String consumer,
                              @PathParam("trackingId") String trackingId) {

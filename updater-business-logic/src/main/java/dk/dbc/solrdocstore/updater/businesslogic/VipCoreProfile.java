@@ -19,6 +19,7 @@
 package dk.dbc.solrdocstore.updater.businesslogic;
 
 import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,6 +47,7 @@ public class VipCoreProfile implements Serializable {
         this.collectionIdentifiers = Collections.unmodifiableCollection(vipCoreProfileResponse.getCollectionIdentifiers());
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Collection<String> getCollectionIdentifiers() {
         return collectionIdentifiers;
     }

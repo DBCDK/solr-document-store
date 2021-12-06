@@ -50,6 +50,7 @@ public class Status {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     public Response getStatus() {
         log.info("getStatus called");
 

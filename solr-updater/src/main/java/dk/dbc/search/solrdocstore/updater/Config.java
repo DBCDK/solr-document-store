@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore.updater;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,6 +172,7 @@ public class Config {
         return appId;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Set<SolrCollection> getSolrCollections() {
         return solrCollections;
     }
@@ -231,10 +233,12 @@ public class Config {
         return openAgencyTimeout;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Map<String, Set<String>> getScanProfiles() {
         return scanProfiles;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Set<String> getScanDefaultFields() {
         return scanDefaultFields;
     }

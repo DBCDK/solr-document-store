@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore.emulator;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ public class DocStoreEmulatorApplication extends Application {
     private final static Set<Class<?>> CLASSES = new HashSet<>(Arrays.asList(BibliographicResource.class, Config.class));
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Set<Class<?>> getClasses() {
         return CLASSES;
     }

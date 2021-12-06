@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore.updater;
 
 import dk.dbc.search.solrdocstore.updater.rest.DocTest;
 import dk.dbc.search.solrdocstore.updater.rest.Status;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ public class RestConfig extends Application {
                           Status.class));
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Set<Class<?>> getClasses() {
         return CLASSES;
     }

@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore.request;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ public class BibliographicEntityRequest extends BibliographicEntity {
     public BibliographicEntityRequest() {
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public BibliographicEntityRequest(int agencyId, String classifier, String bibliographicRecordId, String repositoryId, String work, String unit, boolean deleted, IndexKeys indexKeys, String trackingId, List<String> supersedes) {
         super(agencyId, classifier, bibliographicRecordId, repositoryId, work, unit, deleted, indexKeys, trackingId);
         this.supersedes = supersedes;
@@ -23,15 +25,18 @@ public class BibliographicEntityRequest extends BibliographicEntity {
         return supersedes;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setSupersedes(List<String> supersedes) {
         this.supersedes = supersedes;
     }
 
     //@todo remove this when corepo-indexer is deployed with correct spelling
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<String> getSuperceds() {
         return supersedes;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setSuperceds(List<String> supersedes) {
         this.supersedes = supersedes;
     }
