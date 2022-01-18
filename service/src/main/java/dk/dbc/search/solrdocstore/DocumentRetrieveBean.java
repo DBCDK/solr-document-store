@@ -95,6 +95,17 @@ public class DocumentRetrieveBean {
         }
     }
 
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("combined/{ agencyId : \\d+}-{ classifier : [a-z0-9]+ }:{ bibliographicRecordId : .*}")
+    @Timed
+    public Response getDocumentWithHoldingsitems2(@Context UriInfo uriInfo,
+                                                  @PathParam("agencyId") Integer agencyId,
+                                                  @PathParam("classifier") String classifier,
+                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
+        return getDocumentWithHoldingsitems(uriInfo, agencyId, classifier, bibliographicRecordId);
+    }
+
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(int agencyId, String classifier, String bibliographicRecordId) throws Exception {
         BibliographicEntity biblEntity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId));
         if (biblEntity == null) {
