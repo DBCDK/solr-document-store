@@ -81,11 +81,15 @@ public class DocumentRetrieveBean {
     public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
                                                  @PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
-                                                 @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
+                                                 @PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                                 @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
         try (LogWith logWith = track(null)) {
             DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId);
             if (response == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Record not found").build();
+                return Response.status(Response.Status.NOT_FOUND).header("X-DBC-Status", "200").entity("Record not found").build();
+            }
+            if (deleted404 && response.bibliographicRecord.isDeleted()) {
+                return Response.status(Response.Status.NOT_FOUND).header("X-DBC-Status", "200").entity("Record not found").build();
             }
             return Response.ok(response).build();
         } catch (Exception ex) {
@@ -102,8 +106,9 @@ public class DocumentRetrieveBean {
     public Response getDocumentWithHoldingsitems2(@Context UriInfo uriInfo,
                                                   @PathParam("agencyId") Integer agencyId,
                                                   @PathParam("classifier") String classifier,
-                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId) throws Exception {
-        return getDocumentWithHoldingsitems(uriInfo, agencyId, classifier, bibliographicRecordId);
+                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                                  @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
+        return getDocumentWithHoldingsitems(uriInfo, agencyId, classifier, bibliographicRecordId, deleted404);
     }
 
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(int agencyId, String classifier, String bibliographicRecordId) throws Exception {
@@ -140,13 +145,12 @@ public class DocumentRetrieveBean {
     @Timed
     public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
                                                       @PathParam("workid") String workId,
-                                                      @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys
-    ) throws Exception {
+                                                      @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
         log.debug("Fetching manifestations for work {}, includeHIIK: {}", workId, includeHoldingsItemsIndexKeys);
         try (LogWith logWith = track(null)) {
             List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId, includeHoldingsItemsIndexKeys);
             if (responses == null || responses.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Work not found").build();
+                return Response.status(Response.Status.NOT_FOUND).header("X-DBC-Status", "200").entity("Work not found").build();
             }
             final WorkRetrieveResponse res = new WorkRetrieveResponse(workId, responses);
             return Response.ok(res).build();
