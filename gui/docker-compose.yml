@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   db:
-    image: docker-os.dbc.dk/docstore_postgres_demo:latest
+    image: docker-os.dbc.dkdocker-de.artifacts.dbccloud.dk/docstore_postgres_demo:latest
     ports:
       - "5000:5432"
 

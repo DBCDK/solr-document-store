@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara5-micro:latest
+FROM docker-dbc.artifacts.dbccloud.dk/payara5-micro:latest
 
 COPY target/docker/*.jar /opt/payara5/jars/
 

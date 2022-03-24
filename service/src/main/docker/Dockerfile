@@ -1,4 +1,4 @@
-FROM docker.dbc.dk/payara5-micro:latest
+FROM docker-dbc.artifacts.dbccloud.dk/payara5-micro:latest
 
 LABEL DOCSTORE_POSTGRES_URL="Database url (required)" \
       SYSTEM_NAME="System (repository) name (optional)"\
