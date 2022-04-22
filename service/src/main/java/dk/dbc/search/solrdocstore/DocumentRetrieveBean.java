@@ -1,16 +1,16 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.response.HoldingsInfo;
-import dk.dbc.search.solrdocstore.response.WorkRetrieveResponse;
-import dk.dbc.search.solrdocstore.jpa.LibraryType;
-import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
 import dk.dbc.log.LogWith;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
+import dk.dbc.search.solrdocstore.response.HoldingsInfo;
 import dk.dbc.search.solrdocstore.response.UnitRetrieveResponse;
+import dk.dbc.search.solrdocstore.response.WorkRetrieveResponse;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
