@@ -132,7 +132,9 @@ public class HoldingsItemBean {
         } else if (hadLiveHoldings != hasLiveHoldings && hasLiveHoldings) { // holdings existence change -> exists
             entityManager.merge(hi);
             h2bBean.tryToAttachToBibliographicRecord(hi.getAgencyId(), hi.getBibliographicRecordId(), enqueue,
-                                                     QueueType.HOLDING, QueueType.WORK,
+                                                     QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                                     QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
+                                                     QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING,
                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
                                                      QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
         } else if (hadLiveHoldings != hasLiveHoldings && hadLiveHoldings) { // holdings existence change -> none
@@ -142,19 +144,22 @@ public class HoldingsItemBean {
             if (binding != null) {
                 entityManager.remove(binding);
                 queueRelatedBibliographic(binding, enqueue,
-                                          QueueType.HOLDING, QueueType.WORK,
+                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
+                                          QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING,
                                           QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
                                           QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
             }
         } else if (!oldLocations.equals(hi.getLocations())) { // holdings accessibility change
             entityManager.merge(hi);
             queueRelatedBibliographic(hi, enqueue,
-                                      QueueType.HOLDING, QueueType.WORK,
+                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                      QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
                                       QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
         } else {
             entityManager.merge(hi);
             queueRelatedBibliographic(hi, enqueue,
-                                      QueueType.HOLDING, QueueType.WORK);
+                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
         }
         enqueue.commit();
     }

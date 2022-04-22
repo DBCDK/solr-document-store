@@ -48,6 +48,13 @@ public class QueueJob {
         return job;
     }
 
+    public static QueueJob unit(String unit) {
+        QueueJob job = new QueueJob(unit);
+        if (!job.isUnit())
+            throw new IllegalArgumentException("Invalid arguments to unit");
+        return job;
+    }
+
     public static QueueJob work(String work) {
         QueueJob job = new QueueJob(work);
         if (!job.isWork())
@@ -85,12 +92,22 @@ public class QueueJob {
         return m.group(3);
     }
 
+    public boolean isUnit() {
+        return jobId.startsWith("unit:");
+    }
+
+    public String getUnit() {
+        if (!isUnit())
+            throw new IllegalStateException("Trying to get unit from jobId: " + jobId);
+        return jobId;
+    }
+
     public boolean isWork() {
         return jobId.startsWith("work:");
     }
 
     public String getWork() {
-        if (!jobId.startsWith("work:"))
+        if (!isWork())
             throw new IllegalStateException("Trying to get work from jobId: " + jobId);
         return jobId;
     }

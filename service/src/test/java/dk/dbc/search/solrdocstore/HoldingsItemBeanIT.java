@@ -50,11 +50,13 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         HoldingsItemBean holWithoutDelay = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.HOLDING, 0),
-                new QueueRuleEntity("b", QueueType.WORK, 0));
+                new QueueRuleEntity("b", QueueType.UNIT, 0),
+                new QueueRuleEntity("c", QueueType.WORK, 0));
         HoldingsItemBean holWithDelay = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
-                new QueueRuleEntity("b", QueueType.WORK, 0));
+                new QueueRuleEntity("b", QueueType.UNIT, 0),
+                new QueueRuleEntity("c", QueueType.WORK, 0));
 
         env().getPersistenceContext().run(() -> {
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
@@ -62,7 +64,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueRemovePostponed(), empty());
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233", // Not postponed
-                   "b,work:1"));
+                   "b,unit:1",
+                   "c,work:1"));
 
         env().getPersistenceContext().run(() -> {
             holWithoutDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
@@ -70,7 +73,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueRemovePostponed(), empty());
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233", // Not postponed
-                   "b,work:1"));
+                   "b,unit:1",
+                   "c,work:1"));
 
         env().getPersistenceContext().run(() -> {
             holWithDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
@@ -78,7 +82,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueRemovePostponed(), containsInAnyOrder(
                    "a,870970-basis:25912233")); // Postponed
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "b,work:1")); // Not postponed
+                   "b,unit:1", // Not postponed
+                   "c,work:1"));
     }
 
     @Test(timeout = 2_000L)
@@ -92,7 +97,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         HoldingsItemBean hol = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                new QueueRuleEntity("b", QueueType.WORKFIRSTLASTHOLDING, 0));
+                new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
 
         env().getPersistenceContext().run(() -> {
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
@@ -106,7 +112,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233",
-                   "b,work:1"));
+                   "b,unit:1",
+                   "c,work:1"));
 
         HoldingsToBibliographicEntity htobA = env().getPersistenceContext().run(() -> {
             HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
@@ -126,7 +133,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233",
-                   "b,work:1"));
+                   "b,unit:1",
+                   "c,work:1"));
 
         // Check that no h2b relation exists when no live holdings are present
         HoldingsToBibliographicEntity htobD = env().getPersistenceContext().run(() -> {
@@ -153,7 +161,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         HoldingsItemBean hol = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                new QueueRuleEntity("b", QueueType.WORKFIRSTLASTHOLDING, 0));
+                new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
 
         env().getPersistenceContext().run(() -> {
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
@@ -197,8 +206,10 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         HoldingsItemBean hol = holdingsItemBeanWithRules(
                 env,
                 new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("fu", QueueType.UNITFIRSTLASTHOLDING, 0),
                 new QueueRuleEntity("fw", QueueType.WORKFIRSTLASTHOLDING, 0),
                 new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
+                new QueueRuleEntity("mu", QueueType.UNITMAJORHOLDING, 0),
                 new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
 
         env().getPersistenceContext().run(() -> {
@@ -213,8 +224,10 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "fm,870970-basis:25912233",
+                   "fu,unit:1",
                    "fw,work:1",
                    "mm,870970-basis:25912233",
+                   "mu,unit:1",
                    "mw,work:1"));
 
         // From OnShelf to OnLoan
@@ -223,6 +236,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "mm,870970-basis:25912233",
+                   "mu,unit:1",
                    "mw,work:1"));
     }
 

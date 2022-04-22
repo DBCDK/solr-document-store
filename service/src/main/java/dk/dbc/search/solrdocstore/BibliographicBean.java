@@ -161,7 +161,7 @@ public class BibliographicBean {
             }
             // Going from non existing to deleted shouldn't result in queue jobs
             if (!bibliographicEntity.isDeleted()) {
-                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+                enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
             }
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             if (!bibliographicEntity.isDeleted()) {
@@ -199,9 +199,9 @@ public class BibliographicBean {
                     if (bibliographicEntity.getAgencyId() == LibraryType.COMMON_AGENCY) {
                         deleteSuperseded(bibliographicEntity.getBibliographicRecordId());
                     }
-                    enqueue.add(dbbe, QueueType.MANIFESTATION_DELETED, QueueType.WORK);
+                    enqueue.add(dbbe, QueueType.MANIFESTATION_DELETED, QueueType.UNIT, QueueType.WORK);
                 } else {
-                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
                     updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
                 }
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
@@ -219,7 +219,7 @@ public class BibliographicBean {
             } else {
                 // Going from deleted to deleted shouldn't result in queue jobs
                 if (!bibliographicEntity.isDeleted()) {
-                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.WORK);
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
                 }
                 // Simple update
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
@@ -327,7 +327,7 @@ public class BibliographicBean {
                 log.info("Strange: {}:{} has multiple holdings ({}) pointing to it (002/b2b issue?)", agency, recordId, holdingsItems);
             }
             holdingsItems.forEach(holdingsItem ->
-                    addHoldingsToBibliographic(agency, holdingsItem, agency, recordId, enqueue, QueueType.MANIFESTATION, QueueType.WORK)
+                    addHoldingsToBibliographic(agency, holdingsItem, agency, recordId, enqueue, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK)
             );
         }
     }

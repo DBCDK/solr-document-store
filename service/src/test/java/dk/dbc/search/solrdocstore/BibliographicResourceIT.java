@@ -79,6 +79,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(890890, "classifier1", "45454545"),
                    queueItem(890890, "classifier2", "45454545"),
                    queueItem(890890, "classifier3", "45454545"),
+                   queueItem("unit:1"),
                    queueItem("work:1")));
     }
 
@@ -135,6 +136,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(300000, "classifier1", "12121212"),
                    queueItem(610610, "classifier2", "12121212"),
                    queueItem(312000, "classifier3", "12121212"),
+                   queueItem("unit:1"),
                    queueItem("work:1")
            ));
     }
@@ -154,7 +156,13 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         return "a," + agency + "-" + classifier + ":" + bibliographicRecordId;
     }
 
-    private String queueItem(String work) {
-        return "b," + work;
+    private String queueItem(String id) {
+        if (id.startsWith("unit:")) {
+            return "b," + id;
+        } else if (id.startsWith("work:")) {
+            return "c," + id;
+        } else {
+            return "?," + id;
+        }
     }
 }
