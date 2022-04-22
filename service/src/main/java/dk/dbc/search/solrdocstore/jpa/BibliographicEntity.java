@@ -43,9 +43,19 @@ public class BibliographicEntity implements Serializable {
 
     private static final long serialVersionUID = -2773872842011755768L;
 
+    private static final String SELECT_MANIFESTATIONS_FOR_UNIT_JPA =
+            "SELECT be FROM BibliographicEntity be" +
+            " WHERE be.unit = :unitId";
+
     private static final String SELECT_MANIFESTATIONS_FOR_WORK_JPA =
             "SELECT be FROM BibliographicEntity be" +
             " WHERE be.work = :workId";
+
+    public static List<BibliographicEntity> fetchByUnit(EntityManager entityManager, String unitId) {
+        return entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_UNIT_JPA, BibliographicEntity.class)
+                .setParameter("unitId", unitId)
+                .getResultList();
+    }
 
     public static List<BibliographicEntity> fetchByWork(EntityManager entityManager, String workId) {
         return entityManager.createQuery(SELECT_MANIFESTATIONS_FOR_WORK_JPA, BibliographicEntity.class)

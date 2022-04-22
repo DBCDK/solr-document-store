@@ -1,15 +1,16 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.response.HoldingsInfo;
-import dk.dbc.search.solrdocstore.response.WorkRetrieveResponse;
-import dk.dbc.search.solrdocstore.jpa.LibraryType;
-import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
 import dk.dbc.log.LogWith;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
+import dk.dbc.search.solrdocstore.response.HoldingsInfo;
+import dk.dbc.search.solrdocstore.response.UnitRetrieveResponse;
+import dk.dbc.search.solrdocstore.response.WorkRetrieveResponse;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,14 @@ public class DocumentRetrieveBean {
             "ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
             " AND h2b.bibliographicAgencyId = :agencyId";
+
+    private static final String SELECT_HOLDINGS_ITEMS_FOR_UNIT_JPA =
+            "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
+            " INNER JOIN HoldingsItemEntity h" +
+            " ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            " INNER JOIN BibliographicEntity be" +
+            " ON h2b.bibliographicRecordId = be.bibliographicRecordId AND h2b.bibliographicAgencyId = be.agencyId " +
+            " WHERE be.unit = :unitId";
 
     private static final String SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA =
             "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
@@ -137,6 +146,56 @@ public class DocumentRetrieveBean {
         }
         DocumentRetrieveResponse response = new DocumentRetrieveResponse(biblEntity, holdingsItemRecords, partOfDanbib, attachedResources);
         return response;
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("unit/{ unitid }")
+    @Timed
+    public Response getUnitDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
+                                                      @PathParam("unitid") String unitId,
+                                                      @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
+        log.debug("Fetching manifestations for unit {}, includeHIIK: {}", unitId, includeHoldingsItemsIndexKeys);
+        try (LogWith logWith = track(null)) {
+            List<DocumentRetrieveResponse> responses = getDocumentsForUnit(unitId, includeHoldingsItemsIndexKeys);
+            if (responses == null || responses.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).header("X-DBC-Status", "200").entity("Unit not found").build();
+            }
+            final UnitRetrieveResponse res = new UnitRetrieveResponse(unitId, responses);
+            return Response.ok(res).build();
+        } catch (Exception ex) {
+            log.error("Error retrieving documents for unit {}: {}", unitId, ex.getMessage());
+            log.debug("Error retrieving documents for unit {}: {}", unitId, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving documents for unit").build();
+        }
+    }
+
+    public List<DocumentRetrieveResponse> getDocumentsForUnit(String unitId, boolean includeHoldingsItemsIndexKeys) throws Exception {
+        List<DocumentRetrieveResponse> res = new ArrayList<>();
+        List<BibliographicEntity> bibliographicEntities = BibliographicEntity.fetchByUnit(entityManager, unitId);
+        List<HoldingsInfo> holdingsObjs = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_UNIT_JPA, HoldingsInfo.class)
+                .setParameter("unitId", unitId)
+                .getResultList();
+        for (BibliographicEntity b : bibliographicEntities) {
+            List<HoldingsItemEntity> holdingsItemEntityList = holdingsObjs.stream()
+                    .filter(ho -> ho.holdingsToBibliographicEntity.getBibliographicAgencyId() == b.getAgencyId() &&
+                                    ho.holdingsToBibliographicEntity.getBibliographicRecordId().equals(b.getBibliographicRecordId()))
+                    .map(h -> h.holdingsItemEntity)
+                    .map(h -> includeHoldingsItemsIndexKeys ? h : h.copyForLightweightPresentation())
+                    .collect(Collectors.toList());
+            List<Integer> partOfDanbib = b.getAgencyId() == LibraryType.COMMON_AGENCY ?
+                                         getPartOfDanbibCommon(b.getBibliographicRecordId()) :
+                                         Collections.EMPTY_LIST;
+            LibraryType lt = oaBean.lookup(b.getAgencyId()).getLibraryType();
+            List<BibliographicResourceEntity> resources = agencyLibTypeCommon(b.getAgencyId(), lt) ?
+                                                          brrBean.getResourcesForCommon(b.getBibliographicRecordId()) :
+                                                          brrBean.getResourcesFor(b.getAgencyId(), b.getBibliographicRecordId());
+            Map<String, Map<Integer, Boolean>> attachedResources = mapResources(resources);
+
+            DocumentRetrieveResponse r = new DocumentRetrieveResponse(b, holdingsItemEntityList, partOfDanbib, attachedResources);
+            res.add(r);
+        }
+        return res;
     }
 
     @GET

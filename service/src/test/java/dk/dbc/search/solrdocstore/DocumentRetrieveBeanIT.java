@@ -150,6 +150,23 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
 
+    @Test
+    public void getUnitWithHoldings() throws Exception {
+        System.out.println("getUnitWithHoldings");
+        List<DocumentRetrieveResponse> resp = env().getPersistenceContext().run(() -> {
+            build(300055).holdings(ON_SHELF);
+            build(800055).holdings(ON_SHELF);
+            build(710001, "CBA").holdings(ON_SHELF);
+            return bean.getDocumentsForUnit("unit:0", true);
+        });
+        assertThat(resp, is(not(empty())));
+        DocumentRetrieveResponse r = resp.get(0);
+        Set<String> holdings = r.holdingsItemRecords.stream()
+                .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
+                .collect(Collectors.toSet());
+        assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
+    }
+
     private static IndexKeysList indexKeys(String json) {
         try {
             return O.readValue(json, new TypeReference<IndexKeysList>() {
