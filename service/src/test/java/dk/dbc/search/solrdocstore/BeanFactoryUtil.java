@@ -84,8 +84,10 @@ public class BeanFactoryUtil {
                         new QueueRuleEntity("a", QueueType.MANIFESTATION_DELETED, 100_000),
                         new QueueRuleEntity("a", QueueType.HOLDING, 0),
                         new QueueRuleEntity("a", QueueType.RESOURCE, 0),
-                        new QueueRuleEntity("b", QueueType.WORK, 0),
-                        new QueueRuleEntity("b", QueueType.WORKRESOURCE, 0),
+                        new QueueRuleEntity("b", QueueType.UNIT, 0),
+                        new QueueRuleEntity("b", QueueType.UNITRESOURCE, 0),
+                        new QueueRuleEntity("c", QueueType.WORK, 0),
+                        new QueueRuleEntity("c", QueueType.WORKRESOURCE, 0),
                         new QueueRuleEntity("e", QueueType.ENDPOINT, 0),
                         new QueueRuleEntity("e", QueueType.WORKENDPOINT, 0));
             }

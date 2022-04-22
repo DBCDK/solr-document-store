@@ -229,6 +229,12 @@ public class BibliographicEntity implements Serializable {
         switch (supplier.getType()) {
             case MANIFESTATION:
                 return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
+            case UNIT:
+                if(deleted) {
+                    log.warn("Not queueing for UNIT type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);
+                    return null;
+                }
+                return QueueJob.unit(unit);
             case WORK:
                 if(deleted) {
                     log.warn("Not queueing for WORK type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);

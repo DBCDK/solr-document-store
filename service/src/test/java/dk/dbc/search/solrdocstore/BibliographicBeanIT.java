@@ -223,7 +223,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                     case "a": // Manifestation based (postponed)
                         assertThat(postponed, is(true));
                         break;
-                    case "b": // work based (not postponed)
+                    case "b": // unit based (not postponed)
+                        assertThat(postponed, is(false));
+                        break;
+                    case "c": // work based (not postponed)
                         assertThat(postponed, is(false));
                         break;
                     default:
@@ -652,7 +655,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
-                   "b,work:0"));
+                   "b,unit:0",
+                   "c,work:0"));
     }
 
     @Test(timeout = 2_000L)
@@ -756,7 +760,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
-                   "b,work:0"));
+                   "b,unit:0",
+                   "c,work:0"));
 
         // No changes in structire - nothing queued
         r = env().getPersistenceContext()
@@ -773,7 +778,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,700000-clazzifier:new",
                    "a,870970-clazzifier:new",
-                   "b,work:0"));
+                   "b,unit:0",
+                   "c,work:0"));
 
         // Delete - change in structure
         r = env().getPersistenceContext()
@@ -782,7 +788,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
-                   "b,work:0"));
+                   "b,unit:0",
+                   "c,work:0"));
     }
 
     @Test(timeout = 2_000L)

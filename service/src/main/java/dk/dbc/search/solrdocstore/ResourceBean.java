@@ -172,7 +172,7 @@ public class ResourceBean {
             EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
             bibliographicEntities.forEach(e -> {
                 if (!e.isDeleted()) {
-                    enqueue.add(e, QueueType.RESOURCE, QueueType.WORKRESOURCE);
+                    enqueue.add(e, QueueType.RESOURCE, QueueType.UNITRESOURCE, QueueType.WORKRESOURCE);
                 }
             });
             enqueue.commit();

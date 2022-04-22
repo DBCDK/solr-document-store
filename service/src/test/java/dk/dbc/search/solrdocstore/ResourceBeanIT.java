@@ -42,6 +42,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
             protected Collection<QueueRuleEntity> getQueueRules() {
                 return Arrays.asList(
                         new QueueRuleEntity("m", QueueType.RESOURCE, 0),
+                        new QueueRuleEntity("u", QueueType.UNITRESOURCE, 0),
                         new QueueRuleEntity("w", QueueType.WORKRESOURCE, 0)
                 );
             }
@@ -70,6 +71,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         queue = queueContentAndClear();
         assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         entity = env().getPersistenceContext()
@@ -81,6 +83,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         queue = queueContentAndClear();
         assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         entity = env().getPersistenceContext()
@@ -109,6 +112,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         queue = queueContentAndClear();
         assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         entity = env().getPersistenceContext()
@@ -120,6 +124,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         queue = queueContentAndClear();
         assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         entity = env().getPersistenceContext()
@@ -147,6 +152,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         queue = queueContentAndClear();
         assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         entity = env().getPersistenceContext()
@@ -158,6 +164,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(r.getStatus(), is(200));
         queue = queueContentAndClear();
         assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         entity = env().getPersistenceContext()

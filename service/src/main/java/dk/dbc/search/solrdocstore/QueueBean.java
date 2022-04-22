@@ -135,6 +135,59 @@ public class QueueBean {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
+    @Path("unit/{ unitId : unit:\\d+ }")
+    @Timed
+    @Operation(
+            summary = "Queue a manifestation",
+            description = "This operation puts a unit and its manifestations on queue.")
+    @APIResponses({
+        @APIResponse(name = "Success",
+                     responseCode = "200",
+                     description = "The unit was found, and put onto the queue",
+                     content = @Content(
+                             mediaType = MediaType.APPLICATION_JSON,
+                             schema = @Schema(ref = StatusResponse.NAME))),
+        @APIResponse(name = "Not Found",
+                     responseCode = "404",
+                     description = "There's no such unit",
+                     content = @Content(
+                             mediaType = MediaType.APPLICATION_JSON,
+                             schema = @Schema(ref = StatusResponse.NAME)))
+    })
+    @Parameters({
+        @Parameter(name = "unitId",
+                   description = "The (corepo-)id of the unit",
+                   required = true),
+        @Parameter(name = "trackingId",
+                   description = "For tracking the request",
+                   required = false)})
+    public Response queueUnit(@PathParam("unitId") String unitId,
+                              @QueryParam("trackingId") String trackingId) {
+        if (trackingId == null || trackingId.isEmpty())
+            trackingId = UUID.randomUUID().toString();
+        try (LogWith logWith = LogWith.track(trackingId)
+                .pid(unitId)) {
+            List<BibliographicEntity> biblEntitys = BibliographicEntity.fetchByUnit(entityManager, unitId);
+            if (biblEntitys.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new StatusResponse("No such unit"))
+                        .build();
+            }
+            EnqueueCollector enqueueCollector = enqueueSupplier.getEnqueueCollector();
+            biblEntitys.forEach(biblEntity -> enqueueCollector.add(biblEntity, QueueType.ENDPOINT, QueueType.UNITENDPOINT));
+            enqueueCollector.commit();
+            return Response.ok(new StatusResponse()).build();
+        } catch (SQLException ex) {
+            log.error("Error queueing: {}: {}", unitId, ex.getMessage());
+            log.debug("Error queueing: {}: ", unitId, ex);
+            return Response.serverError()
+                    .entity(new StatusResponse(ex.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
     @Path("work/{ workId : work:\\d+ }")
     @Timed
     @Operation(
@@ -174,7 +227,7 @@ public class QueueBean {
                         .build();
             }
             EnqueueCollector enqueueCollector = enqueueSupplier.getEnqueueCollector();
-            biblEntitys.forEach(biblEntity -> enqueueCollector.add(biblEntity, QueueType.ENDPOINT, QueueType.WORKENDPOINT));
+            biblEntitys.forEach(biblEntity -> enqueueCollector.add(biblEntity, QueueType.ENDPOINT, QueueType.UNITENDPOINT, QueueType.WORKENDPOINT));
             enqueueCollector.commit();
             return Response.ok(new StatusResponse()).build();
         } catch (SQLException ex) {

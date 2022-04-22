@@ -80,22 +80,29 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                         new QueueRuleEntity("g", QueueType.WORK, 0),
                         new QueueRuleEntity("h", QueueType.WORK, 100),
                         new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0),
-                        new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING, 100));
+                        new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING, 100),
+                        new QueueRuleEntity("k", QueueType.UNIT, 0),
+                        new QueueRuleEntity("l", QueueType.UNIT, 100),
+                        new QueueRuleEntity("m", QueueType.UNITFIRSTLASTHOLDING, 0),
+                        new QueueRuleEntity("n", QueueType.UNITFIRSTLASTHOLDING, 100));
             }
         };
         bean.entityManager = em;
 
         env().getPersistenceContext().run(() -> {
             EnqueueCollector collector = bean.getEnqueueCollector();
-            collector.add(entity(123456, "katalog", "87654321", "work:2"), QueueType.WORK);
-            collector.add(entity(123456, "katalog", "87654321", "work:2"), QueueType.MANIFESTATION);
+            collector.add(entity(123456, "katalog", "87654321", "work:2", "unit:0"), QueueType.WORK);
+            collector.add(entity(123456, "katalog", "87654321", "work:2", "unit:0"), QueueType.UNIT);
+            collector.add(entity(123456, "katalog", "87654321", "work:2", "unit:0"), QueueType.MANIFESTATION);
             collector.commit();
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,123456-katalog:87654321",
                    "b,123456-katalog:87654321",
                    "g,work:2",
-                   "h,work:2"));
+                   "h,work:2",
+                   "k,unit:0",
+                   "l,unit:0"));
     }
 
     private static final Integer nonfbsAgency = 800111;
@@ -132,6 +139,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(nonfbsAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")
            ));
 
@@ -142,6 +150,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(nonfbsAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")
            ));
 
@@ -151,6 +160,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(nonfbsAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")
            ));
     }
@@ -182,6 +192,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "clazzifier", "test"),
                    queueItem(fbsAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -189,6 +200,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(fbsAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -197,6 +209,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "clazzifier", "test"),
                    queueItem(fbsAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
     }
 
@@ -231,6 +244,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    containsInAnyOrder(
                            queueItem(commonAgency, "clazzifier", "test"),
                            queueItem(schoolCommonAgency, "clazzifier", "test"),
+                           queueItem("unit:0"),
                            queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -238,6 +252,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(schoolCommonAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -246,6 +261,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "clazzifier", "test"),
                    queueItem(schoolCommonAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
     }
@@ -268,6 +284,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -276,6 +293,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "clazzifier", "test"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
     }
 
@@ -310,6 +328,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(commonAgency, "clazzifier", "test1"),
                    queueItem(commonAgency, "clazzifier", "test2"),
                    queueItem(commonAgency, "clazzifier", "test3"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -320,6 +339,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(commonAgency, "clazzifier", "test2"),
                    queueItem(commonAgency, "clazzifier", "test3"),
                    queueItem(commonAgency, "clazzifier", "test4"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
     }
 
@@ -338,6 +358,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "foo", "a"),
                    queueItem(commonAgency, "bar", "a"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
 
         env().getPersistenceContext().run(() -> {
@@ -347,6 +368,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(commonAgency, "foo", "a"),
                    queueItem(commonAgency, "bar", "a"),
                    queueItem(777777, "woop", "a"),
+                   queueItem("unit:0"),
                    queueItem("work:0")));
     }
 
@@ -381,16 +403,23 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         return "a," + agency + "-" + classifier + ":" + bibliographicRecordId;
     }
 
-    private String queueItem(String work) {
-        return "b," + work;
+    private String queueItem(String id) {
+        if (id.startsWith("unit:")) {
+            return "b," + id;
+        } else if (id.startsWith("work:")) {
+            return "c," + id;
+        } else {
+            return "?," + id;
+        }
     }
 
-    private BibliographicEntity entity(int agencyId, String classifier, String bibliogrephicRecordId, String work) {
+    private BibliographicEntity entity(int agencyId, String classifier, String bibliogrephicRecordId, String work, String unit) {
         BibliographicEntity bib = new BibliographicEntity();
         bib.setAgencyId(agencyId);
         bib.setClassifier(classifier);
         bib.setBibliographicRecordId(bibliogrephicRecordId);
         bib.setWork(work);
+        bib.setUnit(unit);
         return bib;
     }
 }
