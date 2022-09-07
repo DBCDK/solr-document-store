@@ -35,12 +35,16 @@ pipeline {
     stages {
         stage("build") {
             steps {
-                sh """
-                    rm -rf \$WORKSPACE/.repo/dk/dbc
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo -Ddocker.extra.args="--pull" -Ddocker.image.version=${version} -Ddocker.image.label=${label} org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
-                """
                 script {
+                    def version = readMavenPom().version.replace('-SNAPSHOT', '')
+                    def label = imageLabel()
+
+                    sh """
+                        rm -rf \$WORKSPACE/.repo/dk/dbc
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo -Ddocker.extra.args="--pull" -Ddocker.image.version=${version} -Ddocker.image.label=${label} org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
+                    """
+
                     junit testResults: '**/target/surefire-reports/TEST-*.xml'
 
                     def java = scanForIssues tool: [$class: 'Java']
