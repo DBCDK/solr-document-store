@@ -45,7 +45,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
     private static final URI SOLR_URL = makeContainerUrl(SOLR, 8983);
     private static final URI ZK_URL = URI.create("zk://" + containerIp(SOLR) + ":9983/");
 
-    private static final GenericContainer SERVICE = makeService(WIREMOCK_URL, PG, SOLR);
+    private static final GenericContainer SERVICE = makeService(WIREMOCK_URL, PG);
     public static final URI SERVICE_URL = makeContainerUrl(SERVICE, 8080);
 
     public static UriBuilder wireMockBase() {
@@ -128,7 +128,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
     private static GenericContainer makeSolr() {
 
         ImageFromDockerfile image = new ImageFromDockerfile()
-                .withFileFromPath("target/solr/corepo-config", Path.of("/home/bogeskov/DBC/Java/solr-document-store/solr-updater/target/solr/corepo-config"))
+                .withFileFromPath("target/solr/corepo-config", Path.of("target/solr/corepo-config").toAbsolutePath())
                 .withFileFromString("target/solr/corepo-1/core.properties", "name=corepo-1")
                 .withFileFromString("target/solr/corepo-2/core.properties", "name=corepo-2")
                 .withDockerfileFromBuilder(dockerfile ->
@@ -152,7 +152,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
         return solr;
     }
 
-    private static GenericContainer makeService(URI wiremockUrl, DBCPostgreSQLContainer pg, GenericContainer solr) {
+    private static GenericContainer makeService(URI wiremockUrl, DBCPostgreSQLContainer pg) {
         GenericContainer container = new GenericContainer("solr-doc-store-service" + DOCKER_POSTFIX)
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("dk.dbc.SERVICE")))
                 .withEnv("SYSTEM_NAME", "devel")
