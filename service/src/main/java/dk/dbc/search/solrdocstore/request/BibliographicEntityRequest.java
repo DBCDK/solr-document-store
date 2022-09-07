@@ -21,23 +21,13 @@ public class BibliographicEntityRequest extends BibliographicEntity {
         this.supersedes = supersedes;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public List<String> getSupersedes() {
         return supersedes;
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setSupersedes(List<String> supersedes) {
-        this.supersedes = supersedes;
-    }
-
-    //@todo remove this when corepo-indexer is deployed with correct spelling
-    @SuppressFBWarnings("EI_EXPOSE_REP")
-    public List<String> getSuperceds() {
-        return supersedes;
-    }
-
-    @SuppressFBWarnings("EI_EXPOSE_REP2")
-    public void setSuperceds(List<String> supersedes) {
         this.supersedes = supersedes;
     }
 

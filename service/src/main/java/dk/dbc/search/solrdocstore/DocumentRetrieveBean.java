@@ -171,30 +171,11 @@ public class DocumentRetrieveBean {
     }
 
     public List<DocumentRetrieveResponse> getDocumentsForUnit(String unitId, boolean includeHoldingsItemsIndexKeys) throws Exception {
-        List<DocumentRetrieveResponse> res = new ArrayList<>();
         List<BibliographicEntity> bibliographicEntities = BibliographicEntity.fetchByUnit(entityManager, unitId);
         List<HoldingsInfo> holdingsObjs = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_UNIT_JPA, HoldingsInfo.class)
                 .setParameter("unitId", unitId)
                 .getResultList();
-        for (BibliographicEntity b : bibliographicEntities) {
-            List<HoldingsItemEntity> holdingsItemEntityList = holdingsObjs.stream()
-                    .filter(ho -> ho.holdingsToBibliographicEntity.getBibliographicAgencyId() == b.getAgencyId() &&
-                                    ho.holdingsToBibliographicEntity.getBibliographicRecordId().equals(b.getBibliographicRecordId()))
-                    .map(h -> h.holdingsItemEntity)
-                    .map(h -> includeHoldingsItemsIndexKeys ? h : h.copyForLightweightPresentation())
-                    .collect(Collectors.toList());
-            List<Integer> partOfDanbib = b.getAgencyId() == LibraryType.COMMON_AGENCY ?
-                                         getPartOfDanbibCommon(b.getBibliographicRecordId()) :
-                                         Collections.EMPTY_LIST;
-            LibraryType lt = oaBean.lookup(b.getAgencyId()).getLibraryType();
-            List<BibliographicResourceEntity> resources = agencyLibTypeCommon(b.getAgencyId(), lt) ?
-                                                          brrBean.getResourcesForCommon(b.getBibliographicRecordId()) :
-                                                          brrBean.getResourcesFor(b.getAgencyId(), b.getBibliographicRecordId());
-            Map<String, Map<Integer, Boolean>> attachedResources = mapResources(resources);
-
-            DocumentRetrieveResponse r = new DocumentRetrieveResponse(b, holdingsItemEntityList, partOfDanbib, attachedResources);
-            res.add(r);
-        }
+        List<DocumentRetrieveResponse> res = buildDocumentList(bibliographicEntities, holdingsObjs, includeHoldingsItemsIndexKeys);
         return res;
     }
 
@@ -221,12 +202,16 @@ public class DocumentRetrieveBean {
     }
 
     public List<DocumentRetrieveResponse> getDocumentsForWork(String workId, boolean includeHoldingsItemsIndexKeys) throws Exception {
-        List<DocumentRetrieveResponse> res = new ArrayList<>();
         List<BibliographicEntity> bibliographicEntities = BibliographicEntity.fetchByWork(entityManager, workId);
         List<HoldingsInfo> holdingsObjs = entityManager.createQuery(SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA, HoldingsInfo.class)
                 .setParameter("workId", workId)
                 .getResultList();
-        for (BibliographicEntity b : bibliographicEntities) {
+        List<DocumentRetrieveResponse> res = buildDocumentList(bibliographicEntities, holdingsObjs, includeHoldingsItemsIndexKeys);
+        return res;
+    }
+
+    private List<DocumentRetrieveResponse> buildDocumentList(List<BibliographicEntity> bibliographicEntities, List<HoldingsInfo> holdingsObjs, boolean includeHoldingsItemsIndexKeys) {
+        return bibliographicEntities.stream().map(b -> {
             List<HoldingsItemEntity> holdingsItemEntityList = holdingsObjs.stream()
                     .filter(ho -> ho.holdingsToBibliographicEntity.getBibliographicAgencyId() == b.getAgencyId() &&
                                     ho.holdingsToBibliographicEntity.getBibliographicRecordId().equals(b.getBibliographicRecordId()))
@@ -241,11 +226,9 @@ public class DocumentRetrieveBean {
                                                           brrBean.getResourcesForCommon(b.getBibliographicRecordId()) :
                                                           brrBean.getResourcesFor(b.getAgencyId(), b.getBibliographicRecordId());
             Map<String, Map<Integer, Boolean>> attachedResources = mapResources(resources);
-
             DocumentRetrieveResponse r = new DocumentRetrieveResponse(b, holdingsItemEntityList, partOfDanbib, attachedResources);
-            res.add(r);
-        }
-        return res;
+            return r;
+        }).collect(Collectors.toList());
     }
 
     public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {

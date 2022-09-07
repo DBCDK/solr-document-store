@@ -140,7 +140,7 @@ public class SolrDocStoreResponse {
         public boolean deleted;
         public Map<String, List<String>> indexKeys;
 
-        private BibliographicRecord deepCopy() {
+        public BibliographicRecord deepCopy() {
             BibliographicRecord copy = new BibliographicRecord();
             copy.agencyId = agencyId;
             copy.classifier = classifier;
@@ -166,7 +166,7 @@ public class SolrDocStoreResponse {
         public String bibliographicRecordId;
         public List<Map<String, List<String>>> indexKeys;
 
-        private HoldingsItemRecord deepCopy() {
+        public HoldingsItemRecord deepCopy() {
             HoldingsItemRecord copy = new HoldingsItemRecord();
             copy.agencyId = agencyId;
             copy.bibliographicRecordId = bibliographicRecordId;

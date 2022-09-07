@@ -123,6 +123,7 @@ public class BusinessLogic {
             return this;
         }
 
+        @SuppressFBWarnings("EI_EXPOSE_REP2")
         public Builder enableScan(ProfileProvider profileProvider, Set<String> scanDefaultFields, Map<String, Set<String>> scanAgencyProfiles) {
             if (profileProvider == null)
                 throw new IllegalArgumentException("ProfileProvider cannot be null");
