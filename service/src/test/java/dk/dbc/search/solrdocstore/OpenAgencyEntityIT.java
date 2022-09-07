@@ -2,7 +2,6 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import javax.persistence.EntityManager;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
@@ -17,8 +16,7 @@ public class OpenAgencyEntityIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void openAgencyEntityPersist() throws Exception {
         System.out.println("openAgencyEntityPersist");
-        EntityManager em = env().getEntityManager();
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
 
             OpenAgencyEntity foundBefore = em.find(OpenAgencyEntity.class, LibraryType.COMMON_AGENCY);
             assertNull(foundBefore);

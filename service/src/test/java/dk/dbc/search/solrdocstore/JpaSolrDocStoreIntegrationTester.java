@@ -3,113 +3,62 @@ package dk.dbc.search.solrdocstore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import dk.dbc.commons.persistence.JpaIntegrationTest;
-import dk.dbc.commons.persistence.JpaTestEnvironment;
+import dk.dbc.commons.jdbc.util.JDBCUtil;
+import dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import org.junit.Before;
-import org.junit.Test;
-import org.postgresql.ds.PGSimpleDataSource;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManager;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
+import static dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase.PG;
+
+public class JpaSolrDocStoreIntegrationTester extends AbstractJpaTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(JpaSolrDocStoreIntegrationTester.class);
 
-    protected static final ObjectMapper O = new ObjectMapper();
-
     @Override
-    public JpaTestEnvironment setup() {
-        final PGSimpleDataSource dataSource = getDataSource();
-        migrateDatabase(dataSource);
-        return new JpaTestEnvironment(dataSource, "solrDocumentStoreIT_PU");
-    }
-
-    @Before
-    public void clearDatabase() throws SQLException {
-        try (Connection conn = env().getDatasource().getConnection() ;
-             Statement statement = conn.createStatement()) {
-            statement.executeUpdate("TRUNCATE holdingsToBibliographic CASCADE");
-            statement.executeUpdate("TRUNCATE holdingsItemssolrkeys CASCADE");
-            statement.executeUpdate("TRUNCATE bibliographicToBibliographic CASCADE");
-            statement.executeUpdate("TRUNCATE bibliographicSolrKeys CASCADE");
-            statement.executeUpdate("TRUNCATE openagencycache CASCADE");
-            statement.executeUpdate("TRUNCATE queuerule CASCADE");
-            statement.executeUpdate("TRUNCATE queue CASCADE");
-            statement.executeUpdate("TRUNCATE resource CASCADE");
-        }
-    }
-
-    private PGSimpleDataSource getDataSource() {
-        final PGSimpleDataSource datasource = new PGSimpleDataSource();
-
-        datasource.setServerNames(new String[] {"localhost"});
-        String postgresqlPort = System.getProperty("postgresql.port");
-        if (postgresqlPort != null && postgresqlPort.length() > 1) {
-            datasource.setDatabaseName("docstore");
-            datasource.setPortNumbers(new int[] {Integer.parseInt(System.getProperty("postgresql.port", "5432"))});
-        } else {
-            datasource.setDatabaseName(System.getProperty("user.name"));
-            datasource.setPortNumbers(new int[] {5432});
-        }
-        datasource.setUser(System.getProperty("user.name"));
-        datasource.setPassword(System.getProperty("user.name"));
-        return datasource;
-    }
-
-    private void migrateDatabase(PGSimpleDataSource datasource) {
+    public void migrate(DataSource datasource) {
         dk.dbc.search.solrdocstore.db.DatabaseMigrator.migrate(datasource);
     }
 
-    /**
-     * When IDEA tries to run all unit tests in the project - it will fail on
-     * this class.
-     * Since {@link JpaSolrDocStoreIntegrationTester} has a @Before annotation -
-     * it is considered a test class
-     * But since it has no methods to execute, then IDEA will fail the class
-     * with "No runnable method".
-     */
-    @Test
-    public void noTest() {
+    @Override
+    public String persistenceUnitName() {
+        return "solrDocumentStoreIT_PU";
     }
 
-    protected <T> T jpa(JpaCodeBlockExecution<T> codeBlock) {
-        return env().getPersistenceContext().run(() -> codeBlock.execute(env().getEntityManager()));
+    @Override
+    public Collection<String> keepContentOfTables() {
+        return List.of("schema_version", "queue_version", "queuesuppliers", "solr_doc_store_queue_version");
     }
 
-    protected void jpa(JpaCodeBlockVoidExecution codeBlock) {
-        env().getPersistenceContext().run(() -> codeBlock.execute(env().getEntityManager()));
-    }
+    protected static final ObjectMapper O = new ObjectMapper();
 
-    /**
-     * Represents a code block execution with return value
-     *
-     * @param <T> return type of the code block execution
-     */
-    @FunctionalInterface
-    public interface JpaCodeBlockExecution<T> {
-
-        T execute(EntityManager em) throws Exception;
-    }
-
-    /**
-     * Represents a code block execution without return value
-     */
-    @FunctionalInterface
-    public interface JpaCodeBlockVoidExecution {
-
-        void execute(EntityManager em) throws Exception;
+    public void executeSqlScript(String resourcePath) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            try (Connection connection = PG.createConnection() ;
+                 Statement stmt = connection.createStatement()) {
+                stmt.execute(content);
+            }
+        } catch (SQLException | IOException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     /**
@@ -154,7 +103,7 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
     protected Set<String> queueContentAndClear() {
         HashSet<String> enqueued = new HashSet<>();
-        try (Connection connection = env().getDatasource().getConnection() ;
+        try (Connection connection = PG.createConnection() ;
              Statement stmt = connection.createStatement() ;
              ResultSet resultSet = stmt.executeQuery("DELETE FROM queue RETURNING consumer || ',' || jobid")) {
             while (resultSet.next()) {
@@ -170,7 +119,7 @@ public class JpaSolrDocStoreIntegrationTester extends JpaIntegrationTest {
 
     protected Set<String> queueRemovePostponed() {
         HashSet<String> enqueued = new HashSet<>();
-        try (Connection connection = env().getDatasource().getConnection() ;
+        try (Connection connection = PG.createConnection() ;
              Statement stmt = connection.createStatement() ;
              ResultSet resultSet = stmt.executeQuery("DELETE FROM queue WHERE dequeueafter > NOW() RETURNING consumer || ',' || jobid")) {
             while (resultSet.next()) {

@@ -3,9 +3,14 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -16,8 +21,7 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void StoreEntity() {
-        EntityManager em = env().getEntityManager();
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
             IndexKeys indexKeys = new IndexKeys();
             indexKeys.put("titel", Collections.singletonList("unix bogen"));
             indexKeys.put("id", Collections.singletonList("argle"));
@@ -26,34 +30,35 @@ public class BibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         AgencyClassifierItemKey key = new AgencyClassifierItemKey(200, "clazzifier", "1234");
-        BibliographicEntity be2 = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicEntity.class, key));
+        jpa(em -> {
+            BibliographicEntity be2 = em.find(BibliographicEntity.class, key);
 
-        assertThat(be2.getAgencyId(), is(200));
-        assertThat(be2.getClassifier(), is("clazzifier"));
-        assertThat(be2.getBibliographicRecordId(), is("1234"));
+            assertThat(be2.getAgencyId(), is(200));
+            assertThat(be2.getClassifier(), is("clazzifier"));
+            assertThat(be2.getBibliographicRecordId(), is("1234"));
+        });
     }
 
     @Test
-    public void LoadEntity() {
-        executeScriptResource("/entityTestData.sql");
-        EntityManager em = env().getEntityManager();
+    public void LoadEntity() throws IOException, SQLException {
+        executeSqlScript("entityTestData.sql");
 
         AgencyClassifierItemKey key = new AgencyClassifierItemKey(300, "clazzifier", "4321");
-        BibliographicEntity be = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicEntity.class, key));
+        jpa(em -> {
+            BibliographicEntity be = em.find(BibliographicEntity.class, key);
 
-        assertThat(be.getAgencyId(), is(300));
-        assertThat(be.getClassifier(), is("clazzifier"));
-        assertThat(be.getBibliographicRecordId(), is("4321"));
-        assertThat(be.getWork(), is("work:3"));
-        assertThat(be.getUnit(), is("unit:3"));
-        assertThat(be.isDeleted(), is(true));
-        IndexKeys expected = new IndexKeys();
-        expected.put("ti", Arrays.asList("isdnBogen", "title2"));
-        expected.put("001", Collections.singletonList("argle"));
-        assertThat(be.getIndexKeys(), is(expected));
+            assertThat(be.getAgencyId(), is(300));
+            assertThat(be.getClassifier(), is("clazzifier"));
+            assertThat(be.getBibliographicRecordId(), is("4321"));
+            assertThat(be.getWork(), is("work:3"));
+            assertThat(be.getUnit(), is("unit:3"));
+            assertThat(be.isDeleted(), is(true));
+            IndexKeys expected = new IndexKeys();
+            expected.put("ti", Arrays.asList("isdnBogen", "title2"));
+            expected.put("001", Collections.singletonList("argle"));
+            assertThat(be.getIndexKeys(), is(expected));
 
-        assertThat(be.getTrackingId(), is("track"));
+            assertThat(be.getTrackingId(), is("track"));
+        });
     }
 }

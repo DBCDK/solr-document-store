@@ -10,12 +10,6 @@
     <artifactId>solr-doc-store-db</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jersey.version>2.22.2</jersey.version>
-    </properties>
-    
     <dependencies>
         
         <dependency>
@@ -28,13 +22,6 @@
             <artifactId>pg-queue-supplier</artifactId>
             <version>${pg-queue.version}</version>
         </dependency>
-        <dependency>
-            <groupId>dk.dbc.commoms.testutils</groupId>
-            <artifactId>dbc-commons-testutil-postgres-connection</artifactId>
-            <version>${dbc-commons.version}</version>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
 
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -43,6 +30,11 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>dbc-commons-testcontainers-postgres</artifactId>
         </dependency>
 
         <dependency>
@@ -63,74 +55,8 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>postgresql.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>dk.dbc</groupId>
-                <artifactId>postgresql-maven-plugin</artifactId>
-                <version>1.3-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>start-postgresql</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <configuration>
-                            <pgPort>${postgresql.port}</pgPort>
-                            <pgDbName>docstore</pgDbName>
-                            <pgDbScripts>
-                            </pgDbScripts>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>stop-postgresql</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>shutdown</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.1</version>
-                <configuration>
-                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
-                    <environmentVariables>
-                        <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/docstore</DOCSTORE_POSTGRES_URL>
-                    </environmentVariables>
-                    <systemPropertyVariables>
-                        <postgresql.port>${postgresql.port}</postgresql.port>
-                    </systemPropertyVariables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

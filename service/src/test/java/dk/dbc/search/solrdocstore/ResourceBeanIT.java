@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +29,149 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceBeanIT.class);
 
-    private ResourceBean bean;
-    private EntityManager em;
+    @Test(timeout = 2_000L)
+    public void testAddResource() throws Exception {
+        System.out.println("testAddResource");
 
-    @Before
-    public void setupBean() {
-        em = env().getEntityManager();
-        bean = createResourceBean(env());
+        Set<String> queue;
+
+        queueContentAndClear();
+        jpa(em -> {
+            em.merge(new BibliographicEntity(870970, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
+            em.merge(new BibliographicEntity(710100, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
+            em.merge(new OpenAgencyEntity(870970, LibraryType.FBS, false, false, false));
+            em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
+        });
+
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            Response r = bean.addResource("{\"agencyId\":870970,\"bibliographicRecordId\":\"25912233\",\"field\":\"hasCoverUrl\",\"value\":true}");
+            assertThat(r.getStatus(), is(200));
+        });
+        queue = queueContentAndClear();
+        assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
+                                             "m,710100-clazzifier:25912233",
+                                             "m,870970-clazzifier:25912233"));
+        jpa(em -> {
+            BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
+                                                         new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
+            assertThat(entity, notNullValue());
+        });
+
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            Response r = bean.addResource("{\"agencyId\":870970,\"bibliographicRecordId\":\"25912233\",\"field\":\"hasCoverUrl\",\"value\":false}");
+            assertThat(r.getStatus(), is(200));
+        });
+        queue = queueContentAndClear();
+        assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
+                                             "m,710100-clazzifier:25912233",
+                                             "m,870970-clazzifier:25912233"));
+        jpa(em -> {
+            BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
+                                                         new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
+            assertThat(entity, nullValue());
+        });
+    }
+
+    @Test(timeout = 2_000L)
+    public void testPutResource() throws Exception {
+        System.out.println("testPutResource");
+        Set<String> queue;
+
+        queueContentAndClear();
+        jpa(em -> {
+            em.merge(new BibliographicEntity(870970, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
+            em.merge(new BibliographicEntity(710100, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
+            em.merge(new OpenAgencyEntity(870970, LibraryType.FBS, false, false, false));
+            em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
+        });
+
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            Response r = bean.putResource("{\"has\":true}", "hasCoverUrl", 870970, "25912233", null);
+            assertThat(r.getStatus(), is(200));
+        });
+        queue = queueContentAndClear();
+        assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
+                                             "m,710100-clazzifier:25912233",
+                                             "m,870970-clazzifier:25912233"));
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
+                                                         new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
+            assertThat(entity, notNullValue());
+        });
+
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            Response r = bean.putResource("{\"has\":false}", "hasCoverUrl", 870970, "25912233", null);
+            assertThat(r.getStatus(), is(200));
+        });
+        queue = queueContentAndClear();
+        assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
+                                             "m,710100-clazzifier:25912233",
+                                             "m,870970-clazzifier:25912233"));
+        jpa(em -> {
+            BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
+                                                         new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
+            assertThat(entity, nullValue());
+        });
+    }
+
+    @Test(timeout = 2_000L)
+    public void testDeleteResource() throws Exception {
+        System.out.println("testPutResource");
+        Set<String> queue;
+
+        queueContentAndClear();
+        jpa(em -> {
+            em.merge(new BibliographicEntity(870970, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
+            em.merge(new BibliographicEntity(710100, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
+            em.merge(new OpenAgencyEntity(870970, LibraryType.FBS, false, false, false));
+            em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
+        });
+
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            Response r = bean.putResource("{\"has\":true}", "hasCoverUrl", 870970, "25912233", null);
+            assertThat(r.getStatus(), is(200));
+        });
+        queue = queueContentAndClear();
+        assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
+                                             "m,710100-clazzifier:25912233",
+                                             "m,870970-clazzifier:25912233"));
+        jpa(em -> {
+            BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
+                                                         new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
+            assertThat(entity, notNullValue());
+        });
+
+        jpa(em -> {
+            ResourceBean bean = mockResourceBean(em);
+            Response r = bean.deleteResource("hasCoverUrl", 870970, "25912233", null);
+            assertThat(r.getStatus(), is(200));
+        });
+        queue = queueContentAndClear();
+        assertThat(queue, containsInAnyOrder("w,work:update",
+                                             "u,unit:update",
+                                             "m,710100-clazzifier:25912233",
+                                             "m,870970-clazzifier:25912233"));
+
+        jpa(em -> {
+            BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
+                                                         new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
+            assertThat(entity, nullValue());
+        });
+    }
+
+    private ResourceBean mockResourceBean(EntityManager em) {
+        ResourceBean bean = createResourceBean(em);
         bean.enqueueSupplier = new EnqueueSupplierBean() {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {
@@ -47,129 +182,8 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
                 );
             }
         };
-        bean.enqueueSupplier.entityManager = env().getEntityManager();
-    }
-
-    @Test(timeout = 2_000L)
-    public void testAddResource() throws Exception {
-        System.out.println("testAddResource");
-
-        BibliographicResourceEntity entity;
-        Response r;
-        Set<String> queue;
-
-        queueContentAndClear();
-        env().getPersistenceContext().run(() -> {
-            em.merge(new BibliographicEntity(870970, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
-            em.merge(new BibliographicEntity(710100, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
-            em.merge(new OpenAgencyEntity(870970, LibraryType.FBS, false, false, false));
-            em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
-        });
-
-        r = env().getPersistenceContext()
-                .run(() -> bean.addResource("{\"agencyId\":870970,\"bibliographicRecordId\":\"25912233\",\"field\":\"hasCoverUrl\",\"value\":true}"));
-        assertThat(r.getStatus(), is(200));
-        queue = queueContentAndClear();
-        assertThat(queue, containsInAnyOrder("w,work:update",
-                                             "u,unit:update",
-                                             "m,710100-clazzifier:25912233",
-                                             "m,870970-clazzifier:25912233"));
-        entity = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl")));
-        assertThat(entity, notNullValue());
-
-        r = env().getPersistenceContext()
-                .run(() -> bean.addResource("{\"agencyId\":870970,\"bibliographicRecordId\":\"25912233\",\"field\":\"hasCoverUrl\",\"value\":false}"));
-        assertThat(r.getStatus(), is(200));
-        queue = queueContentAndClear();
-        assertThat(queue, containsInAnyOrder("w,work:update",
-                                             "u,unit:update",
-                                             "m,710100-clazzifier:25912233",
-                                             "m,870970-clazzifier:25912233"));
-        entity = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl")));
-        assertThat(entity, nullValue());
-    }
-
-
-    @Test(timeout = 2_000L)
-    public void testPutResource() throws Exception {
-        System.out.println("testPutResource");
-        BibliographicResourceEntity entity;
-        Response r;
-        Set<String> queue;
-
-        queueContentAndClear();
-        env().getPersistenceContext().run(() -> {
-            em.merge(new BibliographicEntity(870970, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
-            em.merge(new BibliographicEntity(710100, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
-            em.merge(new OpenAgencyEntity(870970, LibraryType.FBS, false, false, false));
-            em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
-        });
-
-        r = env().getPersistenceContext()
-                .run(() -> bean.putResource("{\"has\":true}", "hasCoverUrl", 870970, "25912233", null));
-        assertThat(r.getStatus(), is(200));
-        queue = queueContentAndClear();
-        assertThat(queue, containsInAnyOrder("w,work:update",
-                                             "u,unit:update",
-                                             "m,710100-clazzifier:25912233",
-                                             "m,870970-clazzifier:25912233"));
-        entity = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl")));
-        assertThat(entity, notNullValue());
-
-        r = env().getPersistenceContext()
-                .run(() -> bean.putResource("{\"has\":false}", "hasCoverUrl", 870970, "25912233", null));
-        assertThat(r.getStatus(), is(200));
-        queue = queueContentAndClear();
-        assertThat(queue, containsInAnyOrder("w,work:update",
-                                             "u,unit:update",
-                                             "m,710100-clazzifier:25912233",
-                                             "m,870970-clazzifier:25912233"));
-        entity = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl")));
-        assertThat(entity, nullValue());
-    }
-
-    @Test(timeout = 2_000L)
-    public void testDeleteResource() throws Exception {
-        System.out.println("testPutResource");
-        BibliographicResourceEntity entity;
-        Response r;
-        Set<String> queue;
-
-        queueContentAndClear();
-        env().getPersistenceContext().run(() -> {
-            em.merge(new BibliographicEntity(870970, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
-            em.merge(new BibliographicEntity(710100, "clazzifier", "25912233", "id#1", "work:update", "unit:update", false, new IndexKeys(), "track:update"));
-            em.merge(new OpenAgencyEntity(870970, LibraryType.FBS, false, false, false));
-            em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
-        });
-
-        r = env().getPersistenceContext()
-                .run(() -> bean.putResource("{\"has\":true}", "hasCoverUrl", 870970, "25912233", null));
-        assertThat(r.getStatus(), is(200));
-        queue = queueContentAndClear();
-        assertThat(queue, containsInAnyOrder("w,work:update",
-                                             "u,unit:update",
-                                             "m,710100-clazzifier:25912233",
-                                             "m,870970-clazzifier:25912233"));
-        entity = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl")));
-        assertThat(entity, notNullValue());
-
-        r = env().getPersistenceContext()
-                .run(() -> bean.deleteResource("hasCoverUrl", 870970, "25912233", null));
-        assertThat(r.getStatus(), is(200));
-        queue = queueContentAndClear();
-        assertThat(queue, containsInAnyOrder("w,work:update",
-                                             "u,unit:update",
-                                             "m,710100-clazzifier:25912233",
-                                             "m,870970-clazzifier:25912233"));
-        entity = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicResourceEntity.class, new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl")));
-        assertThat(entity, nullValue());
+        bean.enqueueSupplier.entityManager = em;
+        return bean;
     }
 
 }

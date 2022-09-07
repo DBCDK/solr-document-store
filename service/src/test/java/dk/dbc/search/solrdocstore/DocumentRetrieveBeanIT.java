@@ -3,7 +3,6 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
-import dk.dbc.commons.persistence.JpaTestEnvironment;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
@@ -44,127 +43,131 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     private static final IndexKeys EMPTY = indexKeysB("{}");
     private static final String ID = "ABC";
 
-    private DocumentRetrieveBean bean;
-    private EntityManager em;
-    private BibliographicBean bibl;
-    private HoldingsItemBean hold;
-    private HoldingsToBibliographicBean h2b;
-
     @Before
     public void setupBean() {
-        JpaTestEnvironment env = env();
-        em = env.getEntityManager();
-        bean = createDocumentRetrieveBean(env);
-        bibl = createBibliographicBean(env, null);
-        hold = createHoldingsItemBean(env);
-        h2b = createHoldingsToBibliographicBean(env);
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
+            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            BibliographicBean bibl = createBibliographicBean(em, null);
+            HoldingsItemBean hold = createHoldingsItemBean(em);
+            HoldingsToBibliographicBean h2b = createHoldingsToBibliographicBean(em);
             bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "work:0", "unit:0", false, EMPTY, "t0"), Arrays.asList("CBA"), false);
         });
     }
 
     @Test
     public void newCommonRecordWithExistingHoldings() throws Exception {
-        em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
-        em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), "T2"));
-        em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), "T3"));
-        em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
-        em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
-        DocumentRetrieveResponse doc = env().getPersistenceContext()
-                .run(() -> bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678"));
+        jpa(em -> {
+            em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
+            em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), "T2"));
+            em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), "T3"));
+            em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
+            em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
+        });
+        jpa(em -> {
+            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            BibliographicBean bibl = createBibliographicBean(em, null);
+            HoldingsItemBean hold = createHoldingsItemBean(em);
+            HoldingsToBibliographicBean h2b = createHoldingsToBibliographicBean(em);
+            DocumentRetrieveResponse doc = bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678");
 
-        assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
-        assertThat(doc.bibliographicRecord.getBibliographicRecordId(), is("12345678"));
-        assertThat(doc.holdingsItemRecords.size(), is(2));
+            assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
+            assertThat(doc.bibliographicRecord.getBibliographicRecordId(), is("12345678"));
+            assertThat(doc.holdingsItemRecords.size(), is(2));
+        });
     }
 
     @Test
     public void getPartOfDanbibCommon() throws Exception {
         System.out.println("getPartOfDanbibCommon");
-        List<Integer> agencies = env().getPersistenceContext().run(() -> {
+        jpa(em -> {
+            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
 
-            build(300055).holdings(ON_SHELF);
-            build(800055).holdings(ON_SHELF);
-            build(710001, "CBA").holdings(ON_SHELF);
-            build(710002, "CBA").holdings(DECOMMISSIONED);
+            build(em, 300055).holdings(ON_SHELF);
+            build(em, 800055).holdings(ON_SHELF);
+            build(em, 710001, "CBA").holdings(ON_SHELF);
+            build(em, 710002, "CBA").holdings(DECOMMISSIONED);
 
-            build(700011).holdings(ON_SHELF);
-            build(700015).holdings(ON_SHELF);
-            build(700051).holdings(ON_SHELF);
-            build(700055).holdings(ON_SHELF);
+            build(em, 700011).holdings(ON_SHELF);
+            build(em, 700015).holdings(ON_SHELF);
+            build(em, 700051).holdings(ON_SHELF);
+            build(em, 700055).holdings(ON_SHELF);
 
-            build(700211).record(NOEXCLUDE).holdings(ON_SHELF);
-            build(700215).record(NOEXCLUDE).holdings(ON_SHELF);
-            build(700251).record(NOEXCLUDE).holdings(ON_SHELF);
-            build(700255).record(NOEXCLUDE).holdings(ON_SHELF);
+            build(em, 700211).record(NOEXCLUDE).holdings(ON_SHELF);
+            build(em, 700215).record(NOEXCLUDE).holdings(ON_SHELF);
+            build(em, 700251).record(NOEXCLUDE).holdings(ON_SHELF);
+            build(em, 700255).record(NOEXCLUDE).holdings(ON_SHELF);
 
-            build(700311).record(NOTEXCLUDE).holdings(ON_SHELF);
-            build(700315).record(NOTEXCLUDE).holdings(ON_SHELF);
-            build(700351).record(NOTEXCLUDE).holdings(ON_SHELF);
-            build(700355).record(NOTEXCLUDE).holdings(ON_SHELF);
+            build(em, 700311).record(NOTEXCLUDE).holdings(ON_SHELF);
+            build(em, 700315).record(NOTEXCLUDE).holdings(ON_SHELF);
+            build(em, 700351).record(NOTEXCLUDE).holdings(ON_SHELF);
+            build(em, 700355).record(NOTEXCLUDE).holdings(ON_SHELF);
 
-            build(700411).record(EXCLUDE).holdings(ON_SHELF);
-            build(700415).record(EXCLUDE).holdings(ON_SHELF);
-            build(700451).record(EXCLUDE).holdings(ON_SHELF);
-            build(700455).record(EXCLUDE).holdings(ON_SHELF);
+            build(em, 700411).record(EXCLUDE).holdings(ON_SHELF);
+            build(em, 700415).record(EXCLUDE).holdings(ON_SHELF);
+            build(em, 700451).record(EXCLUDE).holdings(ON_SHELF);
+            build(em, 700455).record(EXCLUDE).holdings(ON_SHELF);
 
-            return bean.getPartOfDanbibCommon(ID);
+            List<Integer> agencies = bean.getPartOfDanbibCommon(ID);
+            System.out.println("agencies = " + agencies);
+            assertThat(agencies, Matchers.containsInAnyOrder(710001,
+                                                             700011, 700015, 700051,
+                                                             700211, 700215, 700251,
+                                                             700311, 700315, 700351));
         });
-        System.out.println("agencies = " + agencies);
-        assertThat(agencies, Matchers.containsInAnyOrder(710001,
-                                                         700011, 700015, 700051,
-                                                         700211, 700215, 700251,
-                                                         700311, 700315, 700351));
     }
 
     @Test
     public void getDocumentWithHoldings() throws Exception {
         System.out.println("getDocumentWithHoldings");
-        DocumentRetrieveResponse resp = env().getPersistenceContext().run(() -> {
-            build(300055).holdings(ON_SHELF);
-            build(800055).holdings(ON_SHELF);
-            build(710001, "CBA").holdings(ON_SHELF);
-            return bean.getDocumentWithHoldingsitems(COMMON_AGENCY, "basis", ID);
+        jpa(em -> {
+            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+
+            build(em, 300055).holdings(ON_SHELF);
+            build(em, 800055).holdings(ON_SHELF);
+            build(em, 710001, "CBA").holdings(ON_SHELF);
+            DocumentRetrieveResponse resp = bean.getDocumentWithHoldingsitems(COMMON_AGENCY, "basis", ID);
+            System.out.println("resp = " + resp);
+            Set<String> holdings = resp.holdingsItemRecords.stream()
+                    .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
+                    .collect(Collectors.toSet());
+            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
         });
-        System.out.println("resp = " + resp);
-        Set<String> holdings = resp.holdingsItemRecords.stream()
-                .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
-                .collect(Collectors.toSet());
-        assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
 
     @Test
     public void getWorkWithHoldings() throws Exception {
         System.out.println("getWorkWithHoldings");
-        List<DocumentRetrieveResponse> resp = env().getPersistenceContext().run(() -> {
-            build(300055).holdings(ON_SHELF);
-            build(800055).holdings(ON_SHELF);
-            build(710001, "CBA").holdings(ON_SHELF);
-            return bean.getDocumentsForWork("work:0", true);
+        jpa(em -> {
+            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            build(em, 300055).holdings(ON_SHELF);
+            build(em, 800055).holdings(ON_SHELF);
+            build(em, 710001, "CBA").holdings(ON_SHELF);
+            List<DocumentRetrieveResponse> resp = bean.getDocumentsForWork("work:0", true);
+            assertThat(resp, is(not(empty())));
+            DocumentRetrieveResponse r = resp.get(0);
+            Set<String> holdings = r.holdingsItemRecords.stream()
+                    .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
+                    .collect(Collectors.toSet());
+            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
         });
-        assertThat(resp, is(not(empty())));
-        DocumentRetrieveResponse r = resp.get(0);
-        Set<String> holdings = r.holdingsItemRecords.stream()
-                .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
-                .collect(Collectors.toSet());
-        assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
 
     @Test
     public void getUnitWithHoldings() throws Exception {
         System.out.println("getUnitWithHoldings");
-        List<DocumentRetrieveResponse> resp = env().getPersistenceContext().run(() -> {
-            build(300055).holdings(ON_SHELF);
-            build(800055).holdings(ON_SHELF);
-            build(710001, "CBA").holdings(ON_SHELF);
-            return bean.getDocumentsForUnit("unit:0", true);
+        jpa(em -> {
+            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            build(em, 300055).holdings(ON_SHELF);
+            build(em, 800055).holdings(ON_SHELF);
+            build(em, 710001, "CBA").holdings(ON_SHELF);
+            List<DocumentRetrieveResponse> resp = bean.getDocumentsForUnit("unit:0", true);
+            assertThat(resp, is(not(empty())));
+            DocumentRetrieveResponse r = resp.get(0);
+            Set<String> holdings = r.holdingsItemRecords.stream()
+                    .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
+                    .collect(Collectors.toSet());
+            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
         });
-        assertThat(resp, is(not(empty())));
-        DocumentRetrieveResponse r = resp.get(0);
-        Set<String> holdings = r.holdingsItemRecords.stream()
-                .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
-                .collect(Collectors.toSet());
-        assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
     }
 
     private static IndexKeysList indexKeys(String json) {
@@ -185,12 +188,12 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
     }
 
-    private Build build(int holdingsAgencyId) {
-        return new Build(holdingsAgencyId, ID);
+    private Build build(EntityManager em, int holdingsAgencyId) {
+        return new Build(em, holdingsAgencyId, ID);
     }
 
-    private Build build(int holdingsAgencyId, String id) {
-        return new Build(holdingsAgencyId, id);
+    private Build build(EntityManager em, int holdingsAgencyId, String id) {
+        return new Build(em, holdingsAgencyId, id);
     }
 
     private class Build {
@@ -198,10 +201,19 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         private final int holdingsAgencyId;
         private final String holdingsId;
 
-        private Build(int holdingsAgencyId, String holdingsId) {
+        private final BibliographicBean bibl;
+        private final HoldingsItemBean hold;
+        private final HoldingsToBibliographicBean h2b;
+
+        private Build(EntityManager em, int holdingsAgencyId, String holdingsId) {
             this.holdingsAgencyId = holdingsAgencyId;
             this.holdingsId = holdingsId;
             em.persist(makeOpenAgencyEntity(holdingsAgencyId));
+
+            bibl = createBibliographicBean(em, null);
+            hold = createHoldingsItemBean(em);
+            h2b = createHoldingsToBibliographicBean(em);
+
         }
 
         private Build holdings(IndexKeysList content) throws SQLException {

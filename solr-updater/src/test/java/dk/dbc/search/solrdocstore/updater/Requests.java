@@ -32,6 +32,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,10 @@ public class Requests {
     private static final Client CLIENT = ClientBuilder.newClient();
 
     static void load(String testName, String solrDocStoreUrl) throws IOException {
+        load(CLIENT, testName, UriBuilder.fromUri(solrDocStoreUrl));
+    }
+
+    static void load(Client client, String testName, UriBuilder solrDocStoreUrl) throws IOException {
         String uuid = UUID.randomUUID().toString();
         JsonNode rules;
         try (final InputStream is = Requests.class.getClassLoader().getResourceAsStream("ITRequests/load.json")) {
@@ -56,7 +61,7 @@ public class Requests {
         if (test == null) {
             throw new IllegalStateException("Don't know about test: " + testName);
         }
-        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "api/evict-all").request().get().toString());
+        System.out.println("evict-all: " + client.target(solrDocStoreUrl.clone().path("api/evict-all")).request().get().toString());
         for (Iterator<Map.Entry<String, JsonNode>> iterator = test.fields() ; iterator.hasNext() ;) {
             Map.Entry<String, JsonNode> entry = iterator.next();
             String api = entry.getKey();
@@ -64,8 +69,8 @@ public class Requests {
             if (!array.isArray()) {
                 throw new IllegalStateException("Value of " + api + " in test: " + testName + " is not an array");
             }
-            String targetUrl = solrDocStoreUrl + "api/" + api;
-            WebTarget target = CLIENT.target(targetUrl);
+            UriBuilder targetUrl = solrDocStoreUrl.clone().path("api").path(api);
+            WebTarget target = client.target(targetUrl);
             for (JsonNode file : array) {
                 String fileName = file.asText();
                 log.debug("fileName = {}", fileName);
@@ -77,12 +82,11 @@ public class Requests {
                     Response resp = target.request(MediaType.APPLICATION_JSON_TYPE).buildPost(Entity.entity(content.toString(), MediaType.APPLICATION_JSON)).invoke();
                     System.out.println("resp.getStatusInfo() = " + resp.getStatusInfo());
                     if (resp.getStatus() != 200) {
-                        throw new IllegalArgumentException("Cannot post content of: ITRequests/" + fileName + " to: " +  targetUrl + ": " + resp.getStatusInfo());
+                        throw new IllegalArgumentException("Cannot post content of: ITRequests/" + fileName + " to: " + targetUrl + ": " + resp.getStatusInfo());
                     }
                 }
             }
         }
-        System.out.println("evict-all: " + CLIENT.target(solrDocStoreUrl + "api/evict-all").request().get().toString());
+        System.out.println("evict-all: " + client.target(solrDocStoreUrl.clone().path("api/evict-all")).request().get().toString());
     }
-
 }

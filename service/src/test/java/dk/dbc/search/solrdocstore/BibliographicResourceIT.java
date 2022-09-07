@@ -9,7 +9,6 @@ import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import org.junit.Before;
 import org.junit.Test;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -22,32 +21,29 @@ import static org.hamcrest.Matchers.*;
 
 public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
 
-    EntityManager em;
-    ResourceBean bean;
     JSONBContext jsonbContext = new JSONBContext();
 
     @Before
     public void before() {
-        // Setup bean
-        em = env().getEntityManager();
-        bean = createResourceBean(jpaTestEnvironment);
-
         // Setup records
-        executeScriptResource("/resource.sql");
+        executeSqlScript("resource.sql");
     }
 
     @Test
     public void testAddResource() throws JSONBException {
         System.out.println("testAddResource");
         AddResourceRequest request = new AddResourceRequest(870970, "23556455", "hasCoverUrl", true);
-        bean.addResource(jsonbContext.marshall(request));
-        TypedQuery<BibliographicResourceEntity> query = em.createQuery(
-                "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
-                "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResourceEntity.class);
-        query.setParameter("agencyId", request.getAgencyId());
-        query.setParameter("bibId", request.getBibliographicRecordId());
-        query.setParameter("field", request.getField());
-        assertEquals(query.getSingleResult(), request.asBibliographicResource());
+        jpa(em -> {
+            ResourceBean bean = createResourceBean(em);
+            bean.addResource(jsonbContext.marshall(request));
+            TypedQuery<BibliographicResourceEntity> query = em.createQuery(
+                    "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
+                    "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResourceEntity.class);
+            query.setParameter("agencyId", request.getAgencyId());
+            query.setParameter("bibId", request.getBibliographicRecordId());
+            query.setParameter("field", request.getField());
+            assertEquals(query.getSingleResult(), request.asBibliographicResource());
+        });
     }
 
     @Test(timeout = 2_000L)
@@ -55,6 +51,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testAddResourceOntoDeleted");
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
+            ResourceBean bean = createResourceBean(em);
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", null, null, true, null, "track:1"));
             bean.addResource(jsonbContext.marshall(request));
@@ -67,6 +64,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testAddNonFBSdResourceEnqueue");
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
+            ResourceBean bean = createResourceBean(em);
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicEntity(890890, "classifier2", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
@@ -113,6 +111,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
 
     private void runCommonEnqueueTest(AddResourceRequest request) {
         jpa(em -> {
+            ResourceBean bean = createResourceBean(em);
             // Setup
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new OpenAgencyEntity(870970, LibraryType.NonFBS, false, false, false));
@@ -144,12 +143,15 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void testGetResourcesByBibItem() {
         System.out.println("testGetResourcesByBibItem");
-        Response response = bean.getResourcesByBibItem(870970, "11111111");
-        List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
-        assertThat(result, containsInAnyOrder(new BibliographicResourceEntity(870970, "11111111", "hasCoverUrl", true),
-                                              new BibliographicResourceEntity(870970, "11111111", "hasBackCoverUrl", false),
-                                              new BibliographicResourceEntity(870970, "11111111", "includesCD", true))
-        );
+        jpa(em -> {
+            ResourceBean bean = createResourceBean(em);
+            Response response = bean.getResourcesByBibItem(870970, "11111111");
+            List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
+            assertThat(result, containsInAnyOrder(new BibliographicResourceEntity(870970, "11111111", "hasCoverUrl", true),
+                                                  new BibliographicResourceEntity(870970, "11111111", "hasBackCoverUrl", false),
+                                                  new BibliographicResourceEntity(870970, "11111111", "includesCD", true))
+            );
+        });
     }
 
     private String queueItem(int agency, String classifier, String bibliographicRecordId) {

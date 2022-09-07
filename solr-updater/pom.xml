@@ -37,11 +37,11 @@
             <version>${pg-queue.version}</version>
         </dependency>
 
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
             <version>${solr.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-graceful-cache</artifactId>
@@ -64,9 +64,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>net.jodah</groupId>
@@ -150,6 +149,18 @@
 
         <dependency>
             <groupId>dk.dbc</groupId>
+            <artifactId>dbc-commons-testcontainers-postgres</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>dbc-commons-wiremock-testutil</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
             <artifactId>pg-queue-supplier</artifactId>
             <version>${pg-queue.version}</version>
             <scope>test</scope>
@@ -178,11 +189,11 @@
             <version>1.0.0-SNAPSHOT</version>
             <classifier>vipcore-httpclient</classifier>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>29.0-jre</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -199,38 +210,9 @@
                 <directory>src/test/resources</directory>
                 <filtering>false</filtering>
             </testResource>
-            <testResource>
-                <directory>src/test/filter-resources</directory>
-                <filtering>true</filtering>
-            </testResource>
         </testResources>
                 
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>postgresql.port</portName>
-                                <portName>solr.port</portName>
-                                <portName>solr.port.zk</portName>
-                                <portName>solr.port.shutdown</portName>
-                                <portName>glassfish.port</portName>
-                                <portName>wiremock.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -246,62 +228,8 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-service-war-dependencies</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>slf4j-api,logback-classic,logback-core,postgresql</includeArtifactIds>
-                            <stripClassifier>true</stripClassifier>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.build.directory}/provided-jars</outputDirectory>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>payara-micro-jar</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>fish.payara.extras</groupId>
-                                    <artifactId>payara-micro</artifactId>
-                                    <version>${payara.major.minor.version}</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <stripClassifier>true</stripClassifier>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.build.directory}/payara-micro/</outputDirectory>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>solr-exec</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>dk.dbc</groupId>
-                                    <artifactId>dbc-solr8-base</artifactId>
-                                    <version>${solr.version}-SNAPSHOT</version>
-                                    <type>zip</type>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-
-                    <execution>
                         <id>solr-config</id>
-                        <phase>pre-integration-test</phase>
+                        <phase>generate-test-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -318,6 +246,7 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+
                     <execution>
                         <id>docker-payara-utils</id>
                         <phase>prepare-package</phase>
@@ -340,208 +269,21 @@
             </plugin>
 
             <plugin>
-                <groupId>uk.co.automatictester</groupId>
-                <artifactId>wiremock-maven-plugin</artifactId>          
-                <version>2.14.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <dir>${basedir}/src/test/resources/wiremock</dir>
-                            <params>--port=${wiremock.port} --proxy-all=http://localhost:8000/ --record-mappings</params>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>   
-
-            <plugin>
-                <groupId>dk.dbc</groupId>
-                <artifactId>postgresql-maven-plugin</artifactId>
-                <version>1.3-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>start-postgresql</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <configuration>
-                            <pgPort>${postgresql.port}</pgPort>
-                            <pgDbName>solrdocstore</pgDbName>
-                        </configuration>
-                    </execution>
-   
-                    <execution>
-                        <id>stop-postgresql</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>shutdown</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <executions>
-                    <execution>
-                        <id>load-schema</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>-cex</argument>
-                                <argument>
-                                    read pg _ &lt; ${project.build.directory}/postgresql-cluster/postmaster.opts
-                                    $${pg%/*}/psql postgresql://${user.name}:${user.name}@localhost:${postgresql.port}/solrdocstore &lt; ${basedir}/../postgresql/target/solrdocstore-${project.version}.sql
-                                    $${pg%/*}/psql postgresql://${user.name}:${user.name}@localhost:${postgresql.port}/solrdocstore &lt; ${basedir}/src/test/resources/solrdocstore-data.sql
-                                </argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>start-payara</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <async>true</async>
-                            <environmentVariables>
-                                <DOCSTORE_POSTGRES_URL>localhost:${postgresql.port}/solrdocstore</DOCSTORE_POSTGRES_URL>
-                                <VIPCORE_ENDPOINT>http://localhost:${wiremock.port}/vipcore/</VIPCORE_ENDPOINT>
-                            </environmentVariables>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-jar</argument>
-                                <argument>${basedir}/target/payara-micro/payara-micro.jar</argument>
-                                <argument>--disablephonehome</argument>
-                                <argument>--nocluster</argument>
-                                <argument>--addjars</argument>
-                                <argument>${basedir}/target/provided-jars/postgresql.jar:${basedir}/target/provided-jars/slf4j-api.jar:${basedir}/target/provided-jars/logback-classic.jar:${basedir}/target/provided-jars/logback-core.jar</argument>
-                                <argument>--port</argument>
-                                <argument>${glassfish.port}</argument>
-                                <argument>--postbootcommandfile</argument>
-                                <argument>${basedir}/target/test-classes/payara-setup/postbootcommandfile.txt</argument>
-                                <argument>--logtofile</argument>
-                                <argument>${basedir}/target/test-classes/payara-setup/micro.log</argument>
-                                <argument>--contextroot</argument>
-                                <argument>/</argument>
-                                <argument>--deploy</argument>
-                                <argument>${basedir}/../service/target/solr-doc-store-service-1.0-SNAPSHOT.war</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>start-solr</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>-ce</argument>
-                                <argument>
-<![CDATA[
-SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr start -p ${solr.port} -a "-DzkRun=localhost:${solr.port.zk}"
-${project.build.directory}/solr/bin/solr create_collection -c corepo-a -d ${project.build.directory}/solr/corepo-config -p ${solr.port}
-${project.build.directory}/solr/bin/solr create_collection -c corepo-b -d ${project.build.directory}/solr/corepo-config -p ${solr.port}
-]]></argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>wait-for-payara</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>-c</argument>
-                                <!-- wait for status endpoint to respond with 200 -->
-                                <argument><![CDATA[
-for i in 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
-    if curl -sf http://localhost:${glassfish.port}/api/status; then
-        exit 0
-    fi
-    echo "waiting for payara status endpoint - $i ($?)"
-    sleep 1
-done
-exit 1
-]]></argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-
-
-                    <execution>
-                        <id>stop-solr</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>sh</executable>
-                            <arguments>
-                                <argument>-ce</argument>
-                                <argument>SOLR_ULIMIT_CHECKS=false ${project.build.directory}/solr/bin/solr stop -p ${solr.port}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
-                <configuration>
-                    <trimStackTrace>false</trimStackTrace>
-                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
-                </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.1</version>
-                <configuration>
-                    <trimStackTrace>false</trimStackTrace>
-                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
-                    <systemPropertyVariables>
-                        <postgresql.port>${postgresql.port}</postgresql.port>
-                    </systemPropertyVariables>
-                    <environmentVariables>
-                        <SOLR_URL>http://localhost:${solr.port}/solr/corepo-a</SOLR_URL>
-                        <ZOOKEEPER_URL>zk://localhost:${solr.port.zk}/</ZOOKEEPER_URL>
-                        <ZOOKEEPER_COLLECTIONS>corepo-b</ZOOKEEPER_COLLECTIONS>
-                        <SOLR_DOC_STORE_URL>http://localhost:${glassfish.port}/</SOLR_DOC_STORE_URL>
-                        <VIPCORE_ENDPOINT>http://localhost:${wiremock.port}/vipcore/</VIPCORE_ENDPOINT>
-                        <WORK_PRESENTATION_URL>http://localhost:${wiremock.port}/workpresentation/</WORK_PRESENTATION_URL>
-                        <SOLR_APPID>solr-doc-store-updater</SOLR_APPID>
-                    </environmentVariables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>

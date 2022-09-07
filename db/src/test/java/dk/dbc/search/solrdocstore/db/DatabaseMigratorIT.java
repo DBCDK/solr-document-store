@@ -1,29 +1,25 @@
 package dk.dbc.search.solrdocstore.db;
 
+import dk.dbc.commons.testcontainers.postgres.DBCPostgreSQLContainer;
 import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
-import org.junit.Before;
-import org.postgresql.ds.PGSimpleDataSource;
+import javax.sql.DataSource;
+import org.junit.ClassRule;
 
 import static org.junit.Assert.*;
 
 public class DatabaseMigratorIT {
 
-    private PGSimpleDataSource datasource;
-
-    @Before
-    public void resetDatabase() throws SQLException {
-        datasource = getDataSource();
-    }
+    @ClassRule
+    public static DBCPostgreSQLContainer pg = new DBCPostgreSQLContainer();
 
     @Test
     public void onStartup() throws Exception {
-
+        DataSource datasource = pg.datasource();
         int version = -1;
 
         HashSet<String> migrated = DatabaseMigrator.migrate(datasource);
@@ -39,23 +35,4 @@ public class DatabaseMigratorIT {
         }
         assertEquals(29, version);
     }
-
-    private static PGSimpleDataSource getDataSource() {
-        PGSimpleDataSource datasource = new PGSimpleDataSource();
-
-        datasource.setServerNames(new String[] {"localhost"});
-        String postgresqlPort = System.getProperty("postgresql.port");
-        if (postgresqlPort != null && postgresqlPort.length() > 1) {
-            datasource.setDatabaseName("docstore");
-            datasource.setPortNumbers(new int[] {Integer.parseInt(System.getProperty("postgresql.port", "5432"))});
-        } else {
-            datasource.setDatabaseName(System.getProperty("user.name"));
-            datasource.setPortNumbers(new int[] {5432});
-
-        }
-        datasource.setUser(System.getProperty("user.name"));
-        datasource.setPassword(System.getProperty("user.name"));
-        return datasource;
-    }
-
 }

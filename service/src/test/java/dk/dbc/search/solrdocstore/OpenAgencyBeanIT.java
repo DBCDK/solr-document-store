@@ -25,40 +25,18 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private final HashSet<Integer> changedAgencies;
     private final HashSet<Integer> purgedAgencies;
-    private EntityManager em;
-    private OpenAgencyBean openAgency;
 
     public OpenAgencyBeanIT() {
         this.changedAgencies = new HashSet<>();
         this.purgedAgencies = new HashSet<>();
     }
 
-    @Before
-    public void setupLoader() {
-        this.em = env().getEntityManager();
-        this.openAgency = new OpenAgencyBean() {
-
-            @Override
-            void agencyHasChanged(OpenAgencyEntity oldEntry, OpenAgencyEntity newEntry) {
-                super.agencyHasChanged(oldEntry, newEntry);
-                changedAgencies.add(oldEntry.getAgencyId());
-            }
-
-            @Override
-            void purgeHoldingFor(int agencyId) {
-                super.purgeHoldingFor(agencyId);
-                purgedAgencies.add(agencyId);
-            }
-        };
-        this.openAgency.entityManager = em;
-        this.openAgency.proxy = createOpenAgencyProxyBean();
-    }
-
     @Test
     public void openAgencyVerify() throws Exception {
         System.out.println("openAgencyVerify");
 
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
+            OpenAgencyBean openAgency = createOpenAgencyBean(em);
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100));
             openAgency.verifyOpenAgencyCache();
@@ -71,18 +49,19 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void openAgencyVerifyChangesOpenAgencyReverted() throws Exception {
         System.out.println("openAgencyVerifyChangesOpenAgencyReverted");
 
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
             OpenAgencyEntity original = new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true);
             original.setValid(false); // Has Holdings but openagency has changed
             em.persist(original);
             em.flush();
         });
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
+            OpenAgencyBean openAgency = createOpenAgencyBean(em);
             OpenAgencyEntity oae711100 = em.find(OpenAgencyEntity.class, 711100);
             assertEquals(false, oae711100.getValid()); //
             openAgency.verifyOpenAgencyCache();
         });
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
             // Migrated
             OpenAgencyEntity oae711100 = em.find(OpenAgencyEntity.class, 711100);
             assertEquals(new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true), oae711100);
@@ -98,7 +77,8 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void openAgencyVerifyChangesCanMigrateNoHoldings() throws Exception {
         System.out.println("openAgencyVerifyChangesCanMigrateNoHoldings");
 
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
+            OpenAgencyBean openAgency = createOpenAgencyBean(em);
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, false, false));
             em.flush();
@@ -118,7 +98,8 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void openAgencyVerifyChangesCantMigrate() throws Exception {
         System.out.println("openAgencyVerifyChangesCantMigrate");
 
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
+            OpenAgencyBean openAgency = createOpenAgencyBean(em);
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, true, false));
             em.persist(new HoldingsItemEntity(711100, "1", ON_SHELF, ""));
@@ -133,4 +114,25 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertTrue(changedAgencies.contains(711100));
         assertEquals(1, changedAgencies.size());
     }
+
+    private OpenAgencyBean createOpenAgencyBean(EntityManager em) {
+        OpenAgencyBean openAgency = new OpenAgencyBean() {
+
+            @Override
+            void agencyHasChanged(OpenAgencyEntity oldEntry, OpenAgencyEntity newEntry) {
+                super.agencyHasChanged(oldEntry, newEntry);
+                changedAgencies.add(oldEntry.getAgencyId());
+            }
+
+            @Override
+            void purgeHoldingFor(int agencyId) {
+                super.purgeHoldingFor(agencyId);
+                purgedAgencies.add(agencyId);
+            }
+        };
+        openAgency.entityManager = em;
+        openAgency.proxy = createOpenAgencyProxyBean();
+        return openAgency;
+    }
+
 }

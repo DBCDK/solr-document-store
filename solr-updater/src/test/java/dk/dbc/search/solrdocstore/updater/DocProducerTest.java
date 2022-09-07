@@ -26,6 +26,7 @@ import dk.dbc.solrdocstore.updater.businesslogic.KnownSolrFields;
 import dk.dbc.solrdocstore.updater.businesslogic.SolrDocStoreResponse;
 import dk.dbc.solrdocstore.updater.businesslogic.VipCoreLibraryRule;
 import dk.dbc.solrdocstore.updater.businesslogic.VipCoreProfile;
+import java.io.FileInputStream;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -131,7 +132,7 @@ public class DocProducerTest {
 
             @Override
             public KnownSolrFields getSolrFields() {
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("schema.xml")) {
+                try (FileInputStream is = new FileInputStream("target/solr/corepo-config/schema.xml")) {
                     return new KnownSolrFields(is);
                 } catch (IOException | SAXException ex) {
                     throw new RuntimeException(ex);
