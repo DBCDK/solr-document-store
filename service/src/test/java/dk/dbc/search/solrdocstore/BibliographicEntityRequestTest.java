@@ -37,10 +37,6 @@ public class BibliographicEntityRequestTest {
     public void testDecode() throws Exception {
         System.out.println("testDecode");
 
-        String jsonContentOld = "{\"superceds\":[\"a\"]}";
-        BibliographicEntityRequest beOld = context.unmarshall(jsonContentOld, BibliographicEntityRequest.class);
-        assertThat(beOld.getSupersedes(), containsInAnyOrder("a"));
-
         String jsonContentNew = "{\"supersedes\":[\"a\"]}";
         BibliographicEntityRequest beNew = context.unmarshall(jsonContentNew, BibliographicEntityRequest.class);
         assertThat(beNew.getSupersedes(), containsInAnyOrder("a"));
