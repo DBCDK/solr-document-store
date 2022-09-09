@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore.jpa;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.search.solrdocstore.SolrIndexKeys;
 import java.util.List;
 import java.util.Map;
@@ -27,16 +26,12 @@ import org.junit.Test;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
-import static dk.dbc.search.solrdocstore.SolrIndexKeys.holdingsIndexKeys;
 
 /**
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 public class HoldingsItemEntityTest {
-
-    private static final ObjectMapper O = new ObjectMapper();
 
     @Test(timeout = 2_000L)
     public void testLocations() throws Exception {

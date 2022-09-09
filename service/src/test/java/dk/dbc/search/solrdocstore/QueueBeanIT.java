@@ -38,9 +38,7 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Before
     public void setupItems() {
-        EntityManager em = env().getEntityManager();
-
-        env().getPersistenceContext().run(() -> {
+        jpa(em -> {
             em.persist(new BibliographicEntity(777777, "clazzifier", "12345678", "777777-clazzifier:12345678", "work:4", "unit:8", false, new IndexKeys(), "track-me"));
             em.persist(new BibliographicEntity(777777, "clazzifier", "23456789", "777777-clazzifier:23456789", "work:4", "unit:12", false, new IndexKeys(), "track-me"));
             em.persist(new BibliographicEntity(777777, "clazzifier", "87654321", "777777-clazzifier:87654321", null, null, true, new IndexKeys(), "track-me"));
@@ -51,12 +49,12 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testQueueManifestation() throws Exception {
         System.out.println("testQueueManifestation");
 
-        QueueBean bean = createQueueBean(env());
-        Response resp = env().getPersistenceContext().run(() -> {
-            return bean.queueManifestation(777777, "clazzifier", "12345678", null);
+        jpa(em -> {
+            QueueBean bean = createQueueBean(em);
+            Response resp = bean.queueManifestation(777777, "clazzifier", "12345678", null);
+            assertThat(resp.getStatus(), is(200));
         });
 
-        assertThat(resp.getStatus(), is(200));
         Set<String> queued = queueContentAndClear();
         assertThat(queued, containsInAnyOrder(
                    "e,777777-clazzifier:12345678",
@@ -67,12 +65,12 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testQueueDeletedManifestation() throws Exception {
         System.out.println("testQueueDeletedManifestation");
 
-        QueueBean bean = createQueueBean(env());
-        Response resp = env().getPersistenceContext().run(() -> {
-            return bean.queueManifestation(777777, "clazzifier", "87654321", null);
+        jpa(em -> {
+            QueueBean bean = createQueueBean(em);
+            Response resp = bean.queueManifestation(777777, "clazzifier", "87654321", null);
+            assertThat(resp.getStatus(), is(200));
         });
 
-        assertThat(resp.getStatus(), is(200));
         Set<String> queued = queueContentAndClear();
         assertThat(queued, containsInAnyOrder(
                    "e,777777-clazzifier:87654321"));
@@ -82,12 +80,12 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testQueueUnknownManifestation() throws Exception {
         System.out.println("testQueueUnknownManifestation");
 
-        QueueBean bean = createQueueBean(env());
-        Response resp = env().getPersistenceContext().run(() -> {
-            return bean.queueManifestation(777777, "clazzifier", "not-found", null);
+        jpa(em -> {
+            QueueBean bean = createQueueBean(em);
+            Response resp = bean.queueManifestation(777777, "clazzifier", "not-found", null);
+            assertThat(resp.getStatus(), is(404));
         });
 
-        assertThat(resp.getStatus(), is(404));
         Set<String> queued = queueContentAndClear();
         assertThat(queued, empty());
     }
@@ -96,12 +94,13 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testQueueWork() throws Exception {
         System.out.println("testQueueWork");
 
-        QueueBean bean = createQueueBean(env());
-        Response resp = env().getPersistenceContext().run(() -> {
-            return bean.queueWork("work:4", null);
+        jpa(em -> {
+            QueueBean bean = createQueueBean(em);
+            Response resp =
+                    bean.queueWork("work:4", null);
+            assertThat(resp.getStatus(), is(200));
         });
 
-        assertThat(resp.getStatus(), is(200));
         Set<String> queued = queueContentAndClear();
         assertThat(queued, containsInAnyOrder(
                    "e,777777-clazzifier:12345678",
@@ -113,14 +112,13 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testQueueUnknownWork() throws Exception {
         System.out.println("testQueueUnknownWork");
 
-        QueueBean bean = createQueueBean(env());
-        Response resp = env().getPersistenceContext().run(() -> {
-            return bean.queueWork("not-found", null);
+        jpa(em -> {
+            QueueBean bean = createQueueBean(em);
+            Response resp = bean.queueWork("not-found", null);
+            assertThat(resp.getStatus(), is(404));
         });
 
-        assertThat(resp.getStatus(), is(404));
         Set<String> queued = queueContentAndClear();
         assertThat(queued, empty());
     }
-
 }

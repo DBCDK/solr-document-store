@@ -1,4 +1,5 @@
 def workerNode = 'devel10'
+def dockerRepository = 'https://docker-de.artifacts.dbccloud.dk'
 
 if (env.BRANCH_NAME == 'master') {
     properties([
@@ -9,7 +10,7 @@ if (env.BRANCH_NAME == 'master') {
                     $class: 'jenkins.triggers.ReverseBuildTrigger',
                     upstreamProjects: "../pg-queue/master, dbc-commons, Docker-postgres-bump-trigger, Docker-payara5-bump-trigger", threshold: hudson.model.Result.SUCCESS
                 ]
-    	    ]
+            ]
         ]),
     ])
 }
@@ -34,22 +35,16 @@ pipeline {
     stages {
         stage("build") {
             steps {
-                // Fail Early..
                 script {
-                    if (! env.BRANCH_NAME) {
-                        currentBuild.rawBuild.result = Result.ABORTED
-                        throw new hudson.AbortException('Job Started from non MultiBranch Build')
-                    } else {
-                        println(" Building BRANCH_NAME == ${BRANCH_NAME}")
-                    }
-                }
+                    def version = readMavenPom().version.replace('-SNAPSHOT', '')
+                    def label = imageLabel()
 
-                sh """
-                    rm -rf \$WORKSPACE/.repo/dk/dbc
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
-                    mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
-                """
-                script {
+                    sh """
+                        rm -rf \$WORKSPACE/.repo/dk/dbc
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo -Ddocker.extra.args="--pull" -Ddocker.image.version=${version} -Ddocker.image.label=${label} org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
+                    """
+
                     junit testResults: '**/target/surefire-reports/TEST-*.xml'
 
                     def java = scanForIssues tool: [$class: 'Java']
@@ -93,38 +88,16 @@ pipeline {
         stage('Docker') {
             steps {
                 script {
-                    if (! env.CHANGE_BRANCH) {
-                        imageLabel = env.BRANCH_NAME
-                    } else {
-                        imageLabel = env.CHANGE_BRANCH
-                    }
-                    if ( ! (imageLabel ==~ /master|trunk/) ) {
-                        println("Using branch_name ${imageLabel}")
-                        imageLabel = imageLabel.split(/\//)[-1]
-                        imageLabel = imageLabel.toLowerCase()
-                    } else {
-                        println(" Using Master branch ${BRANCH_NAME}")
-                        imageLabel = env.BUILD_NUMBER
-                    }
-
-                    def dockerFiles = findFiles(glob: '**/target/docker/Dockerfile')
-                    def version = readMavenPom().version.replace('-SNAPSHOT', '')
-
-                    for (def dockerFile : dockerFiles) {
-                        def dirName = dockerFile.path.replace('/target/docker/Dockerfile', '')
-                        dir(dirName) {
-                            def modulePom = readMavenPom file: 'pom.xml'
-                            def projectArtifactId = modulePom.getArtifactId()
-                            def imageName = "${projectArtifactId}-${version}".toLowerCase()
-                            println("In ${dirName} build ${projectArtifactId} as ${imageName}:$imageLabel")
-                            def app = docker.build("$imageName:${imageLabel}", "--pull --file target/docker/Dockerfile .")
-
-                            if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
-                                docker.withRegistry('https://docker-de.artifacts.dbccloud.dk', 'docker') {
-                                    app.push()
-                                    if (env.BRANCH_NAME ==~ /master|trunk/) {
-                                        app.push "latest"
-                                    }
+                    def pom = readMavenPom()
+                    def version = pom.version.replace('-SNAPSHOT', '')
+                    def label = imageLabel()
+                    if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
+                        docker.withRegistry(dockerRepository, 'docker') {
+                            for(def image : ["solr-doc-store-emulator", "solr-doc-store-monitor", "solr-doc-store-updater", "solr-doc-store-postgresql", "solr-doc-store-service"]) {
+                                def app = docker.image("${image}-${version}:${label}")
+                                app.push()
+                                if (env.BRANCH_NAME == "master") {
+                                    app.push "latest"
                                 }
                             }
                         }
@@ -202,4 +175,17 @@ pipeline {
             step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])
         }
     }
+}
+
+def imageLabel() {
+    def label = env.BRANCH_NAME.toLowerCase()
+    if (env.CHANGE_BRANCH) {
+        label = env.CHANGE_BRANCH.toLowerCase()
+    }
+    if (label == "master") {
+        label = env.BUILD_NUMBER
+    } else {
+        label = label.split(/\//)[-1]
+    }
+    return label
 }

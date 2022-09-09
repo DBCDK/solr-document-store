@@ -23,8 +23,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.SolrIndexKeys.*;
@@ -35,23 +33,11 @@ import static org.junit.Assert.fail;
 
 public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    private static final Logger log = LoggerFactory.getLogger(BibliographicBeanIT.class);
-
-    private BibliographicBean bean;
-    private EntityManager em;
-
     private final JSONBContext jsonbContext = new JSONBContext();
 
     @Before
     public void setupBean() throws URISyntaxException {
-        em = env().getEntityManager();
-        bean = createBibliographicBean(env(), new Config() {
-                                   @Override
-                                   public long getReviveOlderWhenDeletedForAtleast() {
-                                       return TimeUnit.HOURS.toMillis(8);
-                                   }
-                               });
-        executeScriptResource("/bibliographicUpdate.sql");
+        executeSqlScript("bibliographicUpdate.sql");
     }
 
     @Test
@@ -59,67 +45,100 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         String b870970 = makeBibliographicRequestJson(870970);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, b870970)
-                );
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, b870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
-        List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
-
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 870970, true),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                   new HoldingsToBibliographicEntity(300100, "new", 870970, false),
-                   new HoldingsToBibliographicEntity(300200, "new", 870970, false)
-           ));
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(700000, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(300100, "new", 870970, false),
+                       new HoldingsToBibliographicEntity(300200, "new", 870970, false)
+               ));
+        });
 
         String b700000 = makeBibliographicRequestJson(700000);
 
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, b700000)
-                );
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
 
-        assertThat(r.getStatus(), is(200));
+            Response r = bean.addBibliographicKeys(false, b700000);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 700000, true),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                   new HoldingsToBibliographicEntity(300100, "new", 870970, false),
-                   new HoldingsToBibliographicEntity(300200, "new", 870970, false)
-           ));
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(700000, "new", 700000, true),
+                       new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(300100, "new", 870970, false),
+                       new HoldingsToBibliographicEntity(300200, "new", 870970, false)
+               ));
+        });
 
         String b300100 = makeBibliographicRequestJson(300100);
 
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, b300100)
-                );
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
 
-        l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 700000, true),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                   new HoldingsToBibliographicEntity(300100, "new", 300100, false),
-                   new HoldingsToBibliographicEntity(300200, "new", 870970, false)
-           ));
+            Response r = bean.addBibliographicKeys(false, b300100);
+            assertThat(r.getStatus(), is(200));
+        });
+
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(700000, "new", 700000, true),
+                       new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(300100, "new", 300100, false),
+                       new HoldingsToBibliographicEntity(300200, "new", 870970, false)
+               ));
+        });
 
         String b300000 = makeBibliographicRequestJson(300000);
 
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, b300000)
-                );
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
 
-        l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(700000, "new", 700000, true),
-                   new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                   new HoldingsToBibliographicEntity(300100, "new", 300100, false),
-                   new HoldingsToBibliographicEntity(300200, "new", 300000, false)
-           ));
+            Response r = bean.addBibliographicKeys(false, b300000);
+            assertThat(r.getStatus(), is(200));
+        });
+
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(700000, "new", 700000, true),
+                       new HoldingsToBibliographicEntity(700100, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(300100, "new", 300100, false),
+                       new HoldingsToBibliographicEntity(300200, "new", 300000, false)
+               ));
+        });
     }
 
     @Test
@@ -127,21 +146,31 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#1", "work:update", "unit:update", false, makeIndexKeys(), "track:update");
         String updatedB = jsonbContext.marshall(b);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedB)
-                );
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, updatedB);
+            assertThat(r.getStatus(), is(200));
+        });
 
         // Ensure update came through
-        BibliographicEntity updatedBibEntity = em.find(BibliographicEntity.class, b.asAgencyClassifierItemKey());
-        assertThat(updatedBibEntity, equalTo(b));
-        //assertThat(true,equalTo(true));
+        jpa(em -> {
+            BibliographicEntity updatedBibEntity = em.find(BibliographicEntity.class, b.asAgencyClassifierItemKey());
+            assertThat(updatedBibEntity, equalTo(b));
+            //assertThat(true,equalTo(true));
+        });
 
         // Ensure related holdings are unchanged
-        List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.bibliographicRecordId='properUpdate'", HoldingsToBibliographicEntity.class).getResultList();
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(610510, "properUpdate", 600100, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.bibliographicRecordId='properUpdate'", HoldingsToBibliographicEntity.class).getResultList();
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(610510, "properUpdate", 600100, false)
+               ));
+        });
     }
 
     @Test
@@ -149,24 +178,42 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", "work:update", "unit:update", false, makeIndexKeys(), "track:update");
         String updatedB = jsonbContext.marshall(b);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedB)
-                );
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, updatedB);
+            assertThat(r.getStatus(), is(200));
+        });
 
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", null, null, true, makeIndexKeys(), "track:update");
         String updatedD = jsonbContext.marshall(d);
 
-        Response rd1 = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedD)
-                );
-        assertThat(rd1.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response rd1 = bean.addBibliographicKeys(false, updatedD);
+            assertThat(rd1.getStatus(), is(200));
+        });
 
         // resend deleted record:
-        Response rd2 = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedD)
-                );
-        assertThat(rd2.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response rd2 = bean.addBibliographicKeys(false, updatedD);
+            assertThat(rd2.getStatus(), is(200));
+        });
     }
 
     @Test(timeout = 2_000L)
@@ -174,16 +221,28 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("reviveDeletedRecordFail");
 
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "id", "id#1", null, null, true, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now()), "track:deleted");
-        Response deleted = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(d))
-                );
-        assertThat(deleted.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response deleted = bean.addBibliographicKeys(false, jsonbContext.marshall(d));
+            assertThat(deleted.getStatus(), is(200));
+        });
 
         BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:not-revive");
-        Response revive = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(r))
-                );
-        assertThat(revive.getStatus(), not(is(200)));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response revive = bean.addBibliographicKeys(false, jsonbContext.marshall(r));
+            assertThat(revive.getStatus(), not(is(200)));
+        });
     }
 
     @Test(timeout = 2_000L)
@@ -191,16 +250,28 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("reviveDeletedRecordSuccess");
 
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "id", "id#1", null, null, true, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("1d"))), "track:deleted");
-        Response deleted = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(d))
-                );
-        assertThat(deleted.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response deleted = bean.addBibliographicKeys(false, jsonbContext.marshall(d));
+            assertThat(deleted.getStatus(), is(200));
+        });
 
         BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:revive");
-        Response revive = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, jsonbContext.marshall(r))
-                );
-        assertThat(revive.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response revive = bean.addBibliographicKeys(false, jsonbContext.marshall(r));
+            assertThat(revive.getStatus(), is(200));
+        });
     }
 
     @Test
@@ -208,12 +279,18 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "delay", "id#2", "work:delay", "unit:delay", true, makeIndexKeys(), "track:delay");
         String updatedB = jsonbContext.marshall(b);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, updatedB)
-                );
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, updatedB);
+            assertThat(r.getStatus(), is(200));
+        });
         // Record what time the bib entity was queued
-        try (Connection conn = env().getDatasource().getConnection() ;
+        try (Connection conn = PG.createConnection() ;
              Statement statement = conn.createStatement() ;
              ResultSet resultSet = statement.executeQuery("SELECT consumer, dequeueafter > now() FROM queue")) {
             while (resultSet.next()) {
@@ -246,52 +323,63 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void deleteUpdateHoldings() throws JSONBException {
         // Before common FBS update
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDelete");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600200, "onDelete", 600200, true),
-                   new HoldingsToBibliographicEntity(620520, "onDelete", 600200, true),
-                   new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDelete");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600200, "onDelete", 600200, true),
+                       new HoldingsToBibliographicEntity(620520, "onDelete", 600200, true),
+                       new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
+               ));
+        });
         // Update common for FBS
         runDeleteUpdate(600200, "onDelete", true);
 
         // Ensure related holdings are moved to a higher level
-        l = getRelatedHoldings("onDelete");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600200, "onDelete", 870970, true),
-                   new HoldingsToBibliographicEntity(620520, "onDelete", 870970, true),
-                   new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDelete");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600200, "onDelete", 870970, true),
+                       new HoldingsToBibliographicEntity(620520, "onDelete", 870970, true),
+                       new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
+               ));
+        });
         // Before common FBS School update
-        l = getRelatedHoldings("onDeleteSchool");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300200, false),
-                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchool");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300200, false),
+                       new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
+               ));
+        });
         // Update common FBS School, moved one level up
         runDeleteUpdate(300200, "onDeleteSchool", true);
-        l = getRelatedHoldings("onDeleteSchool");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300000, false),
-                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchool");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300000, false),
+                       new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
+               ));
+        });
         // Update common FBS School, moved up yet again
         runDeleteUpdate(300000, "onDeleteSchool", true);
-        l = getRelatedHoldings("onDeleteSchool");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 870970, false),
-                   new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 870970, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchool");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 870970, false),
+                       new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 870970, false)
+               ));
+        });
 
         // Update single record (no ancestor) holdings does not change
         runDeleteUpdate(633333, "onDeleteSingle", true);
 
         // Ensure related holdings no ancestor does not change
-        l = getRelatedHoldings("onDeleteSingle");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(644444, "onDeleteSingle", 633333, false)
-           ));
-
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSingle");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(644444, "onDeleteSingle", 633333, false)
+               ));
+        });
     }
 
     /**
@@ -303,119 +391,149 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void recreateUpdateHoldings() throws JSONBException {
         // Before update
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreate");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600300, "onRecreate", 870970, true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreate");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600300, "onRecreate", 870970, true)
+               ));
+        });
         // Recreate FBS library
         runDeleteUpdate(600300, "onRecreate", false);
 
         // Ensure related holdings are moved back to their lower level
-        l = getRelatedHoldings("onRecreate");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600300, "onRecreate", 600300, true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreate");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600300, "onRecreate", 600300, true)
+               ));
+        });
         // Before update of FBS School
-        l = getRelatedHoldings("onRecreateSchool");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300000, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchool");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300000, false)
+               ));
+        });
         // Recreate FBS School
         runDeleteUpdate(300300, "onRecreateSchool", false);
 
         // Ensure related holdings are moved to a higher level
-        l = getRelatedHoldings("onRecreateSchool");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300300, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchool");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300300, false)
+               ));
+        });
         // Recreate no holdings on lower level, nothing is moved
         runDeleteUpdate(655555, "onRecreateSingle", false);
-        l = getRelatedHoldings("onRecreateSingle");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(607000, "onRecreateSingle", 655555, false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSingle");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(607000, "onRecreateSingle", 655555, false)
+               ));
+        });
     }
 
     @Test
     public void deleteUpdateHoldingsSupersede() throws JSONBException {
         // Before supersede update FBS
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onDeleteSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true)
+               ));
+        });
         // Delete update FBS, records moved to higher level
         runDeleteUpdate(600400, "onDeleteSupersedeNew", true);
-        l = getRelatedHoldings("onDeleteSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true)
+               ));
+        });
         // Before supersede update FBS School
-        l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchoolSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false)
+               ));
+        });
         // Delete update FBS School, moved to higher level
         runDeleteUpdate(300400, "onDeleteSchoolSupersedeNew", true);
-        l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchoolSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false)
+               ));
+        });
         runDeleteUpdate(300000, "onDeleteSchoolSupersedeNew", true);
-        l = getRelatedHoldings("onDeleteSchoolSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchoolSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false)
+               ));
+        });
     }
 
     @Test
     public void recreateUpdateHoldingsSupersede() throws JSONBException {
         // Before FBS re-create
-        List<HoldingsToBibliographicEntity> l = getRelatedHoldings("onRecreateSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
+               ));
+        });
         // Re-create FBS
         runDeleteUpdate(600500, "onRecreateSupersedeNew", false);
-        l = getRelatedHoldings("onRecreateSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 600500, "onRecreateSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
-                   new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 600500, "onRecreateSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
+                       new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
+               ));
+        });
         // Before FBS School re-create
-        l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchoolSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false)
+               ));
+        });
         // Re-create FBSSchool
         runDeleteUpdate(300000, "onRecreateSchoolSupersedeNew", false);
-        l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchoolSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
+               ));
+        });
         runDeleteUpdate(300500, "onRecreateSchoolSupersedeNew", false);
-        l = getRelatedHoldings("onRecreateSchoolSupersedeNew");
-        assertThat(l, containsInAnyOrder(
-                   new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300500, "onRecreateSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
-                   new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
-           ));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchoolSupersedeNew");
+            assertThat(l, containsInAnyOrder(
+                       new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300500, "onRecreateSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
+                       new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
+               ));
+        });
     }
 
     /**
@@ -445,30 +563,44 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void updateNonFbsLibrary() throws JSONBException {
         String json = makeBibliographicRequestJson(800000);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, json)
-                );
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, json);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
-        List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
-
-        assertThat(l, contains(( new HoldingsToBibliographicEntity(800000, "new", 800000, false) )));
+            assertThat(l, contains(( new HoldingsToBibliographicEntity(800000, "new", 800000, false) )));
+        });
     }
 
     @Test
     public void updateNonFbsLibraryWithNoHolding() throws JSONBException {
         String json = makeBibliographicRequestJson(888000);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, json)
-                );
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, json);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
 
-        List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
-
-        assertThat(l.size(), is(0));
+            assertThat(l.size(), is(0));
+        });
     }
 
     @Test
@@ -480,25 +612,35 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setSupersedes(Arrays.asList("a", "b"));
         });
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, json));
-        assertThat(r.getStatus(), is(200));
-        List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, json);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        assertThat(l.size(), is(2));
-        Assert.assertTrue("One superseded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
-        Assert.assertTrue("One superseded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
+        jpa(em -> {
+            List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
+
+            assertThat(l.size(), is(2));
+            Assert.assertTrue("One superseded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
+            Assert.assertTrue("One superseded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
+        });
     }
 
     @Test(timeout = 2_000L)
     public void supersedesReverted() throws Exception {
         System.out.println("supersedesReverted");
 
-        try (Connection conn = env().getDatasource().getConnection() ;
+        // DELETE rows from 'executeScriptResource("/bibliographicUpdate.sql");'
+        try (Connection conn = PG.createConnection() ;
              Statement statement = conn.createStatement()) {
             statement.executeUpdate("TRUNCATE bibliographicToBibliographic");
         }
-
         { // a dead  b live
 
             String json = makeBibliographicRequestJson(
@@ -508,13 +650,22 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 e.setSupersedes(Arrays.asList("a"));
             });
 
-            Response r = env().getPersistenceContext()
-                    .run(() -> bean.addBibliographicKeys(false, json));
-            assertThat(r.getStatus(), is(200));
+            jpa(em -> {
+                BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                             @Override
+                                                             public long getReviveOlderWhenDeletedForAtleast() {
+                                                                 return TimeUnit.HOURS.toMillis(8);
+                                                             }
+                                                         });
+                Response r = bean.addBibliographicKeys(false, json);
+                assertThat(r.getStatus(), is(200));
+            });
 
-            List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
-            System.out.println("l = " + l);
-            assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("a", "b")));
+            jpa(em -> {
+                List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
+                System.out.println("l = " + l);
+                assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("a", "b")));
+            });
         }
         { // a live, b dead & b deleted
 
@@ -525,9 +676,16 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 e.setSupersedes(Arrays.asList("b"));
             });
 
-            Response r1 = env().getPersistenceContext()
-                    .run(() -> bean.addBibliographicKeys(false, json1));
-            assertThat(r1.getStatus(), is(200));
+            jpa(em -> {
+                BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                             @Override
+                                                             public long getReviveOlderWhenDeletedForAtleast() {
+                                                                 return TimeUnit.HOURS.toMillis(8);
+                                                             }
+                                                         });
+                Response r1 = bean.addBibliographicKeys(false, json1);
+                assertThat(r1.getStatus(), is(200));
+            });
             String json2 = makeBibliographicRequestJson(
                     870970,
                     e -> {
@@ -536,46 +694,64 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 e.setSupersedes(Arrays.asList("a"));
             });
 
-            Response r2 = env().getPersistenceContext()
-                    .run(() -> bean.addBibliographicKeys(false, json2));
-            assertThat(r2.getStatus(), is(200));
+            jpa(em -> {
+                BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                             @Override
+                                                             public long getReviveOlderWhenDeletedForAtleast() {
+                                                                 return TimeUnit.HOURS.toMillis(8);
+                                                             }
+                                                         });
+                Response r2 = bean.addBibliographicKeys(false, json2);
+                assertThat(r2.getStatus(), is(200));
+            });
 
-            List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
-            System.out.println("l = " + l);
-            assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("b", "a")));
+            jpa(em -> {
+                List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
+                System.out.println("l = " + l);
+                assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("b", "a")));
+            });
         }
     }
 
     @Test
     public void newRecordWhereSupersedesIsAlreadySet() throws Exception {
 
-        Response r;
         String a870970 = makeBibliographicRequestJson(
                 870970, e -> {
             e.setBibliographicRecordId("a");
         });
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, a870970));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, a870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
         // Setup holding pointint to 870970:a
-        env().getPersistenceContext()
-                .run(() -> {
-                    em.persist(new HoldingsItemEntity(700000, "a", new IndexKeysList(), "T#1"));
-                });
-        env().getPersistenceContext()
-                .run(() -> {
-                    em.persist(new HoldingsToBibliographicEntity(700000, "a", 870970, true));
-                });
+        jpa(em -> {
+            em.persist(new HoldingsItemEntity(700000, "a", new IndexKeysList(), "T#1"));
+            em.persist(new HoldingsToBibliographicEntity(700000, "a", 870970, true));
+        });
 
         String b870970 = makeBibliographicRequestJson(
                 870970, e -> {
             e.setBibliographicRecordId("b");
             e.setSupersedes(Arrays.asList("a"));
         });
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, b870970));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, b870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
         // Not really nessecary
         String a870970d = makeBibliographicRequestJson(
@@ -583,33 +759,56 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setDeleted(true);
             e.setBibliographicRecordId("a");
         });
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, a870970d));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, a870970d);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        HoldingsToBibliographicEntity h2bBefore = env().getPersistenceContext()
-                .run(() -> {
-                    return em.find(HoldingsToBibliographicEntity.class,
-                                   new HoldingsToBibliographicKey(700000, "a"));
-                });
-
-        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 870970, "b", true), h2bBefore);
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity h2bBefore = em.find(HoldingsToBibliographicEntity.class,
+                                                              new HoldingsToBibliographicKey(700000, "a"));
+            Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 870970, "b", true), h2bBefore);
+        });
 
         String b70000 = makeBibliographicRequestJson(
                 700000, e -> {
             e.setBibliographicRecordId("b");
         });
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, b70000));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, b70000);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        HoldingsToBibliographicEntity h2bAfter = env().getPersistenceContext()
-                .run(() -> {
-                    return em.find(HoldingsToBibliographicEntity.class,
-                                   new HoldingsToBibliographicKey(700000, "a"));
-                });
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity h2bAfter = em.find(HoldingsToBibliographicEntity.class,
+                                                             new HoldingsToBibliographicKey(700000, "a"));
+            Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b", true), h2bAfter);
+        });
 
-        Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b", true), h2bAfter);
     }
 
     @Test(timeout = 2_000L)
@@ -621,20 +820,24 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setIndexKeys(null);
         });
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, a870970));
-        assertThat(r.getStatus(), not(is(200)));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, a870970);
+            assertThat(r.getStatus(), not(is(200)));
+        });
     }
 
     @Test(timeout = 2_000L)
     public void resurrectRecord() throws Exception {
         System.out.println("resurrectRecord");
 
-        evictAll();
-
         assertThat(queueContentAndClear(), empty());
 
-        Response r;
         String a870970d = makeBibliographicRequestJson(
                 870970, e -> {
             e.setDeleted(true);
@@ -643,15 +846,29 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 870970, e -> {
             e.setDeleted(false);
         });
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, a870970d));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, a870970d);
+            assertThat(r.getStatus(), is(200));
+        });
 
         assertThat(queueContentAndClear(), empty()); // From non-existing -> deleted
 
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, a870970));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, a870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
@@ -663,69 +880,99 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void resurrectRecordWithHoldings() throws Exception {
         System.out.println("resurrectRecordWithHoldings");
 
-        HoldingsItemBean hb = createHoldingsItemBean(env());
-        HoldingsToBibliographicEntity h2b;
+        jpa(em -> {
+            HoldingsItemBean hb = createHoldingsItemBean(em);
+            hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-1"));
+        });
 
-        env().getPersistenceContext()
-                .run(() -> {
-                    hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-1"));
-                });
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity h2b = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+            assertThat(h2b, nullValue());
+        });
 
-        h2b = env().getPersistenceContext()
-                .run(() -> {
-                    return env().getEntityManager()
-                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
-                });
-        assertThat(h2b, nullValue());
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            bean.addBibliographicKeys(
+                    new BibliographicEntity(800010, "katalog", "12345678",
+                                            "800010-katalog:12345678", "work:1", "unit:1",
+                                            false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
+        });
 
-        env().getPersistenceContext()
-                .run(() -> {
-                    bean.addBibliographicKeys(
-                            new BibliographicEntity(800010, "katalog", "12345678",
-                                                    "800010-katalog:12345678", "work:1", "unit:1",
-                                                    false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
-                });
-
-        h2b = env().getPersistenceContext()
-                .run(() -> {
-                    return env().getEntityManager()
-                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
-                });
-        assertThat(h2b, notNullValue());
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity h2b = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+            assertThat(h2b, notNullValue());
+        });
 
         // Delete
-        env().getPersistenceContext()
-                .run(() -> {
-                    bean.addBibliographicKeys(
-                            new BibliographicEntity(800010, "katalog", "12345678",
-                                                    "800010-katalog:12345678", "work:1", "unit:1",
-                                                    true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), EMPTY_LIST, true);
-                    hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", NO_HOLDINGS, "h-2"));
-                });
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsItemBean hb = createHoldingsItemBean(em);
+            bean.addBibliographicKeys(
+                    new BibliographicEntity(800010, "katalog", "12345678",
+                                            "800010-katalog:12345678", "work:1", "unit:1",
+                                            true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), EMPTY_LIST, true);
+            hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", NO_HOLDINGS, "h-2"));
+        });
 
-        h2b = env().getPersistenceContext()
-                .run(() -> {
-                    return env().getEntityManager()
-                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
-                });
-        assertThat(h2b, nullValue());
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity h2b = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+            assertThat(h2b, nullValue());
+        });
 
         // Resurrect
-        env().getPersistenceContext()
-                .run(() -> {
-                    hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-2"));
-                    bean.addBibliographicKeys(
-                            new BibliographicEntity(800010, "katalog", "12345678",
-                                                    "800010-katalog:12345678", "work:1", "unit:1",
-                                                    false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
-                });
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsItemBean hb = createHoldingsItemBean(em);
+            hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-2"));
+            bean.addBibliographicKeys(
+                    new BibliographicEntity(800010, "katalog", "12345678",
+                                            "800010-katalog:12345678", "work:1", "unit:1",
+                                            false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
+        });
 
-        h2b = env().getPersistenceContext()
-                .run(() -> {
-                    return env().getEntityManager()
-                            .find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
-                });
-        assertThat(h2b, notNullValue());
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity h2b = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(800010, "12345678"));
+            assertThat(h2b, notNullValue());
+        });
 
     }
 
@@ -733,16 +980,14 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void skipQueueParameter() throws Exception {
         System.out.println("skipQueueParameter");
 
-        Response r;
-
         assertThat(queueContentAndClear(), empty());
 
         // live holdings
-        env().getPersistenceContext()
-                .run(() -> env().getEntityManager().merge(
-                        new HoldingsItemEntity(700000, "new",
-                                               SolrIndexKeys.ON_SHELF,
-                                               "test")));
+        jpa(em -> {
+            em.merge(new HoldingsItemEntity(700000, "new",
+                                            SolrIndexKeys.ON_SHELF,
+                                            "test"));
+        });
 
         String a870970 = makeBibliographicRequestJson(
                 870970, e -> {
@@ -754,9 +999,16 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String a700000 = makeBibliographicRequestJson(
                 700000, e -> {
         });
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(true, a870970));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(true, a870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
@@ -764,16 +1016,30 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "c,work:0"));
 
         // No changes in structire - nothing queued
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(true, a870970));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(true, a870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
         assertThat(queueContentAndClear(), empty());
 
         // Change in structure
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(true, a700000));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(true, a700000);
+            assertThat(r.getStatus(), is(200));
+        });
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,700000-clazzifier:new",
@@ -782,9 +1048,16 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "c,work:0"));
 
         // Delete - change in structure
-        r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(true, a870970d));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(true, a870970d);
+            assertThat(r.getStatus(), is(200));
+        });
 
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-clazzifier:new",
@@ -796,46 +1069,66 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsUponCommonStaysIfDeletedManifestationIsCreated() throws Exception {
         System.out.println("testHoldingsUponCommonStaysIfDeletedManifestationIsCreated");
 
-        Response r;
-        HoldingsToBibliographicEntity htob;
-
-        HoldingsItemBean hol = createHoldingsItemBean(env());
-
         String a870970 = jsonbContext.marshall(new BibliographicEntityRequest(870970, "clazzifier", "25912233", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT", null));
         String d710100 = jsonbContext.marshall(new BibliographicEntityRequest(710100, "clazzifier", "25912233", "id#0", "work:0", "unit:0", true, new IndexKeys(), "IT", null));
         String h710100 = jsonRequestHold("710100-25912233-a");
 
-        r = env().getPersistenceContext().run(() -> bean.addBibliographicKeys(true, a870970));
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
 
-        r = env().getPersistenceContext().run(() -> hol.setHoldingsKeys(h710100));
-        assertThat(r.getStatus(), is(200));
+            Response r = bean.addBibliographicKeys(true, a870970);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        htob = env().getPersistenceContext()
-                .run(() -> em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(710100, "25912233")));
-        System.out.println("htob = " + htob);
-        assertThat(htob, notNullValue());
-        assertThat(htob.getBibliographicAgencyId(), is(870970));
+        jpa(em -> {
+            HoldingsItemBean hol = createHoldingsItemBean(em);
 
-        r = env().getPersistenceContext().run(() -> bean.addBibliographicKeys(true, d710100));
-        assertThat(r.getStatus(), is(200));
+            Response r = hol.setHoldingsKeys(h710100);
+            assertThat(r.getStatus(), is(200));
+        });
 
-        htob = env().getPersistenceContext()
-                .run(() -> em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(710100, "25912233")));
-        System.out.println("htob = " + htob);
-        assertThat(htob, notNullValue());
-        assertThat(htob.getBibliographicAgencyId(), is(870970));
-    }
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity htob = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(710100, "25912233"));
+            System.out.println("htob = " + htob);
+            assertThat(htob, notNullValue());
+            assertThat(htob.getBibliographicAgencyId(), is(870970));
+        });
 
-    private void evictAll() throws SQLException {
-        try (Connection connection = env().getDatasource().getConnection() ;
-             Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("TRUNCATE bibliographictobibliographic CASCADE");
-            stmt.executeUpdate("TRUNCATE bibliographicsolrkeys CASCADE");
-            stmt.executeUpdate("TRUNCATE holdingstobibliographic CASCADE");
-            stmt.executeUpdate("TRUNCATE holdingsitemssolrkeys CASCADE");
-        }
-        em.getEntityManagerFactory().getCache().evictAll();
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(true, d710100);
+
+            assertThat(r.getStatus(), is(200));
+        });
+
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            HoldingsToBibliographicEntity htob = em.find(HoldingsToBibliographicEntity.class, new HoldingsToBibliographicKey(710100, "25912233"));
+            System.out.println("htob = " + htob);
+            assertThat(htob, notNullValue());
+            assertThat(htob.getBibliographicAgencyId(), is(870970));
+        });
     }
 
     public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
@@ -843,10 +1136,16 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#3", "work:update", "unit:update", deleted, makeIndexKeys(), "track:update");
         String deletedB = jsonbContext.marshall(b);
 
-        Response r = env().getPersistenceContext()
-                .run(() -> bean.addBibliographicKeys(false, deletedB)
-                );
-        assertThat(r.getStatus(), is(200));
+        jpa(em -> {
+            BibliographicBean bean = createBibliographicBean(em, new Config() {
+                                                         @Override
+                                                         public long getReviveOlderWhenDeletedForAtleast() {
+                                                             return TimeUnit.HOURS.toMillis(8);
+                                                         }
+                                                     });
+            Response r = bean.addBibliographicKeys(false, deletedB);
+            assertThat(r.getStatus(), is(200));
+        });
     }
 
     private static IndexKeys makeIndexKeys(String... keys) {
@@ -860,7 +1159,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                         Collectors.toList()))));
     }
 
-    public List<HoldingsToBibliographicEntity> getRelatedHoldings(String bibId) {
+    public List<HoldingsToBibliographicEntity> getRelatedHoldings(EntityManager em, String bibId) {
         return em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId=:bibId",
                               HoldingsToBibliographicEntity.class)
                 .setParameter("bibId", bibId)

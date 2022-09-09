@@ -34,60 +34,26 @@
         </dependency>
 
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>dbc-commons-testcontainers-postgres</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>postgresql.port</portName>
-                                <portName>wiremock.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>dk.dbc</groupId>
-                <artifactId>postgresql-maven-plugin</artifactId>
-                <version>1.3-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>start-postgresql</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                        <configuration>
-                            <pgPort>${postgresql.port}</pgPort>
-                            <pgDbName>solrdocstore</pgDbName>
-                            <pgDbScripts>
-                            </pgDbScripts>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>stop-postgresql</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>shutdown</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -116,34 +82,6 @@
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>exec-maven-plugin</artifactId>
-                <groupId>org.codehaus.mojo</groupId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>create-and-dump-database</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${basedir}</workingDirectory>
-                            <executable>bash</executable>
-                            <arguments>
-                                <argument>-cex</argument>
-                                <argument>
-                                    java -jar ${project.build.directory}/${project.artifactId}-jar-with-dependencies.jar ${user.name}:${user.name}@localhost:${postgresql.port}/solrdocstore
-                                    read pg _ &lt; ${project.build.directory}/postgresql-cluster/postmaster.opts
-                                    $${pg%/*}/pg_dump --no-owner --inserts postgresql://${user.name}:${user.name}@localhost:${postgresql.port}/solrdocstore | \
-                                        sed '/^CREATE TRIGGER/s/FOR EACH \(STATEMENT\|ROW\) EXECUTE FUNCTION/FOR EACH \1 EXECUTE PROCEDURE/' > ${project.build.directory}/solrdocstore-${project.version}.sql
-                                </argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -184,6 +122,12 @@
                 <scope>compile</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+                <scope>compile</scope>
+            </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>

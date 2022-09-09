@@ -20,9 +20,6 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
-import javax.persistence.EntityManager;
-import org.junit.Before;
 import org.junit.Test;
 import dk.dbc.search.solrdocstore.response.ExistsResponse;
 
@@ -36,61 +33,64 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    private EntityManager em;
-    private ExistenceBean bean;
 
-    @Before
-    public void before() {
-        em = env().getEntityManager();
-        bean = createExistenceBean(jpaTestEnvironment);
-    }
 
     @Test(timeout = 2_000L)
     public void testBibliographicNonExisting() throws Exception {
         System.out.println("testBibliographicNonExisting");
-        ExistsResponse existence = jpa(em -> {
-            return bean.bibliographicExists(870970, "clazzifier", "12345678");
+        jpa(em -> {
+            ExistenceBean bean = createExistenceBean(em);
+            ExistsResponse existence = bean.bibliographicExists(870970, "clazzifier", "12345678");
+            assertThat(existence.exists, is(false));
         });
-        assertThat(existence.exists, is(false));
     }
 
     @Test(timeout = 2_000L)
     public void testBibliographicExisting() throws Exception {
         System.out.println("testBibliographicExisting");
-        ExistsResponse existence = jpa(em -> {
+        jpa(em -> {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "repo", "work:1", "unit:1", false, null, "track:1"));
-            return bean.bibliographicExists(870970, "clazzifier", "12345678");
         });
-        assertThat(existence.exists, is(true));
+        jpa(em -> {
+            ExistenceBean bean = createExistenceBean(em);
+            ExistsResponse existence = bean.bibliographicExists(870970, "clazzifier", "12345678");
+            assertThat(existence.exists, is(true));
+        });
     }
 
     @Test(timeout = 2_000L)
     public void testBibliographicDeleted() throws Exception {
         System.out.println("testBibliographicDeleted");
-        ExistsResponse existence = jpa(em -> {
+        jpa(em -> {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "repo", null, null, true, null, "track:1"));
-            return bean.bibliographicExists(870970, "clazzifier", "12345678");
         });
-        assertThat(existence.exists, is(false));
+        jpa(em -> {
+            ExistenceBean bean = createExistenceBean(em);
+            ExistsResponse existence = bean.bibliographicExists(870970, "clazzifier", "12345678");
+            assertThat(existence.exists, is(false));
+        });
     }
 
     @Test(timeout = 2_000L)
     public void testHoldingsNonExisting() throws Exception {
         System.out.println("testHoldingsNonExisting");
-        ExistsResponse existence = jpa(em -> {
-            return bean.holdingExists(777777, "12345678");
+        jpa(em -> {
+            ExistenceBean bean = createExistenceBean(em);
+            ExistsResponse existence = bean.holdingExists(777777, "12345678");
+            assertThat(existence.exists, is(false));
         });
-        assertThat(existence.exists, is(false));
     }
 
     @Test(timeout = 2_000L)
     public void testHoldingsExisting() throws Exception {
         System.out.println("testHoldingsExisting");
-        ExistsResponse existence = jpa(em -> {
+        jpa(em -> {
             em.merge(new HoldingsItemEntity(777777, "12345678", SolrIndexKeys.ON_SHELF, "track:1"));
-            return bean.holdingExists(777777, "12345678");
         });
-        assertThat(existence.exists, is(true));
+        jpa(em -> {
+            ExistenceBean bean = createExistenceBean(em);
+            ExistsResponse existence = bean.holdingExists(777777, "12345678");
+            assertThat(existence.exists, is(true));
+        });
     }
-
 }

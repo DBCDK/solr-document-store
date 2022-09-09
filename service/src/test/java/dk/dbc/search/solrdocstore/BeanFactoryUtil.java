@@ -7,7 +7,6 @@ import dk.dbc.search.solrdocstore.jpa.RecordType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dk.dbc.commons.persistence.JpaTestEnvironment;
 import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import java.io.IOException;
@@ -24,58 +23,57 @@ public class BeanFactoryUtil {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    public static BibliographicBean createBibliographicBean(JpaTestEnvironment env, Config config) {
+    public static BibliographicBean createBibliographicBean(EntityManager em, Config config) {
         BibliographicBean bean = new BibliographicBean();
-        EntityManager em = env.getEntityManager();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.config = config;
         bean.entityManager = em;
         bean.openAgency = openAgency;
-        bean.h2bBean = createHoldingsToBibliographicBean(env);
-        bean.brBean = createBibliographicRetrieveBean(env);
-        bean.enqueueSupplier = createEnqueueSupplier(env);
+        bean.h2bBean = createHoldingsToBibliographicBean(em);
+        bean.brBean = createBibliographicRetrieveBean(em);
+        bean.enqueueSupplier = createEnqueueSupplier(em);
         return bean;
     }
 
-    public static BibliographicRecordAPIBean createBiliographicRecordAPIBean(JpaTestEnvironment env) {
+    public static BibliographicRecordAPIBean createBiliographicRecordAPIBean(EntityManager env) {
         BibliographicRecordAPIBean bean = new BibliographicRecordAPIBean();
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = env;
         bean.brBean = createBibliographicRetrieveBean(env);
         bean.holdingsItemBean = createHoldingsItemBean(env);
         return bean;
     }
 
-    public static HoldingsItemBean createHoldingsItemBean(JpaTestEnvironment env) {
+    public static HoldingsItemBean createHoldingsItemBean(EntityManager em) {
         HoldingsItemBean bean = new HoldingsItemBean();
-        bean.entityManager = env.getEntityManager();
-        bean.h2bBean = createHoldingsToBibliographicBean(env);
-        bean.brBean = createBibliographicRetrieveBean(env);
-        bean.enqueueSupplier = createEnqueueSupplier(env);
+        bean.entityManager = em;
+        bean.h2bBean = createHoldingsToBibliographicBean(em);
+        bean.brBean = createBibliographicRetrieveBean(em);
+        bean.enqueueSupplier = createEnqueueSupplier(em);
         return bean;
     }
 
-    public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(JpaTestEnvironment env) {
+    public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em) {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = em;
         bean.openAgency = createOpenAgencyBean();
-        bean.brBean = createBibliographicRetrieveBean(env);
+        bean.brBean = createBibliographicRetrieveBean(em);
         return bean;
     }
 
-    public static OpenAgencyStatusBean createOpenAgencyStatusBean(JpaTestEnvironment env) {
+    public static OpenAgencyStatusBean createOpenAgencyStatusBean(EntityManager em) {
         OpenAgencyStatusBean bean = new OpenAgencyStatusBean() {
             @Override
             String hash(int agencyId) throws NoSuchAlgorithmException {
                 return "";
             }
         };
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = em;
         bean.proxy = createOpenAgencyProxyBean();
-        bean.supplier = createEnqueueSupplier(env);
+        bean.supplier = createEnqueueSupplier(em);
         return bean;
     }
 
-    public static EnqueueSupplierBean createEnqueueSupplier(JpaTestEnvironment env) {
+    public static EnqueueSupplierBean createEnqueueSupplier(EntityManager em) {
         EnqueueSupplierBean bean = new EnqueueSupplierBean() {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {
@@ -92,7 +90,7 @@ public class BeanFactoryUtil {
                         new QueueRuleEntity("e", QueueType.WORKENDPOINT, 0));
             }
         };
-        EntityManager entityManager = env.getEntityManager();
+        EntityManager entityManager = em;
         bean.entityManager = entityManager;
         return bean;
     }
@@ -129,30 +127,30 @@ public class BeanFactoryUtil {
         };
     }
 
-    public static DocumentRetrieveBean createDocumentRetrieveBean(JpaTestEnvironment env) {
+    public static DocumentRetrieveBean createDocumentRetrieveBean(EntityManager em) {
         DocumentRetrieveBean bean = new DocumentRetrieveBean();
-        bean.entityManager = env.getEntityManager();
-        bean.brBean = createBibliographicRetrieveBean(env);
-        bean.brrBean = createBibliographicResourceRetrieveBean(env);
+        bean.entityManager = em;
+        bean.brBean = createBibliographicRetrieveBean(em);
+        bean.brrBean = createBibliographicResourceRetrieveBean(em);
         bean.oaBean = createOpenAgencyBean();
         return bean;
     }
 
-    public static BibliographicResourceRetrieveBean createBibliographicResourceRetrieveBean(JpaTestEnvironment env) {
+    public static BibliographicResourceRetrieveBean createBibliographicResourceRetrieveBean(EntityManager em) {
         BibliographicResourceRetrieveBean bean = new BibliographicResourceRetrieveBean();
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = em;
         return bean;
     }
 
-    public static BibliographicRetrieveBean createBibliographicRetrieveBean(JpaTestEnvironment env) {
+    public static BibliographicRetrieveBean createBibliographicRetrieveBean(EntityManager em) {
         BibliographicRetrieveBean bean = new BibliographicRetrieveBean();
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = em;
         return bean;
     }
 
-    public static ExistenceBean createExistenceBean(JpaTestEnvironment env) {
+    public static ExistenceBean createExistenceBean(EntityManager em) {
         ExistenceBean bean = new ExistenceBean();
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = em;
         return bean;
     }
 
@@ -164,19 +162,19 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static ResourceBean createResourceBean(JpaTestEnvironment env) {
+    public static ResourceBean createResourceBean(EntityManager em) {
         ResourceBean bean = new ResourceBean();
         OpenAgencyBean openAgency = createOpenAgencyBean();
-        bean.entityManager = env.getEntityManager();
+        bean.entityManager = em;
         bean.openAgency = openAgency;
-        bean.enqueueSupplier = createEnqueueSupplier(env);
+        bean.enqueueSupplier = createEnqueueSupplier(em);
         return bean;
     }
 
-    public static QueueBean createQueueBean(JpaTestEnvironment env) {
+    public static QueueBean createQueueBean(EntityManager em) {
         QueueBean bean = new QueueBean();
-        bean.entityManager = env.getEntityManager();
-        bean.enqueueSupplier = createEnqueueSupplier(env);
+        bean.entityManager = em;
+        bean.enqueueSupplier = createEnqueueSupplier(em);
         return bean;
     }
 }

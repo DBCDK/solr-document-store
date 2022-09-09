@@ -6,29 +6,25 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import javax.persistence.EntityManager;
 
 public class BibliographicToBibliographicEntityIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test
     public void storeEntity() {
-        executeScriptResource("/entityTestData.sql");
-        EntityManager em = env().getEntityManager();
-
-        env().getPersistenceContext().run(() -> {
+        executeSqlScript("entityTestData.sql");
+        jpa(em -> {
             em.persist(new BibliographicToBibliographicEntity("300", "4321"));
         });
     }
 
     @Test
     public void loadEntity() {
-        executeScriptResource("/entityTestData.sql");
+        executeSqlScript("entityTestData.sql");
 
-        EntityManager em = env().getEntityManager();
+        jpa(em -> {
+            BibliographicToBibliographicEntity b2b = em.find(BibliographicToBibliographicEntity.class, "399");
 
-        BibliographicToBibliographicEntity b2b = env().getPersistenceContext()
-                .run(() -> em.find(BibliographicToBibliographicEntity.class, "399"));
-
-        assertThat(b2b.getLiveBibliographicRecordId(), is("600"));
+            assertThat(b2b.getLiveBibliographicRecordId(), is("600"));
+        });
     }
 }

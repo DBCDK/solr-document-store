@@ -22,7 +22,6 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.util.List;
-import org.junit.Before;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
@@ -34,16 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * @author DBC {@literal <dbc.dk>}
  */
 public class BibliographicResourceRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
-
-    private BibliographicResourceRetrieveBean bean;
-
-    public BibliographicResourceRetrieveBeanIT() {
-    }
-
-    @Before
-    public void setUp() {
-        this.bean = createBibliographicResourceRetrieveBean(env());
-    }
 
     @Test(timeout = 2_000L)
     public void testCase() throws Exception {
@@ -60,19 +49,25 @@ public class BibliographicResourceRetrieveBeanIT extends JpaSolrDocStoreIntegrat
             em.merge(new BibliographicResourceEntity(710100, "no", "bar", false));
             em.merge(new BibliographicResourceEntity(310100, "a", "foo", false));
         });
-        List<BibliographicResourceEntity> resourcesFor = bean.getResourcesFor(710100, "a");
-        System.out.println("resourcesFor = " + resourcesFor);
+        jpa(em -> {
+            BibliographicResourceRetrieveBean bean = createBibliographicResourceRetrieveBean(em);
+            List<BibliographicResourceEntity> resourcesFor = bean.getResourcesFor(710100, "a");
+            System.out.println("resourcesFor = " + resourcesFor);
 
-        assertThat(resourcesFor, containsInAnyOrder(
-                   new BibliographicResourceEntity(710100, "a", "foo", true),
-                   new BibliographicResourceEntity(710100, "a", "bar", false)
-           ));
-        List<BibliographicResourceEntity> resourcesForCommon = bean.getResourcesForCommon("a");
-        System.out.println("resourcesForCommon = " + resourcesForCommon);
-        assertThat(resourcesForCommon, containsInAnyOrder(
-                   new BibliographicResourceEntity(710100, "a", "foo", true),
-                   new BibliographicResourceEntity(710100, "a", "bar", false),
-                   new BibliographicResourceEntity(310100, "a", "foo", false)
-           ));
+            assertThat(resourcesFor, containsInAnyOrder(
+                       new BibliographicResourceEntity(710100, "a", "foo", true),
+                       new BibliographicResourceEntity(710100, "a", "bar", false)
+               ));
+        });
+        jpa(em -> {
+            BibliographicResourceRetrieveBean bean = createBibliographicResourceRetrieveBean(em);
+            List<BibliographicResourceEntity> resourcesForCommon = bean.getResourcesForCommon("a");
+            System.out.println("resourcesForCommon = " + resourcesForCommon);
+            assertThat(resourcesForCommon, containsInAnyOrder(
+                       new BibliographicResourceEntity(710100, "a", "foo", true),
+                       new BibliographicResourceEntity(710100, "a", "bar", false),
+                       new BibliographicResourceEntity(310100, "a", "foo", false)
+               ));
+        });
     }
 }
