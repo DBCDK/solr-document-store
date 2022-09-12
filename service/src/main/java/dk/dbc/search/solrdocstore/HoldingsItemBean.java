@@ -79,7 +79,7 @@ public class HoldingsItemBean {
                                       @QueryParam("trackingId") String trackingId) throws JSONBException, SQLException {
         if (trackingId == null)
             trackingId = UUID.randomUUID().toString();
-        try (LogWith logWith = LogWith.track(trackingId)) {
+        try (LogWith logWith = track(trackingId)) {
             logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
 
             log.info("Update holdings: {}/{}", agencyId, bibliographicRecordId);
@@ -138,7 +138,7 @@ public class HoldingsItemBean {
                                          @QueryParam("trackingId") String trackingId) throws SQLException {
         if (trackingId == null)
             trackingId = UUID.randomUUID().toString();
-        try (LogWith logWith = LogWith.track(trackingId)) {
+        try (LogWith logWith = track(trackingId)) {
             logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
 
             log.info("Delete holdings: {}/{}", agencyId, bibliographicRecordId);
