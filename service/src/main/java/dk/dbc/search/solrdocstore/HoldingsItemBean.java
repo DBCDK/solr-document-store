@@ -7,11 +7,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
+import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
 import dk.dbc.search.solrdocstore.request.HoldingsItemEntityRequest;
 import dk.dbc.search.solrdocstore.request.HoldingsItemEntitySchemaAnnotated;
+import dk.dbc.search.solrdocstore.request.HoldingsItemIndexKeysRequest;
 import java.sql.SQLException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -36,6 +39,11 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 import static dk.dbc.log.LogWith.track;
 import static java.util.Collections.EMPTY_SET;
@@ -59,6 +67,102 @@ public class HoldingsItemBean {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;
+
+    @PUT
+    @Path("{agencyId : \\d+}-{bibliographicRecordId}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Timed
+    public StatusResponse putHoldings(String jsonContent,
+                                      @PathParam("agencyId") int agencyId,
+                                      @PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                      @QueryParam("trackingId") String trackingId) throws JSONBException, SQLException {
+        if (trackingId == null)
+            trackingId = UUID.randomUUID().toString();
+        try (LogWith logWith = track(trackingId)) {
+            logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
+
+            log.info("Update holdings: {}/{}", agencyId, bibliographicRecordId);
+            HoldingsItemIndexKeysRequest request = jsonbContext.unmarshall(jsonContent, HoldingsItemIndexKeysRequest.class);
+            IndexKeysList indexKeys = request.indexKeys;
+            if (indexKeys == null || indexKeys.isEmpty()) {
+                throw new BadRequestException("Cannot send empty index-keys list in PUT - use DELETE");
+            }
+            AgencyItemKey key = new AgencyItemKey(agencyId, bibliographicRecordId);
+            HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, key);
+
+            EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
+
+            if (entity == null) {
+                log.trace("create");
+                entity = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, trackingId);
+                entityManager.persist(entity);
+
+                queueRelatedBibliographic(entity, enqueue,
+                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                          QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+
+                h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
+                                                         QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                                         QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                                         QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+            } else {
+                log.trace("update");
+                Set<String> oldLocations = entity.getLocations();
+                entity.setIndexKeys(indexKeys);
+                entityManager.merge(entity);
+                Set<String> newLocations = entity.getLocations();
+
+                if (oldLocations.equals(newLocations)) {
+                    queueRelatedBibliographic(entity, enqueue,
+                                              QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                } else {
+                    queueRelatedBibliographic(entity, enqueue,
+                                              QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                              QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
+                                              QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
+                }
+            }
+
+            enqueue.commit();
+            return new StatusResponse();
+        }
+    }
+
+    @DELETE
+    @Path("{agencyId : \\d+}-{bibliographicRecordId}")
+    @Timed
+    public StatusResponse deleteHoldings(@PathParam("agencyId") int agencyId,
+                                         @PathParam("bibliographicRecordId") String bibliographicRecordId,
+                                         @QueryParam("trackingId") String trackingId) throws SQLException {
+        if (trackingId == null)
+            trackingId = UUID.randomUUID().toString();
+        try (LogWith logWith = track(trackingId)) {
+            logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
+
+            log.info("Delete holdings: {}/{}", agencyId, bibliographicRecordId);
+
+            AgencyItemKey key = new AgencyItemKey(agencyId, bibliographicRecordId);
+            HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, key);
+            if (entity != null) {
+                EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
+                HoldingsToBibliographicKey h2bKey = new HoldingsToBibliographicKey(agencyId, bibliographicRecordId);
+                HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
+                if (binding != null) {
+                    log.trace("binding = {} - enqueue", binding);
+                    queueRelatedBibliographic(entity, enqueue,
+                                              QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                              QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                              QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+                    entityManager.remove(binding);
+                }
+                entityManager.remove(entity);
+                enqueue.commit();
+            }
+            return new StatusResponse();
+        }
+    }
 
     @POST
     @Consumes({MediaType.APPLICATION_JSON})

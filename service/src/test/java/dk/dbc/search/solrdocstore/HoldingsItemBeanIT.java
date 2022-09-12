@@ -31,6 +31,7 @@ import javax.persistence.EntityManager;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
+import static dk.dbc.search.solrdocstore.HoldingItemIndexKeys.indexKeysList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -39,6 +40,66 @@ import static org.hamcrest.Matchers.*;
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
+
+    @Test(timeout = 2_000L)
+    public void testEnqueueNewChangeAndDelete() throws Exception {
+        System.out.println("testEnqueueNewChangeAndDelete");
+
+        jpa(em -> {
+            BibliographicBean bib = createBibliographicBean(em, null);
+            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
+        });
+        queueContentAndClear();
+        jpa(em -> {
+            holdingsItemBeanWithAllRules(em)
+                    .putHoldings(indexKeysList(710100, "25912233")
+                            .add(b -> b
+                                    .itemId("a")
+                                    .status("Online"))
+                            .add(b -> b.itemId("b", "c")
+                                    .status("OnShelf"))
+                            .json(), 710100, "25912233", "x");
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1",
+                   "d,870970-basis:25912233", "e,unit:1", "f,work:1",
+                   "g,870970-basis:25912233", "h,unit:1", "i,work:1"));
+
+        // Major change (online -> gone, shelf->loan
+        jpa(em -> {
+            holdingsItemBeanWithAllRules(em)
+                    .putHoldings(indexKeysList(710100, "25912233")
+                            .add(b -> b.itemId("b", "c")
+                                    .status("OnLoan"))
+                            .json(), 710100, "25912233", "x");
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1",
+                   "d,870970-basis:25912233", "e,unit:1", "f,work:1"));
+
+
+        // Minor Change (all still on loan)
+        jpa(em -> {
+            holdingsItemBeanWithAllRules(em)
+                    .putHoldings(indexKeysList(710100, "25912233")
+                            .add(b -> b.itemId("b")
+                                    .status("OnLoan"))
+                            .json(), 710100, "25912233", "x");
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
+
+        // Major & first/last
+        jpa(em -> {
+            holdingsItemBeanWithAllRules(em)
+                    .deleteHoldings(710100, "25912233", "x");
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1",
+                   "d,870970-basis:25912233", "e,unit:1", "f,work:1",
+                   "g,870970-basis:25912233", "h,unit:1", "i,work:1"));
+
+    }
 
     @Test(timeout = 2_000L)
     public void enqueueWhenHoldingsItemSet() throws Exception {
@@ -268,5 +329,19 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         hol.enqueueSupplier.entityManager = em;
         hol.brBean = createBibliographicRetrieveBean(em);
         return hol;
+    }
+
+    private HoldingsItemBean holdingsItemBeanWithAllRules(EntityManager em) {
+        return holdingsItemBeanWithRules(
+                em,
+                new QueueRuleEntity("a", QueueType.HOLDING, 0),
+                new QueueRuleEntity("b", QueueType.UNIT, 0),
+                new QueueRuleEntity("c", QueueType.WORK, 0),
+                new QueueRuleEntity("d", QueueType.MAJORHOLDING, 0),
+                new QueueRuleEntity("e", QueueType.UNITMAJORHOLDING, 0),
+                new QueueRuleEntity("f", QueueType.WORKMAJORHOLDING, 0),
+                new QueueRuleEntity("g", QueueType.FIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("h", QueueType.UNITFIRSTLASTHOLDING, 0),
+                new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0));
     }
 }
