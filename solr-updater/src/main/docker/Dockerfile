@@ -25,8 +25,6 @@ LABEL SOLR_URL="(zk-/httpurl[=features]) (semicolon seperated list) of solr-coll
       MAX_POOL_SIZE="Max number of connections to the database, should be THREADS+1 (default: 3)" \
       MAX_TRIES="Number of tries to process job (default: 3)" \
       VIPCORE_ENDPOINT="URL for VipCore service (required)" \
-      WORK_PRESENTATION_URL="URL for work presentation service (required)" \
-      PERSISTENT_WORK_ID_FAILURE_POSTPONE="How long to wait if no persistentWorkId is present (default: 5s)" \
       OPEN_AGENCY_AGE="Caching of successful openagency call (default: 4h)" \
       OPEN_AGENCY_FAILURE_AGE="Caching of unsuccessful result (default: 5m)"\
       OPEN_AGENCY_TIMEOUT="Open agency timeout (default: 1m)" \

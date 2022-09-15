@@ -75,12 +75,7 @@ public class FeatureSwitch {
          * Expand "scan.*" fields making any and default, and special registers
          * for those profiles that are enabled.
          */
-        SCAN("scan"),
-        /**
-         * Extract a persistent work-id from work-presentation and set it as
-         * "rec.persistentWorkId".
-         */
-        PERSISTENT_WORK_ID("persistentWorkId");
+        SCAN("scan");
 
         private final String name;
 

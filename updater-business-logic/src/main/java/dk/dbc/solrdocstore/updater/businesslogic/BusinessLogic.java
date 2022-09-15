@@ -59,8 +59,6 @@ public class BusinessLogic {
 
     private final LibraryRuleProvider libraryRuleProvider;
 
-    private final PersistentWorkIdProvider persistentWorkIdProvider;
-
     private final ProfileProvider profileProvider;
     private final Set<String> scanDefaultFields;
     private final Map<String, Set<String>> scanAgencyProfiles;
@@ -75,8 +73,6 @@ public class BusinessLogic {
         private final KnownSolrFields knownSolrFields;
 
         private LibraryRuleProvider libraryRuleProvider;
-
-        private PersistentWorkIdProvider persistentWorkIdProvider;
 
         private ProfileProvider profileProvider;
         private Set<String> scanDefaultFields;
@@ -95,15 +91,6 @@ public class BusinessLogic {
             if (this.libraryRuleProvider != null)
                 throw new IllegalStateException("LibraryRuleProvider has already been enabled");
             this.libraryRuleProvider = libraryRuleProvider;
-            return this;
-        }
-
-        public Builder enablePersistentWorkId(PersistentWorkIdProvider persistentWorkIdProvider) {
-            if (persistentWorkIdProvider == null)
-                throw new IllegalArgumentException("PersistentWorkIdProvider cannot be null");
-            if (this.persistentWorkIdProvider != null)
-                throw new IllegalStateException("PersistentWorkId has already been enabled");
-            this.persistentWorkIdProvider = persistentWorkIdProvider;
             return this;
         }
 
@@ -140,18 +127,16 @@ public class BusinessLogic {
         }
 
         public BusinessLogic build() {
-            return new BusinessLogic(libraryRuleProvider, featureSwitch, knownSolrFields, profileProvider, scanDefaultFields, scanAgencyProfiles, persistentWorkIdProvider);
+            return new BusinessLogic(libraryRuleProvider, featureSwitch, knownSolrFields, profileProvider, scanDefaultFields, scanAgencyProfiles);
         }
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public BusinessLogic(LibraryRuleProvider libraryRuleProvider, FeatureSwitch featureSwitch, KnownSolrFields knownSolrFields,
-                         ProfileProvider profileProvider, Set<String> scanDefaultFields, Map<String, Set<String>> scanAgencyProfiles,
-                         PersistentWorkIdProvider persistentWorkIdProvider) {
+                         ProfileProvider profileProvider, Set<String> scanDefaultFields, Map<String, Set<String>> scanAgencyProfiles) {
         this.featureSwitch = featureSwitch;
         this.knownSolrFields = knownSolrFields;
         this.libraryRuleProvider = libraryRuleProvider;
-        this.persistentWorkIdProvider = persistentWorkIdProvider;
         this.profileProvider = profileProvider;
         this.scanDefaultFields = scanDefaultFields;
         this.scanAgencyProfiles = scanAgencyProfiles;
@@ -200,13 +185,6 @@ public class BusinessLogic {
                 log.error("Feature '{}' is enabled but not configured", Feature.SCAN.name());
             } else {
                 addScan(indexKeys, holdingsItemsIndexKeys);
-            }
-        }
-        if (should(Feature.PERSISTENT_WORK_ID)) {
-            if (persistentWorkIdProvider == null) {
-                log.error("Feature '{}' is enabled but not configured", Feature.PERSISTENT_WORK_ID.name());
-            } else {
-                addPersistentWorkId(indexKeys, source);
             }
         }
         if (should(Feature.NESTED_HOLDINGS_DOCUMENTS)) {
@@ -299,15 +277,6 @@ public class BusinessLogic {
             List<String> ln = indexKeys.computeIfAbsent("dkcclterm.ln", list());
             partOfDanbib.forEach(agencyId -> ln.add(String.valueOf(agencyId)));
         }
-    }
-
-    private void addPersistentWorkId(Map<String, List<String>> indexKeys, SolrDocStoreResponse source) {
-        String corepoWorkId = source.bibliographicRecord.work;
-        if (corepoWorkId == null)
-            throw new IllegalStateException("Cannot add persistent-work-id, since no corepo-work-id is present");
-        String persistentWorkId = persistentWorkIdProvider.persistentWorkIdFor(corepoWorkId);
-        log.trace("setting " + REC_PERSISTENT_WORK_ID + " to {}", persistentWorkId);
-        indexKeys.put(REC_PERSISTENT_WORK_ID, singletonList(persistentWorkId));
     }
 
     private void addRecRepositoryIdToHoldings(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys, String repositoryId) {
