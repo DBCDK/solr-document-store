@@ -37,6 +37,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
@@ -220,14 +222,10 @@ public class HoldingsItemBean {
     public void setHoldingsKeys(HoldingsItemEntity hi) throws SQLException {
         EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
 
-// TODO rewrite to .find()
-        List<HoldingsItemEntity> his = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", HoldingsItemEntity.class)
-                .setParameter("agency", hi.getAgencyId())
-                .setParameter("bibId", hi.getBibliographicRecordId())
-                .getResultList();
-        boolean hadLiveHoldings = !his.isEmpty();
+        HoldingsItemEntity hiDb = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(hi.getAgencyId(), hi.getBibliographicRecordId()));
+        boolean hadLiveHoldings = hiDb != null;
         boolean hasLiveHoldings = !hi.getIndexKeys().isEmpty();
-        Set<String> oldLocations = his.isEmpty() ? EMPTY_SET : his.get(0).getLocations();
+        Set<String> oldLocations = hiDb == null ? EMPTY_SET : hiDb.getLocations();
 
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         if (!hadLiveHoldings && !hasLiveHoldings) { // No holdings before or now
@@ -241,7 +239,7 @@ public class HoldingsItemBean {
                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
                                                      QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
         } else if (hadLiveHoldings != hasLiveHoldings && hadLiveHoldings) { // holdings existence change -> none
-            entityManager.remove(his.get(0)); // Remove existing
+            entityManager.remove(hiDb); // Remove existing
             HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(hi.getAgencyId(), hi.getBibliographicRecordId());
             HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, key);
             if (binding != null) {
@@ -283,28 +281,15 @@ public class HoldingsItemBean {
         }
     }
 
-    private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {
-        Query query = entityManager.createNativeQuery(
-                "select * " +
-                "from holdingsitemssolrkeys  " +
-                "where (agencyid,bibliographicrecordid) " +
-                "IN ( select holdingsagencyid,bibliographicRecordId " +
-                "FROM holdingstobibliographic h2b " +
-                "where h2b.bibliographicagencyid = ? " +
-                "and h2b.bibliographicrecordid = ?)",
-                HoldingsItemEntity.class);
-        query.setParameter(1, bibliographicAgencyId);
-        query.setParameter(2, bibliographicRecordId);
-        return query;
-    }
-
-    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId) {
-        return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId).getResultList();
-    }
-
     public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId) {
-        return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId)
-                .setHint("javax.persistence.loadgraph", entityManager.getEntityGraph("holdingItemsWithIndexKeys"))
-                .getResultList();
+        return entityManager.createQuery("SELECT h2b FROM HoldingsToBibliographicEntity h2b" +
+                                         " WHERE h2b.bibliographicAgencyId = :bibliographicAgencyId" +
+                                         "  AND h2b.bibliographicRecordId = :bibliographicRecordId", HoldingsToBibliographicEntity.class)
+                .setParameter("bibliographicAgencyId", bibliographicAgencyId)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .getResultStream()
+                .map(h2b -> entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(h2b.getHoldingsAgencyId(), h2b.getBibliographicRecordId())))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
