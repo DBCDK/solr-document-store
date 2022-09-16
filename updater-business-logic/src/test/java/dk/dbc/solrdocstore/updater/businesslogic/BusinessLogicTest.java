@@ -105,7 +105,6 @@ public class BusinessLogicTest {
                         .enableScan(new ProfileProviderMock(),
                                     "scan.lti,scan.lfo",
                                     "102030-magic,102030-self,123456-basic,876543-self")
-                        .enablePersistentWorkId(new PersistentWorkIdProviderMock())
                         .build();
 
         SolrInputDocument afterSolrInputDocument = businessLogic.process(solrDocStoreResponse.deepCopy());

@@ -99,13 +99,6 @@ public class DocProducerTest {
             }
         };
 
-        docProducer.persistentWorkIdProvider = new PersistentWorkIdProviderBean() {
-            @Override
-            public String persistentWorkIdFor(String corepoWorkId) {
-                return "persistent-for-" + corepoWorkId;
-            }
-        };
-
         docProducer.profileProvider = new ProfileProviderBean() {
             @Override
             public VipCoreProfile profileFor(String agencyId, String profile) {

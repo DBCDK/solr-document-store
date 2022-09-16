@@ -140,12 +140,6 @@ public class WorkerIT extends IntegrationTestBase {
                 }
             }
         };
-        worker.docProducer.persistentWorkIdProvider = new PersistentWorkIdProviderBean() {
-            @Override
-            public String persistentWorkIdFor(String corepoWorkId) {
-                return "xxx";
-            }
-        };
         ProfileProviderBean profileProviderBean = new ProfileProviderBean();
         profileProviderBean.config = config;
         profileProviderBean.vipCoreHttpClient = new VipCoreHttpClient();
