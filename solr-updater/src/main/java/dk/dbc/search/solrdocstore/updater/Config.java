@@ -27,7 +27,6 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.ws.rs.core.UriBuilder;
 
 /**
  *
@@ -64,9 +63,7 @@ public class Config {
     private Map<String, Set<String>> scanProfiles;
     private Set<String> scanDefaultFields;
     private String appId;
-    private String workPresentationUrl;
     private Client client;
-    private long persistentWorkIdFailurePostpone;
 
     public Config() {
         props = findProperties("solr-doc-store-updater");
@@ -124,15 +121,6 @@ public class Config {
         if (vipCoreEndpoint == null || vipCoreEndpoint.isEmpty()) {
             throw new IllegalStateException("Environment variable VIPCORE_ENDPOINT must be set");
         }
-        workPresentationUrl = get("workPresentationUrl", "WORK_PRESENTATION_URL", null);
-        workPresentationUrl = UriBuilder.fromPath(workPresentationUrl)
-                .path("api/work-presentation/getPersistentWorkId")
-                .build()
-                .toString();
-        if (workPresentationUrl == null || workPresentationUrl.isEmpty()) {
-            throw new IllegalStateException("Environment variable WORK_PRESENTATION_URL must be set");
-        }
-        persistentWorkIdFailurePostpone = Long.max(1000, milliseconds(get("persistentWorkIdFailurePostpone", "PERSISTENT_WORK_ID_FAILURE_POSTPONE", "5s")));
     }
 
     protected Set<SolrCollection> makeSolrCollections(Client client) throws IllegalArgumentException {
@@ -241,14 +229,6 @@ public class Config {
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public Set<String> getScanDefaultFields() {
         return scanDefaultFields;
-    }
-
-    public String getWorkPresentationEndpoint() {
-        return workPresentationUrl;
-    }
-
-    public long getPersistentWorkIdFailurePostpone() {
-        return persistentWorkIdFailurePostpone;
     }
 
     public Client getClient() {
