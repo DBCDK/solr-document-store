@@ -1,16 +1,11 @@
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.request.BibliographicEntityRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
-import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
-import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,14 +21,13 @@ import java.util.stream.Collectors;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.SolrIndexKeys.*;
-import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-    private final JSONBContext jsonbContext = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
 
     @Before
     public void setupBean() throws URISyntaxException {
@@ -142,9 +136,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void updateExistingBibliographicPost() throws JSONBException {
+    public void updateExistingBibliographicPost() throws JsonProcessingException {
         BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#1", "work:update", "unit:update", false, makeIndexKeys(), "track:update");
-        String updatedB = jsonbContext.marshall(b);
+        String updatedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
             BibliographicBean bean = createBibliographicBean(em, new Config() {
@@ -174,9 +168,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void updateExistingBibliographicPostToDeleted() throws JSONBException {
+    public void updateExistingBibliographicPostToDeleted() throws JsonProcessingException {
         BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", "work:update", "unit:update", false, makeIndexKeys(), "track:update");
-        String updatedB = jsonbContext.marshall(b);
+        String updatedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
             BibliographicBean bean = createBibliographicBean(em, new Config() {
@@ -190,7 +184,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "properUpdate", "id#2", null, null, true, makeIndexKeys(), "track:update");
-        String updatedD = jsonbContext.marshall(d);
+        String updatedD = MARSHALLER.marshall(d);
 
         jpa(em -> {
             BibliographicBean bean = createBibliographicBean(em, new Config() {
@@ -228,7 +222,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            Response deleted = bean.addBibliographicKeys(false, jsonbContext.marshall(d));
+            Response deleted = bean.addBibliographicKeys(false, MARSHALLER.marshall(d));
             assertThat(deleted.getStatus(), is(200));
         });
 
@@ -240,7 +234,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            Response revive = bean.addBibliographicKeys(false, jsonbContext.marshall(r));
+            Response revive = bean.addBibliographicKeys(false, MARSHALLER.marshall(r));
             assertThat(revive.getStatus(), not(is(200)));
         });
     }
@@ -257,7 +251,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            Response deleted = bean.addBibliographicKeys(false, jsonbContext.marshall(d));
+            Response deleted = bean.addBibliographicKeys(false, MARSHALLER.marshall(d));
             assertThat(deleted.getStatus(), is(200));
         });
 
@@ -269,15 +263,15 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            Response revive = bean.addBibliographicKeys(false, jsonbContext.marshall(r));
+            Response revive = bean.addBibliographicKeys(false, MARSHALLER.marshall(r));
             assertThat(revive.getStatus(), is(200));
         });
     }
 
     @Test
-    public void updateExistingBibliographicPostToDeletedIsDelayed() throws JSONBException, SQLException {
+    public void updateExistingBibliographicPostToDeletedIsDelayed() throws JsonProcessingException, SQLException {
         BibliographicEntity b = new BibliographicEntity(600100, "clazzifier", "delay", "id#2", "work:delay", "unit:delay", true, makeIndexKeys(), "track:delay");
-        String updatedB = jsonbContext.marshall(b);
+        String updatedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
             BibliographicBean bean = createBibliographicBean(em, new Config() {
@@ -318,10 +312,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
      * If a bibliographic post (all types) goes from deleted: false -> true,
      * that bibliographic holdings are properly updated
      *
-     * @throws JSONBException
+     * @throws JsonProcessingException
      */
     @Test
-    public void deleteUpdateHoldings() throws JSONBException {
+    public void deleteUpdateHoldings() throws JsonProcessingException {
         // Before common FBS update
         jpa(em -> {
             List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDelete");
@@ -386,10 +380,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
      * If a bibliographic post (all types) goes from deleted: true -> false,
      * that bibliographic holdings are properly updated
      *
-     * @throws JSONBException
+     * @throws JsonProcessingException
      */
     @Test
-    public void recreateUpdateHoldings() throws JSONBException {
+    public void recreateUpdateHoldings() throws JsonProcessingException {
         // Before update
         jpa(em -> {
             List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreate");
@@ -434,117 +428,15 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-    @Test
-    public void deleteUpdateHoldingsSupersede() throws JSONBException {
-        // Before supersede update FBS
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 600400, "onDeleteSupersedeNew", true)
-               ));
-        });
-        // Delete update FBS, records moved to higher level
-        runDeleteUpdate(600400, "onDeleteSupersedeNew", true);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(600400, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600401, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600402, "onDeleteSupersede", 870970, "onDeleteSupersedeNew", true)
-               ));
-        });
-        // Before supersede update FBS School
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchoolSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300400, "onDeleteSchoolSupersedeNew", false)
-               ));
-        });
-        // Delete update FBS School, moved to higher level
-        runDeleteUpdate(300400, "onDeleteSchoolSupersedeNew", true);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchoolSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 300000, "onDeleteSchoolSupersedeNew", false)
-               ));
-        });
-        runDeleteUpdate(300000, "onDeleteSchoolSupersedeNew", true);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchoolSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300400, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300401, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300402, "onDeleteSchoolSupersede", 870970, "onDeleteSchoolSupersedeNew", false)
-               ));
-        });
-    }
-
-    @Test
-    public void recreateUpdateHoldingsSupersede() throws JSONBException {
-        // Before FBS re-create
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
-               ));
-        });
-        // Re-create FBS
-        runDeleteUpdate(600500, "onRecreateSupersedeNew", false);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(600500, "onRecreateSupersede", 600500, "onRecreateSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600501, "onRecreateSupersede", 870970, "onRecreateSupersedeNew", true),
-                       new HoldingsToBibliographicEntity(600502, "onRecreateSupersede", 600502, "onRecreateSupersedeNew", true)
-               ));
-        });
-        // Before FBS School re-create
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchoolSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 870970, "onRecreateSchoolSupersedeNew", false)
-               ));
-        });
-        // Re-create FBSSchool
-        runDeleteUpdate(300000, "onRecreateSchoolSupersedeNew", false);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchoolSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
-               ));
-        });
-        runDeleteUpdate(300500, "onRecreateSchoolSupersedeNew", false);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchoolSupersedeNew");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300500, "onRecreateSchoolSupersede", 300500, "onRecreateSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300501, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false),
-                       new HoldingsToBibliographicEntity(300502, "onRecreateSchoolSupersede", 300000, "onRecreateSchoolSupersedeNew", false)
-               ));
-        });
-    }
-
     /**
      * Ensures field updates that are not deleted will not update holdings in
      * any way,
      * for non fbs libraries
      *
-     * @throws JSONBException
+     * @throws JsonProcessingException
      */
     @Test
-    public void deleteNoHoldings() throws JSONBException {
+    public void deleteNoHoldings() throws JsonProcessingException {
         // Assure no exceptions thrown, for any type of library
         runDeleteUpdate(780780, "onDeleteNoHoldings", true);
         runDeleteUpdate(780780, "onDeleteNoHoldings", false);
@@ -560,7 +452,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void updateNonFbsLibrary() throws JSONBException {
+    public void updateNonFbsLibrary() throws JsonProcessingException {
         String json = makeBibliographicRequestJson(800000);
 
         jpa(em -> {
@@ -582,7 +474,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void updateNonFbsLibraryWithNoHolding() throws JSONBException {
+    public void updateNonFbsLibraryWithNoHolding() throws JsonProcessingException {
         String json = makeBibliographicRequestJson(888000);
 
         jpa(em -> {
@@ -601,214 +493,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             assertThat(l.size(), is(0));
         });
-    }
-
-    @Test
-    public void supersedesAdd() throws Exception {
-
-        String json = makeBibliographicRequestJson(
-                870970,
-                e -> {
-            e.setSupersedes(Arrays.asList("a", "b"));
-        });
-
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            Response r = bean.addBibliographicKeys(false, json);
-            assertThat(r.getStatus(), is(200));
-        });
-
-        jpa(em -> {
-            List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b WHERE b2b.liveBibliographicRecordId='new'", BibliographicToBibliographicEntity.class).getResultList();
-
-            assertThat(l.size(), is(2));
-            Assert.assertTrue("One superseded named 'a'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("a")));
-            Assert.assertTrue("One superseded named 'b'", l.stream().anyMatch(b2b -> b2b.getDeadBibliographicRecordId().equals("b")));
-        });
-    }
-
-    @Test(timeout = 2_000L)
-    public void supersedesReverted() throws Exception {
-        System.out.println("supersedesReverted");
-
-        // DELETE rows from 'executeScriptResource("/bibliographicUpdate.sql");'
-        try (Connection conn = PG.createConnection() ;
-             Statement statement = conn.createStatement()) {
-            statement.executeUpdate("TRUNCATE bibliographicToBibliographic");
-        }
-        { // a dead  b live
-
-            String json = makeBibliographicRequestJson(
-                    870970,
-                    e -> {
-                e.setBibliographicRecordId("b");
-                e.setSupersedes(Arrays.asList("a"));
-            });
-
-            jpa(em -> {
-                BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                             @Override
-                                                             public long getReviveOlderWhenDeletedForAtleast() {
-                                                                 return TimeUnit.HOURS.toMillis(8);
-                                                             }
-                                                         });
-                Response r = bean.addBibliographicKeys(false, json);
-                assertThat(r.getStatus(), is(200));
-            });
-
-            jpa(em -> {
-                List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
-                System.out.println("l = " + l);
-                assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("a", "b")));
-            });
-        }
-        { // a live, b dead & b deleted
-
-            String json1 = makeBibliographicRequestJson(
-                    870970,
-                    e -> {
-                e.setBibliographicRecordId("a");
-                e.setSupersedes(Arrays.asList("b"));
-            });
-
-            jpa(em -> {
-                BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                             @Override
-                                                             public long getReviveOlderWhenDeletedForAtleast() {
-                                                                 return TimeUnit.HOURS.toMillis(8);
-                                                             }
-                                                         });
-                Response r1 = bean.addBibliographicKeys(false, json1);
-                assertThat(r1.getStatus(), is(200));
-            });
-            String json2 = makeBibliographicRequestJson(
-                    870970,
-                    e -> {
-                e.setBibliographicRecordId("b");
-                e.setDeleted(true);
-                e.setSupersedes(Arrays.asList("a"));
-            });
-
-            jpa(em -> {
-                BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                             @Override
-                                                             public long getReviveOlderWhenDeletedForAtleast() {
-                                                                 return TimeUnit.HOURS.toMillis(8);
-                                                             }
-                                                         });
-                Response r2 = bean.addBibliographicKeys(false, json2);
-                assertThat(r2.getStatus(), is(200));
-            });
-
-            jpa(em -> {
-                List<BibliographicToBibliographicEntity> l = em.createQuery("SELECT b2b FROM BibliographicToBibliographicEntity as b2b", BibliographicToBibliographicEntity.class).getResultList();
-                System.out.println("l = " + l);
-                assertThat(l, containsInAnyOrder(new BibliographicToBibliographicEntity("b", "a")));
-            });
-        }
-    }
-
-    @Test
-    public void newRecordWhereSupersedesIsAlreadySet() throws Exception {
-
-        String a870970 = makeBibliographicRequestJson(
-                870970, e -> {
-            e.setBibliographicRecordId("a");
-        });
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            Response r = bean.addBibliographicKeys(false, a870970);
-            assertThat(r.getStatus(), is(200));
-        });
-
-        // Setup holding pointint to 870970:a
-        jpa(em -> {
-            em.persist(new HoldingsItemEntity(700000, "a", new IndexKeysList(), "T#1"));
-            em.persist(new HoldingsToBibliographicEntity(700000, "a", 870970, true));
-        });
-
-        String b870970 = makeBibliographicRequestJson(
-                870970, e -> {
-            e.setBibliographicRecordId("b");
-            e.setSupersedes(Arrays.asList("a"));
-        });
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            Response r = bean.addBibliographicKeys(false, b870970);
-            assertThat(r.getStatus(), is(200));
-        });
-
-        // Not really nessecary
-        String a870970d = makeBibliographicRequestJson(
-                870970, e -> {
-            e.setDeleted(true);
-            e.setBibliographicRecordId("a");
-        });
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            Response r = bean.addBibliographicKeys(false, a870970d);
-            assertThat(r.getStatus(), is(200));
-        });
-
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            HoldingsToBibliographicEntity h2bBefore = em.find(HoldingsToBibliographicEntity.class,
-                                                              new HoldingsToBibliographicKey(700000, "a"));
-            Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 870970, "b", true), h2bBefore);
-        });
-
-        String b70000 = makeBibliographicRequestJson(
-                700000, e -> {
-            e.setBibliographicRecordId("b");
-        });
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            Response r = bean.addBibliographicKeys(false, b70000);
-            assertThat(r.getStatus(), is(200));
-        });
-
-        jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-            HoldingsToBibliographicEntity h2bAfter = em.find(HoldingsToBibliographicEntity.class,
-                                                             new HoldingsToBibliographicKey(700000, "a"));
-            Assert.assertEquals(new HoldingsToBibliographicEntity(700000, "a", 700000, "b", true), h2bAfter);
-        });
-
     }
 
     @Test(timeout = 2_000L)
@@ -903,10 +587,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            bean.addBibliographicKeys(
-                    new BibliographicEntity(800010, "katalog", "12345678",
-                                            "800010-katalog:12345678", "work:1", "unit:1",
-                                            false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
+            bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
+                                                              "800010-katalog:12345678", "work:1", "unit:1",
+                                                              false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), true);
         });
 
         jpa(em -> {
@@ -929,10 +612,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                          }
                                                      });
             HoldingsItemBean hb = createHoldingsItemBean(em);
-            bean.addBibliographicKeys(
-                    new BibliographicEntity(800010, "katalog", "12345678",
-                                            "800010-katalog:12345678", "work:1", "unit:1",
-                                            true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), EMPTY_LIST, true);
+            bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
+                                                              "800010-katalog:12345678", "work:1", "unit:1",
+                                                              true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), true);
             hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", NO_HOLDINGS, "h-2"));
         });
 
@@ -957,10 +639,9 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                      });
             HoldingsItemBean hb = createHoldingsItemBean(em);
             hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-2"));
-            bean.addBibliographicKeys(
-                    new BibliographicEntity(800010, "katalog", "12345678",
-                                            "800010-katalog:12345678", "work:1", "unit:1",
-                                            false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), EMPTY_LIST, true);
+            bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
+                                                              "800010-katalog:12345678", "work:1", "unit:1",
+                                                              false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), true);
         });
 
         jpa(em -> {
@@ -1069,8 +750,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsUponCommonStaysIfDeletedManifestationIsCreated() throws Exception {
         System.out.println("testHoldingsUponCommonStaysIfDeletedManifestationIsCreated");
 
-        String a870970 = jsonbContext.marshall(new BibliographicEntityRequest(870970, "clazzifier", "25912233", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT", null));
-        String d710100 = jsonbContext.marshall(new BibliographicEntityRequest(710100, "clazzifier", "25912233", "id#0", "work:0", "unit:0", true, new IndexKeys(), "IT", null));
+        String a870970 = MARSHALLER.marshall(new BibliographicEntity(870970, "clazzifier", "25912233", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT"));
+        String d710100 = MARSHALLER.marshall(new BibliographicEntity(710100, "clazzifier", "25912233", "id#0", "work:0", "unit:0", true, new IndexKeys(), "IT"));
         String h710100 = jsonRequestHold("710100-25912233-a");
 
         jpa(em -> {
@@ -1131,10 +812,10 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-    public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JSONBException {
+    public void runDeleteUpdate(int agencyId, String bibliographicRecordId, boolean deleted) throws JsonProcessingException {
 
         BibliographicEntity b = new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#3", "work:update", "unit:update", deleted, makeIndexKeys(), "track:update");
-        String deletedB = jsonbContext.marshall(b);
+        String deletedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
             BibliographicBean bean = createBibliographicBean(em, new Config() {
@@ -1166,14 +847,14 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 .getResultList();
     }
 
-    private String makeBibliographicRequestJson(int agency) throws JSONBException {
+    private String makeBibliographicRequestJson(int agency) throws JsonProcessingException {
         return makeBibliographicRequestJson(agency, e -> {
                                     });
     }
 
-    private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntityRequest> modifier) throws JSONBException {
-        BibliographicEntityRequest entity = new BibliographicEntityRequest(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT", null);
+    private String makeBibliographicRequestJson(int agency, Consumer<BibliographicEntity> modifier) throws JsonProcessingException {
+        BibliographicEntity entity = new BibliographicEntity(agency, "clazzifier", "new", "id#0", "work:0", "unit:0", false, new IndexKeys(), "IT");
         modifier.accept(entity);
-        return jsonbContext.marshall(entity);
+        return MARSHALLER.marshall(entity);
     }
 }

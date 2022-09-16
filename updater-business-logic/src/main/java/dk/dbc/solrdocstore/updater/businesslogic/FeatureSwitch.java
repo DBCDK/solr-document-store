@@ -135,5 +135,4 @@ public class FeatureSwitch {
                 return EnumSet.of(Feature.of(name));
         }
     }
-
 }

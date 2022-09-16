@@ -16,8 +16,6 @@ import org.junit.Test;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,11 +44,8 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void setupBean() {
         jpa(em -> {
-            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
             BibliographicBean bibl = createBibliographicBean(em, null);
-            HoldingsItemBean hold = createHoldingsItemBean(em);
-            HoldingsToBibliographicBean h2b = createHoldingsToBibliographicBean(em);
-            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "work:0", "unit:0", false, EMPTY, "t0"), Arrays.asList("CBA"), false);
+            bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "work:0", "unit:0", false, EMPTY, "t0"), false);
         });
     }
 
@@ -67,7 +62,6 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
             BibliographicBean bibl = createBibliographicBean(em, null);
             HoldingsItemBean hold = createHoldingsItemBean(em);
-            HoldingsToBibliographicBean h2b = createHoldingsToBibliographicBean(em);
             DocumentRetrieveResponse doc = bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678");
 
             assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
@@ -84,7 +78,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
-            build(em, 710001, "CBA").holdings(ON_SHELF);
+            build(em, 710001, "CBA").holdings(ON_SHELF); // No supersedes any more
             build(em, 710002, "CBA").holdings(DECOMMISSIONED);
 
             build(em, 700011).holdings(ON_SHELF);
@@ -109,8 +103,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             List<Integer> agencies = bean.getPartOfDanbibCommon(ID);
             System.out.println("agencies = " + agencies);
-            assertThat(agencies, Matchers.containsInAnyOrder(710001,
-                                                             700011, 700015, 700051,
+            assertThat(agencies, Matchers.containsInAnyOrder(700011, 700015, 700051,
                                                              700211, 700215, 700251,
                                                              700311, 700315, 700351));
         });
@@ -124,13 +117,12 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
-            build(em, 710001, "CBA").holdings(ON_SHELF);
             DocumentRetrieveResponse resp = bean.getDocumentWithHoldingsitems(COMMON_AGENCY, "basis", ID);
             System.out.println("resp = " + resp);
             Set<String> holdings = resp.holdingsItemRecords.stream()
                     .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
                     .collect(Collectors.toSet());
-            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
+            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC"));
         });
     }
 
@@ -141,14 +133,13 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
-            build(em, 710001, "CBA").holdings(ON_SHELF);
             List<DocumentRetrieveResponse> resp = bean.getDocumentsForWork("work:0", true);
             assertThat(resp, is(not(empty())));
             DocumentRetrieveResponse r = resp.get(0);
             Set<String> holdings = r.holdingsItemRecords.stream()
                     .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
                     .collect(Collectors.toSet());
-            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
+            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC"));
         });
     }
 
@@ -159,14 +150,13 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
-            build(em, 710001, "CBA").holdings(ON_SHELF);
             List<DocumentRetrieveResponse> resp = bean.getDocumentsForUnit("unit:0", true);
             assertThat(resp, is(not(empty())));
             DocumentRetrieveResponse r = resp.get(0);
             Set<String> holdings = r.holdingsItemRecords.stream()
                     .map(h -> h.getAgencyId() + "-" + h.getBibliographicRecordId())
                     .collect(Collectors.toSet());
-            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC", "710001-CBA"));
+            assertThat(holdings, Matchers.containsInAnyOrder("300055-ABC"));
         });
     }
 
@@ -223,7 +213,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         private Build record(IndexKeys content) throws SQLException {
-            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "work:1", "unit:1", false, content, "t0"), Collections.EMPTY_LIST, false);
+            bibl.addBibliographicKeys(new BibliographicEntity(holdingsAgencyId, "katalog", holdingsId, "r:*", "work:1", "unit:1", false, content, "t0"), false);
             return this;
         }
     }

@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
@@ -8,8 +9,6 @@ import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
-import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemFieldKey;
 import dk.dbc.search.solrdocstore.request.ResourceRestRequest;
@@ -49,7 +48,8 @@ public class ResourceBean {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceBean.class);
 
-    private final JSONBContext jsonbContext = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
+
     @Inject
     OpenAgencyBean openAgency;
 
@@ -74,9 +74,9 @@ public class ResourceBean {
                      description = "Resource has been added",
                      ref = StatusResponse.NAME)})
     @RequestBody(ref = BibliographicResourceSchemaAnnotated.NAME)
-    public Response addResource(String jsonContent) throws JSONBException {
+    public Response addResource(String jsonContent) throws JsonProcessingException {
         try (LogWith logWith = track(UUID.randomUUID().toString())) {
-            AddResourceRequest request = jsonbContext.unmarshall(jsonContent, AddResourceRequest.class);
+            AddResourceRequest request = MARSHALLER.unmarshall(jsonContent, AddResourceRequest.class);
             // Add resource
             BibliographicResourceEntity resource = request.asBibliographicResource();
             log.debug("POST resource: {}", resource);
@@ -103,11 +103,11 @@ public class ResourceBean {
                                 @PathParam("fieldName") String fieldName,
                                 @PathParam("agencyId") Integer agencyId,
                                 @PathParam("bibliographicRecordId") String bibliographicRecordId,
-                                @QueryParam("trackingId") String trackingId) throws JSONBException {
+                                @QueryParam("trackingId") String trackingId) throws JsonProcessingException {
         if (trackingId == null || trackingId.isEmpty())
             trackingId = UUID.randomUUID().toString();
         try (LogWith logWith = track(trackingId)) {
-            ResourceRestRequest request = jsonbContext.unmarshall(jsonContent, ResourceRestRequest.class);
+            ResourceRestRequest request = MARSHALLER.unmarshall(jsonContent, ResourceRestRequest.class);
             BibliographicResourceEntity resource = new BibliographicResourceEntity(agencyId, bibliographicRecordId, fieldName, request.getHas());
             log.debug("PUT resource: {}", resource);
             return storeResource(resource);
@@ -132,7 +132,7 @@ public class ResourceBean {
     public Response deleteResource(@PathParam("fieldName") String fieldName,
                                    @PathParam("agencyId") Integer agencyId,
                                    @PathParam("bibliographicRecordId") String bibliographicRecordId,
-                                   @QueryParam("trackingId") String trackingId) throws JSONBException {
+                                   @QueryParam("trackingId") String trackingId) {
         if (trackingId == null || trackingId.isEmpty())
             trackingId = UUID.randomUUID().toString();
         try (LogWith logWith = track(trackingId)) {

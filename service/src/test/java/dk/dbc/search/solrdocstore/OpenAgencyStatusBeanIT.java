@@ -8,9 +8,6 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.net.URLEncoder;
-import javax.persistence.EntityManager;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
@@ -67,8 +64,8 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         jpa(em -> {
             OpenAgencyStatusBean openAgencyStatus = createOpenAgencyStatusBean(em);
             em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, new IndexKeys(), ""));
-            em.persist(new HoldingsToBibliographicEntity(711111, "23645500", 870970, "23645564", true));
-            em.persist(new HoldingsItemEntity(711111, "23645500", ON_SHELF, ""));
+            em.persist(new HoldingsToBibliographicEntity(711111, 870970, "23645564", true));
+            em.persist(new HoldingsItemEntity(711111, "23645564", ON_SHELF, ""));
             Object status = openAgencyStatus.purgeAgency(711111, "").getEntity();
 
             System.out.println("status = " + status);

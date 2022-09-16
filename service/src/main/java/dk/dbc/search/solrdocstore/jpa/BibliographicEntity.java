@@ -4,15 +4,12 @@ import dk.dbc.search.solrdocstore.queue.QueueJob;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import javax.persistence.Basic;
-import javax.persistence.ColumnResult;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EntityResult;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,9 +27,6 @@ import static javax.persistence.FetchType.LAZY;
 @Table(name = "bibliographicSolrKeys")
 @NamedEntityGraph(name = "bibPostWithIndexKeys", attributeNodes =
                   @NamedAttributeNode("indexKeys"))
-@SqlResultSetMapping(name = "BibliographicEntityWithSupersedeId", entities = {
-    @EntityResult(entityClass = BibliographicEntity.class),}, columns = {
-    @ColumnResult(name = "supersede_id")})
 @IdClass(AgencyClassifierItemKey.class)
 public class BibliographicEntity implements Serializable {
 
@@ -230,13 +224,13 @@ public class BibliographicEntity implements Serializable {
             case MANIFESTATION:
                 return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
             case UNIT:
-                if(deleted) {
+                if (deleted) {
                     log.warn("Not queueing for UNIT type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);
                     return null;
                 }
                 return QueueJob.unit(unit);
             case WORK:
-                if(deleted) {
+                if (deleted) {
                     log.warn("Not queueing for WORK type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);
                     return null;
                 }

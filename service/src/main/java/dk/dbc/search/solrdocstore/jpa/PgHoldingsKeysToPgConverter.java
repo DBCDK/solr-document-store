@@ -20,10 +20,10 @@
  */
 package dk.dbc.search.solrdocstore.jpa;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.postgresql.util.PGobject;
 
-import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
+import dk.dbc.search.solrdocstore.Marshaller;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -35,15 +35,15 @@ import java.sql.SQLException;
 @Converter
 public class PgHoldingsKeysToPgConverter implements AttributeConverter<IndexKeysList, PGobject> {
 
-    private final JSONBContext context = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
 
     @Override
     public PGobject convertToDatabaseColumn(IndexKeysList content) throws IllegalStateException {
         final PGobject pgObject = new PGobject();
         pgObject.setType("jsonb");
         try {
-            pgObject.setValue(context.marshall(content));
-        } catch (SQLException | JSONBException e) {
+            pgObject.setValue(MARSHALLER.marshall(content));
+        } catch (SQLException | JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
         return pgObject;
@@ -55,8 +55,8 @@ public class PgHoldingsKeysToPgConverter implements AttributeConverter<IndexKeys
             return null;
         }
         try {
-            return context.unmarshall(pgObject.getValue(), IndexKeysList.class);
-        } catch (JSONBException e) {
+            return MARSHALLER.unmarshall(pgObject.getValue(), IndexKeysList.class);
+        } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
     }

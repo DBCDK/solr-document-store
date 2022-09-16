@@ -28,7 +28,7 @@
     <modules>
         <module>queue</module>
         <module>db</module>
-        <module>gui</module>
+        <!--<module>gui</module>-->
         <module>service</module>
         <module>updater-business-logic</module>
         <module>solr-updater</module>

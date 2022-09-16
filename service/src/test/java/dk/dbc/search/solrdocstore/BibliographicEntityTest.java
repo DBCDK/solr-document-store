@@ -1,7 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.commons.jsonb.JSONBContext;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 
 import org.junit.Test;
@@ -14,7 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class BibliographicEntityTest {
 
-    private final JSONBContext context = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
 
     @Test
     public void simpleEncode() throws Exception {
@@ -23,7 +22,7 @@ public class BibliographicEntityTest {
         indexKeys.put("id", Collections.singletonList("argle"));
 
         BibliographicEntity be = new BibliographicEntity(200, "clazzifier", "1234", "id#1", "work:1", "unit:2", false, indexKeys, "");
-        String s = context.marshall(be);
+        String s = MARSHALLER.marshall(be);
         assertThat(s, is("{\"agencyId\":200,\"classifier\":\"clazzifier\",\"bibliographicRecordId\":\"1234\",\"repositoryId\":\"id#1\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"deleted\":false,\"indexKeys\":{\"id\":[\"argle\"],\"title\":[\"unix bogen\",\"title2\"]},\"trackingId\":\"\"}"));
     }
 
@@ -31,7 +30,7 @@ public class BibliographicEntityTest {
     public void simpleDecode() throws Exception {
         String jsonContent = "{\"agencyId\":200,\"classifier\":\"clazzifier\",\"bibliographicRecordId\":\"1234\",\"repositoryId\":\"id#1\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"trackingId\":\"\"}";
 
-        BibliographicEntity be = context.unmarshall(jsonContent, BibliographicEntity.class);
+        BibliographicEntity be = MARSHALLER.unmarshall(jsonContent, BibliographicEntity.class);
         assertThat(be.getAgencyId(), is(200));
         assertThat(be.getClassifier(), is("clazzifier"));
         assertThat(be.getBibliographicRecordId(), is("1234"));

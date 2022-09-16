@@ -4,8 +4,6 @@ import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
@@ -54,7 +52,7 @@ public class HoldingsItemBean {
 
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
 
-    private final JSONBContext jsonbContext = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
 
     @Inject
     HoldingsToBibliographicBean h2bBean;
@@ -76,14 +74,14 @@ public class HoldingsItemBean {
     public StatusResponse putHoldings(String jsonContent,
                                       @PathParam("agencyId") int agencyId,
                                       @PathParam("bibliographicRecordId") String bibliographicRecordId,
-                                      @QueryParam("trackingId") String trackingId) throws JSONBException, SQLException {
+                                      @QueryParam("trackingId") String trackingId) throws SQLException, JsonProcessingException {
         if (trackingId == null)
             trackingId = UUID.randomUUID().toString();
         try (LogWith logWith = track(trackingId)) {
             logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
 
             log.info("Update holdings: {}/{}", agencyId, bibliographicRecordId);
-            HoldingsItemIndexKeysRequest request = jsonbContext.unmarshall(jsonContent, HoldingsItemIndexKeysRequest.class);
+            HoldingsItemIndexKeysRequest request = MARSHALLER.unmarshall(jsonContent, HoldingsItemIndexKeysRequest.class);
             IndexKeysList indexKeys = request.indexKeys;
             if (indexKeys == null || indexKeys.isEmpty()) {
                 throw new BadRequestException("Cannot send empty index-keys list in PUT - use DELETE");
@@ -187,9 +185,9 @@ public class HoldingsItemBean {
                      description = "Holdings has NOT been added - this really shouldn't happen",
                      ref = StatusResponse.NAME)})
     @RequestBody(ref = HoldingsItemEntitySchemaAnnotated.NAME)
-    public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException {
+    public Response setHoldingsKeys(String jsonContent) throws JsonProcessingException {
 
-        HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
+        HoldingsItemEntityRequest hi = MARSHALLER.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         if (hi.getTrackingId() == null)
             hi.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(hi.getTrackingId())) {
@@ -222,6 +220,7 @@ public class HoldingsItemBean {
     public void setHoldingsKeys(HoldingsItemEntity hi) throws SQLException {
         EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
 
+// TODO rewrite to .find()
         List<HoldingsItemEntity> his = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", HoldingsItemEntity.class)
                 .setParameter("agency", hi.getAgencyId())
                 .setParameter("bibId", hi.getBibliographicRecordId())
@@ -289,7 +288,7 @@ public class HoldingsItemBean {
                 "select * " +
                 "from holdingsitemssolrkeys  " +
                 "where (agencyid,bibliographicrecordid) " +
-                "IN ( select holdingsagencyid,holdingsbibliographicrecordid " +
+                "IN ( select holdingsagencyid,bibliographicRecordId " +
                 "FROM holdingstobibliographic h2b " +
                 "where h2b.bibliographicagencyid = ? " +
                 "and h2b.bibliographicrecordid = ?)",

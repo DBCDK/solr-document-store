@@ -50,14 +50,14 @@ public class DocumentRetrieveBean {
     private static final String SELECT_HOLDINGS_ITEMS_JPA =
             "SELECT h FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h " +
-            "ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            "ON h2b.bibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
             " AND h2b.bibliographicAgencyId = :agencyId";
 
     private static final String SELECT_HOLDINGS_ITEMS_FOR_UNIT_JPA =
             "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h" +
-            " ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            " ON h2b.bibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " INNER JOIN BibliographicEntity be" +
             " ON h2b.bibliographicRecordId = be.bibliographicRecordId AND h2b.bibliographicAgencyId = be.agencyId " +
             " WHERE be.unit = :unitId";
@@ -65,7 +65,7 @@ public class DocumentRetrieveBean {
     private static final String SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA =
             "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h" +
-            " ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            " ON h2b.bibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " INNER JOIN BibliographicEntity be" +
             " ON h2b.bibliographicRecordId = be.bibliographicRecordId AND h2b.bibliographicAgencyId = be.agencyId " +
             " WHERE be.work = :workId";
@@ -230,13 +230,14 @@ public class DocumentRetrieveBean {
         }).collect(Collectors.toList());
     }
 
+    // TODO really needs to be rewritten
     public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {
         return entityManager.createNativeQuery(
                 "SELECT CAST(h2b.holdingsAgencyId AS INTEGER) FROM HoldingsToBibliographic h2b" +
                 " JOIN OpenAgencyCache oa " +
                 "ON oa.agencyId = h2b.holdingsAgencyId AND oa.libraryType = 'FBS' AND (oa.partOfDanbib = TRUE OR oa.authCreateCommonRecord = TRUE)" +
                 " JOIN HoldingsItemsSolrKeys h " +
-                "ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
+                "ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.bibliographicRecordId" +
                 " WHERE" +
                 "  h2b.isCommonDerived = TRUE" +
                 "  AND h2b.bibliographicRecordId = ?" +

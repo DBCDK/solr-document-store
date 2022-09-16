@@ -2,7 +2,6 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.response.FrontendReturnListType;
-import dk.dbc.search.solrdocstore.response.BibliographicFrontendResponse;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
@@ -57,9 +56,9 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         String bibliographicRecordId = "XYZ";
         jpa(em -> {
             BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
-            Response json = bean.getBibliographicKeysWithSupersedeId(bibliographicRecordId, 1, 10, "agencyId", true);
-            FrontendReturnListType<BibliographicFrontendResponse> frontendReturnListType =
-                    (FrontendReturnListType<BibliographicFrontendResponse>) json.getEntity();
+            Response json = bean.getBibliographicKeys(bibliographicRecordId, 1, 10, "agencyId", true);
+            FrontendReturnListType<BibliographicEntity> frontendReturnListType =
+                    (FrontendReturnListType<BibliographicEntity>) json.getEntity();
             Assert.assertEquals(2, frontendReturnListType.result.size());
         });
     }
@@ -70,9 +69,9 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         // Should have 8 results, which with a pagesize of 5 is 2 pages
         jpa(em -> {
             BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
-            Response json = bean.getBibliographicKeysWithSupersedeId(bibliographicRecordId, 1, 2, "agencyId", false);
-            FrontendReturnListType<BibliographicFrontendResponse> frontendReturnListType =
-                    (FrontendReturnListType<BibliographicFrontendResponse>) json.getEntity();
+            Response json = bean.getBibliographicKeys(bibliographicRecordId, 1, 2, "agencyId", false);
+            FrontendReturnListType<BibliographicEntity> frontendReturnListType =
+                    (FrontendReturnListType<BibliographicEntity>) json.getEntity();
             Assert.assertEquals(4, frontendReturnListType.pages);
         });
     }
@@ -82,11 +81,11 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         jpa(em -> {
             BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
             Response result = bean.getBibliographicRecord("page-order", 103862);
-            BibliographicFrontendResponse res = (BibliographicFrontendResponse) result.getEntity();
+            BibliographicEntity res = (BibliographicEntity) result.getEntity();
             IndexKeys map = new IndexKeys();
             map.put("rec.repositoryId", Collections.singletonList("p-o"));
             BibliographicEntity b = new BibliographicEntity(103862, "clazzifier", "page-order", "p-o", "work:2", "unit:6", false, map, "track:8");
-            Assert.assertEquals(res, new BibliographicFrontendResponse(b, "0639423"));
+            Assert.assertEquals(res, b);
         });
     }
 
@@ -96,32 +95,32 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         // Should have 8 results, which with a pagesize of 5 is 2 pages
         jpa(em -> {
             BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
-            Response json = bean.getBibliographicKeysByRepositoryIdWithSupersedeId(bibliographicRecordId, 1, 2, "agencyId", false);
+            Response json = bean.getBibliographicKeysByRepositoryId(bibliographicRecordId, 1, 2, "agencyId", false);
             FrontendReturnListType<BibliographicEntity> frontendReturnListType =
                     (FrontendReturnListType<BibliographicEntity>) json.getEntity();
             Assert.assertEquals(4, frontendReturnListType.pages);
         });
     }
 
-    public List<BibliographicFrontendResponse> getFrontendResultBibIdWithOrder(BibliographicRecordAPIBean bean, String bibliographicRecordId, String order, boolean desc) {
-        Response json = bean.getBibliographicKeysWithSupersedeId(bibliographicRecordId, 1, 10, order, desc);
-        return ( (FrontendReturnListType<BibliographicFrontendResponse>) json.getEntity() ).result;
+    public List<BibliographicEntity> getFrontendResultBibIdWithOrder(BibliographicRecordAPIBean bean, String bibliographicRecordId, String order, boolean desc) {
+        Response json = bean.getBibliographicKeys(bibliographicRecordId, 1, 10, order, desc);
+        return ( (FrontendReturnListType<BibliographicEntity>) json.getEntity() ).result;
     }
 
-    public List<BibliographicFrontendResponse> getFrontendResultRepoIdWithOrder(BibliographicRecordAPIBean bean, String repositoryId, String order, boolean desc) throws JsonProcessingException {
-        Response json = bean.getBibliographicKeysByRepositoryIdWithSupersedeId(repositoryId, 1, 10, order, desc);
-        return ( (FrontendReturnListType<BibliographicFrontendResponse>) json.getEntity() ).result;
+    public List<BibliographicEntity> getFrontendResultRepoIdWithOrder(BibliographicRecordAPIBean bean, String repositoryId, String order, boolean desc) throws JsonProcessingException {
+        Response json = bean.getBibliographicKeysByRepositoryId(repositoryId, 1, 10, order, desc);
+        return ( (FrontendReturnListType<BibliographicEntity>) json.getEntity() ).result;
     }
 
-    public <A> List<A> getColumn(List<BibliographicFrontendResponse> of, Function<BibliographicFrontendResponse, A> fun) {
+    public <A> List<A> getColumn(List<BibliographicEntity> of, Function<BibliographicEntity, A> fun) {
         return of.stream().map(fun).collect(Collectors.toList());
     }
 
-    public <A> List<A> getColumnOfBib(String bibliographicRecordId, String columnName, boolean desc, Function<BibliographicFrontendResponse, A> fun, BibliographicRecordAPIBean bean) {
+    public <A> List<A> getColumnOfBib(String bibliographicRecordId, String columnName, boolean desc, Function<BibliographicEntity, A> fun, BibliographicRecordAPIBean bean) {
         return getColumn(getFrontendResultBibIdWithOrder(bean, bibliographicRecordId, columnName, desc), fun);
     }
 
-    public <A> List<A> getColumnOfRepo(BibliographicRecordAPIBean bean, String repositoryId, String columnName, boolean desc, Function<BibliographicFrontendResponse, A> fun) throws JsonProcessingException {
+    public <A> List<A> getColumnOfRepo(BibliographicRecordAPIBean bean, String repositoryId, String columnName, boolean desc, Function<BibliographicEntity, A> fun) throws JsonProcessingException {
         return getColumn(getFrontendResultRepoIdWithOrder(bean, repositoryId, columnName, desc), fun);
     }
 
@@ -218,28 +217,6 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
             BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
             List<Boolean> result = getColumnOfRepo(bean, repositoryId, "deleted", true, bibItem -> bibItem.isDeleted());
             assertEquals(result, Arrays.asList(true, true, true, false, false, false, false, false));
-        });
-    }
-
-    @Test
-    public void testSupersedeIdIncluded() throws JsonProcessingException {
-        String bibliographicRecordId = "page-order";
-        jpa(em -> {
-            BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
-            Response json = bean.getBibliographicKeysWithSupersedeId(bibliographicRecordId, 1, 10, "agencyId", false);
-            FrontendReturnListType<BibliographicFrontendResponse> frontendReturnListType =
-                    (FrontendReturnListType<BibliographicFrontendResponse>) json.getEntity();
-            List<String> supersedeIds = frontendReturnListType.result.stream().map(b -> b.getSupersedeId()).collect(Collectors.toList());
-            Assert.assertEquals(supersedeIds, Arrays.asList("0639423", "0639423", "0639423", "0639423", "0639423", "0639423", "0639423", "0639423"));
-        });
-        String repositoryId = "p-o";
-        jpa(em -> {
-            BibliographicRecordAPIBean bean = createBiliographicRecordAPIBean(em);
-            Response jsonRepo = bean.getBibliographicKeysByRepositoryIdWithSupersedeId(repositoryId, 1, 10, "agencyId", false);
-            FrontendReturnListType<BibliographicFrontendResponse> frontendReturnListTypeRepo =
-                    (FrontendReturnListType<BibliographicFrontendResponse>) jsonRepo.getEntity();
-            List<String> supersedeIdsRepo = frontendReturnListTypeRepo.result.stream().map(b -> b.getSupersedeId()).collect(Collectors.toList());
-            Assert.assertEquals(supersedeIdsRepo, Arrays.asList("0639423", "0639423", "0639423", "0639423", "0639423", "0639423", "0639423", "0639423"));
         });
     }
 
