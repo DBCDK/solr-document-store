@@ -9,7 +9,6 @@
     },
     "profiles": ["solr-client"],
     "hazelcast": {
-        "clusterName": "solr-updater-${SCOPE}-${COLLECTION}",
         "cacheConfig": {
             "*": {
                 "timeout": "${CACHE_TIMEOUT}",
