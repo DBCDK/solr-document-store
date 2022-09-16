@@ -48,7 +48,6 @@ public class BusinessLogic {
     private static final String REC_HOLDINGS_AGENCY_ID = "rec.holdingsAgencyId";
     private static final String REC_HOLDINGS_COUNT = "rec.holdingsCount";
     private static final String REC_HOLDINGS_ON_LOAN = "rec.holdingsOnLoan";
-    private static final String REC_PERSISTENT_WORK_ID = "rec.persistentWorkId";
     private static final String REC_REPOSITORY_ID = "rec.repositoryId";
     private static final String HOLDINGSITEM_ROLE = "holdingsitem.role";
     private static final String COMMON_RECORD_ID_PREFIX = "870970-basis:";
