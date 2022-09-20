@@ -77,7 +77,6 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "a,870970-basis:25912233", "b,unit:1", "c,work:1",
                    "d,870970-basis:25912233", "e,unit:1", "f,work:1"));
 
-
         // Minor Change (all still on loan)
         jpa(em -> {
             holdingsItemBeanWithAllRules(em)

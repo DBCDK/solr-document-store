@@ -6,12 +6,9 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import dk.dbc.search.solrdocstore.jpa.BibliographicToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
-import java.util.Arrays;
-import java.util.HashSet;
 import javax.persistence.EntityManager;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -34,7 +31,7 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
 
             bean.openAgency = mockToReturn(LibraryType.FBS);
             createBibRecord(em, agencyId, bibliographicRecordId);
-            createH2BRecord(em, agencyId, bibliographicRecordId, 132);
+            createH2BRecord(em, agencyId, 132, bibliographicRecordId);
             bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, mockEnqueueCollector, QueueType.HOLDING);
             HoldingsToBibliographicEntity abc = fetchH2BRecord(em, agencyId, bibliographicRecordId);
             assertThat(mockEnqueueCollector.getJobs(), containsInAnyOrder(
@@ -123,120 +120,6 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
     }
 
     @Test
-    public void onFBSwillReadB2B() {
-        jpa(em -> {
-            HoldingsToBibliographicBean bean = createHoldingsToBibliographicBean(em);
-            int agencyId = 132;
-            String bibliographicRecordId = "ABC";
-            String newRecordId = "DEF";
-
-            bean.openAgency = mockToReturn(LibraryType.FBS);
-
-            createBibRecord(em, LibraryType.COMMON_AGENCY, bibliographicRecordId);
-            createBibRecord(em, agencyId, newRecordId);
-            createB2B(em, bibliographicRecordId, newRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
-            HoldingsToBibliographicEntity e = fetchH2BRecord(em, agencyId, bibliographicRecordId);
-            assertNotNull(e);
-            assertEquals(agencyId, e.getBibliographicAgencyId());
-            assertEquals(newRecordId, e.getBibliographicRecordId());
-        });
-    }
-
-    @Test
-    public void onFBCSchoolWillReadB2B() {
-        jpa(em -> {
-            HoldingsToBibliographicBean bean = createHoldingsToBibliographicBean(em);
-            int agencyId = 132;
-            String bibliographicRecordId = "ABC";
-            String newRecordId = "DEF";
-
-            bean.openAgency = mockToReturn(LibraryType.FBSSchool);
-            createBibRecord(em, LibraryType.SCHOOL_COMMON_AGENCY, bibliographicRecordId);
-            createBibRecord(em, LibraryType.COMMON_AGENCY, newRecordId);
-            createB2B(em, bibliographicRecordId, newRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
-            HoldingsToBibliographicEntity e = fetchH2BRecord(em, agencyId, bibliographicRecordId);
-            assertNotNull(e);
-            assertEquals(LibraryType.COMMON_AGENCY, e.getBibliographicAgencyId());
-            assertEquals(newRecordId, e.getBibliographicRecordId());
-        });
-    }
-
-    @Test
-    public void onB2BUpdateRecalc() {
-        jpa(em -> {
-            HoldingsToBibliographicBean bean = createHoldingsToBibliographicBean(em);
-            bean.openAgency = new OpenAgencyBean();
-            bean.openAgency.entityManager = em;
-            bean.openAgency.proxy = null;
-
-            // Override LibraryConfig OpenAgency by add agencies directly to cache
-            int fbsSchoolAgency = 300711;
-            int fbsAgencyWithoutLocalBib = 704711;
-            int fbsAgencyWithLocalBib = 704712;
-            int nonFbsAgency = 884750;
-            createAgency(em, fbsSchoolAgency);
-            createAgency(em, fbsAgencyWithoutLocalBib);
-            createAgency(em, fbsAgencyWithLocalBib);
-            createAgency(em, nonFbsAgency);
-
-            int[] agencies = {fbsAgencyWithLocalBib, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY};
-            String originalRecordId = "A";
-            String superseedingRecordId = "B";
-
-            String[] recordIds = {originalRecordId, superseedingRecordId};
-            for (int a : agencies) {
-                for (String r : recordIds) {
-                    createBibRecord(em, a, r);
-                }
-            }
-            createH2BRecord(em, fbsAgencyWithoutLocalBib, originalRecordId, LibraryType.COMMON_AGENCY, originalRecordId);
-            createH2BRecord(em, fbsAgencyWithLocalBib, originalRecordId, fbsAgencyWithLocalBib, originalRecordId);
-            createH2BRecord(em, fbsSchoolAgency, originalRecordId, LibraryType.SCHOOL_COMMON_AGENCY, originalRecordId);
-            createH2BRecord(em, nonFbsAgency, originalRecordId, nonFbsAgency, originalRecordId);
-            createB2B(em, originalRecordId, superseedingRecordId);
-            em.flush();
-
-            MockEnqueueCollector mockEnqueueCollector = new MockEnqueueCollector();
-            bean.recalcAttachments(superseedingRecordId, new HashSet<>(Arrays.asList(new String[] {originalRecordId})),
-                                   mockEnqueueCollector, QueueType.HOLDING);
-
-            assertThat(mockEnqueueCollector.getJobs(), containsInAnyOrder(
-                       "HOLDING:" + LibraryType.COMMON_AGENCY + "-clazzifier:" + originalRecordId,
-                       "HOLDING:" + LibraryType.SCHOOL_COMMON_AGENCY + "-clazzifier:" + originalRecordId,
-                       "HOLDING:" + fbsAgencyWithLocalBib + "-clazzifier:" + originalRecordId,
-                       "HOLDING:" + LibraryType.COMMON_AGENCY + "-clazzifier:" + superseedingRecordId,
-                       "HOLDING:" + LibraryType.SCHOOL_COMMON_AGENCY + "-clazzifier:" + superseedingRecordId,
-                       "HOLDING:" + fbsAgencyWithLocalBib + "-clazzifier:" + superseedingRecordId));
-            assertH2B(em, fbsAgencyWithoutLocalBib, originalRecordId, LibraryType.COMMON_AGENCY, superseedingRecordId);
-            assertH2B(em, fbsSchoolAgency, originalRecordId, LibraryType.SCHOOL_COMMON_AGENCY, superseedingRecordId);
-            assertH2B(em, nonFbsAgency, originalRecordId, nonFbsAgency, originalRecordId);
-        });
-    }
-
-    @Test
-    public void onNonFBSWillIgnoreB2B() {
-        jpa(em -> {
-            HoldingsToBibliographicBean bean = createHoldingsToBibliographicBean(em);
-            int agencyId = 132;
-            String bibliographicRecordId = "ABC";
-            String newRecordId = "DEF";
-
-            bean.openAgency = mockToReturn(LibraryType.NonFBS);
-            createBibRecord(em, agencyId, bibliographicRecordId);
-            createBibRecord(em, LibraryType.COMMON_AGENCY, bibliographicRecordId);
-            createBibRecord(em, LibraryType.COMMON_AGENCY, newRecordId);
-            createB2B(em, bibliographicRecordId, newRecordId);
-            bean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, EnqueueCollector.VOID, QueueType.HOLDING);
-            HoldingsToBibliographicEntity e = fetchH2BRecord(em, agencyId, bibliographicRecordId);
-            assertNotNull(e);
-            assertEquals(agencyId, e.getBibliographicAgencyId());
-            assertEquals(bibliographicRecordId, e.getBibliographicRecordId());
-        });
-    }
-
-    @Test
     public void isCommonDerived() throws Exception {
         jpa(em -> {
             HoldingsToBibliographicBean bean = createHoldingsToBibliographicBean(em);
@@ -269,10 +152,6 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         });
     }
 
-    private void createB2B(EntityManager em, String oldRecordId, String newRecordId) {
-        em.merge(new BibliographicToBibliographicEntity(oldRecordId, newRecordId));
-    }
-
     private OpenAgencyBean mockToReturn(LibraryType libraryType) {
         OpenAgencyBean mock = Mockito.mock(OpenAgencyBean.class);
         Mockito.when(mock.lookup(Mockito.anyInt())).thenReturn(new OpenAgencyEntity(-1, libraryType, true, true, true));
@@ -295,14 +174,9 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         em.merge(e);
     }
 
-    private void createH2BRecord(EntityManager em, int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId) {
-        createH2BRecord(em, holdingsAgencyId, holdingsBibliographicRecordId, bibliographicAgencyId, holdingsBibliographicRecordId);
-    }
-
-    private void createH2BRecord(EntityManager em, int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId, String bibliographicRecordId) {
+    private void createH2BRecord(EntityManager em, int holdingsAgencyId, int bibliographicAgencyId, String bibliographicRecordId) {
         HoldingsToBibliographicEntity e = new HoldingsToBibliographicEntity(
                 holdingsAgencyId,
-                holdingsBibliographicRecordId,
                 bibliographicAgencyId,
                 bibliographicRecordId,
                 false
@@ -310,8 +184,8 @@ public class HoldingsToBibliographicBeanIT extends JpaSolrDocStoreIntegrationTes
         em.merge(e);
     }
 
-    private void assertH2B(EntityManager em, int holdingsAgencyId, String holdingsBibliographicRecordId, int bibliographicAgencyId, String bibliographicRecordId) {
-        HoldingsToBibliographicEntity e = fetchH2BRecord(em, holdingsAgencyId, holdingsBibliographicRecordId);
+    private void assertH2B(EntityManager em, int holdingsAgencyId, int bibliographicAgencyId, String bibliographicRecordId) {
+        HoldingsToBibliographicEntity e = fetchH2BRecord(em, holdingsAgencyId, bibliographicRecordId);
         assertEquals(e.toString(), bibliographicAgencyId, e.getBibliographicAgencyId());
         assertEquals(e.toString(), bibliographicRecordId, e.getBibliographicRecordId());
     }

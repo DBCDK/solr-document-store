@@ -66,21 +66,18 @@ public class BibliographicRetrieveBean {
      * @param orderBy               which column we order by
      * @param desc                  ascending or descending
      * @return Query of bibliographic entities joined with bibliographic to
-     *         bibliographic table, so the supersede id is
-     *         included
+     *         bibliographic table
      */
-    public Query getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId, String orderBy, boolean desc) {
+    public TypedQuery<BibliographicEntity> getBibliographicEntitiesWithIndexKeys(String bibliographicRecordId, String orderBy, boolean desc) {
         String direction = desc ? "DESC" : "ASC";
         if (!BibliographicEntity.sortableColumns.contains(orderBy)) {
             throw new JPQLException("Invalid order by parameter");
         }
-        Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
-                                                              "FROM bibliographicsolrkeys b " +
-                                                              "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
-                                                              "WHERE b.bibliographicrecordid=?1 " +
-                                                              "ORDER BY b." + orderBy.toLowerCase() + " " + direction, "BibliographicEntityWithSupersedeId");
-        return frontendQuery.setParameter(1, bibliographicRecordId);
-
+        return entityManager.createQuery("SELECT b " +
+                                         "FROM BibliographicEntity b " +
+                                         "WHERE b.bibliographicRecordId=:bibliographicRecordId " +
+                                         "ORDER BY b." + orderBy + " " + direction, BibliographicEntity.class)
+                .setParameter("bibliographicRecordId", bibliographicRecordId);
     }
 
     public long getBibliographicEntityCountById(String bibliographicRecordId) {

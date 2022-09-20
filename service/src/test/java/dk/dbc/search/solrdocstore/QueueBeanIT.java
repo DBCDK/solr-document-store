@@ -21,7 +21,6 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import java.util.Set;
-import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;

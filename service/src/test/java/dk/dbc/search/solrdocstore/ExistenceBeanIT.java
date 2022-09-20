@@ -33,8 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
 
-
-
     @Test(timeout = 2_000L)
     public void testBibliographicNonExisting() throws Exception {
         System.out.println("testBibliographicNonExisting");

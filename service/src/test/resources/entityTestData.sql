@@ -9,6 +9,4 @@ INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, T
      VALUES ( 600, '600', '[{}, {}]'::jsonb, 'track');
 
 
-INSERT INTO holdingsTobibliographic (holdingsagencyid,holdingsbibliographicrecordid, bibliographicagencyid, bibliographicrecordid, isCommonDerived ) VALUES (600, '600', 100,'600', false);
-
-INSERT INTO bibliographictobibliographic (deadBibliographicRecordId, liveBibliographicRecordId) VALUES ('399', '600');
+INSERT INTO holdingsTobibliographic (holdingsagencyid,bibliographicagencyid, bibliographicrecordid, isCommonDerived ) VALUES (600, 100,'600', false);

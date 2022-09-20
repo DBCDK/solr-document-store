@@ -5,8 +5,6 @@ import dk.dbc.search.solrdocstore.request.AddResourceRequest;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
 import org.junit.Before;
 import org.junit.Test;
 import javax.persistence.TypedQuery;
@@ -21,7 +19,7 @@ import static org.hamcrest.Matchers.*;
 
 public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
 
-    JSONBContext jsonbContext = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
 
     @Before
     public void before() {
@@ -30,12 +28,12 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void testAddResource() throws JSONBException {
+    public void testAddResource() throws Exception {
         System.out.println("testAddResource");
         AddResourceRequest request = new AddResourceRequest(870970, "23556455", "hasCoverUrl", true);
         jpa(em -> {
             ResourceBean bean = createResourceBean(em);
-            bean.addResource(jsonbContext.marshall(request));
+            bean.addResource(MARSHALLER.marshall(request));
             TypedQuery<BibliographicResourceEntity> query = em.createQuery(
                     "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
                     "r.bibliographicRecordId=:bibId AND r.field=:field", BibliographicResourceEntity.class);
@@ -54,7 +52,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
             ResourceBean bean = createResourceBean(em);
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", null, null, true, null, "track:1"));
-            bean.addResource(jsonbContext.marshall(request));
+            bean.addResource(MARSHALLER.marshall(request));
         });
         assertThat(queueContentAndClear(), empty());
     }
@@ -70,7 +68,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new BibliographicEntity(890890, "classifier2", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicEntity(890890, "classifier3", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicResourceEntity(890890, "45454545", "hasCoverUrl", true));
-            bean.addResource(jsonbContext.marshall(request));
+            bean.addResource(MARSHALLER.marshall(request));
         });
         // Only enqueues its own items
         assertThat(queueContentAndClear(), containsInAnyOrder(
@@ -127,7 +125,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new BibliographicEntity(890890, "classifier3", "12121212", "repo", "work:1", "unit:1", false, null, "track:1")); // NonFBS should not be enqueued
             // Resource
             em.merge(new BibliographicResourceEntity(300000, "12121212", "hasCoverUrl", true));
-            bean.addResource(jsonbContext.marshall(request));
+            bean.addResource(MARSHALLER.marshall(request));
         });
         // Enqueues all posts with the recordId, since they might inherit this value from common
         assertThat(queueContentAndClear(), containsInAnyOrder(

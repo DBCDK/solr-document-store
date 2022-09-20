@@ -5,6 +5,7 @@ import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
@@ -50,14 +51,14 @@ public class DocumentRetrieveBean {
     private static final String SELECT_HOLDINGS_ITEMS_JPA =
             "SELECT h FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h " +
-            "ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            "ON h2b.bibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " WHERE h2b.bibliographicRecordId = :bibliographicRecordId" +
             " AND h2b.bibliographicAgencyId = :agencyId";
 
     private static final String SELECT_HOLDINGS_ITEMS_FOR_UNIT_JPA =
             "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h" +
-            " ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            " ON h2b.bibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " INNER JOIN BibliographicEntity be" +
             " ON h2b.bibliographicRecordId = be.bibliographicRecordId AND h2b.bibliographicAgencyId = be.agencyId " +
             " WHERE be.unit = :unitId";
@@ -65,7 +66,7 @@ public class DocumentRetrieveBean {
     private static final String SELECT_HOLDINGS_ITEMS_FOR_WORK_JPA =
             "SELECT new dk.dbc.search.solrdocstore.response.HoldingsInfo(h, h2b) FROM HoldingsToBibliographicEntity h2b" +
             " INNER JOIN HoldingsItemEntity h" +
-            " ON h2b.holdingsBibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
+            " ON h2b.bibliographicRecordId = h.bibliographicRecordId AND h2b.holdingsAgencyId = h.agencyId" +
             " INNER JOIN BibliographicEntity be" +
             " ON h2b.bibliographicRecordId = be.bibliographicRecordId AND h2b.bibliographicAgencyId = be.agencyId " +
             " WHERE be.work = :workId";
@@ -231,20 +232,33 @@ public class DocumentRetrieveBean {
     }
 
     public List<Integer> getPartOfDanbibCommon(String bibliographicRecordId) {
-        return entityManager.createNativeQuery(
-                "SELECT CAST(h2b.holdingsAgencyId AS INTEGER) FROM HoldingsToBibliographic h2b" +
-                " JOIN OpenAgencyCache oa " +
-                "ON oa.agencyId = h2b.holdingsAgencyId AND oa.libraryType = 'FBS' AND (oa.partOfDanbib = TRUE OR oa.authCreateCommonRecord = TRUE)" +
-                " JOIN HoldingsItemsSolrKeys h " +
-                "ON h.agencyId = h2b.holdingsAgencyId AND h.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
-                " WHERE" +
-                "  h2b.isCommonDerived = TRUE" +
-                "  AND h2b.bibliographicRecordId = ?" +
-                "  AND NOT EXISTS (SELECT (1) FROM BibliographicSolrKeys b " +
-                "WHERE b.agencyId = h2b.holdingsAgencyId AND b.bibliographicRecordId = h2b.bibliographicRecordId " +
-                "AND 'true' = jsonb_extract_path_text(b.indexKeys, 'rec.excludeFromUnionCatalogue', '0'))"
-        ).setParameter(1, bibliographicRecordId)
-                .getResultList();
+        return entityManager.createQuery("SELECT h2b  FROM HoldingsToBibliographicEntity h2b" +
+                                         " WHERE h2b.isCommonDerived = TRUE" +
+                                         "  AND h2b.bibliographicRecordId = :bibliographicRecordId",
+                                         HoldingsToBibliographicEntity.class)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .getResultStream()
+                .filter(h2b -> {
+                    OpenAgencyEntity oae = oaBean.lookup(h2b.getHoldingsAgencyId());
+                    return oae.getLibraryType() == LibraryType.FBS && ( oae.getAuthCreateCommonRecord() || oae.getPartOfDanbib() );
+                })
+                .filter(h2b -> !hasExcludeFromUnionCatalogue(h2b.getBibliographicAgencyId(), h2b.getBibliographicRecordId()))
+                .map(HoldingsToBibliographicEntity::getHoldingsAgencyId)
+                .collect(Collectors.toList());
+    }
+
+    private boolean hasExcludeFromUnionCatalogue(int agencyId, String bibliographicRecordId) {
+        return entityManager.createQuery("SELECT b FROM BibliographicEntity b" +
+                                         " WHERE b.bibliographicRecordId=:bibliographicRecordId" +
+                                         "  AND b.agencyId=:agencyId", BibliographicEntity.class)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .setParameter("agencyId", agencyId)
+                .getResultStream()
+                .filter(b -> b.getIndexKeys()
+                        .getOrDefault("rec.excludeFromUnionCatalogue", Collections.EMPTY_LIST)
+                        .contains("true"))
+                .findAny()
+                .isPresent();
     }
 
     public static Map<String, Map<Integer, Boolean>> mapResources(List<BibliographicResourceEntity> resources) {

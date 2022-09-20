@@ -1,7 +1,6 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.response.FrontendReturnListType;
-import dk.dbc.search.solrdocstore.response.BibliographicFrontendResponse;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,7 +22,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import static dk.dbc.log.LogWith.track;
@@ -49,13 +47,13 @@ public class BibliographicRecordAPIBean {
 
     /*
      * Returns a json object with a result field, which is a list of json BibliographicEntity that matches
-     * holdingsBibliographicRecordId with the argument. Also includes the supersede id, if it exists.
+     * holdingsBibliographicRecordId with the argument.
      */
     @GET
     @Path("bibliographic-records/bibliographic-record-id/{bibliographicRecordId}")
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
-    public Response getBibliographicKeysWithSupersedeId(
+    public Response getBibliographicKeys(
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
             @DefaultValue("1") @QueryParam("page") int page,
             @DefaultValue("10") @QueryParam("page_size") int pageSize,
@@ -68,12 +66,10 @@ public class BibliographicRecordAPIBean {
             if (!BibliographicEntity.sortableColumns.contains(orderBy)) {
                 return Response.status(400).entity("{\"error\":\"order_by parameter not acceptable\"}").build();
             }
-            Query frontendQuery = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId, orderBy, desc);
-            List<Object[]> resultList = frontendQuery.setFirstResult(( page - 1 ) * pageSize).setMaxResults(pageSize).getResultList();
-            List<BibliographicFrontendResponse> bibliographicFrontendEntityList = resultList.stream().map((record) -> {
-                BibliographicEntity b = (BibliographicEntity) record[0];
-                return new BibliographicFrontendResponse(b, (String) record[1]);
-            }).collect(Collectors.toList());
+            List<BibliographicEntity> bibliographicFrontendEntityList = brBean.getBibliographicEntitiesWithIndexKeys(bibliographicRecordId, orderBy, desc)
+                    .setFirstResult(( page - 1 ) * pageSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
             long countResult = brBean.getBibliographicEntityCountById(bibliographicRecordId);
             return Response.ok(new FrontendReturnListType<>(bibliographicFrontendEntityList, pageCount(countResult, pageSize)), MediaType.APPLICATION_JSON).build();
         }
@@ -83,7 +79,7 @@ public class BibliographicRecordAPIBean {
     @Path("bibliographic-records/repository-id/{repositoryId}")
     @Produces({MediaType.APPLICATION_JSON})
     @Timed
-    public Response getBibliographicKeysByRepositoryIdWithSupersedeId(
+    public Response getBibliographicKeysByRepositoryId(
             @PathParam("repositoryId") String repositoryID,
             @DefaultValue("1") @QueryParam("page") int page,
             @DefaultValue("10") @QueryParam("page_size") int pageSize,
@@ -98,18 +94,14 @@ public class BibliographicRecordAPIBean {
             }
 
             String direction = desc ? "DESC" : "ASC";
-            Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
-                                                                  "FROM bibliographicsolrkeys b " +
-                                                                  "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
-                                                                  "WHERE b.repositoryId = ? ORDER BY b." + orderBy + " " + direction, "BibliographicEntityWithSupersedeId")
-                    .setParameter(1, repositoryID)
-                    .setParameter(2, orderBy)
+            List<BibliographicEntity> res = entityManager.createQuery(
+                    "SELECT b " +
+                    "FROM BibliographicEntity b " +
+                    "WHERE b.repositoryId=:repositoryId ORDER BY b." + orderBy + " " + direction, BibliographicEntity.class)
+                    .setParameter("repositoryId", repositoryID)
                     .setFirstResult(( page - 1 ) * pageSize)
-                    .setMaxResults(pageSize);
-            List<BibliographicFrontendResponse> res = ( (List<Object[]>) frontendQuery.getResultList() ).stream().map((record) -> {
-                BibliographicEntity b = (BibliographicEntity) record[0];
-                return new BibliographicFrontendResponse(b, (String) record[1]);
-            }).collect(Collectors.toList());
+                    .setMaxResults(pageSize)
+                    .getResultList();
             Query queryTotal = entityManager.createNativeQuery("SELECT COUNT(b.bibliographicRecordId) FROM bibliographicsolrkeys b WHERE b.repositoryId = ?")
                     .setParameter(1, repositoryID);
             long count = (long) queryTotal.getSingleResult();
@@ -125,14 +117,14 @@ public class BibliographicRecordAPIBean {
             @PathParam("bibliographicRecordId") String bibliographicRecordId,
             @PathParam("bibliographicAgencyId") int bibliographicAgencyId) {
         try (LogWith logWith = track(null)) {
-            Query frontendQuery = entityManager.createNativeQuery("SELECT b.*,b2b.livebibliographicrecordid as supersede_id " +
-                                                                  "FROM bibliographicsolrkeys b " +
-                                                                  "LEFT OUTER JOIN bibliographictobibliographic b2b ON b.bibliographicrecordid=b2b.deadbibliographicrecordid " +
-                                                                  "WHERE (b.bibliographicrecordid=?1 AND b.agencyid=?2)", "BibliographicEntityWithSupersedeId")
-                    .setParameter(1, bibliographicRecordId)
-                    .setParameter(2, bibliographicAgencyId);
-            Object[] record = (Object[]) frontendQuery.getSingleResult();
-            return Response.ok(new BibliographicFrontendResponse((BibliographicEntity) record[0], (String) record[1])).build();
+            BibliographicEntity entity = entityManager.createQuery(
+                    "SELECT b " +
+                    "FROM BibliographicEntity b " +
+                    "WHERE (b.bibliographicRecordId=:bibliographicRecordId AND b.agencyId=:agencyId)", BibliographicEntity.class)
+                    .setParameter("bibliographicRecordId", bibliographicRecordId)
+                    .setParameter("agencyId", bibliographicAgencyId)
+                    .getSingleResult();
+            return Response.ok(entity).build();
         }
     }
 

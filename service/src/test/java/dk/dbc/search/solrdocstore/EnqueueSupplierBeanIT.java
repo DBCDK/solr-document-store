@@ -28,9 +28,6 @@ import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.persistence.EntityManager;
 import org.junit.Test;
@@ -299,57 +296,11 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test(timeout = 2_000L)
-    public void superseeds() {
-        System.out.println("superseeds");
-        /*
-         * Superseeds
-         * ----------
-         * Add Bib(870970) rec 1,2,3
-         * Add Holdings (OWN:FBS) rec 1,2,3
-         * Attaches to Bib
-         * Queue contains 870970: 1,2,3
-         *
-         * Add Bib(870970) 4 (to superseed 1,2,3).
-         * Holdings reattaches to new Bib
-         * Queue contains 870970: 1,2,3,4
-         *
-         */
-
-        String superseedId = "test4";
-        List<String> ids = Arrays.asList("test1", "test2", "test3");
-
-        jpa(em -> {
-            for (String id : ids) {
-                addBibliographic(em, commonAgency, id);
-                addHoldings(em, fbsAgency, id);
-            }
-        });
-
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test1"),
-                   queueItem(commonAgency, "clazzifier", "test2"),
-                   queueItem(commonAgency, "clazzifier", "test3"),
-                   queueItem("unit:0"),
-                   queueItem("work:0")));
-
-        jpa(em -> {
-            addBibliographic(em, commonAgency, superseedId, Optional.of(ids));
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test1"),
-                   queueItem(commonAgency, "clazzifier", "test2"),
-                   queueItem(commonAgency, "clazzifier", "test3"),
-                   queueItem(commonAgency, "clazzifier", "test4"),
-                   queueItem("unit:0"),
-                   queueItem("work:0")));
-    }
-
-    @Test(timeout = 2_000L)
     public void multipleClassifiersMoveHolding() {
         System.out.println("multipleClassifiersMoveHolding");
         jpa(em -> {
-            addBibliographic(em, commonAgency, "foo", "a", Optional.empty());
-            addBibliographic(em, commonAgency, "bar", "a", Optional.empty());
+            addBibliographic(em, commonAgency, "foo", "a");
+            addBibliographic(em, commonAgency, "bar", "a");
         });
         queueContentAndClear();
 
@@ -363,7 +314,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem("work:0")));
 
         jpa(em -> {
-            addBibliographic(em, 777777, "woop", "a", Optional.empty());
+            addBibliographic(em, 777777, "woop", "a");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "foo", "a"),
@@ -374,25 +325,20 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     private BibliographicEntity addBibliographic(EntityManager em, int agency, String bibliographicRecordId) throws SQLException {
-        return addBibliographic(em, agency, bibliographicRecordId, Optional.empty());
+        return addBibliographic(em, agency, "clazzifier", bibliographicRecordId);
     }
 
-    private BibliographicEntity addBibliographic(EntityManager em, int agency, String bibliographicRecordId, Optional<List<String>> superseed) throws SQLException {
-        return addBibliographic(em, agency, "clazzifier", bibliographicRecordId, superseed);
-    }
-
-    private BibliographicEntity addBibliographic(EntityManager em, int agency, String classifier, String bibliographicRecordId, Optional<List<String>> superseed) throws SQLException {
-        List<String> superseedList = superseed.orElse(Collections.emptyList());
+    private BibliographicEntity addBibliographic(EntityManager em, int agency, String classifier, String bibliographicRecordId) throws SQLException {
         BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "work:0", "unit:0", false, new IndexKeys(), "IT");
         BibliographicBean bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
-        bibliographicBean.addBibliographicKeys(e, superseedList, true);
+        bibliographicBean.addBibliographicKeys(e, true);
         return e;
     }
 
     private void deleteBibliographic(EntityManager em, BibliographicEntity ownRecord) throws SQLException {
         ownRecord.setDeleted(true);
         BibliographicBean bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
-        bibliographicBean.addBibliographicKeys(ownRecord, Collections.emptyList(), true);
+        bibliographicBean.addBibliographicKeys(ownRecord, true);
     }
 
     private HoldingsItemEntity addHoldings(EntityManager em, int holdingAgency, String holdingBibliographicId) throws SQLException {

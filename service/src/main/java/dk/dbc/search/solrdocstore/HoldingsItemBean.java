@@ -4,8 +4,6 @@ import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dk.dbc.commons.jsonb.JSONBContext;
-import dk.dbc.commons.jsonb.JSONBException;
 import dk.dbc.log.LogWith;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
@@ -24,7 +22,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -39,6 +36,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
@@ -54,7 +53,7 @@ public class HoldingsItemBean {
 
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
 
-    private final JSONBContext jsonbContext = new JSONBContext();
+    private static final Marshaller MARSHALLER = new Marshaller();
 
     @Inject
     HoldingsToBibliographicBean h2bBean;
@@ -76,14 +75,14 @@ public class HoldingsItemBean {
     public StatusResponse putHoldings(String jsonContent,
                                       @PathParam("agencyId") int agencyId,
                                       @PathParam("bibliographicRecordId") String bibliographicRecordId,
-                                      @QueryParam("trackingId") String trackingId) throws JSONBException, SQLException {
+                                      @QueryParam("trackingId") String trackingId) throws SQLException, JsonProcessingException {
         if (trackingId == null)
             trackingId = UUID.randomUUID().toString();
         try (LogWith logWith = track(trackingId)) {
             logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
 
             log.info("Update holdings: {}/{}", agencyId, bibliographicRecordId);
-            HoldingsItemIndexKeysRequest request = jsonbContext.unmarshall(jsonContent, HoldingsItemIndexKeysRequest.class);
+            HoldingsItemIndexKeysRequest request = MARSHALLER.unmarshall(jsonContent, HoldingsItemIndexKeysRequest.class);
             IndexKeysList indexKeys = request.indexKeys;
             if (indexKeys == null || indexKeys.isEmpty()) {
                 throw new BadRequestException("Cannot send empty index-keys list in PUT - use DELETE");
@@ -187,9 +186,9 @@ public class HoldingsItemBean {
                      description = "Holdings has NOT been added - this really shouldn't happen",
                      ref = StatusResponse.NAME)})
     @RequestBody(ref = HoldingsItemEntitySchemaAnnotated.NAME)
-    public Response setHoldingsKeys(String jsonContent) throws JSONBException, JsonProcessingException {
+    public Response setHoldingsKeys(String jsonContent) throws JsonProcessingException {
 
-        HoldingsItemEntityRequest hi = jsonbContext.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
+        HoldingsItemEntityRequest hi = MARSHALLER.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
         if (hi.getTrackingId() == null)
             hi.setTrackingId(UUID.randomUUID().toString());
         try (LogWith logWith = track(hi.getTrackingId())) {
@@ -222,13 +221,10 @@ public class HoldingsItemBean {
     public void setHoldingsKeys(HoldingsItemEntity hi) throws SQLException {
         EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
 
-        List<HoldingsItemEntity> his = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.bibliographicRecordId = :bibId and h.agencyId = :agency", HoldingsItemEntity.class)
-                .setParameter("agency", hi.getAgencyId())
-                .setParameter("bibId", hi.getBibliographicRecordId())
-                .getResultList();
-        boolean hadLiveHoldings = !his.isEmpty();
+        HoldingsItemEntity hiDb = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(hi.getAgencyId(), hi.getBibliographicRecordId()));
+        boolean hadLiveHoldings = hiDb != null;
         boolean hasLiveHoldings = !hi.getIndexKeys().isEmpty();
-        Set<String> oldLocations = his.isEmpty() ? EMPTY_SET : his.get(0).getLocations();
+        Set<String> oldLocations = hiDb == null ? EMPTY_SET : hiDb.getLocations();
 
         log.info("Updating holdings for {}:{}", hi.getAgencyId(), hi.getBibliographicRecordId());
         if (!hadLiveHoldings && !hasLiveHoldings) { // No holdings before or now
@@ -242,7 +238,7 @@ public class HoldingsItemBean {
                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING,
                                                      QueueType.FIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
         } else if (hadLiveHoldings != hasLiveHoldings && hadLiveHoldings) { // holdings existence change -> none
-            entityManager.remove(his.get(0)); // Remove existing
+            entityManager.remove(hiDb); // Remove existing
             HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(hi.getAgencyId(), hi.getBibliographicRecordId());
             HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, key);
             if (binding != null) {
@@ -284,28 +280,15 @@ public class HoldingsItemBean {
         }
     }
 
-    private Query generateRelatedHoldingsQuery(String bibliographicRecordId, int bibliographicAgencyId) {
-        Query query = entityManager.createNativeQuery(
-                "select * " +
-                "from holdingsitemssolrkeys  " +
-                "where (agencyid,bibliographicrecordid) " +
-                "IN ( select holdingsagencyid,holdingsbibliographicrecordid " +
-                "FROM holdingstobibliographic h2b " +
-                "where h2b.bibliographicagencyid = ? " +
-                "and h2b.bibliographicrecordid = ?)",
-                HoldingsItemEntity.class);
-        query.setParameter(1, bibliographicAgencyId);
-        query.setParameter(2, bibliographicRecordId);
-        return query;
-    }
-
-    public List<HoldingsItemEntity> getRelatedHoldings(String bibliographicRecordId, int bibliographicAgencyId) {
-        return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId).getResultList();
-    }
-
     public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId) {
-        return generateRelatedHoldingsQuery(bibliographicRecordId, bibliographicAgencyId)
-                .setHint("javax.persistence.loadgraph", entityManager.getEntityGraph("holdingItemsWithIndexKeys"))
-                .getResultList();
+        return entityManager.createQuery("SELECT h2b FROM HoldingsToBibliographicEntity h2b" +
+                                         " WHERE h2b.bibliographicAgencyId = :bibliographicAgencyId" +
+                                         "  AND h2b.bibliographicRecordId = :bibliographicRecordId", HoldingsToBibliographicEntity.class)
+                .setParameter("bibliographicAgencyId", bibliographicAgencyId)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .getResultStream()
+                .map(h2b -> entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(h2b.getHoldingsAgencyId(), h2b.getBibliographicRecordId())))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

@@ -116,7 +116,7 @@ public class OpenAgencyStatusBean {
                 " JOIN HoldingsToBibliographicEntity h2b" +
                 " JOIN HoldingsItemEntity hi" +
                 " ON b.agencyId = h2b.bibliographicAgencyId AND b.bibliographicRecordId = h2b.bibliographicRecordId" +
-                " AND hi.agencyId = h2b.holdingsAgencyId AND hi.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
+                " AND hi.agencyId = h2b.holdingsAgencyId AND hi.bibliographicRecordId = h2b.bibliographicRecordId" +
                 " WHERE h2b.holdingsAgencyId = :agencyId", BibliographicEntity.class)
                 .setParameter("agencyId", agencyId)
                 .getResultList()
@@ -128,7 +128,7 @@ public class OpenAgencyStatusBean {
             // Purge h2b
             entityManager.createQuery(
                     "SELECT hi FROM HoldingsItemEntity hi JOIN HoldingsToBibliographicEntity h2b" +
-                    " ON hi.agencyId = h2b.holdingsAgencyId AND hi.bibliographicRecordId = h2b.holdingsBibliographicRecordId" +
+                    " ON hi.agencyId = h2b.holdingsAgencyId AND hi.bibliographicRecordId = h2b.bibliographicRecordId" +
                     " WHERE h2b.holdingsAgencyId = :agencyId", HoldingsItemEntity.class)
                     .setParameter("agencyId", agencyId)
                     .getResultList()

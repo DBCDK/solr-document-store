@@ -19,7 +19,6 @@ Endpoint for updating bibliographic records.
   * The **key** in the map is the SolR field
   * The **value** in the map is a list of *unique* values for this key
 * `trackingId`: (string) identifier for the source of this update
-* `supersedes`: (list-of-strings, optional) `bibliographicRecordId` that this record is a replacement for
 * `commitWithin`: (integer, optional) number carried through to solr-updater, and used to indicate when SolR should commit - currently not utilized in production.
 
 `QUERY_STRING` parameters:

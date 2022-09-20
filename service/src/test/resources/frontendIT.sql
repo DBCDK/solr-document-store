@@ -14,6 +14,3 @@ INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, 
 VALUES (706244, 'clazzifier', 'page-order', 'p-o', TRUE, '{"rec.repositoryId": ["p-o"]}' :: JSONB, 'track:2', 'unit:4', 'work:4');
 INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
 VALUES (808077, 'clazzifier', 'page-order', 'p-o', FALSE, '{"rec.repositoryId": ["p-o"]}' :: JSONB, 'track:1', 'unit:7', 'work:7');
-
-INSERT INTO bibliographictobibliographic (DEADBIBLIOGRAPHICRECORDID,LIVEBIBLIOGRAPHICRECORDID)
-VALUES ('page-order','0639423');
