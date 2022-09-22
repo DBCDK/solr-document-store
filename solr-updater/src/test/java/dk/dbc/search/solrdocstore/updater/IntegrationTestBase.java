@@ -16,16 +16,18 @@ import java.sql.Statement;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.AfterClass;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testcontainers.images.builder.Transferable;
+import org.testcontainers.utility.DockerImageName;
 
 import static dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase.PG;
 
@@ -126,19 +128,27 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
     }
 
     private static GenericContainer makeSolr() {
+        String fromImage = "docker-dbc.artifacts.dbccloud.dk/dbc-solr9:latest";
+        try {
+            // pull image
+            DockerImageName from = DockerImageName.parse(fromImage);
+            DockerClientFactory.instance().client()
+                    .pullImageCmd(from.getUnversionedPart())
+                    .withTag(from.getVersionPart())
+                    .start()
+                    .awaitCompletion(30, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
 
         ImageFromDockerfile image = new ImageFromDockerfile()
                 .withFileFromPath("target/solr/corepo-config", Path.of("target/solr/corepo-config").toAbsolutePath())
-                .withFileFromString("target/solr/corepo-1/core.properties", "name=corepo-1")
-                .withFileFromString("target/solr/corepo-2/core.properties", "name=corepo-2")
                 .withDockerfileFromBuilder(dockerfile ->
-                        dockerfile.from("docker-de.artifacts.dbccloud.dk/dbc-solr8-replica-searcher:latest")
-                                .add("target/solr/corepo-config/", "/opt/solr/server/solr/corepo-1/conf/")
-                                .add("target/solr/corepo-1/core.properties", "/opt/solr/server/solr/corepo-1/core.properties")
-                                .add("target/solr/corepo-config/", "/opt/solr/server/solr/corepo-2/conf/")
-                                .add("target/solr/corepo-2/core.properties", "/opt/solr/server/solr/corepo-2/core.properties")
+                        dockerfile.from(fromImage)
+                                .add("target/solr/corepo-config/", "/collections/corepo-1/")
+                                .add("target/solr/corepo-config/", "/collections/corepo-2/")
                                 .user("root")
-                                .run("chown -R $SOLR_USER:$SOLR_USER /opt/solr//server/solr")
+                                .run("chown -R $SOLR_USER:$SOLR_USER /opt/solr/server/solr")
                                 .user("$SOLR_USER")
                                 .build());
         GenericContainer solr = new GenericContainer(image)
@@ -146,8 +156,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
                 .withEnv("ZKSTRING", "localhost")
                 .withExposedPorts(8983)
                 .waitingFor(Wait.forHttp("/solr/corepo-1/select?q=*:*"))
-                .withStartupTimeout(Duration.ofMinutes(1))
-                .withCopyToContainer(Transferable.of("name=corepo-1"), "/opt/solr/server/solr/corepo-1/core.properties");
+                .withStartupTimeout(Duration.ofMinutes(1));
         solr.start();
         return solr;
     }

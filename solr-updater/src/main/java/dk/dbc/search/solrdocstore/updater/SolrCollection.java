@@ -40,7 +40,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.common.cloud.ClusterState;
 import org.apache.solr.common.cloud.Replica;
 import org.slf4j.Logger;
@@ -164,14 +164,14 @@ public class SolrCollection {
      * @return url as string
      */
     private static String getHttpUrl(SolrClient client) {
-        if (client instanceof HttpSolrClient) {
-            return ( (HttpSolrClient) client ).getBaseURL();
+        if (client instanceof Http2SolrClient) {
+            return ( (Http2SolrClient) client ).getBaseURL();
         }
         if (client instanceof CloudSolrClient) {
             CloudSolrClient cloud = (CloudSolrClient) client;
 
             String collectionName = cloud.getDefaultCollection();
-            ClusterState state = cloud.getZkStateReader().getClusterState();
+            ClusterState state = cloud.getClusterState();
             Set<String> nodes = state.getLiveNodes();
             if (nodes.isEmpty()) {
                 throw new IllegalArgumentException("Zookeeper don't know about live nodes");
@@ -226,7 +226,7 @@ public class SolrCollection {
 
             return solrClient;
         } else {
-            return new HttpSolrClient.Builder(solrUrl)
+            return new Http2SolrClient.Builder(solrUrl)
                     .build();
         }
     }
