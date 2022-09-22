@@ -130,6 +130,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
     private static GenericContainer makeSolr() {
         String fromImage = "docker-dbc.artifacts.dbccloud.dk/dbc-solr9:latest";
         try {
+            // pull image
             DockerImageName from = DockerImageName.parse(fromImage);
             DockerClientFactory.instance().client()
                     .pullImageCmd(from.getUnversionedPart())
