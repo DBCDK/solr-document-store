@@ -91,12 +91,23 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Major & first/last
         jpa(em -> {
             holdingsItemBeanWithAllRules(em)
-                    .deleteHoldings(710100, "25912233", "x");
+                    .putHoldings(indexKeysList(710100, "25912233")
+                            .add(b -> b.itemId("b")
+                                    .status("Lost"))
+                            .json(), 710100, "25912233", "x");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233", "b,unit:1", "c,work:1",
                    "d,870970-basis:25912233", "e,unit:1", "f,work:1",
                    "g,870970-basis:25912233", "h,unit:1", "i,work:1"));
+
+        // Delete no major change
+        jpa(em -> {
+            holdingsItemBeanWithAllRules(em)
+                    .deleteHoldings(710100, "25912233", "x");
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder(
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
 
     }
 
@@ -120,7 +131,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.HOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNIT, 0),
                     new QueueRuleEntity("c", QueueType.WORK, 0));
-            holWithoutDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+            holWithoutDelay.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
         });
         assertThat(queueRemovePostponed(), empty());
         assertThat(queueContentAndClear(), containsInAnyOrder(
@@ -134,7 +145,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
                     new QueueRuleEntity("b", QueueType.UNIT, 0),
                     new QueueRuleEntity("c", QueueType.WORK, 0));
-            holWithDelay.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
+            holWithDelay.putHoldings(jsonRequestHold("710100-25912233-b"), 710100, "25912233", "t");
         });
         assertThat(queueRemovePostponed(), containsInAnyOrder(
                    "a,870970-basis:25912233")); // Postponed
@@ -162,7 +173,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+            hol.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233",
@@ -183,7 +194,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+            hol.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), empty());
 
@@ -194,7 +205,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
+            hol.deleteHoldings(710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "a,870970-basis:25912233",
@@ -238,7 +249,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
+            hol.deleteHoldings(710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), empty());
 
@@ -263,7 +274,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-d"));
+            hol.deleteHoldings(710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), empty());
     }
@@ -289,7 +300,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
                     new QueueRuleEntity("mu", QueueType.UNITMAJORHOLDING, 0),
                     new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-a"));
+            hol.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "fm,870970-basis:25912233",
@@ -309,7 +320,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
                     new QueueRuleEntity("mu", QueueType.UNITMAJORHOLDING, 0),
                     new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
-            hol.setHoldingsKeys(jsonRequestHold("710100-25912233-b"));
+            hol.putHoldings(jsonRequestHold("710100-25912233-b"), 710100, "25912233", "t");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    "mm,870970-basis:25912233",

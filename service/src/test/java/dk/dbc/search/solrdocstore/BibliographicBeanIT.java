@@ -566,7 +566,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         jpa(em -> {
             HoldingsItemBean hb = createHoldingsItemBean(em);
-            hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-1"));
+            hb.putIndexKeys(800010, "12345678", ON_SHELF, "h-1");
         });
 
         jpa(em -> {
@@ -615,7 +615,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
                                                               "800010-katalog:12345678", "work:1", "unit:1",
                                                               true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), true);
-            hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", NO_HOLDINGS, "h-2"));
+            hb.deleteHoldings(800010, "12345678", "h-2");
         });
 
         jpa(em -> {
@@ -638,7 +638,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                          }
                                                      });
             HoldingsItemBean hb = createHoldingsItemBean(em);
-            hb.setHoldingsKeys(new HoldingsItemEntity(800010, "12345678", ON_SHELF, "h-2"));
+            hb.putIndexKeys(800010, "12345678", ON_SHELF, "h-2");
             bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
                                                               "800010-katalog:12345678", "work:1", "unit:1",
                                                               false, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-1"), true);
@@ -769,8 +769,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         jpa(em -> {
             HoldingsItemBean hol = createHoldingsItemBean(em);
 
-            Response r = hol.setHoldingsKeys(h710100);
-            assertThat(r.getStatus(), is(200));
+            hol.putHoldings(h710100, 710100, "25912233", "track");
         });
 
         jpa(em -> {

@@ -207,7 +207,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         }
 
         private Build holdings(IndexKeysList content) throws SQLException {
-            hold.setHoldingsKeys(new HoldingsItemEntity(holdingsAgencyId, holdingsId, content, "t1"));
+            hold.putIndexKeys(holdingsAgencyId, holdingsId, content, "t1");
             h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId, EnqueueCollector.VOID, QueueType.HOLDING);
             return this;
         }
