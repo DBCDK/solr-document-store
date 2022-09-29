@@ -14,7 +14,12 @@
         {
             "bibliographicRecordId": "",
             "hasLiveHoldings": true,
-            "indexKeys": [ { } ],
+            "indexKeys": [ {
+                    "holdingsitem.status": [
+                        "OnShelf"
+                    ]
+                }
+            ],
             "agencyId": 102030,
             "trackingId": ""
         },

@@ -25,8 +25,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
@@ -50,7 +52,9 @@ public class BusinessLogic {
     private static final String REC_HOLDINGS_ON_LOAN = "rec.holdingsOnLoan";
     private static final String REC_REPOSITORY_ID = "rec.repositoryId";
     private static final String HOLDINGSITEM_ROLE = "holdingsitem.role";
+    private static final String HOLDINGSITEM_STATUS = "holdingsitem.status";
     private static final String COMMON_RECORD_ID_PREFIX = "870970-basis:";
+    private static final Set STRIPPED_STATUS_CODES = Set.of("Lost", "Discarded");
     private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
 
     private final FeatureSwitch featureSwitch;
@@ -152,9 +156,16 @@ public class BusinessLogic {
         Map<String, List<String>> indexKeys = source.getIndexKeys();
         Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys = source.getHoldingsItemsIndexKeys();
 
+//        Map<String, List<Map<String, List<String>>>> filteredHoldingsItemsIndexKeys = holdingsItemsIndexKeys;
+        Map<String, List<Map<String, List<String>>>> filteredHoldingsItemsIndexKeys = removeLostAndDiscarded(holdingsItemsIndexKeys);
+        if (!Objects.equals(holdingsItemsIndexKeys, filteredHoldingsItemsIndexKeys)) {
+            System.out.println("holdingsItemsIndexKeys = " + holdingsItemsIndexKeys);
+            System.out.println("filteredHoldingsItemsIndexKeys = " + filteredHoldingsItemsIndexKeys);
+        }
+
         addType(indexKeys, holdingsItemsIndexKeys);
         if (should(Feature.HOLDINGS_AGENCY)) {
-            addHoldingsAgency(indexKeys, holdingsItemsIndexKeys);
+            addHoldingsAgency(indexKeys, filteredHoldingsItemsIndexKeys);
         }
         if (should(Feature.HOLDINGS_STATS)) {
             addHoldingsStats(indexKeys, source);
@@ -166,14 +177,14 @@ public class BusinessLogic {
             if (libraryRuleProvider == null) {
                 log.error("Feature '{}' is enabled but not configured", Feature.COLLECTION_IDENTIFIER_800000.name());
             } else {
-                add800000CollectionIdenitifers(indexKeys, holdingsItemsIndexKeys);
+                add800000CollectionIdenitifers(indexKeys, filteredHoldingsItemsIndexKeys);
             }
         }
         if (should(Feature.HOLDING_ITEMS_ROLE)) {
             if (libraryRuleProvider == null) {
                 log.error("Feature '{}' is enabled but not configured", Feature.HOLDING_ITEMS_ROLE.name());
             } else {
-                addHoldingsItemsRole(indexKeys, holdingsItemsIndexKeys, source);
+                addHoldingsItemsRole(indexKeys, filteredHoldingsItemsIndexKeys, source);
             }
         }
         if (should(Feature.ATTACH_RESOURCES)) {
@@ -183,7 +194,7 @@ public class BusinessLogic {
             if (profileProvider == null) {
                 log.error("Feature '{}' is enabled but not configured", Feature.SCAN.name());
             } else {
-                addScan(indexKeys, holdingsItemsIndexKeys);
+                addScan(indexKeys, filteredHoldingsItemsIndexKeys);
             }
         }
         if (should(Feature.NESTED_HOLDINGS_DOCUMENTS)) {
@@ -191,6 +202,37 @@ public class BusinessLogic {
             return solrInputDocument(indexKeys, holdingsItemsIndexKeys);
         } else {
             return solrInputDocument(indexKeys, EMPTY_MAP);
+        }
+    }
+
+    private static Map<String, List<Map<String, List<String>>>> removeLostAndDiscarded(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys) {
+        return holdingsItemsIndexKeys.entrySet().stream()
+                .collect(toMap(Map.Entry::getKey,
+                               e -> e.getValue().stream() // pr agency holdings
+                                       .map(BusinessLogic::removeLostAndDiscardedIndexKeys)
+                                       .filter(Objects::nonNull)
+                                       .collect(toList())
+                ));
+    }
+
+    private static Map<String, List<String>> removeLostAndDiscardedIndexKeys(Map<String, List<String>> indexKeys) {
+        Map<String, List<String>> filtered = indexKeys.entrySet().stream()
+                .map(e -> {
+                    if (e.getKey().equals(HOLDINGSITEM_STATUS)) {
+                        return Map.entry(
+                                e.getKey(),
+                                e.getValue().stream()
+                                        .filter(Predicate.not(STRIPPED_STATUS_CODES::contains))
+                                        .collect(toList()));
+                    } else {
+                        return e;
+                    }
+                })
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (filtered.getOrDefault(HOLDINGSITEM_STATUS, EMPTY_LIST).isEmpty()) {
+            return null;
+        } else {
+            return indexKeys;
         }
     }
 
