@@ -286,8 +286,9 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         jpa(em -> {
             HoldingsItemBean holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
-            h.get().setTrackingId("NEW");
-            holdingsItemBean.setHoldingsKeys(h.get());
+            HoldingsItemEntity hold = h.get();
+            hold.setTrackingId("NEW");
+            holdingsItemBean.putIndexKeys(hold.getAgencyId(), hold.getBibliographicRecordId(), hold.getIndexKeys(), hold.getTrackingId());
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(commonAgency, "clazzifier", "test"),
@@ -345,7 +346,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         // Dummy holding - ensure enqueue from non existing to this
         HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, SolrIndexKeys.ON_SHELF, "IT");
         HoldingsItemBean holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
-        holdingsItemBean.setHoldingsKeys(e);
+        holdingsItemBean.putIndexKeys(e.getAgencyId(), e.getBibliographicRecordId(), e.getIndexKeys(), e.getTrackingId());
         return e;
     }
 

@@ -26,10 +26,12 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -46,6 +48,8 @@ public class Requests {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Client CLIENT = ClientBuilder.newClient();
+
+    private static final Pattern HOLDING_PATTERN = Pattern.compile("^h-(\\d+-\\d+)");
 
     static void load(String testName, String solrDocStoreUrl) throws IOException {
         load(CLIENT, testName, UriBuilder.fromUri(solrDocStoreUrl));
@@ -69,24 +73,64 @@ public class Requests {
             if (!array.isArray()) {
                 throw new IllegalStateException("Value of " + api + " in test: " + testName + " is not an array");
             }
-            UriBuilder targetUrl = solrDocStoreUrl.clone().path("api").path(api);
-            WebTarget target = client.target(targetUrl);
             for (JsonNode file : array) {
                 String fileName = file.asText();
                 log.debug("fileName = {}", fileName);
-                try (final InputStream is = Requests.class.getClassLoader().getResourceAsStream("ITRequests/" + fileName)) {
-                    JsonNode content = OBJECT_MAPPER.readTree(is);
-                    if (content.isObject()) {
-                        ( (ObjectNode) content ).put("trackingId", uuid);
-                    }
-                    Response resp = target.request(MediaType.APPLICATION_JSON_TYPE).buildPost(Entity.entity(content.toString(), MediaType.APPLICATION_JSON)).invoke();
-                    System.out.println("resp.getStatusInfo() = " + resp.getStatusInfo());
-                    if (resp.getStatus() != 200) {
-                        throw new IllegalArgumentException("Cannot post content of: ITRequests/" + fileName + " to: " + targetUrl + ": " + resp.getStatusInfo());
-                    }
+                switch (api) {
+                    case "holdings":
+                        loadHold(client, fileName, solrDocStoreUrl);
+                        break;
+                    case "bibliographic":
+                        loadBibl(client, fileName, solrDocStoreUrl);
+                        break;
+                    default:
+                        throw new AssertionError();
                 }
             }
         }
         System.out.println("evict-all: " + client.target(solrDocStoreUrl.clone().path("api/evict-all")).request().get().toString());
+    }
+
+    private static void loadHold(Client client, String fileName, UriBuilder solrDocStoreUrl) throws IOException {
+        Matcher matcher = HOLDING_PATTERN.matcher(fileName);
+        if (!matcher.find())
+            throw new IllegalArgumentException("Unknown file: " + fileName);
+        String uuid = UUID.randomUUID().toString();
+        UriBuilder targetUrl = solrDocStoreUrl.clone().path("api").path("holdings").path(matcher.group(1));
+        try (final InputStream is = Requests.class.getClassLoader().getResourceAsStream("ITRequests/" + fileName)) {
+            JsonNode content = OBJECT_MAPPER.readTree(is);
+            Invocation.Builder request = client.target(targetUrl)
+                    .request(MediaType.APPLICATION_JSON_TYPE);
+            Invocation invocation;
+            if (content.isEmpty()) {
+                invocation = request.buildDelete();
+            } else {
+                invocation = request.buildPut(Entity.json(content.toString()));
+            }
+            Response resp = invocation.invoke();
+            System.out.println("resp.getStatusInfo() = " + resp.getStatusInfo());
+            if (resp.getStatus() != 200) {
+                throw new IllegalArgumentException("Cannot post content of: ITRequests/" + fileName + " to: " + targetUrl + ": " + resp.getStatusInfo());
+            }
+        }
+    }
+
+    private static void loadBibl(Client client, String fileName, UriBuilder solrDocStoreUrl) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        UriBuilder targetUrl = solrDocStoreUrl.clone().path("api").path("bibliographic");
+        try (final InputStream is = Requests.class.getClassLoader().getResourceAsStream("ITRequests/" + fileName)) {
+            JsonNode content = OBJECT_MAPPER.readTree(is);
+            if (content.isObject()) {
+                ( (ObjectNode) content ).put("trackingId", uuid);
+            }
+            Response resp = client.target(targetUrl)
+                    .request(MediaType.APPLICATION_JSON_TYPE)
+                    .buildPost(Entity.json(content.toString()))
+                    .invoke();
+            System.out.println("resp.getStatusInfo() = " + resp.getStatusInfo());
+            if (resp.getStatus() != 200) {
+                throw new IllegalArgumentException("Cannot post content of: ITRequests/" + fileName + " to: " + targetUrl + ": " + resp.getStatusInfo());
+            }
+        }
     }
 }
