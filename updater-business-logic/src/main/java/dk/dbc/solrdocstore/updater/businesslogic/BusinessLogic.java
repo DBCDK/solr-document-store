@@ -156,9 +156,7 @@ public class BusinessLogic {
         Map<String, List<String>> indexKeys = source.getIndexKeys();
         Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys = source.getHoldingsItemsIndexKeys();
 
-        System.out.println("holdingsItemsIndexKeys = " + holdingsItemsIndexKeys);
         holdingsItemsIndexKeys = removeLostAndDiscarded(holdingsItemsIndexKeys);
-        System.out.println("holdingsItemsIndexKeys = " + holdingsItemsIndexKeys);
 
         addType(indexKeys, holdingsItemsIndexKeys);
         if (should(Feature.HOLDINGS_AGENCY)) {
