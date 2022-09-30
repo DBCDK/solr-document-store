@@ -12,7 +12,10 @@
         {
             "bibliographicRecordId": "",
             "hasLiveHoldings": true,
-            "indexKeys": [ { "holdingsitem.agencyId": [ "xxx" ] } ],
+            "indexKeys": [ {
+                    "holdingsitem.agencyId": [ "xxx" ],
+                    "holdingsitem.status": [ "OnLoan" ]
+                } ],
             "agencyId": 102030,
             "trackingId": ""
         },

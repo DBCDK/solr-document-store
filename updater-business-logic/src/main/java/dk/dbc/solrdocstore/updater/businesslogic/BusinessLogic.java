@@ -156,16 +156,13 @@ public class BusinessLogic {
         Map<String, List<String>> indexKeys = source.getIndexKeys();
         Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys = source.getHoldingsItemsIndexKeys();
 
-//        Map<String, List<Map<String, List<String>>>> filteredHoldingsItemsIndexKeys = holdingsItemsIndexKeys;
-        Map<String, List<Map<String, List<String>>>> filteredHoldingsItemsIndexKeys = removeLostAndDiscarded(holdingsItemsIndexKeys);
-        if (!Objects.equals(holdingsItemsIndexKeys, filteredHoldingsItemsIndexKeys)) {
-            System.out.println("holdingsItemsIndexKeys = " + holdingsItemsIndexKeys);
-            System.out.println("filteredHoldingsItemsIndexKeys = " + filteredHoldingsItemsIndexKeys);
-        }
+        System.out.println("holdingsItemsIndexKeys = " + holdingsItemsIndexKeys);
+        holdingsItemsIndexKeys = removeLostAndDiscarded(holdingsItemsIndexKeys);
+        System.out.println("holdingsItemsIndexKeys = " + holdingsItemsIndexKeys);
 
         addType(indexKeys, holdingsItemsIndexKeys);
         if (should(Feature.HOLDINGS_AGENCY)) {
-            addHoldingsAgency(indexKeys, filteredHoldingsItemsIndexKeys);
+            addHoldingsAgency(indexKeys, holdingsItemsIndexKeys);
         }
         if (should(Feature.HOLDINGS_STATS)) {
             addHoldingsStats(indexKeys, source);
@@ -177,14 +174,14 @@ public class BusinessLogic {
             if (libraryRuleProvider == null) {
                 log.error("Feature '{}' is enabled but not configured", Feature.COLLECTION_IDENTIFIER_800000.name());
             } else {
-                add800000CollectionIdenitifers(indexKeys, filteredHoldingsItemsIndexKeys);
+                add800000CollectionIdenitifers(indexKeys, holdingsItemsIndexKeys);
             }
         }
         if (should(Feature.HOLDING_ITEMS_ROLE)) {
             if (libraryRuleProvider == null) {
                 log.error("Feature '{}' is enabled but not configured", Feature.HOLDING_ITEMS_ROLE.name());
             } else {
-                addHoldingsItemsRole(indexKeys, filteredHoldingsItemsIndexKeys, source);
+                addHoldingsItemsRole(indexKeys, holdingsItemsIndexKeys, source);
             }
         }
         if (should(Feature.ATTACH_RESOURCES)) {
@@ -194,7 +191,7 @@ public class BusinessLogic {
             if (profileProvider == null) {
                 log.error("Feature '{}' is enabled but not configured", Feature.SCAN.name());
             } else {
-                addScan(indexKeys, filteredHoldingsItemsIndexKeys);
+                addScan(indexKeys, holdingsItemsIndexKeys);
             }
         }
         if (should(Feature.NESTED_HOLDINGS_DOCUMENTS)) {
