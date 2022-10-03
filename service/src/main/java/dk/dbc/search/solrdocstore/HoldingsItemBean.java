@@ -10,6 +10,7 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
+import dk.dbc.search.solrdocstore.request.HoldingsItemEntityRequest;
 import dk.dbc.search.solrdocstore.request.HoldingsItemIndexKeysRequest;
 import java.sql.SQLException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -33,6 +34,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -69,7 +71,6 @@ public class HoldingsItemBean {
                                       @PathParam("agencyId") int agencyId,
                                       @PathParam("bibliographicRecordId") String bibliographicRecordId,
                                       @QueryParam("trackingId") String trackingId) throws SQLException, JsonProcessingException {
-        System.out.println("json = " + jsonContent);
         if (trackingId == null)
             trackingId = UUID.randomUUID().toString();
         try (LogWith logWith = track(trackingId)) {
@@ -89,7 +90,7 @@ public class HoldingsItemBean {
     void putIndexKeys(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) throws SQLException {
         AgencyItemKey key = new AgencyItemKey(agencyId, bibliographicRecordId);
         HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, key);
-        
+
         EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
 
         if (entity == null) {
@@ -98,14 +99,14 @@ public class HoldingsItemBean {
             entityManager.persist(entity);
 
             queueRelatedBibliographic(entity, enqueue,
-                                                  QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                                  QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                                  QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                      QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                      QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
 
             h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
-                                                                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                                                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                                                                          QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+                                                     QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                                     QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                                     QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
         } else {
             log.trace("update");
             Set<String> oldLocations = entity.getLocations();
@@ -119,17 +120,17 @@ public class HoldingsItemBean {
 
             if (oldLiveHolding != newLiveHolding) {
                 queueRelatedBibliographic(entity, enqueue,
-                                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                                      QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                                      QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
+                                          QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
             } else if (oldLocations.equals(newLocations)) {
                 queueRelatedBibliographic(entity, enqueue,
-                                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
             } else {
                 queueRelatedBibliographic(entity, enqueue,
-                                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                                      QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
-                                                      QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
+                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
+                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
+                                          QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
             }
         }
 
@@ -175,6 +176,29 @@ public class HoldingsItemBean {
         }
     }
 
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Timed
+    public StatusResponse postHoldings(String jsonContent,
+                                       @QueryParam("trackingId") String trackingId) throws SQLException, JsonProcessingException {
+        if (trackingId == null)
+            trackingId = UUID.randomUUID().toString();
+        try (LogWith logWith = track(trackingId)) {
+            HoldingsItemEntityRequest request = MARSHALLER.unmarshall(jsonContent, HoldingsItemEntityRequest.class);
+            int agencyId = request.getAgencyId();
+            String bibliographicRecordId = request.getBibliographicRecordId();
+            logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
+            log.info("Update holdings: {}/{} (POST)", agencyId, bibliographicRecordId);
+            IndexKeysList indexKeys = request.getIndexKeys();
+            if (indexKeys == null || indexKeys.isEmpty()) {
+                return deleteHoldings(agencyId, bibliographicRecordId, trackingId);
+            } else {
+                putIndexKeys(agencyId, bibliographicRecordId, indexKeys, trackingId);
+                return new StatusResponse();
+            }
+        }
+    }
 
     private boolean containsLiveHolding(IndexKeysList indexKeysList) {
         return indexKeysList.stream()
