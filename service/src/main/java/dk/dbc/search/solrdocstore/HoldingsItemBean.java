@@ -189,7 +189,7 @@ public class HoldingsItemBean {
             int agencyId = request.getAgencyId();
             String bibliographicRecordId = request.getBibliographicRecordId();
             logWith.agencyId(agencyId).bibliographicRecordId(bibliographicRecordId);
-            log.info("Update holdings: {}/{}", agencyId, bibliographicRecordId);
+            log.info("Update holdings: {}/{} (POST)", agencyId, bibliographicRecordId);
             IndexKeysList indexKeys = request.getIndexKeys();
             if (indexKeys == null || indexKeys.isEmpty()) {
                 return deleteHoldings(agencyId, bibliographicRecordId, trackingId);
