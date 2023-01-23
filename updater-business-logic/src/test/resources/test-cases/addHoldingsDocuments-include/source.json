@@ -25,6 +25,16 @@
             "indexKeys": [ ],
             "agencyId": 876543,
             "trackingId": ""
+        },
+        {
+            "bibliographicRecordId": "",
+            "hasLiveHoldings": false,
+            "indexKeys": [ {
+                    "holdingsitem.agencyId": [ "xxx" ],
+                    "holdingsitem.status": [ "Lost" ]
+                } ],
+            "agencyId": 123456,
+            "trackingId": ""
         }
     ]
 }

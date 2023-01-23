@@ -1,1 +1,25 @@
-{"bibliographicRecord":{"agencyId":700004,"classifier":"katalog","bibliographicRecordId":"25912233","repositoryId":"700004-katalog:25912233","work":"work:837840","unit":"unit:1007058","deleted":false,"indexKeys":{},"trackingId":"SolrWorker:870970-basis:25912233<Hive:300730-katalog,Batch:5040647,Entry:43125419<bulk-20160902175112-25912233"},"holdingsItemRecords":[{"agencyId":700004,"bibliographicRecordId":"25912233","indexKeys":[{}]}]}
+{
+    "bibliographicRecord": {
+        "agencyId": 700004,
+        "classifier": "katalog",
+        "bibliographicRecordId": "25912233",
+        "repositoryId": "700004-katalog:25912233",
+        "work": "work:837840",
+        "unit": "unit:1007058",
+        "deleted": false,
+        "indexKeys": { },
+        "trackingId": "SolrWorker:870970-basis:25912233<Hive:300730-katalog,Batch:5040647,Entry:43125419<bulk-20160902175112-25912233"
+    },
+    "holdingsItemRecords": [
+        {
+            "agencyId": 700004,
+            "bibliographicRecordId": "25912233",
+            "indexKeys": [
+                {
+                    "holdingsitems.agencyId": [ "700004" ],
+                    "holdingsitem.status": [ "OnLine" ]
+                }
+            ]
+        }
+    ]
+}

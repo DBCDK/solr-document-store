@@ -25,10 +25,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
@@ -54,7 +52,7 @@ public class BusinessLogic {
     private static final String HOLDINGSITEM_ROLE = "holdingsitem.role";
     private static final String HOLDINGSITEM_STATUS = "holdingsitem.status";
     private static final String COMMON_RECORD_ID_PREFIX = "870970-basis:";
-    private static final Set STRIPPED_STATUS_CODES = Set.of("Lost", "Discarded");
+    private static final Set DEAD_HOLDINGSITEM_STATUS = Set.of("Lost", "Discarded");
     private static final int MAX_SOLR_FIELD_VALUE_SIZE = 32000;
 
     private final FeatureSwitch featureSwitch;
@@ -156,8 +154,6 @@ public class BusinessLogic {
         Map<String, List<String>> indexKeys = source.getIndexKeys();
         Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys = source.getHoldingsItemsIndexKeys();
 
-        holdingsItemsIndexKeys = removeLostAndDiscarded(holdingsItemsIndexKeys);
-
         addType(indexKeys, holdingsItemsIndexKeys);
         if (should(Feature.HOLDINGS_AGENCY)) {
             addHoldingsAgency(indexKeys, holdingsItemsIndexKeys);
@@ -200,37 +196,6 @@ public class BusinessLogic {
         }
     }
 
-    private static Map<String, List<Map<String, List<String>>>> removeLostAndDiscarded(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys) {
-        return holdingsItemsIndexKeys.entrySet().stream()
-                .collect(toMap(Map.Entry::getKey,
-                               e -> e.getValue().stream() // pr agency holdings
-                                       .map(BusinessLogic::removeLostAndDiscardedIndexKeys)
-                                       .filter(Objects::nonNull)
-                                       .collect(toList())
-                ));
-    }
-
-    private static Map<String, List<String>> removeLostAndDiscardedIndexKeys(Map<String, List<String>> indexKeys) {
-        Map<String, List<String>> filtered = indexKeys.entrySet().stream()
-                .map(e -> {
-                    if (e.getKey().equals(HOLDINGSITEM_STATUS)) {
-                        return Map.entry(
-                                e.getKey(),
-                                e.getValue().stream()
-                                        .filter(Predicate.not(STRIPPED_STATUS_CODES::contains))
-                                        .collect(toList()));
-                    } else {
-                        return e;
-                    }
-                })
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-        if (filtered.getOrDefault(HOLDINGSITEM_STATUS, EMPTY_LIST).isEmpty()) {
-            return null;
-        } else {
-            return indexKeys;
-        }
-    }
-
     private void addType(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
         indexKeys.put("t", singletonList("m"));
         holdingsItemsIndexKeysList.values().stream()
@@ -248,7 +213,7 @@ public class BusinessLogic {
         boolean shouldHaveBibDk = hasBibDk;
         boolean shouldHaveDanbib = hasDanbib;
 
-        for (String agencyId : extractHoldingsAgencies(holdingsItemsIndexKeysList)) {
+        for (String agencyId : extractLiveHoldingsAgencies(holdingsItemsIndexKeysList)) {
             if (shouldHaveBibDk && shouldHaveDanbib)
                 break;
             VipCoreLibraryRule libraryRules = libraryRuleProvider.libraryRulesFor(agencyId);
@@ -284,16 +249,30 @@ public class BusinessLogic {
             VipCoreLibraryRule libraryRules = libraryRuleProvider.libraryRulesFor(agencyId);
             boolean authCreateComonRecord = libraryRules.authCreateCommonRecord();
             if (shouldAddholdingsItemRole(libraryRules.isPartOfBibdk(), excludeFromUnionCatalogue, authCreateComonRecord, commonRecord)) {
-                hiIndexKeys.forEach(hi -> hi.computeIfAbsent(HOLDINGSITEM_ROLE, list()).add("bibdk"));
+                hiIndexKeys.stream()
+                        .filter(BusinessLogic::hasNotLostAndNotDiscarded)
+                        .forEach(hi -> hi.computeIfAbsent(HOLDINGSITEM_ROLE, list()).add("bibdk"));
             }
             if (shouldAddholdingsItemRole(libraryRules.isPartOfDanbib(), excludeFromUnionCatalogue, authCreateComonRecord, commonRecord)) {
-                hiIndexKeys.forEach(hi -> hi.computeIfAbsent(HOLDINGSITEM_ROLE, list()).add("danbib"));
+                hiIndexKeys.stream()
+                        .filter(BusinessLogic::hasNotLostAndNotDiscarded)
+                        .forEach(hi -> hi.computeIfAbsent(HOLDINGSITEM_ROLE, list()).add("danbib"));
             }
         });
     }
 
+    private static boolean hasNotLostAndNotDiscarded(Map<String, List<String>> indexKeys) {
+        return !indexKeys.getOrDefault(HOLDINGSITEM_STATUS, emptyList())
+                .stream()
+                .allMatch(DEAD_HOLDINGSITEM_STATUS::contains);
+    }
+
     private boolean shouldAddholdingsItemRole(boolean partOf, boolean excludeFromUnionCatalogue,
                                               boolean authCreateCommonRecord, boolean commonRecord) {
+        System.out.println("partOf = " + partOf);
+        System.out.println("excludeFromUnionCatalogue = " + excludeFromUnionCatalogue);
+        System.out.println("authCreateCommonRecord = " + authCreateCommonRecord);
+        System.out.println("commonRecord = " + commonRecord);
         return partOf && !excludeFromUnionCatalogue ||
                !partOf && authCreateCommonRecord && commonRecord;
     }
@@ -429,6 +408,13 @@ public class BusinessLogic {
     private static Set<String> extractHoldingsAgencies(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
         return holdingsItemsIndexKeysList.entrySet().stream()
                 .filter(e -> !e.getValue().isEmpty())
+                .map(Map.Entry::getKey)
+                .collect(toSet());
+    }
+
+    private static Set<String> extractLiveHoldingsAgencies(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
+        return holdingsItemsIndexKeysList.entrySet().stream()
+                .filter(e -> e.getValue().stream().anyMatch(BusinessLogic::hasNotLostAndNotDiscarded))
                 .map(Map.Entry::getKey)
                 .collect(toSet());
     }
