@@ -269,10 +269,6 @@ public class BusinessLogic {
 
     private boolean shouldAddholdingsItemRole(boolean partOf, boolean excludeFromUnionCatalogue,
                                               boolean authCreateCommonRecord, boolean commonRecord) {
-        System.out.println("partOf = " + partOf);
-        System.out.println("excludeFromUnionCatalogue = " + excludeFromUnionCatalogue);
-        System.out.println("authCreateCommonRecord = " + authCreateCommonRecord);
-        System.out.println("commonRecord = " + commonRecord);
         return partOf && !excludeFromUnionCatalogue ||
                !partOf && authCreateCommonRecord && commonRecord;
     }
