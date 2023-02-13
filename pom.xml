@@ -5,14 +5,14 @@
     <repositories>
         <repository>
             <id>mavenrepo.dbc.dk</id>
-            <url>http://mavenrepo.dbc.dk/content/groups/public</url>
+            <url>https://mavenrepo.dbc.dk/content/groups/public</url>
         </repository>
     </repositories>
 
     <parent>
         <groupId>dk.dbc</groupId>
         <artifactId>microservice-pom</artifactId>
-        <version>latest-SNAPSHOT</version>
+        <version>java8-old-payara5</version>
         <relativePath/>
     </parent>
 
