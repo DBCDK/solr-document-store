@@ -27,7 +27,6 @@ import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.persistence.EntityManager;
 import org.junit.Test;
@@ -46,28 +45,29 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testEnqueueAddsTotTables() throws Exception {
         System.out.println("testEnqueueAddsTotTables");
 
+        jpa( em -> {
+            for( var e : Arrays.asList(
+                    new QueueRuleEntity("a", QueueType.MANIFESTATION, 0),
+                    new QueueRuleEntity("b", QueueType.MANIFESTATION, 5),
+                    new QueueRuleEntity("c", QueueType.HOLDING, 0),
+                    new QueueRuleEntity("d", QueueType.HOLDING, 20),
+                    new QueueRuleEntity("e", QueueType.FIRSTLASTHOLDING, 0),
+                    new QueueRuleEntity("f", QueueType.FIRSTLASTHOLDING, 20),
+                    new QueueRuleEntity("g", QueueType.WORK, 0),
+                    new QueueRuleEntity("h", QueueType.WORK, 100),
+                    new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0),
+                    new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING, 100),
+                    new QueueRuleEntity("k", QueueType.UNIT, 0),
+                    new QueueRuleEntity("l", QueueType.UNIT, 100),
+                    new QueueRuleEntity("m", QueueType.UNITFIRSTLASTHOLDING, 0),
+                    new QueueRuleEntity("n", QueueType.UNITFIRSTLASTHOLDING, 100)) ) {
+                em.persist(e);
+            }
+        });
+
         jpa(em -> {
             try {
-                EnqueueSupplierBean bean = new EnqueueSupplierBean() {
-                    @Override
-                    protected Collection<QueueRuleEntity> getQueueRules() {
-                        return Arrays.asList(
-                                new QueueRuleEntity("a", QueueType.MANIFESTATION, 0),
-                                new QueueRuleEntity("b", QueueType.MANIFESTATION, 5),
-                                new QueueRuleEntity("c", QueueType.HOLDING, 0),
-                                new QueueRuleEntity("d", QueueType.HOLDING, 20),
-                                new QueueRuleEntity("e", QueueType.FIRSTLASTHOLDING, 0),
-                                new QueueRuleEntity("f", QueueType.FIRSTLASTHOLDING, 20),
-                                new QueueRuleEntity("g", QueueType.WORK, 0),
-                                new QueueRuleEntity("h", QueueType.WORK, 100),
-                                new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0),
-                                new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING, 100),
-                                new QueueRuleEntity("k", QueueType.UNIT, 0),
-                                new QueueRuleEntity("l", QueueType.UNIT, 100),
-                                new QueueRuleEntity("m", QueueType.UNITFIRSTLASTHOLDING, 0),
-                                new QueueRuleEntity("n", QueueType.UNITFIRSTLASTHOLDING, 100));
-                    }
-                };
+                EnqueueSupplierBean bean = new EnqueueSupplierBean();
                 bean.entityManager = em;
                 EnqueueCollector collector = bean.getEnqueueCollector();
                 collector.add(entity(123456, "katalog", "87654321", "work:2", "unit:0"), QueueType.WORK);

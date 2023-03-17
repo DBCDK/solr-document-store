@@ -27,7 +27,7 @@ public class QueueRuleEntity implements Serializable {
 
     @EmbeddedId
     @SuppressWarnings("PMD.UnusedPrivateField")
-    private final QueueRuleKey pk;
+    private QueueRuleKey pk;
 
     @Column(name = "queue", updatable = false, nullable = false)
     private String queue;
