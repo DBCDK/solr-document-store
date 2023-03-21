@@ -5,9 +5,9 @@
              version="2.1">
   <persistence-unit name="solrDocumentStore_PU" transaction-type="JTA">
     <jta-data-source>jdbc/solr-doc-store</jta-data-source>
-    <shared-cache-mode>NONE</shared-cache-mode> <!-- until hazelcast communication/invalidation has been verified -->
     <properties>
       <property name="javax.persistence.schema-generation.database.action" value="none"/>
+      <property name="eclipselink.cache.coordination.protocol" value="fish.payara.persistence.eclipselink.cache.coordination.HazelcastPublishingTransportManager"/>
     </properties>
   </persistence-unit>
   <persistence-unit name="solrDocumentStoreIT_PU" transaction-type="RESOURCE_LOCAL">
