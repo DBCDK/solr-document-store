@@ -173,6 +173,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
                 .withEnv("MAX_POOL_SIZE", "24")
                 .withEnv("DOCSTORE_POSTGRES_URL", pg.getPayaraDockerJdbcUrl())
                 .withEnv("REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST", "1d")
+                .withEnv("HAZELCAST_CLUSTER", "")
                 .withEnv("VIPCORE_ENDPOINT", UriBuilder.fromUri(wiremockUrl).path("vipcore").build().toString())
                 .withExposedPorts(8080)
                 .waitingFor(Wait.forHttp("/api/status"))
