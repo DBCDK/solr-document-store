@@ -2,13 +2,92 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>DocStore Søg</title>
-        <link rel="stylesheet" href="webjars/service/0.0.1/solr-docstore-gui-styles.css">
-        <script src="webjars/service/0.0.1/vendor-bundle.js" charset="utf-8"></script>
+        <title>DocStore </title>
+        <style>
+            dt {
+                font-family: monospace;
+                font-size: x-large;
+            }
+            .m {
+                font-family: monospace;
+                font-size: x-large;
+                font-style: oblique
+            }
+            div.entrypoint a:hover, div.entrypoint a:visited, div.entrypoint a:active, div.entrypoint a {
+                color: black;
+                text-decoration: none;
+              }
+
+        </style>
     </head>
 
     <body>
-        <div id="solr-docstore-gui-root"></div>
-        <script src="webjars/service/0.0.1/solr-docstore-gui-bundle.js"></script>
+      <H1> Admin UI is moved to solr-doc-store-introspect  </H1>
+          <p>
+              More info at  <a href="https://dbcjira.atlassian.net/wiki/x/TAD0P">Oversigt over driftssystemer</a>
+          </p>
+          <p>
+            Try this link to the new
+            <script>
+                const { host, hostname, href, origin, pathname, port, protocol, search } = window.location
+                let hostNameList = host.split('.');
+                hostNameList[0]='solr-doc-store-service-introspect';
+                const newHost=hostNameList.join(".");
+                document.write('<a href="' +window.location.protocol + "//" + newHost + "/" + '">Solr Document Store introspect</a>');
+            </script>
+          </p>
+          <p>
+            <script>
+                const searchParams = new URLSearchParams(search);
+                const key = searchParams.get('key');
+                if( key ) {
+                    const oldStyleArguments = JSON.parse(key);
+                    const directRecordURL = window.location.protocol + "//" + newHost + "/" + oldStyleArguments.bibliographicAgencyId + "/" + oldStyleArguments.bibliographicRecordId;
+                    document.write('Or <a href="' + directRecordURL + '">Direct link to '+oldStyleArguments.bibliographicRecordId+' in the new UI</a>');
+              }
+            </script>
+          </p>
+
+      <div class="entrypoint">
+      <h1>List of endpoints</h1>
+
+        <dl>
+            <dt><a href="api/status">api/status</a></dt>
+            <dd>Simple "is alive" endpoint</dd>
+            <dt><a href="api/status/system">api/status/system</a></dt>
+            <dd>Get configured system name</dd>
+            <dt><a href="api/status/queue">api/status/queue</a></dt>
+            <dd>Queue status endpoint.<br>
+                JSON - the 2 most important keys in the object are
+                <dl>
+                    <dt>queue-max-age</dt>
+                    <dd>The oldest job on the queue. Age in milliseconds</dd>
+                    <dt>diag-count</dt>
+                    <dd>Number of diags</dd>
+                </dl>
+                has an optional parameter <span class="m">ignore</span>, which
+                is a comma separated list of queues to ignore in
+                <span class="m">queue-max-age</span>
+            </dd>
+            <dt><a href="api/status/diags">api/status/diags</a></dt>
+            <dd>diagnostics grouped by type, then grouped by timestamp, to see
+                when a system problem occurred</dd>
+            <dt><a href="api/evict-all">api/evict-all</a></dt>
+            <dd>Clear entity managers cache</dd>
+            <dt><a href="api/open-agency/status">api/open-agency/status</a></dt>
+            <dd>JSON map of all agencies that during the night has been classified
+                as invalid (difference between solr-doc-store and open-agency).
+                status is accumulated into a boolean <span class="m">ok</span>,
+                which tell if all are ok.<br>
+                State is updated once a day
+            </dd>
+            <dt><a href="api/open-agency/purge/{agency-id}">api/open-agency/purge/{agency-id}</a></dt>
+            <dd>If a state has changed in open-agency and it should be forced to
+                match in solr-doc-store, use this to queue all records with holding.
+                And remove all holdings (dangerous)
+            </dd>
+        </dl>
+      </div>
+
     </body>
 </html>
