@@ -97,13 +97,6 @@
             <artifactId>eclipselink</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- includes js bundle in build so html can load it -->
-        <dependency>
-            <groupId>dk.dbc</groupId>
-            <artifactId>solr-doc-store-service-gui</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-common -->
         <dependency>
