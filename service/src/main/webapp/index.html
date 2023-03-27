@@ -31,7 +31,7 @@
             <script>
                 const { host, hostname, href, origin, pathname, port, protocol, search } = window.location
                 let hostNameList = host.split('.');
-                hostNameList[0]='solr-doc-store-service-introspect';
+                hostNameList[0]='solr-doc-store-introspect';
                 const newHost=hostNameList.join(".");
                 document.write('<a href="' +window.location.protocol + "//" + newHost + "/" + '">Solr Document Store introspect</a>');
             </script>
