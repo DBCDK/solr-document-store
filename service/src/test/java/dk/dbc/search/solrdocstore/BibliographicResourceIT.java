@@ -7,8 +7,8 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import org.junit.Before;
 import org.junit.Test;
-import javax.persistence.TypedQuery;
-import javax.ws.rs.core.Response;
+import jakarta.persistence.TypedQuery;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createResourceBean;

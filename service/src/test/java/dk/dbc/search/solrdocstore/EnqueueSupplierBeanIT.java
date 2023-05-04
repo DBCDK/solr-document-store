@@ -28,7 +28,7 @@ import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;

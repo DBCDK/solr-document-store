@@ -1,4 +1,4 @@
-FROM docker-dbc.artifacts.dbccloud.dk/payara5-micro:latest
+FROM docker-dbc.artifacts.dbccloud.dk/payara6-micro:latest
 LABEL maintainer="Team Search os-team@dbc.dk"
 
 LABEL SOLR_DOC_STORE_URL="SolrDocStore url (required)"

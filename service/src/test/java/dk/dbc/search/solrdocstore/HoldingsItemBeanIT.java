@@ -27,7 +27,7 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;

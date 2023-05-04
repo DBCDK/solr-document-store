@@ -1,6 +1,6 @@
 package dk.dbc.search.solrdocstore.jpa;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
