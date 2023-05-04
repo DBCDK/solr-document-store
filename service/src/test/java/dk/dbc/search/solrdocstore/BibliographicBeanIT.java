@@ -9,8 +9,8 @@ import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
-import javax.ws.rs.core.Response;
+import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.core.Response;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.time.Instant;

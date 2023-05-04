@@ -8,20 +8,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 /**
  *
@@ -39,9 +39,6 @@ public class Status {
     @Inject
     Config config;
 
-//    @Inject
-//    HazelCastStatus hzStatus;
-
     @EJB
     Worker worker;
 
@@ -54,8 +51,6 @@ public class Status {
     public Response getStatus() {
         log.info("getStatus called");
 
-//        if (!hzStatus.good())
-//            return fail("Hazelcast is in bad state");
         try (Connection connection = dataSource.getConnection() ;
              PreparedStatement stmt = connection.prepareStatement("SELECT clock_timestamp()") ;
              ResultSet resultSet = stmt.executeQuery()) {

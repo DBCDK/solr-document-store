@@ -11,8 +11,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
-import javax.ws.rs.core.Response;
+import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;

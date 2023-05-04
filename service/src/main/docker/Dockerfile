@@ -1,4 +1,4 @@
-FROM docker-dbc.artifacts.dbccloud.dk/payara5-micro:latest
+FROM docker-dbc.artifacts.dbccloud.dk/payara6-micro:latest
 
 LABEL DOCSTORE_POSTGRES_URL="Database url (required)" \
       SYSTEM_NAME="System (repository) name (optional)"\
@@ -7,7 +7,7 @@ LABEL DOCSTORE_POSTGRES_URL="Database url (required)" \
       REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST="For how long a record should have been deleted, before it can be revived as older (N unit ie. 1d or 5h)" \
       HAZELCAST_CLUSTER="DNS for headless service that comprises this hazelcast cluster (required in prod)"
 
-COPY target/docker/*.jar /opt/payara5/jars/
+COPY target/docker/*.jar /opt/payara6/jars/
 
 # Unconfigurable thread-pool in payara image
 RUN echo "set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=500" >>scripts/prebootcommandfile.txt

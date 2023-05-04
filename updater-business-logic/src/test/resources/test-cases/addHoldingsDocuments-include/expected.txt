@@ -1,14 +1,14 @@
 {
-  "t" : [ "m" ]++> ,
-  "_childDocuments_" : [ {
-    "holdingsitem.agencyId" : [ "xxx" ],
-    "holdingsitem.status" : [ "OnLoan" ],
-    "rec.repositoryId" : [ "870970-basis:25912233" ],
-    "t" : [ "h" ]
-  }, {
-    "holdingsitem.agencyId" : [ "xxx" ],
-    "holdingsitem.status" : [ "Lost" ],
-    "rec.repositoryId" : [ "870970-basis:25912233" ],
-    "t" : [ "h" ]
-  } ] <++
+  "t" : [ "m" ]++> , <++
+++>   "_childDocuments_" : [ { <++
+++>     "holdingsitem.agencyId" : [ "xxx" ], <++
+++>     "holdingsitem.status" : [ "OnLoan" ], <++
+++>     "rec.repositoryId" : [ "870970-basis:25912233" ], <++
+++>     "t" : [ "h" ] <++
+++>   }, { <++
+++>     "holdingsitem.agencyId" : [ "xxx" ], <++
+++>     "holdingsitem.status" : [ "Lost" ], <++
+++>     "rec.repositoryId" : [ "870970-basis:25912233" ], <++
+++>     "t" : [ "h" ] <++
+++>   } ] <++
 }

@@ -33,10 +33,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 import java.io.IOException;
 import java.util.Collection;
-import javax.ws.rs.core.UriBuilderException;
+import jakarta.ws.rs.core.UriBuilderException;
 
 import static dk.dbc.search.solrdocstore.updater.IntegrationTestBase.serviceBase;
 import static org.junit.Assert.assertEquals;

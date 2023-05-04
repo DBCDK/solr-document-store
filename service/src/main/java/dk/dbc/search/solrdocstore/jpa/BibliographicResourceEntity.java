@@ -1,11 +1,11 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
-import javax.persistence.IdClass;
+import jakarta.persistence.IdClass;
 
 @Entity
 @Table(name = "resource")

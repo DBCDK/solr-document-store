@@ -12,7 +12,7 @@ import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;

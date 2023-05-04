@@ -1,8 +1,8 @@
 package dk.dbc.search.solrdocstore.emulator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;

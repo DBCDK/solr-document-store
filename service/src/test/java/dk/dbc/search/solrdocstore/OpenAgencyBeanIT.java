@@ -7,7 +7,7 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.util.HashSet;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 

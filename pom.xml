@@ -12,7 +12,7 @@
     <parent>
         <groupId>dk.dbc</groupId>
         <artifactId>microservice-pom</artifactId>
-        <version>java11-old-payara5</version>
+        <version>java11-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -28,7 +28,6 @@
     <modules>
         <module>queue</module>
         <module>db</module>
-        <!--<module>gui</module>-->
         <module>service</module>
         <module>updater-business-logic</module>
         <module>solr-updater</module>
@@ -39,7 +38,7 @@
 
     <groupId>dk.dbc</groupId>
     <artifactId>solr-doc-store</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -120,7 +119,7 @@
             <dependency>
                 <groupId>dk.dbc</groupId>
                 <artifactId>dbc-commons-testcontainers-postgres</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>2.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
