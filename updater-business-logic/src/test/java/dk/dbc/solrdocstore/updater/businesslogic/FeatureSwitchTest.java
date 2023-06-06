@@ -44,30 +44,29 @@ public class FeatureSwitchTest {
     public void testOnlyAdd() throws Exception {
         System.out.println("testOnlyAdd");
 
-        FeatureSwitch featureSwitch = new FeatureSwitch("role+800000");
+        FeatureSwitch featureSwitch = new FeatureSwitch("role");
         assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(false));
         assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
-        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(true));
     }
 
     @Test(timeout = 2_000L)
     public void testOnlyAddExplicit() throws Exception {
         System.out.println("testOnlyAddExplicit");
 
-        FeatureSwitch featureSwitch = new FeatureSwitch("+role+800000");
+        FeatureSwitch featureSwitch = new FeatureSwitch("+role+resources");
         assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(false));
         assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
-        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(true));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.ATTACH_RESOURCES), is(true));
     }
 
     @Test(timeout = 2_000L)
     public void testRemove() throws Exception {
         System.out.println("testRemove");
 
-        FeatureSwitch featureSwitch = new FeatureSwitch("-role-800000");
+        FeatureSwitch featureSwitch = new FeatureSwitch("-role-resources");
         assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(true));
         assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(false));
-        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.ATTACH_RESOURCES), is(false));
     }
 
     @Test(timeout = 2_000L)
@@ -77,6 +76,6 @@ public class FeatureSwitchTest {
         FeatureSwitch featureSwitch = new FeatureSwitch("none");
         assertThat(featureSwitch.should(FeatureSwitch.Feature.SCAN), is(false));
         assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(false));
-        assertThat(featureSwitch.should(FeatureSwitch.Feature.COLLECTION_IDENTIFIER_800000), is(false));
+        assertThat(featureSwitch.should(FeatureSwitch.Feature.ATTACH_RESOURCES), is(false));
     }
 }

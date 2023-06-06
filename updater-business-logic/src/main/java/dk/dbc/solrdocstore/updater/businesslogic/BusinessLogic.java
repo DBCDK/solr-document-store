@@ -45,7 +45,6 @@ public class BusinessLogic {
 
     private static final String REC_COLLECTION_IDENTIFIER_FIELD = "rec.collectionIdentifier";
     private static final String REC_EXCLUDE_FROM_UNION_CATALOGUE = "rec.excludeFromUnionCatalogue";
-    private static final String REC_HOLDINGS_AGENCY_ID = "rec.holdingsAgencyId";
     private static final String REC_HOLDINGS_COUNT = "rec.holdingsCount";
     private static final String REC_HOLDINGS_ON_LOAN = "rec.holdingsOnLoan";
     private static final String REC_REPOSITORY_ID = "rec.repositoryId";
@@ -155,21 +154,11 @@ public class BusinessLogic {
         Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys = source.getHoldingsItemsIndexKeys();
 
         addType(indexKeys, holdingsItemsIndexKeys);
-        if (should(Feature.HOLDINGS_AGENCY)) {
-            addHoldingsAgency(indexKeys, holdingsItemsIndexKeys);
-        }
         if (should(Feature.HOLDINGS_STATS)) {
             addHoldingsStats(indexKeys, source);
         }
         if (should(Feature.PART_OF_DANBIB)) {
             addPartOfDanbib(indexKeys, source.partOfDanbib, source);
-        }
-        if (should(Feature.COLLECTION_IDENTIFIER_800000)) {
-            if (libraryRuleProvider == null) {
-                log.error("Feature '{}' is enabled but not configured", Feature.COLLECTION_IDENTIFIER_800000.name());
-            } else {
-                add800000CollectionIdenitifers(indexKeys, holdingsItemsIndexKeys);
-            }
         }
         if (should(Feature.HOLDING_ITEMS_ROLE)) {
             if (libraryRuleProvider == null) {
@@ -201,45 +190,6 @@ public class BusinessLogic {
         holdingsItemsIndexKeysList.values().stream()
                 .flatMap(Collection::stream)
                 .forEach(i -> i.put("t", singletonList("h")));
-    }
-
-    private void add800000CollectionIdenitifers(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
-        if (excludeFromUnionCatalogue(indexKeys)) {
-            return;
-        }
-        List<String> collectionIdentifiers = indexKeys.computeIfAbsent(REC_COLLECTION_IDENTIFIER_FIELD, list());
-        boolean hasBibDk = collectionIdentifiers.contains("800000-bibdk");
-        boolean hasDanbib = collectionIdentifiers.contains("800000-danbib");
-        boolean shouldHaveBibDk = hasBibDk;
-        boolean shouldHaveDanbib = hasDanbib;
-
-        for (String agencyId : extractLiveHoldingsAgencies(holdingsItemsIndexKeysList)) {
-            if (shouldHaveBibDk && shouldHaveDanbib)
-                break;
-            VipCoreLibraryRule libraryRules = libraryRuleProvider.libraryRulesFor(agencyId);
-            if (libraryRules.isResearchLibrary() &&
-                libraryRules.usesHoldingsItem()) {
-                shouldHaveBibDk = shouldHaveBibDk || libraryRules.isPartOfBibdk();
-                shouldHaveDanbib = shouldHaveDanbib || libraryRules.isPartOfDanbib();
-            }
-        }
-        if (shouldHaveBibDk && !hasBibDk) {
-            log.trace("adding 800000-bibdk");
-            collectionIdentifiers.add("800000-bibdk");
-        }
-        if (shouldHaveDanbib && !hasDanbib) {
-            log.trace("adding 800000-danbib");
-            collectionIdentifiers.add("800000-danbib");
-        }
-    }
-
-    private void addHoldingsAgency(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
-        Set<String> agencyIds = extractHoldingsAgencies(holdingsItemsIndexKeysList);
-        if (!agencyIds.isEmpty()) {
-            log.trace("adding " + REC_HOLDINGS_AGENCY_ID + ": {}", agencyIds);
-            indexKeys.computeIfAbsent(REC_HOLDINGS_AGENCY_ID, list())
-                    .addAll(agencyIds);
-        }
     }
 
     private void addHoldingsItemsRole(Map<String, List<String>> indexKeys, Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeys, SolrDocStoreResponse source) {
@@ -404,13 +354,6 @@ public class BusinessLogic {
     private static Set<String> extractHoldingsAgencies(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
         return holdingsItemsIndexKeysList.entrySet().stream()
                 .filter(e -> !e.getValue().isEmpty())
-                .map(Map.Entry::getKey)
-                .collect(toSet());
-    }
-
-    private static Set<String> extractLiveHoldingsAgencies(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
-        return holdingsItemsIndexKeysList.entrySet().stream()
-                .filter(e -> e.getValue().stream().anyMatch(BusinessLogic::hasNotLostAndNotDiscarded))
                 .map(Map.Entry::getKey)
                 .collect(toSet());
     }
