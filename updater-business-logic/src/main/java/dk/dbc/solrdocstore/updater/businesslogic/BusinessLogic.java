@@ -45,7 +45,6 @@ public class BusinessLogic {
 
     private static final String REC_COLLECTION_IDENTIFIER_FIELD = "rec.collectionIdentifier";
     private static final String REC_EXCLUDE_FROM_UNION_CATALOGUE = "rec.excludeFromUnionCatalogue";
-    private static final String REC_HOLDINGS_AGENCY_ID = "rec.holdingsAgencyId";
     private static final String REC_HOLDINGS_COUNT = "rec.holdingsCount";
     private static final String REC_HOLDINGS_ON_LOAN = "rec.holdingsOnLoan";
     private static final String REC_REPOSITORY_ID = "rec.repositoryId";
@@ -355,13 +354,6 @@ public class BusinessLogic {
     private static Set<String> extractHoldingsAgencies(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
         return holdingsItemsIndexKeysList.entrySet().stream()
                 .filter(e -> !e.getValue().isEmpty())
-                .map(Map.Entry::getKey)
-                .collect(toSet());
-    }
-
-    private static Set<String> extractLiveHoldingsAgencies(Map<String, List<Map<String, List<String>>>> holdingsItemsIndexKeysList) {
-        return holdingsItemsIndexKeysList.entrySet().stream()
-                .filter(e -> e.getValue().stream().anyMatch(BusinessLogic::hasNotLostAndNotDiscarded))
                 .map(Map.Entry::getKey)
                 .collect(toSet());
     }
