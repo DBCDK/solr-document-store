@@ -38,16 +38,6 @@ public class FeatureSwitch {
 
     public enum Feature {
         /**
-         * Add 800000-danbib/800000-bibdk to rec.collectionIdentifier, if is
-         * part of those collections based upon libraryrules and holdings.
-         */
-        COLLECTION_IDENTIFIER_800000("800000"),
-        /**
-         * Add "rec.holdingsAgencyId" for each and everyone of the agencies,
-         * that have holdings.
-         */
-        HOLDINGS_AGENCY("holdingsAgency"),
-        /**
          * Adds "rec.holdingsCount" for those that are available for loan
          * (OnShelf and OnLoan), and "rec.holdingsOnLoan" as a fraction of those
          * available for loan, that are actually with borrowers.
