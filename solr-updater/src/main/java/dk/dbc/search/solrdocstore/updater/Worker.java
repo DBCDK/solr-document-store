@@ -185,9 +185,8 @@ public class Worker {
 
                 SolrInputDocument solrDocument = docProducer.createSolrDocument(sourceDoc, collection);
 
-                docProducer.deleteSolrDocuments(bibliographicShardId, collection);
+                docProducer.updateSolr(bibliographicShardId, solrDocument, collection);
 
-                docProducer.deploy(solrDocument, collection);
                 log.info("Added {} to SolR", bibliographicShardId);
             } catch (IOException | SolrServerException ex) {
                 throw new RethrowableException(ex);

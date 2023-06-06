@@ -28,5 +28,30 @@
         "bibliographic": [
             "b-300010-23645564_deleted.json"
         ]
+    },
+    "test3-part1": {
+        "bibliographic": [
+            "b-777777-23645564.json"
+        ]
+    },
+    "test3-part2": {
+        "holdings": [
+            "h-777777-23645564-one.json"
+        ]
+    },
+    "test3-part3": {
+        "holdings": [
+            "h-777777-23645564-two.json"
+        ]
+    },
+    "test3-part4": {
+        "holdings": [
+            "h-777777-23645564-one.json"
+        ]
+    },
+    "test3-part5": {
+        "bibliographic": [
+            "b-777777-23645564_deleted.json"
+        ]
     }
 }
