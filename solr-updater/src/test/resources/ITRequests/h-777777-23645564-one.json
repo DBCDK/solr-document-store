@@ -1,0 +1,10 @@
+{
+    "indexKeys": [
+        {
+            "rec.bibliographicRecordId": ["23645564"],
+            "holdingsitem.agencyId": ["777777"],
+            "holdingsitem.itemId": ["777777_1"],
+            "holdingsitem.status": ["OnLoan"]
+        }
+    ]
+}

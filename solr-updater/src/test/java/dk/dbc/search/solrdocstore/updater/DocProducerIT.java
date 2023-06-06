@@ -102,13 +102,38 @@ public class DocProducerIT extends IntegrationTestBase {
         deployAndSearch(300010, docProducer, config.getSolrCollections(), 0);
     }
 
+    @Test
+    public void changeHoldingsCount() throws Exception {
+        System.out.println("changeHoldingsCount");
+
+        Requests.load(getClient(), "test3-part1", serviceBase());
+
+        deployAndSearch(777777, docProducer, config.getSolrCollections(), 1);
+
+        Requests.load(getClient(), "test3-part2", serviceBase());
+
+        deployAndSearch(777777, docProducer, config.getSolrCollections(), 2);
+
+        Requests.load(getClient(), "test3-part3", serviceBase());
+
+        deployAndSearch(777777, docProducer, config.getSolrCollections(), 3);
+
+        Requests.load(getClient(), "test3-part4", serviceBase());
+
+        deployAndSearch(777777, docProducer, config.getSolrCollections(), 2);
+
+        Requests.load(getClient(), "test3-part5", serviceBase());
+
+        deployAndSearch(777777, docProducer, config.getSolrCollections(), 0);
+
+    }
+
     private void deployAndSearch(int agencyId, DocProducer docProducer, Collection<SolrCollection> solrCollections, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
         for (SolrCollection solrCollection : solrCollections) {
             SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, "clazzifier", "23645564"));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc, solrCollection);
             String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
-            docProducer.deleteSolrDocuments(bibliographicShardId, solrCollection);
-            docProducer.deploy(doc, solrCollection);
+            docProducer.updateSolr(bibliographicShardId, doc, solrCollection);
             SolrClient solrClient = solrCollection.getSolrClient();
             solrClient.commit(true, true);
             QueryResponse response = solrClient.query(new SolrQuery("*:*"));

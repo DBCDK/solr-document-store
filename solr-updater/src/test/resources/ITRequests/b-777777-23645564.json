@@ -1,0 +1,17 @@
+{
+    "agencyId": "777777",
+    "classifier": "clazzifier",
+    "bibliographicRecordId": "23645564",
+    "repositoryId": "870970-basis:23645564",
+    "deleted": false,
+    "unit": "unit:2",
+    "work": "work:2",
+    "trackingId": "woot",
+    "indexKeys": {
+        "rec.repositoryId": ["777777-katalog:23645564"],
+        "rec.bibliographicRecordId": ["23645564"],
+        "dkcclterm.po": ["Haruki", "Murakami"],
+        "display.title": ["My Title 1"]
+    }
+}
+

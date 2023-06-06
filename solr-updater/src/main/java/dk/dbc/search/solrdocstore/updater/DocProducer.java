@@ -72,6 +72,24 @@ public class DocProducer {
     }
 
     /**
+     *
+     * @param bibliographicShardId the root id of the document to purge
+     * @param doc                  The document to post to the solr (null if no
+     *                             documents, i.e. delete)
+     * @param collection           connection to solr collection
+     * @throws IOException         solr communication error
+     * @throws SolrServerException solr communication error
+     */
+    @Timed
+    public void updateSolr(String bibliographicShardId, SolrInputDocument doc, SolrCollection collection) throws IOException, SolrServerException {
+        if (doc == null) {
+            deleteSolrDocuments(bibliographicShardId, collection);
+        } else {
+            deploy(doc, collection);
+        }
+    }
+
+    /**
      * Retrieve Document and process it
      * <p>
      * Delete from solr, of not deleted then add too
@@ -82,28 +100,24 @@ public class DocProducer {
      * @throws IOException         if an retrieval error occurs
      * @throws SolrServerException if a sending error occurs
      */
-    @Timed
-    public void deploy(SolrInputDocument doc, SolrCollection solrCollection) throws IOException, SolrServerException {
-
-        if (doc != null) {
-            if (log.isDebugEnabled()) {
-                List<SolrInputDocument> children = doc.getChildDocuments();
-                if (children == null) {
-                    log.debug("Adding document {}", doc.getFieldValue("id"));
-                } else {
-                    log.debug("Adding document {}{}", doc.getFieldValue("id"),
-                              children.stream().map(d -> ", " + d.getFieldValue("id"))
-                                      .collect(Collectors.joining()));
-                }
-                log.trace("doc = {}", doc);
+    private void deploy(SolrInputDocument doc, SolrCollection solrCollection) throws IOException, SolrServerException {
+        if (log.isDebugEnabled()) {
+            List<SolrInputDocument> children = doc.getChildDocuments();
+            if (children == null) {
+                log.debug("Adding document {}", doc.getFieldValue("id"));
+            } else {
+                log.debug("Adding document {}{}", doc.getFieldValue("id"),
+                          children.stream().map(d -> ", " + d.getFieldValue("id"))
+                                  .collect(Collectors.joining()));
             }
-            UpdateRequest updateRequest = new UpdateRequest();
-            updateRequest.add(doc);
-            updateRequest.setParam("appId", config.getAppId());
-            UpdateResponse resp = updateRequest.process(solrCollection.getSolrClient());
-            if (resp.getStatus() != 0) {
-                throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
-            }
+            log.trace("doc = {}", doc);
+        }
+        UpdateRequest updateRequest = new UpdateRequest();
+        updateRequest.add(doc);
+        updateRequest.setParam("appId", config.getAppId());
+        UpdateResponse resp = updateRequest.process(solrCollection.getSolrClient());
+        if (resp.getStatus() != 0) {
+            throw new IllegalStateException("Got non-zero status: " + resp.getStatus() + " from solr on deploy");
         }
     }
 
@@ -116,8 +130,7 @@ public class DocProducer {
      * @throws IOException         solr communication error
      * @throws SolrServerException solr communication error
      */
-    @Timed
-    public void deleteSolrDocuments(String bibliographicShardId, SolrCollection solrCollection) throws IOException, SolrServerException {
+    private void deleteSolrDocuments(String bibliographicShardId, SolrCollection solrCollection) throws IOException, SolrServerException {
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.setParam("appId", config.getAppId());
         updateRequest.deleteById(bibliographicShardId);
