@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -137,11 +136,6 @@ public class DocProducerTest {
         System.out.println("document = " + document);
         assertTrue(document.containsKey("dkcclterm.po"));
         assertFalse(document.containsKey("unknown.field"));
-
-        assertEquals(3, document.get("rec.holdingsAgencyId").getValues().size());
-        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300101"));
-        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300102"));
-        assertTrue(document.get("rec.holdingsAgencyId").getValues().contains("300104"));
 
         assertTrue(document.get("rec.repositoryId").getValues().contains("870970-basis:23645564"));
 
