@@ -112,7 +112,7 @@ public class HoldingsItemEntity implements Serializable {
                 .withModified(getModified())
                 .withDocuments(indexKeys.stream()
                         .map(e -> (Map<String, List<String>>) e)
-                        .collect(Collectors.toList()));
+                        .collect(toList()));
     }
 
     @Override
