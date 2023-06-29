@@ -29,10 +29,8 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Set;
 import java.util.UUID;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
-import java.util.function.Predicate;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
@@ -49,7 +47,6 @@ public class HoldingsItemBeanV1 {
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBeanV1.class);
 
     private static final Marshaller MARSHALLER = new Marshaller();
-    private static final Predicate<String> LIVE_STATUS_PREDICATE = Predicate.not(Set.of("Lost", "Discarded")::contains);
 
     @Inject
     public HoldingsToBibliographicBean h2bBean;
@@ -184,5 +181,4 @@ public class HoldingsItemBeanV1 {
             enqueue.add(e, queues);
         }
     }
-
 }
