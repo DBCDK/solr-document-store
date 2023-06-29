@@ -53,8 +53,8 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void newCommonRecordWithExistingHoldings() throws Exception {
         jpa(em -> {
             em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
-            em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), "T2"));
-            em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), "T3"));
+            em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), null, "T2"));
+            em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), null, "T3"));
             em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
             em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
         });

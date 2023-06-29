@@ -83,7 +83,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsExisting() throws Exception {
         System.out.println("testHoldingsExisting");
         jpa(em -> {
-            em.merge(new HoldingsItemEntity(777777, "12345678", SolrIndexKeys.ON_SHELF, "track:1"));
+            em.merge(new HoldingsItemEntity(777777, "12345678", SolrIndexKeys.ON_SHELF, null, "track:1"));
         });
         jpa(em -> {
             ExistenceBean bean = createExistenceBean(em);
