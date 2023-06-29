@@ -32,7 +32,7 @@ public class DocStoreApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return super.getClasses();
+        return BEANS;
     }
 
     @Override
