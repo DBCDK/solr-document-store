@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.v2.QueueBeanV2;
 import java.util.Set;
 import jakarta.ws.rs.core.Response;
 import org.junit.Before;
@@ -49,7 +50,7 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testQueueManifestation");
 
         jpa(em -> {
-            QueueBean bean = createQueueBean(em);
+            QueueBeanV2 bean = createQueueBean(em);
             Response resp = bean.queueManifestation(777777, "clazzifier", "12345678", null);
             assertThat(resp.getStatus(), is(200));
         });
@@ -65,7 +66,7 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testQueueDeletedManifestation");
 
         jpa(em -> {
-            QueueBean bean = createQueueBean(em);
+            QueueBeanV2 bean = createQueueBean(em);
             Response resp = bean.queueManifestation(777777, "clazzifier", "87654321", null);
             assertThat(resp.getStatus(), is(200));
         });
@@ -80,7 +81,7 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testQueueUnknownManifestation");
 
         jpa(em -> {
-            QueueBean bean = createQueueBean(em);
+            QueueBeanV2 bean = createQueueBean(em);
             Response resp = bean.queueManifestation(777777, "clazzifier", "not-found", null);
             assertThat(resp.getStatus(), is(404));
         });
@@ -94,7 +95,7 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testQueueWork");
 
         jpa(em -> {
-            QueueBean bean = createQueueBean(em);
+            QueueBeanV2 bean = createQueueBean(em);
             Response resp =
                     bean.queueWork("work:4", null);
             assertThat(resp.getStatus(), is(200));
@@ -112,7 +113,7 @@ public class QueueBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testQueueUnknownWork");
 
         jpa(em -> {
-            QueueBean bean = createQueueBean(em);
+            QueueBeanV2 bean = createQueueBean(em);
             Response resp = bean.queueWork("not-found", null);
             assertThat(resp.getStatus(), is(404));
         });

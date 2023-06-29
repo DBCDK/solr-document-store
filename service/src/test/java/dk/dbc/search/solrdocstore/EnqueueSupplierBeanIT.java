@@ -25,6 +25,8 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -97,8 +99,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void checkConfig() {
         System.out.println("checkConfig");
         jpa(em -> {
-            BibliographicBean bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
-            HoldingsItemBean holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
+            BibliographicBeanV2 bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
+            HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
             assertEquals(LibraryType.NonFBS, bibliographicBean.openAgency.lookup(nonfbsAgency).getLibraryType());
             assertEquals(LibraryType.FBS, bibliographicBean.openAgency.lookup(fbsAgency).getLibraryType());
             assertEquals(LibraryType.FBSSchool, bibliographicBean.openAgency.lookup(schoolAgency).getLibraryType());
@@ -285,7 +287,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem("work:0")));
 
         jpa(em -> {
-            HoldingsItemBean holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
+            HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
             HoldingsItemEntity hold = h.get();
             hold.setTrackingId("NEW");
             holdingsItemBean.putIndexKeys(hold.getAgencyId(), hold.getBibliographicRecordId(), hold.getIndexKeys(), hold.getTrackingId());
@@ -331,21 +333,21 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     private BibliographicEntity addBibliographic(EntityManager em, int agency, String classifier, String bibliographicRecordId) throws SQLException {
         BibliographicEntity e = new BibliographicEntity(agency, classifier, bibliographicRecordId, "id#1", "work:0", "unit:0", false, new IndexKeys(), "IT");
-        BibliographicBean bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
+        BibliographicBeanV2 bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
         bibliographicBean.addBibliographicKeys(e, true);
         return e;
     }
 
     private void deleteBibliographic(EntityManager em, BibliographicEntity ownRecord) throws SQLException {
         ownRecord.setDeleted(true);
-        BibliographicBean bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
+        BibliographicBeanV2 bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
         bibliographicBean.addBibliographicKeys(ownRecord, true);
     }
 
     private HoldingsItemEntity addHoldings(EntityManager em, int holdingAgency, String holdingBibliographicId) throws SQLException {
         // Dummy holding - ensure enqueue from non existing to this
         HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, SolrIndexKeys.ON_SHELF, null, "IT");
-        HoldingsItemBean holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
+        HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
         holdingsItemBean.putIndexKeys(e.getAgencyId(), e.getBibliographicRecordId(), e.getIndexKeys(), e.getTrackingId());
         return e;
     }

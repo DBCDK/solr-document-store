@@ -1,5 +1,7 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import dk.dbc.search.solrdocstore.response.FrontendReturnListType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
@@ -27,19 +29,19 @@ import org.eclipse.microprofile.metrics.annotation.Timed;
 import static dk.dbc.log.LogWith.track;
 
 @Stateless
-@Path("")
-public class BibliographicRecordAPIBean {
+@Path("v2/")
+public class BibliographicRecordAPIBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBean.class);
-
-    @Inject
-    BibliographicRetrieveBean brBean;
+    private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBeanV2.class);
 
     @Inject
-    HoldingsItemBean holdingsItemBean;
+    public BibliographicRetrieveBean brBean;
+
+    @Inject
+    public HoldingsItemBeanV1 holdingsItemBean;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     private int pageCount(long resCount, int pageSize) {
         return (int) Math.ceil((double) resCount / pageSize);

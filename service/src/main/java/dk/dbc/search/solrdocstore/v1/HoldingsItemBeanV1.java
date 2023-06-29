@@ -1,10 +1,14 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v1;
 
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
+import dk.dbc.search.solrdocstore.HoldingsToBibliographicBean;
+import dk.dbc.search.solrdocstore.Marshaller;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
@@ -43,24 +47,24 @@ import static dk.dbc.log.LogWith.track;
 
 @Stateless
 @Path("holdings")
-public class HoldingsItemBean {
+public class HoldingsItemBeanV1 {
 
-    private static final Logger log = LoggerFactory.getLogger(HoldingsItemBean.class);
+    private static final Logger log = LoggerFactory.getLogger(HoldingsItemBeanV1.class);
 
     private static final Marshaller MARSHALLER = new Marshaller();
     private static final Predicate<String> LIVE_STATUS_PREDICATE = Predicate.not(Set.of("Lost", "Discarded")::contains);
 
     @Inject
-    HoldingsToBibliographicBean h2bBean;
+    public HoldingsToBibliographicBean h2bBean;
 
     @Inject
-    BibliographicRetrieveBean brBean;
+    public BibliographicRetrieveBean brBean;
 
     @Inject
-    EnqueueSupplierBean enqueueSupplier;
+    public EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @PUT
     @Path("{agencyId : \\d+}-{bibliographicRecordId}")
@@ -87,7 +91,7 @@ public class HoldingsItemBean {
         }
     }
 
-    void putIndexKeys(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) throws SQLException {
+    public void putIndexKeys(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) throws SQLException {
         AgencyItemKey key = new AgencyItemKey(agencyId, bibliographicRecordId);
         HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, key);
 

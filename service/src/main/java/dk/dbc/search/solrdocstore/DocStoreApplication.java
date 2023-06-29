@@ -1,7 +1,24 @@
 package dk.dbc.search.solrdocstore;
 
-import java.util.HashMap;
-import java.util.Map;
+import dk.dbc.search.solrdocstore.v1.BibliographicBeanV1;
+import dk.dbc.search.solrdocstore.v1.BibliographicRecordAPIBeanV1;
+import dk.dbc.search.solrdocstore.v1.DocumentRetrieveBeanV1;
+import dk.dbc.search.solrdocstore.v1.EvictAllV1;
+import dk.dbc.search.solrdocstore.v1.ExistenceBeanV1;
+import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
+import dk.dbc.search.solrdocstore.v2.BibliographicRecordAPIBeanV2;
+import dk.dbc.search.solrdocstore.v2.DocumentRetrieveBeanV2;
+import dk.dbc.search.solrdocstore.v2.EvictAllV2;
+import dk.dbc.search.solrdocstore.v2.ExistenceBeanV2;
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
+import dk.dbc.search.solrdocstore.v1.OpenAgencyStatusBeanV1;
+import dk.dbc.search.solrdocstore.v1.QueueBeanV1;
+import dk.dbc.search.solrdocstore.v1.ResourceBeanV1;
+import dk.dbc.search.solrdocstore.v1.StatusBeanV1;
+import dk.dbc.search.solrdocstore.v2.OpenAgencyStatusBeanV2;
+import dk.dbc.search.solrdocstore.v2.QueueBeanV2;
+import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
+import dk.dbc.search.solrdocstore.v2.StatusBeanV2;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
@@ -16,16 +33,27 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 public class DocStoreApplication extends Application {
 
     private static final Set<Class<?>> BEANS = Set.of(
-            BibliographicBean.class,
-            BibliographicRecordAPIBean.class,
-            DocumentRetrieveBean.class,
-            EvictAll.class,
-            ExistenceBean.class,
-            HoldingsItemBean.class,
-            OpenAgencyStatusBean.class,
-            QueueBean.class,
-            ResourceBean.class,
-            StatusBean.class,
+            // V1
+            BibliographicBeanV1.class,
+            BibliographicRecordAPIBeanV1.class,
+            DocumentRetrieveBeanV1.class,
+            EvictAllV1.class,
+            ExistenceBeanV1.class,
+            HoldingsItemBeanV1.class,
+            OpenAgencyStatusBeanV1.class,
+            QueueBeanV1.class,
+            ResourceBeanV1.class,
+            StatusBeanV1.class,
+            // V2
+            BibliographicBeanV2.class,
+            BibliographicRecordAPIBeanV2.class,
+            DocumentRetrieveBeanV2.class,
+            EvictAllV2.class,
+            ExistenceBeanV2.class,
+            OpenAgencyStatusBeanV2.class,
+            QueueBeanV2.class,
+            ResourceBeanV2.class,
+            StatusBeanV2.class,
             // Tools
             JacksonFeature.class,
             JacksonObjectMapperProvider.class);
@@ -33,14 +61,5 @@ public class DocStoreApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         return BEANS;
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        Map<String, Object> props = new HashMap<>();
-
-        props.put("jersey.config.server.disableMoxyJson", true);
-
-        return props;
     }
 }

@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
@@ -54,16 +55,16 @@ import org.slf4j.LoggerFactory;
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
 @Stateless
-@Path("queue")
-public class QueueBean {
+@Path("v2/queue")
+public class QueueBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(QueueBean.class);
+    private static final Logger log = LoggerFactory.getLogger(QueueBeanV2.class);
 
     @Inject
-    EnqueueSupplierBean enqueueSupplier;
+    public EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})

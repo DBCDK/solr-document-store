@@ -1,9 +1,10 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.search.solrdocstore.response.StatusResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dk.dbc.search.solrdocstore.Config;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,11 +25,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Stateless
-@Path("status")
-public class StatusBean {
+@Path("v2/status")
+public class StatusBeanV2 {
 
     private static final ObjectMapper O = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(StatusBean.class);
+    private static final Logger log = LoggerFactory.getLogger(StatusBeanV2.class);
 
     @Inject
     Config config;

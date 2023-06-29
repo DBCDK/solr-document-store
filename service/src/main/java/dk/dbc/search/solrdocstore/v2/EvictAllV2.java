@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.search.solrdocstore.response.StatusResponse;
 import jakarta.ejb.Stateless;
@@ -33,8 +33,8 @@ import jakarta.ws.rs.core.Response;
  * @author DBC {@literal <dbc.dk>}
  */
 @Stateless
-@Path("evict-all")
-public class EvictAll {
+@Path("v2/evict-all")
+public class EvictAllV2 {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     EntityManager entityManager;

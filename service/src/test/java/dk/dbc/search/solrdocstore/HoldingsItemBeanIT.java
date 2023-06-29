@@ -24,6 +24,8 @@ import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
+import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,7 +48,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testEnqueueNewChangeAndDelete");
 
         jpa(em -> {
-            BibliographicBean bib = createBibliographicBean(em, null);
+            BibliographicBeanV2 bib = createBibliographicBean(em, null);
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
         queueContentAndClear();
@@ -115,7 +117,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void enqueueWhenHoldingsItemSet() throws Exception {
         System.out.println("enqueueWhenHoldingsItemSet");
         jpa(em -> {
-            BibliographicBean bib = createBibliographicBean(em, null);
+            BibliographicBeanV2 bib = createBibliographicBean(em, null);
 
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
@@ -126,7 +128,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "c,work:1"));
 
         jpa(em -> {
-            HoldingsItemBean holWithoutDelay = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 holWithoutDelay = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.HOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNIT, 0),
@@ -140,7 +142,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "c,work:1"));
 
         jpa(em -> {
-            HoldingsItemBean holWithDelay = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 holWithDelay = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
                     new QueueRuleEntity("b", QueueType.UNIT, 0),
@@ -159,7 +161,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testFirstLast");
 
         jpa(em -> {
-            BibliographicBean bib = createBibliographicBean(em, null);
+            BibliographicBeanV2 bib = createBibliographicBean(em, null);
 
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
@@ -168,7 +170,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From non existing to live holdings
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -189,7 +191,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From live holdings to live holdings
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -200,7 +202,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From live holdings to no holdings
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -214,7 +216,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // Check that no h2b relation exists when no live holdings are present
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -236,7 +238,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testFirstLastNoneToNone");
 
         jpa(em -> {
-            BibliographicBean bib = createBibliographicBean(em, null);
+            BibliographicBeanV2 bib = createBibliographicBean(em, null);
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
 
@@ -244,7 +246,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From non existing to no holdings
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -269,7 +271,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From no holdings to no holdings
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -284,7 +286,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testMajorHoldingsChange");
 
         jpa(em -> {
-            BibliographicBean bib = createBibliographicBean(em, null);
+            BibliographicBeanV2 bib = createBibliographicBean(em, null);
             bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
         });
 
@@ -292,7 +294,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From non existing to OnShelf
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("fu", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -312,7 +314,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // From OnShelf to OnLoan
         jpa(em -> {
-            HoldingsItemBean hol = holdingsItemBeanWithRules(
+            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
                     new QueueRuleEntity("fu", QueueType.UNITFIRSTLASTHOLDING, 0),
@@ -328,8 +330,8 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "mw,work:1"));
     }
 
-    private static HoldingsItemBean holdingsItemBeanWithRules(EntityManager em, QueueRuleEntity... rules) {
-        HoldingsItemBean hol = createHoldingsItemBean(em);
+    private static HoldingsItemBeanV1 holdingsItemBeanWithRules(EntityManager em, QueueRuleEntity... rules) {
+        HoldingsItemBeanV1 hol = createHoldingsItemBean(em);
         hol.enqueueSupplier = new EnqueueSupplierBean() {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {
@@ -341,7 +343,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         return hol;
     }
 
-    private HoldingsItemBean holdingsItemBeanWithAllRules(EntityManager em) {
+    private HoldingsItemBeanV1 holdingsItemBeanWithAllRules(EntityManager em) {
         return holdingsItemBeanWithRules(
                 em,
                 new QueueRuleEntity("a", QueueType.HOLDING, 0),
