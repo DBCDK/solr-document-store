@@ -48,7 +48,6 @@ public class BeanFactoryUtil {
         BibliographicRecordAPIBeanV2 bean = new BibliographicRecordAPIBeanV2();
         bean.entityManager = env;
         bean.brBean = createBibliographicRetrieveBean(env);
-        bean.holdingsItemBean = createHoldingsItemBean(env);
         return bean;
     }
 

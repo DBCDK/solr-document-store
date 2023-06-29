@@ -20,10 +20,6 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
-import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
-import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
-import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
 import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import java.time.Instant;
@@ -63,9 +59,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                             .json(), 710100, "25912233", "x");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1",
-                   "d,870970-basis:25912233", "e,unit:1", "f,work:1",
-                   "g,870970-basis:25912233", "h,unit:1", "i,work:1"));
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
 
         // Major change (online -> gone, shelf->loan
         jpa(em -> {
@@ -76,8 +70,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                             .json(), 710100, "25912233", "x");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1",
-                   "d,870970-basis:25912233", "e,unit:1", "f,work:1"));
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
 
         // Minor Change (all still on loan)
         jpa(em -> {
@@ -99,9 +92,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                             .json(), 710100, "25912233", "x");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1",
-                   "d,870970-basis:25912233", "e,unit:1", "f,work:1",
-                   "g,870970-basis:25912233", "h,unit:1", "i,work:1"));
+                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
 
         // Delete no major change
         jpa(em -> {
@@ -156,179 +147,6 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                    "c,work:1"));
     }
 
-    @Test(timeout = 2_000L)
-    public void testFirstLast() throws Exception {
-        System.out.println("testFirstLast");
-
-        jpa(em -> {
-            BibliographicBeanV2 bib = createBibliographicBean(em, null);
-
-            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
-        });
-
-        queueContentAndClear();
-
-        // From non existing to live holdings
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233",
-                   "b,unit:1",
-                   "c,work:1"));
-
-        jpa(em -> {
-            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
-
-            HoldingsToBibliographicEntity entity = em.find(HoldingsToBibliographicEntity.class, key);
-            assertThat(entity, notNullValue());
-        });
-
-        // From live holdings to live holdings
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), empty());
-
-        // From live holdings to no holdings
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.deleteHoldings(710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233",
-                   "b,unit:1",
-                   "c,work:1"));
-
-        // Check that no h2b relation exists when no live holdings are present
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
-            HoldingsToBibliographicEntity entity = em.find(HoldingsToBibliographicEntity.class, key);
-            assertThat(entity, nullValue());
-        });
-
-        jpa(em -> {
-            AgencyItemKey key = new AgencyItemKey(710100, "25912233");
-            HoldingsItemEntity hi = em.find(HoldingsItemEntity.class, key);
-            assertThat(hi, nullValue());
-        });
-    }
-
-    @Test(timeout = 2_000L)
-    public void testFirstLastNoneToNone() throws Exception {
-        System.out.println("testFirstLastNoneToNone");
-
-        jpa(em -> {
-            BibliographicBeanV2 bib = createBibliographicBean(em, null);
-            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
-        });
-
-        queueContentAndClear();
-
-        // From non existing to no holdings
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.deleteHoldings(710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), empty());
-
-        // Check that no h2b relation exists when no live holdings are present
-        jpa(em -> {
-            HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(710100, "25912233");
-            HoldingsToBibliographicEntity htob = em.find(HoldingsToBibliographicEntity.class, key);
-            assertThat(htob, nullValue());
-        });
-
-        // and no holdings
-        jpa(em -> {
-            AgencyItemKey key = new AgencyItemKey(710100, "25912233");
-            HoldingsItemEntity hi = em.find(HoldingsItemEntity.class, key);
-            assertThat(hi, nullValue());
-        });
-
-        // From no holdings to no holdings
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("c", QueueType.WORKFIRSTLASTHOLDING, 0));
-            hol.deleteHoldings(710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), empty());
-    }
-
-    @Test(timeout = 2_000L)
-    public void testMajorHoldingsChange() throws Exception {
-        System.out.println("testMajorHoldingsChange");
-
-        jpa(em -> {
-            BibliographicBeanV2 bib = createBibliographicBean(em, null);
-            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
-        });
-
-        queueContentAndClear();
-
-        // From non existing to OnShelf
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("fu", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("fw", QueueType.WORKFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
-                    new QueueRuleEntity("mu", QueueType.UNITMAJORHOLDING, 0),
-                    new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
-            hol.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "fm,870970-basis:25912233",
-                   "fu,unit:1",
-                   "fw,work:1",
-                   "mm,870970-basis:25912233",
-                   "mu,unit:1",
-                   "mw,work:1"));
-
-        // From OnShelf to OnLoan
-        jpa(em -> {
-            HoldingsItemBeanV1 hol = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("fm", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("fu", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("fw", QueueType.WORKFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("mm", QueueType.MAJORHOLDING, 0),
-                    new QueueRuleEntity("mu", QueueType.UNITMAJORHOLDING, 0),
-                    new QueueRuleEntity("mw", QueueType.WORKMAJORHOLDING, 0));
-            hol.putHoldings(jsonRequestHold("710100-25912233-b"), 710100, "25912233", "t");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "mm,870970-basis:25912233",
-                   "mu,unit:1",
-                   "mw,work:1"));
-    }
 
     private static HoldingsItemBeanV1 holdingsItemBeanWithRules(EntityManager em, QueueRuleEntity... rules) {
         HoldingsItemBeanV1 hol = createHoldingsItemBean(em);
@@ -348,12 +166,6 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                 em,
                 new QueueRuleEntity("a", QueueType.HOLDING, 0),
                 new QueueRuleEntity("b", QueueType.UNIT, 0),
-                new QueueRuleEntity("c", QueueType.WORK, 0),
-                new QueueRuleEntity("d", QueueType.MAJORHOLDING, 0),
-                new QueueRuleEntity("e", QueueType.UNITMAJORHOLDING, 0),
-                new QueueRuleEntity("f", QueueType.WORKMAJORHOLDING, 0),
-                new QueueRuleEntity("g", QueueType.FIRSTLASTHOLDING, 0),
-                new QueueRuleEntity("h", QueueType.UNITFIRSTLASTHOLDING, 0),
-                new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0));
+                new QueueRuleEntity("c", QueueType.WORK, 0));
     }
 }

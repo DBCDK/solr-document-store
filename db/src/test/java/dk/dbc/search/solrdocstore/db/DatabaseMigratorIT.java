@@ -33,6 +33,6 @@ public class DatabaseMigratorIT {
                 System.out.println("version = " + version);
             }
         }
-        assertEquals(31, version);
+        assertEquals(32, version);
     }
 }
