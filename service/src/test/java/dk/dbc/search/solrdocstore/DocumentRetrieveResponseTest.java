@@ -65,6 +65,6 @@ public class DocumentRetrieveResponseTest {
     }
 
     private static HoldingsItemEntity hiEntityWith(String json) throws JsonProcessingException {
-        return new HoldingsItemEntity(0, "", SolrIndexKeys.holdingsIndexKeys(json), "");
+        return new HoldingsItemEntity(0, "", SolrIndexKeys.holdingsIndexKeys(json), null, "");
     }
 }

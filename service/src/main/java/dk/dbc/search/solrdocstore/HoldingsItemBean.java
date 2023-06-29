@@ -95,7 +95,7 @@ public class HoldingsItemBean {
 
         if (entity == null) {
             log.trace("create");
-            entity = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, trackingId);
+            entity = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, null, trackingId);
             entityManager.persist(entity);
 
             queueRelatedBibliographic(entity, enqueue,

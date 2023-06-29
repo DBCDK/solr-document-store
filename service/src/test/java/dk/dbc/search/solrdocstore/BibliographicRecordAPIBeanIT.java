@@ -223,7 +223,7 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
     private void createBibAndHoldings(EntityManager em, int agencyId, String bibliographicRecordId, int... agencies) {
         em.persist(new BibliographicEntity(agencyId, "clazzifier", bibliographicRecordId, "id#1", "w", "u", false, new IndexKeys(), "IT"));
         for (int i = 0 ; i < agencies.length ; i++) {
-            em.persist(new HoldingsItemEntity(agencies[i], bibliographicRecordId, SolrIndexKeys.ON_SHELF, "track"));
+            em.persist(new HoldingsItemEntity(agencies[i], bibliographicRecordId, SolrIndexKeys.ON_SHELF, null, "track"));
             HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
                     agencies[i], bibliographicRecordId, agencyId, false
             );

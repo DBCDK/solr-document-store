@@ -65,7 +65,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
             OpenAgencyStatusBean openAgencyStatus = createOpenAgencyStatusBean(em);
             em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, new IndexKeys(), ""));
             em.persist(new HoldingsToBibliographicEntity(711111, 870970, "23645564", true));
-            em.persist(new HoldingsItemEntity(711111, "23645564", ON_SHELF, ""));
+            em.persist(new HoldingsItemEntity(711111, "23645564", ON_SHELF, null, ""));
             Object status = openAgencyStatus.purgeAgency(711111, "").getEntity();
 
             System.out.println("status = " + status);

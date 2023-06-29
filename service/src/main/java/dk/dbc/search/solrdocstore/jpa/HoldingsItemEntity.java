@@ -13,6 +13,8 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,16 +48,19 @@ public class HoldingsItemEntity implements Serializable {
 
     private String trackingId;
 
+    private Timestamp modified;
+
 
     public HoldingsItemEntity() {
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
-    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, String trackingId) {
+    public HoldingsItemEntity(int agencyId, String bibliographicRecordId, IndexKeysList indexKeys, Timestamp modified, String trackingId) {
         this.agencyId = agencyId;
         this.bibliographicRecordId = bibliographicRecordId;
         this.indexKeys = indexKeys;
         this.trackingId = trackingId;
+        this.modified = modified;
     }
 
     /**
@@ -67,12 +72,12 @@ public class HoldingsItemEntity implements Serializable {
         if (getClass().equals(HoldingsItemEntity.class)) {
             return this;
         }
-        return new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, trackingId);
+        return new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, modified, trackingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(3, agencyId, bibliographicRecordId, trackingId, indexKeys);
+        return Objects.hash(3, agencyId, bibliographicRecordId, trackingId, modified, indexKeys);
     }
 
     @Override
@@ -85,6 +90,7 @@ public class HoldingsItemEntity implements Serializable {
         return this.agencyId == other.agencyId &&
                Objects.equals(this.bibliographicRecordId, other.bibliographicRecordId) &&
                Objects.equals(this.trackingId, other.trackingId) &&
+               Objects.equals(this.modified, other.modified) &&
                Objects.equals(this.indexKeys, other.indexKeys);
     }
 
@@ -120,6 +126,14 @@ public class HoldingsItemEntity implements Serializable {
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setIndexKeys(IndexKeysList indexKeys) {
         this.indexKeys = indexKeys;
+    }
+
+    public Instant getModified() {
+        return modified == null ? null : modified.toInstant();
+    }
+
+    public void setModified(Instant modified) {
+        this.modified = modified == null ? null : Timestamp.from(modified);
     }
 
     public Set<String> getLocations() {
@@ -166,7 +180,7 @@ public class HoldingsItemEntity implements Serializable {
         Set<String> locationsCopy = getLocations();
         Map<String, Integer> statusCountCopy = getStatusCount();
 
-        return new HoldingsItemEntity(agencyId, bibliographicRecordId, null, trackingId) {
+        return new HoldingsItemEntity(agencyId, bibliographicRecordId, null, modified, trackingId) {
             @Override
             public Set<String> getLocations() {
                 return locationsCopy;

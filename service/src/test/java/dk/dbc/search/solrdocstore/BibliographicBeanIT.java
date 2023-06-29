@@ -666,8 +666,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // live holdings
         jpa(em -> {
             em.merge(new HoldingsItemEntity(700000, "new",
-                                            SolrIndexKeys.ON_SHELF,
-                                            "test"));
+                                            SolrIndexKeys.ON_SHELF, null, "test"));
         });
 
         String a870970 = makeBibliographicRequestJson(
