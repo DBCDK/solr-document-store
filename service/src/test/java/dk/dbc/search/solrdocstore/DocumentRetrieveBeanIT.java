@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createBibliographicBean;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createDocumentRetrieveBean;
-import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsItemBean;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsToBibliographicBean;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.COMMON_AGENCY;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
@@ -33,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsItemBeanV1;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -64,7 +64,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         jpa(em -> {
             DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
             BibliographicBeanV2 bibl = createBibliographicBean(em, null);
-            HoldingsItemBeanV1 hold = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hold = createHoldingsItemBeanV1(em);
             DocumentRetrieveResponse doc = bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678");
 
             assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
@@ -204,7 +204,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.persist(makeOpenAgencyEntity(holdingsAgencyId));
 
             bibl = createBibliographicBean(em, null);
-            hold = createHoldingsItemBean(em);
+            hold = createHoldingsItemBeanV1(em);
             h2b = createHoldingsToBibliographicBean(em);
 
         }

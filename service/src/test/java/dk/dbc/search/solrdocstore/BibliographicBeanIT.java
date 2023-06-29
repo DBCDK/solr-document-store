@@ -567,7 +567,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("resurrectRecordWithHoldings");
 
         jpa(em -> {
-            HoldingsItemBeanV1 hb = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hb = createHoldingsItemBeanV1(em);
             hb.putIndexKeys(800010, "12345678", ON_SHELF, "h-1");
         });
 
@@ -613,7 +613,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            HoldingsItemBeanV1 hb = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hb = createHoldingsItemBeanV1(em);
             bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
                                                               "800010-katalog:12345678", "work:1", "unit:1",
                                                               true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), true);
@@ -639,7 +639,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            HoldingsItemBeanV1 hb = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hb = createHoldingsItemBeanV1(em);
             hb.putIndexKeys(800010, "12345678", ON_SHELF, "h-2");
             bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
                                                               "800010-katalog:12345678", "work:1", "unit:1",
@@ -768,7 +768,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            HoldingsItemBeanV1 hol = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hol = createHoldingsItemBeanV1(em);
 
             hol.putHoldings(h710100, 710100, "25912233", "track");
         });

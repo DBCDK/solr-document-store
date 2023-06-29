@@ -17,6 +17,7 @@ import dk.dbc.search.solrdocstore.v1.OpenAgencyStatusBeanV1;
 import dk.dbc.search.solrdocstore.v1.QueueBeanV1;
 import dk.dbc.search.solrdocstore.v1.ResourceBeanV1;
 import dk.dbc.search.solrdocstore.v1.StatusBeanV1;
+import dk.dbc.search.solrdocstore.v2.HoldingsItemBeanV2;
 import dk.dbc.search.solrdocstore.v2.OpenAgencyStatusBeanV2;
 import dk.dbc.search.solrdocstore.v2.QueueBeanV2;
 import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
@@ -53,6 +54,7 @@ public class DocStoreApplication extends Application {
             DocumentRetrieveBeanV2.class,
             EvictAllV2.class,
             ExistenceBeanV2.class,
+            HoldingsItemBeanV2.class,
             OpenAgencyStatusBeanV2.class,
             QueueBeanV2.class,
             ResourceBeanV2.class,
