@@ -5,6 +5,8 @@ import java.util.Map;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import java.util.Set;
+import org.glassfish.jersey.jackson.JacksonFeature;
 
 /**
  * This class defines the other classes that make up this JAX-RS application by
@@ -12,6 +14,26 @@ import jakarta.ws.rs.core.Application;
  */
 @ApplicationPath("/api")
 public class DocStoreApplication extends Application {
+
+    private static final Set<Class<?>> BEANS = Set.of(
+            BibliographicBean.class,
+            BibliographicRecordAPIBean.class,
+            DocumentRetrieveBean.class,
+            EvictAll.class,
+            ExistenceBean.class,
+            HoldingsItemBean.class,
+            OpenAgencyStatusBean.class,
+            QueueBean.class,
+            ResourceBean.class,
+            StatusBean.class,
+            // Tools
+            JacksonFeature.class,
+            JacksonObjectMapperProvider.class);
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        return super.getClasses();
+    }
 
     @Override
     public Map<String, Object> getProperties() {

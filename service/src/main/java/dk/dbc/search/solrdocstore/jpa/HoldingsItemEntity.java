@@ -129,11 +129,11 @@ public class HoldingsItemEntity implements Serializable {
     }
 
     public Instant getModified() {
-        return modified.toInstant();
+        return modified == null ? null : modified.toInstant();
     }
 
     public void setModified(Instant modified) {
-        this.modified = Timestamp.from(modified);
+        this.modified = modified == null ? null : Timestamp.from(modified);
     }
 
     public Set<String> getLocations() {
