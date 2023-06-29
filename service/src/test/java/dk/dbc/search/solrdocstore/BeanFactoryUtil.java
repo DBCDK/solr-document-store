@@ -8,6 +8,15 @@ import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.openagency.http.OpenAgencyException;
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
+import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
+import dk.dbc.search.solrdocstore.v2.BibliographicRecordAPIBeanV2;
+import dk.dbc.search.solrdocstore.v2.DocumentRetrieveBeanV2;
+import dk.dbc.search.solrdocstore.v2.ExistenceBeanV2;
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
+import dk.dbc.search.solrdocstore.v2.OpenAgencyStatusBeanV2;
+import dk.dbc.search.solrdocstore.v2.QueueBeanV2;
+import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +32,8 @@ public class BeanFactoryUtil {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    public static BibliographicBean createBibliographicBean(EntityManager em, Config config) {
-        BibliographicBean bean = new BibliographicBean();
+    public static BibliographicBeanV2 createBibliographicBean(EntityManager em, Config config) {
+        BibliographicBeanV2 bean = new BibliographicBeanV2();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.config = config;
         bean.entityManager = em;
@@ -35,16 +44,16 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static BibliographicRecordAPIBean createBiliographicRecordAPIBean(EntityManager env) {
-        BibliographicRecordAPIBean bean = new BibliographicRecordAPIBean();
+    public static BibliographicRecordAPIBeanV2 createBiliographicRecordAPIBean(EntityManager env) {
+        BibliographicRecordAPIBeanV2 bean = new BibliographicRecordAPIBeanV2();
         bean.entityManager = env;
         bean.brBean = createBibliographicRetrieveBean(env);
         bean.holdingsItemBean = createHoldingsItemBean(env);
         return bean;
     }
 
-    public static HoldingsItemBean createHoldingsItemBean(EntityManager em) {
-        HoldingsItemBean bean = new HoldingsItemBean();
+    public static HoldingsItemBeanV1 createHoldingsItemBean(EntityManager em) {
+        HoldingsItemBeanV1 bean = new HoldingsItemBeanV1();
         bean.entityManager = em;
         bean.h2bBean = createHoldingsToBibliographicBean(em);
         bean.brBean = createBibliographicRetrieveBean(em);
@@ -60,10 +69,10 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static OpenAgencyStatusBean createOpenAgencyStatusBean(EntityManager em) {
-        OpenAgencyStatusBean bean = new OpenAgencyStatusBean() {
+    public static OpenAgencyStatusBeanV2 createOpenAgencyStatusBean(EntityManager em) {
+        OpenAgencyStatusBeanV2 bean = new OpenAgencyStatusBeanV2() {
             @Override
-            String hash(int agencyId) throws NoSuchAlgorithmException {
+            public String hash(int agencyId) throws NoSuchAlgorithmException {
                 return "";
             }
         };
@@ -127,8 +136,8 @@ public class BeanFactoryUtil {
         };
     }
 
-    public static DocumentRetrieveBean createDocumentRetrieveBean(EntityManager em) {
-        DocumentRetrieveBean bean = new DocumentRetrieveBean();
+    public static DocumentRetrieveBeanV2 createDocumentRetrieveBean(EntityManager em) {
+        DocumentRetrieveBeanV2 bean = new DocumentRetrieveBeanV2();
         bean.entityManager = em;
         bean.brBean = createBibliographicRetrieveBean(em);
         bean.brrBean = createBibliographicResourceRetrieveBean(em);
@@ -148,8 +157,8 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static ExistenceBean createExistenceBean(EntityManager em) {
-        ExistenceBean bean = new ExistenceBean();
+    public static ExistenceBeanV2 createExistenceBean(EntityManager em) {
+        ExistenceBeanV2 bean = new ExistenceBeanV2();
         bean.entityManager = em;
         return bean;
     }
@@ -162,8 +171,8 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static ResourceBean createResourceBean(EntityManager em) {
-        ResourceBean bean = new ResourceBean();
+    public static ResourceBeanV2 createResourceBean(EntityManager em) {
+        ResourceBeanV2 bean = new ResourceBeanV2();
         OpenAgencyBean openAgency = createOpenAgencyBean();
         bean.entityManager = em;
         bean.openAgency = openAgency;
@@ -171,8 +180,8 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static QueueBean createQueueBean(EntityManager em) {
-        QueueBean bean = new QueueBean();
+    public static QueueBeanV2 createQueueBean(EntityManager em) {
+        QueueBeanV2 bean = new QueueBeanV2();
         bean.entityManager = em;
         bean.enqueueSupplier = createEnqueueSupplier(em);
         return bean;

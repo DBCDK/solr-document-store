@@ -9,6 +9,9 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
+import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
+import dk.dbc.search.solrdocstore.v2.DocumentRetrieveBeanV2;
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +47,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Before
     public void setupBean() {
         jpa(em -> {
-            BibliographicBean bibl = createBibliographicBean(em, null);
+            BibliographicBeanV2 bibl = createBibliographicBean(em, null);
             bibl.addBibliographicKeys(new BibliographicEntity(COMMON_AGENCY, "basis", ID, "r:0", "work:0", "unit:0", false, EMPTY, "t0"), false);
         });
     }
@@ -59,9 +62,9 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
         });
         jpa(em -> {
-            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
-            BibliographicBean bibl = createBibliographicBean(em, null);
-            HoldingsItemBean hold = createHoldingsItemBean(em);
+            DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
+            BibliographicBeanV2 bibl = createBibliographicBean(em, null);
+            HoldingsItemBeanV1 hold = createHoldingsItemBean(em);
             DocumentRetrieveResponse doc = bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678");
 
             assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
@@ -74,7 +77,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getPartOfDanbibCommon() throws Exception {
         System.out.println("getPartOfDanbibCommon");
         jpa(em -> {
-            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
 
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
@@ -113,7 +116,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getDocumentWithHoldings() throws Exception {
         System.out.println("getDocumentWithHoldings");
         jpa(em -> {
-            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
 
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
@@ -130,7 +133,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getWorkWithHoldings() throws Exception {
         System.out.println("getWorkWithHoldings");
         jpa(em -> {
-            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
             List<DocumentRetrieveResponse> resp = bean.getDocumentsForWork("work:0", true);
@@ -147,7 +150,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getUnitWithHoldings() throws Exception {
         System.out.println("getUnitWithHoldings");
         jpa(em -> {
-            DocumentRetrieveBean bean = createDocumentRetrieveBean(em);
+            DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
             build(em, 300055).holdings(ON_SHELF);
             build(em, 800055).holdings(ON_SHELF);
             List<DocumentRetrieveResponse> resp = bean.getDocumentsForUnit("unit:0", true);
@@ -191,8 +194,8 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
         private final int holdingsAgencyId;
         private final String holdingsId;
 
-        private final BibliographicBean bibl;
-        private final HoldingsItemBean hold;
+        private final BibliographicBeanV2 bibl;
+        private final HoldingsItemBeanV1 hold;
         private final HoldingsToBibliographicBean h2b;
 
         private Build(EntityManager em, int holdingsAgencyId, String holdingsId) {

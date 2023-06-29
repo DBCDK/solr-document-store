@@ -8,6 +8,7 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             Response r = bean.addResource("{\"agencyId\":870970,\"bibliographicRecordId\":\"25912233\",\"field\":\"hasCoverUrl\",\"value\":true}");
             assertThat(r.getStatus(), is(200));
         });
@@ -60,7 +61,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             Response r = bean.addResource("{\"agencyId\":870970,\"bibliographicRecordId\":\"25912233\",\"field\":\"hasCoverUrl\",\"value\":false}");
             assertThat(r.getStatus(), is(200));
         });
@@ -90,7 +91,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             Response r = bean.putResource("{\"has\":true}", "hasCoverUrl", 870970, "25912233", null);
             assertThat(r.getStatus(), is(200));
         });
@@ -100,14 +101,14 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
                                              "m,710100-clazzifier:25912233",
                                              "m,870970-clazzifier:25912233"));
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             BibliographicResourceEntity entity = em.find(BibliographicResourceEntity.class,
                                                          new AgencyItemFieldKey(870970, "25912233", "hasCoverUrl"));
             assertThat(entity, notNullValue());
         });
 
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             Response r = bean.putResource("{\"has\":false}", "hasCoverUrl", 870970, "25912233", null);
             assertThat(r.getStatus(), is(200));
         });
@@ -137,7 +138,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             Response r = bean.putResource("{\"has\":true}", "hasCoverUrl", 870970, "25912233", null);
             assertThat(r.getStatus(), is(200));
         });
@@ -153,7 +154,7 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            ResourceBean bean = mockResourceBean(em);
+            ResourceBeanV2 bean = mockResourceBean(em);
             Response r = bean.deleteResource("hasCoverUrl", 870970, "25912233", null);
             assertThat(r.getStatus(), is(200));
         });
@@ -170,8 +171,8 @@ public class ResourceBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
     }
 
-    private ResourceBean mockResourceBean(EntityManager em) {
-        ResourceBean bean = createResourceBean(em);
+    private ResourceBeanV2 mockResourceBean(EntityManager em) {
+        ResourceBeanV2 bean = createResourceBean(em);
         bean.enqueueSupplier = new EnqueueSupplierBean() {
             @Override
             protected Collection<QueueRuleEntity> getQueueRules() {

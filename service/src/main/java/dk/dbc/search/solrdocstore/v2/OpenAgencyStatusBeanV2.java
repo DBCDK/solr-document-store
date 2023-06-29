@@ -1,5 +1,7 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
+import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
+import dk.dbc.search.solrdocstore.OpenAgencyProxyBean;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.response.OpenAgencyStatusResponse;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
@@ -34,19 +36,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author DBC {@literal <dbc.dk>}
  */
 @Stateless
-@Path("open-agency")
-public class OpenAgencyStatusBean {
+@Path("v2/open-agency")
+public class OpenAgencyStatusBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenAgencyStatusBean.class);
+    private static final Logger log = LoggerFactory.getLogger(OpenAgencyStatusBeanV2.class);
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @Inject
-    OpenAgencyProxyBean proxy;
+    public OpenAgencyProxyBean proxy;
 
     @Inject
-    EnqueueSupplierBean supplier;
+    public EnqueueSupplierBean supplier;
 
     @GET
     @Path("status")
@@ -100,7 +102,7 @@ public class OpenAgencyStatusBean {
      * @return hash of number
      * @throws NoSuchAlgorithmException if sha-256 is unknown
      */
-    String hash(int agencyId) throws NoSuchAlgorithmException {
+    public String hash(int agencyId) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(( "a79befdb3d4d08625066afa9d106f970" + agencyId ).getBytes(UTF_8));
         return Base64.getEncoder().encodeToString(digest.digest())

@@ -7,6 +7,7 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.v2.OpenAgencyStatusBeanV2;
 import java.net.URLEncoder;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getStatusOk() throws Exception {
         System.out.println("getStatusOk");
         jpa(em -> {
-            OpenAgencyStatusBean openAgencyStatus = createOpenAgencyStatusBean(em);
+            OpenAgencyStatusBeanV2 openAgencyStatus = createOpenAgencyStatusBean(em);
             em.persist(new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true));
             OpenAgencyStatusResponse status = (OpenAgencyStatusResponse) openAgencyStatus.getStatus().getEntity();
             assertThat(status.ok, is(true));
@@ -36,7 +37,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void getStatusNotOk() throws Exception {
         System.out.println("getStatusNotOk");
         jpa(em -> {
-            OpenAgencyStatusBean openAgencyStatus = createOpenAgencyStatusBean(em);
+            OpenAgencyStatusBeanV2 openAgencyStatus = createOpenAgencyStatusBean(em);
             OpenAgencyEntity entity = new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false);
             entity.setValid(false);
             em.persist(entity);
@@ -51,7 +52,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void hashProducesUriSafe() throws Exception {
         System.out.println("hashProducesUriSafe");
         for (int i = 0 ; i < 33 ; i++) {
-            String hash = new OpenAgencyStatusBean().hash(i);
+            String hash = new OpenAgencyStatusBeanV2().hash(i);
             String uri = URLEncoder.encode(hash, "UTF-8");
             assertThat(hash, is(uri));
         }
@@ -62,7 +63,7 @@ public class OpenAgencyStatusBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("purgeEnqueuesWhenHasLiveHoldings");
 
         jpa(em -> {
-            OpenAgencyStatusBean openAgencyStatus = createOpenAgencyStatusBean(em);
+            OpenAgencyStatusBeanV2 openAgencyStatus = createOpenAgencyStatusBean(em);
             em.persist(new BibliographicEntity(870970, "basis", "23645564", "", "", "", false, new IndexKeys(), ""));
             em.persist(new HoldingsToBibliographicEntity(711111, 870970, "23645564", true));
             em.persist(new HoldingsItemEntity(711111, "23645564", ON_SHELF, null, ""));

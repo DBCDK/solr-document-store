@@ -22,6 +22,7 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import org.junit.Test;
 import dk.dbc.search.solrdocstore.response.ExistsResponse;
+import dk.dbc.search.solrdocstore.v2.ExistenceBeanV2;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createExistenceBean;
 import static org.hamcrest.CoreMatchers.*;
@@ -37,7 +38,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testBibliographicNonExisting() throws Exception {
         System.out.println("testBibliographicNonExisting");
         jpa(em -> {
-            ExistenceBean bean = createExistenceBean(em);
+            ExistenceBeanV2 bean = createExistenceBean(em);
             ExistsResponse existence = bean.bibliographicExists(870970, "clazzifier", "12345678");
             assertThat(existence.exists, is(false));
         });
@@ -50,7 +51,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "repo", "work:1", "unit:1", false, null, "track:1"));
         });
         jpa(em -> {
-            ExistenceBean bean = createExistenceBean(em);
+            ExistenceBeanV2 bean = createExistenceBean(em);
             ExistsResponse existence = bean.bibliographicExists(870970, "clazzifier", "12345678");
             assertThat(existence.exists, is(true));
         });
@@ -63,7 +64,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "repo", null, null, true, null, "track:1"));
         });
         jpa(em -> {
-            ExistenceBean bean = createExistenceBean(em);
+            ExistenceBeanV2 bean = createExistenceBean(em);
             ExistsResponse existence = bean.bibliographicExists(870970, "clazzifier", "12345678");
             assertThat(existence.exists, is(false));
         });
@@ -73,7 +74,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testHoldingsNonExisting() throws Exception {
         System.out.println("testHoldingsNonExisting");
         jpa(em -> {
-            ExistenceBean bean = createExistenceBean(em);
+            ExistenceBeanV2 bean = createExistenceBean(em);
             ExistsResponse existence = bean.holdingExists(777777, "12345678");
             assertThat(existence.exists, is(false));
         });
@@ -86,7 +87,7 @@ public class ExistenceBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new HoldingsItemEntity(777777, "12345678", SolrIndexKeys.ON_SHELF, null, "track:1"));
         });
         jpa(em -> {
-            ExistenceBean bean = createExistenceBean(em);
+            ExistenceBeanV2 bean = createExistenceBean(em);
             ExistsResponse existence = bean.holdingExists(777777, "12345678");
             assertThat(existence.exists, is(true));
         });
