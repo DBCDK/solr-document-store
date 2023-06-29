@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.*;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
+public class HoldingsItemBeanV1IT extends JpaSolrDocStoreIntegrationTester {
 
     @Test(timeout = 2_000L)
     public void testEnqueueNewChangeAndDelete() throws Exception {
