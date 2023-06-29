@@ -1,5 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
+import dk.dbc.commons.payara.helpers.MDCRequestInfo;
+import dk.dbc.commons.payara.helpers.RequestLogLevel;
 import dk.dbc.search.solrdocstore.v1.BibliographicBeanV1;
 import dk.dbc.search.solrdocstore.v1.BibliographicRecordAPIBeanV1;
 import dk.dbc.search.solrdocstore.v1.DocumentRetrieveBeanV1;
@@ -24,6 +26,7 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import java.util.Set;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.microprofileext.openapi.swaggerui.OpenApiUiService;
 
 /**
  * This class defines the other classes that make up this JAX-RS application by
@@ -55,8 +58,11 @@ public class DocStoreApplication extends Application {
             ResourceBeanV2.class,
             StatusBeanV2.class,
             // Tools
+            MDCRequestInfo.class,
+            RequestLogLevel.class,
             JacksonFeature.class,
-            JacksonObjectMapperProvider.class);
+            JacksonObjectMapperProvider.class,
+            OpenApiUiService.class);
 
     @Override
     public Set<Class<?>> getClasses() {
