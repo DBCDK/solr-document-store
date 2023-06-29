@@ -93,18 +93,26 @@ public class HoldingsItemBeanV2 {
                     h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
                                                              QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
                 }
-            } else if (entity.update(hid)) {
-                entityManager.merge(entity);
-                queueRelatedBibliographic(entity, enqueue, QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
-                if (entity.getIndexKeys().isEmpty()) {
-                    log.info("Removed holdings for {}-{}", agencyId, bibliographicRecordId);
-                    HoldingsToBibliographicKey h2bKey = new HoldingsToBibliographicKey(agencyId, bibliographicRecordId);
-                    HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
-                    if (binding != null) {
-                        entityManager.remove(binding);
+            } else {
+                boolean hadNoIndexKeys = entity.getIndexKeys().isEmpty();
+                if (entity.update(hid)) {
+                    entityManager.merge(entity);
+                    if (entity.getIndexKeys().isEmpty()) {
+                        log.info("Removed holdings for {}-{}", agencyId, bibliographicRecordId);
+                        queueRelatedBibliographic(entity, enqueue, QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                        HoldingsToBibliographicKey h2bKey = new HoldingsToBibliographicKey(agencyId, bibliographicRecordId);
+                        HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
+                        if (binding != null) {
+                            entityManager.remove(binding);
+                        }
+                    } else if (hadNoIndexKeys) {
+                        log.info("Resurrected holdings for {}-{}", agencyId, bibliographicRecordId);
+                        h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
+                                                                 QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                    } else {
+                        log.info("Updated holdings for {}-{}", agencyId, bibliographicRecordId);
+                        queueRelatedBibliographic(entity, enqueue, QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
                     }
-                } else {
-                    log.info("Updated holdings for {}-{}", agencyId, bibliographicRecordId);
                 }
             }
         }
