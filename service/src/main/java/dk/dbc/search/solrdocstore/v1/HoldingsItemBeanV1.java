@@ -29,13 +29,8 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
@@ -52,7 +47,6 @@ public class HoldingsItemBeanV1 {
     private static final Logger log = LoggerFactory.getLogger(HoldingsItemBeanV1.class);
 
     private static final Marshaller MARSHALLER = new Marshaller();
-    private static final Predicate<String> LIVE_STATUS_PREDICATE = Predicate.not(Set.of("Lost", "Discarded")::contains);
 
     @Inject
     public HoldingsToBibliographicBean h2bBean;
@@ -102,40 +96,15 @@ public class HoldingsItemBeanV1 {
             entity = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, null, trackingId);
             entityManager.persist(entity);
 
-            queueRelatedBibliographic(entity, enqueue,
-                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                      QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                      QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
-
             h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
-                                                     QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                                     QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                                     QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
+                                                     QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
         } else {
             log.trace("update");
-            Set<String> oldLocations = entity.getLocations();
-            boolean oldLiveHolding = containsLiveHolding(entity.getIndexKeys());
             entity.setIndexKeys(indexKeys);
             entityManager.merge(entity);
-            Set<String> newLocations = entity.getLocations();
-            boolean newLiveHolding = containsLiveHolding(entity.getIndexKeys());
-            System.out.println("oldLiveHolding = " + oldLiveHolding);
-            System.out.println("newLiveHolding = " + newLiveHolding);
 
-            if (oldLiveHolding != newLiveHolding) {
-                queueRelatedBibliographic(entity, enqueue,
-                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                          QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
-            } else if (oldLocations.equals(newLocations)) {
-                queueRelatedBibliographic(entity, enqueue,
-                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
-            } else {
-                queueRelatedBibliographic(entity, enqueue,
-                                          QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                          QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING,
-                                          QueueType.MAJORHOLDING, QueueType.WORKMAJORHOLDING);
-            }
+            queueRelatedBibliographic(entity, enqueue,
+                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
         }
 
         enqueue.commit();
@@ -162,15 +131,8 @@ public class HoldingsItemBeanV1 {
                 HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
                 if (binding != null) {
                     log.trace("binding = {} - enqueue", binding);
-                    if (containsLiveHolding(entity.getIndexKeys())) {
-                        queueRelatedBibliographic(entity, enqueue,
-                                                  QueueType.HOLDING, QueueType.UNIT, QueueType.WORK,
-                                                  QueueType.MAJORHOLDING, QueueType.UNITMAJORHOLDING, QueueType.WORKMAJORHOLDING,
-                                                  QueueType.FIRSTLASTHOLDING, QueueType.UNITFIRSTLASTHOLDING, QueueType.WORKFIRSTLASTHOLDING);
-                    } else {
-                        queueRelatedBibliographic(entity, enqueue,
-                                                  QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
-                    }
+                    queueRelatedBibliographic(entity, enqueue,
+                                              QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
                     entityManager.remove(binding);
                 }
                 entityManager.remove(entity);
@@ -204,14 +166,6 @@ public class HoldingsItemBeanV1 {
         }
     }
 
-    private boolean containsLiveHolding(IndexKeysList indexKeysList) {
-        return indexKeysList.stream()
-                .flatMap(m -> m.entrySet().stream())
-                .filter(e -> e.getKey().equals("holdingsitem.status"))
-                .flatMap(e -> e.getValue().stream())
-                .anyMatch(LIVE_STATUS_PREDICATE);
-    }
-
     private void queueRelatedBibliographic(HoldingsItemEntity hi, EnqueueCollector enqueue, QueueType... queues) {
         HoldingsToBibliographicKey key = new HoldingsToBibliographicKey(hi.getAgencyId(), hi.getBibliographicRecordId());
         HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, key);
@@ -226,17 +180,5 @@ public class HoldingsItemBeanV1 {
         if (e != null && !e.isDeleted()) {
             enqueue.add(e, queues);
         }
-    }
-
-    public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId) {
-        return entityManager.createQuery("SELECT h2b FROM HoldingsToBibliographicEntity h2b" +
-                                         " WHERE h2b.bibliographicAgencyId = :bibliographicAgencyId" +
-                                         "  AND h2b.bibliographicRecordId = :bibliographicRecordId", HoldingsToBibliographicEntity.class)
-                .setParameter("bibliographicAgencyId", bibliographicAgencyId)
-                .setParameter("bibliographicRecordId", bibliographicRecordId)
-                .getResultStream()
-                .map(h2b -> entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(h2b.getHoldingsAgencyId(), h2b.getBibliographicRecordId())))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 }

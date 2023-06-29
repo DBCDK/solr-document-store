@@ -53,16 +53,10 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("b", QueueType.MANIFESTATION, 5),
                     new QueueRuleEntity("c", QueueType.HOLDING, 0),
                     new QueueRuleEntity("d", QueueType.HOLDING, 20),
-                    new QueueRuleEntity("e", QueueType.FIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("f", QueueType.FIRSTLASTHOLDING, 20),
                     new QueueRuleEntity("g", QueueType.WORK, 0),
                     new QueueRuleEntity("h", QueueType.WORK, 100),
-                    new QueueRuleEntity("i", QueueType.WORKFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("j", QueueType.WORKFIRSTLASTHOLDING, 100),
                     new QueueRuleEntity("k", QueueType.UNIT, 0),
-                    new QueueRuleEntity("l", QueueType.UNIT, 100),
-                    new QueueRuleEntity("m", QueueType.UNITFIRSTLASTHOLDING, 0),
-                    new QueueRuleEntity("n", QueueType.UNITFIRSTLASTHOLDING, 100)) ) {
+                    new QueueRuleEntity("l", QueueType.UNIT, 100)) ) {
                 em.persist(e);
             }
         });

@@ -34,18 +34,12 @@ public enum QueueType {
     MANIFESTATION("manifestation", JobType.MANIFESTATION),
     MANIFESTATION_DELETED("manifestation_deleted", JobType.MANIFESTATION),
     HOLDING("holding", JobType.MANIFESTATION),
-    FIRSTLASTHOLDING("firstlastholding", JobType.MANIFESTATION),
-    MAJORHOLDING("majorholding", JobType.MANIFESTATION),
     RESOURCE("resource", JobType.MANIFESTATION),
     ENDPOINT("endpoint", JobType.MANIFESTATION),
     UNIT("unit", JobType.UNIT),
-    UNITFIRSTLASTHOLDING("unitfirstlastholding", JobType.UNIT),
-    UNITMAJORHOLDING("unitmajorholding", JobType.UNIT),
     UNITRESOURCE("unitresource", JobType.UNIT),
     UNITENDPOINT("unitendpoint", JobType.UNIT),
     WORK("work", JobType.WORK),
-    WORKFIRSTLASTHOLDING("workfirstlastholding", JobType.WORK),
-    WORKMAJORHOLDING("workmajorholding", JobType.WORK),
     WORKRESOURCE("workresource", JobType.WORK),
     WORKENDPOINT("workendpoint", JobType.WORK);
 
