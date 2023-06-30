@@ -36,7 +36,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class EnqueueCollector {
+public class EnqueueCollector implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(EnqueueCollector.class);
 
@@ -102,6 +102,11 @@ public class EnqueueCollector {
         for (EnqueueTarget target : targetTypes.values()) {
             target.commit();
         }
+    }
+
+    @Override
+    public void close() throws SQLException {
+        commit();
     }
 
     private EnqueueTarget makeTarget(QueueType type) {

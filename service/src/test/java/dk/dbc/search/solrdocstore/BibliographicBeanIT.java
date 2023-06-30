@@ -6,6 +6,8 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
+import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +42,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b870970 = makeBibliographicRequestJson(870970);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -64,7 +66,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b700000 = makeBibliographicRequestJson(700000);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -89,7 +91,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b300100 = makeBibliographicRequestJson(300100);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -113,7 +115,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String b300000 = makeBibliographicRequestJson(300000);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -141,7 +143,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -173,7 +175,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -187,7 +189,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedD = MARSHALLER.marshall(d);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -199,7 +201,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // resend deleted record:
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -216,7 +218,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "id", "id#1", null, null, true, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now()), "track:deleted");
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -228,7 +230,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:not-revive");
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -245,7 +247,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         BibliographicEntity d = new BibliographicEntity(600100, "clazzifier", "id", "id#1", null, null, true, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("1d"))), "track:deleted");
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -257,7 +259,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         BibliographicEntity r = new BibliographicEntity(600100, "clazzifier", "id", "id#2", "work:1", "unit:1", false, makeIndexKeys("rec.fedoraStreamDate=" + Instant.now().minusMillis(Config.ms("10d"))), "track:revive");
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -274,7 +276,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String updatedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -456,7 +458,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String json = makeBibliographicRequestJson(800000);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -478,7 +480,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String json = makeBibliographicRequestJson(888000);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -505,7 +507,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -531,7 +533,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             e.setDeleted(false);
         });
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -544,7 +546,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         assertThat(queueContentAndClear(), empty()); // From non-existing -> deleted
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -565,12 +567,12 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("resurrectRecordWithHoldings");
 
         jpa(em -> {
-            HoldingsItemBean hb = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hb = createHoldingsItemBeanV1(em);
             hb.putIndexKeys(800010, "12345678", ON_SHELF, "h-1");
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -581,7 +583,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -593,7 +595,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -605,13 +607,13 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // Delete
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            HoldingsItemBean hb = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hb = createHoldingsItemBeanV1(em);
             bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
                                                               "800010-katalog:12345678", "work:1", "unit:1",
                                                               true, biblIndexKeys("{'rec.fedoraStreamDate': ['" + Instant.now() + "']}"), "b-2"), true);
@@ -619,7 +621,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -631,13 +633,13 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // Resurrect
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
                                                          }
                                                      });
-            HoldingsItemBean hb = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hb = createHoldingsItemBeanV1(em);
             hb.putIndexKeys(800010, "12345678", ON_SHELF, "h-2");
             bean.addBibliographicKeys(new BibliographicEntity(800010, "katalog", "12345678",
                                                               "800010-katalog:12345678", "work:1", "unit:1",
@@ -645,7 +647,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -666,8 +668,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         // live holdings
         jpa(em -> {
             em.merge(new HoldingsItemEntity(700000, "new",
-                                            SolrIndexKeys.ON_SHELF,
-                                            "test"));
+                                            SolrIndexKeys.ON_SHELF, null, "test"));
         });
 
         String a870970 = makeBibliographicRequestJson(
@@ -681,7 +682,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                 700000, e -> {
         });
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -698,7 +699,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // No changes in structire - nothing queued
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -712,7 +713,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // Change in structure
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -730,7 +731,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         // Delete - change in structure
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -755,7 +756,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String h710100 = jsonRequestHold("710100-25912233-a");
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -767,13 +768,13 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            HoldingsItemBean hol = createHoldingsItemBean(em);
+            HoldingsItemBeanV1 hol = createHoldingsItemBeanV1(em);
 
             hol.putHoldings(h710100, 710100, "25912233", "track");
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -786,7 +787,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -798,7 +799,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);
@@ -817,7 +818,7 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
         String deletedB = MARSHALLER.marshall(b);
 
         jpa(em -> {
-            BibliographicBean bean = createBibliographicBean(em, new Config() {
+            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
                                                          @Override
                                                          public long getReviveOlderWhenDeletedForAtleast() {
                                                              return TimeUnit.HOURS.toMillis(8);

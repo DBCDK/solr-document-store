@@ -1,5 +1,6 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
@@ -7,6 +8,12 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.Config;
+import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
+import dk.dbc.search.solrdocstore.HoldingsToBibliographicBean;
+import dk.dbc.search.solrdocstore.IntermittentErrorException;
+import dk.dbc.search.solrdocstore.Marshaller;
+import dk.dbc.search.solrdocstore.OpenAgencyBean;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
@@ -48,30 +55,30 @@ import static dk.dbc.search.solrdocstore.jpa.RecordType.SingleRecord;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Stateless
-@Path("bibliographic")
-public class BibliographicBean {
+@Path("v2/bibliographic")
+public class BibliographicBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(BibliographicBean.class);
+    private static final Logger log = LoggerFactory.getLogger(BibliographicBeanV2.class);
 
     private static final Marshaller MARSHALLER = new Marshaller();
 
     @Inject
-    Config config;
+    public Config config;
 
     @Inject
-    OpenAgencyBean openAgency;
+    public OpenAgencyBean openAgency;
 
     @Inject
-    HoldingsToBibliographicBean h2bBean;
+    public HoldingsToBibliographicBean h2bBean;
 
     @Inject
-    BibliographicRetrieveBean brBean;
+    public BibliographicRetrieveBean brBean;
 
     @Inject
-    EnqueueSupplierBean enqueueSupplier;
+    public EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     /**
      * Add bibliographic SolR keys and reorganize related holdings
@@ -139,7 +146,7 @@ public class BibliographicBean {
         }
     }
 
-    void addBibliographicKeys(BibliographicEntity bibliographicEntity, boolean queueAll) throws SQLException {
+    public void addBibliographicKeys(BibliographicEntity bibliographicEntity, boolean queueAll) throws SQLException {
         EnqueueCollector enqueue = queueAll ? enqueueSupplier.getEnqueueCollector() : EnqueueCollector.VOID;
 
         if (bibliographicEntity.getClassifier() == null) {

@@ -16,15 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v1;
 
-import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
-import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
-import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -41,9 +35,9 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import dk.dbc.search.solrdocstore.response.ExistsResponse;
+import dk.dbc.search.solrdocstore.v2.ExistenceBeanV2;
+import jakarta.inject.Inject;
 
 /**
  *
@@ -57,12 +51,10 @@ import dk.dbc.search.solrdocstore.response.ExistsResponse;
                 version = "1.0",
                 description = "This service allows checking if a record exists and is not 'delete'",
                 contact = @Contact(url = "mailto:dbc@dbc.dk")))
-public class ExistenceBean {
+public class ExistenceBeanV1 {
 
-    private static final Logger log = LoggerFactory.getLogger(ExistenceBean.class);
-
-    @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    @Inject
+    public ExistenceBeanV2 proxy;
 
     @Timed
     @GET
@@ -92,15 +84,7 @@ public class ExistenceBean {
     public ExistsResponse bibliographicExists(@PathParam("agencyId") Integer agencyId,
                                               @PathParam("classifier") String classifier,
                                               @PathParam("bibliographicRecordId") String bibliographicRecordId) {
-        log.info("Checking existence of bibliographic item {}-{}:{}", agencyId, classifier, bibliographicRecordId);
-        ExistsResponse response = new ExistsResponse();
-        BibliographicEntity entity = entityManager.find(BibliographicEntity.class, new AgencyClassifierItemKey(agencyId, classifier, bibliographicRecordId));
-        if (entity == null) {
-            response.exists = false;
-        } else {
-            response.exists = !entity.isDeleted();
-        }
-        return response;
+        return proxy.bibliographicExists(agencyId, classifier, bibliographicRecordId);
     }
 
     @Timed
@@ -127,10 +111,6 @@ public class ExistenceBean {
                    required = true)})
     public ExistsResponse holdingExists(@PathParam("agencyId") Integer agencyId,
                                         @PathParam("bibliographicRecordId") String bibliographicRecordId) {
-        log.info("Checking existence of holdings item {}:{}", agencyId, bibliographicRecordId);
-        ExistsResponse response = new ExistsResponse();
-        HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
-        response.exists = entity != null;
-        return response;
+        return proxy.holdingExists(agencyId, bibliographicRecordId);
     }
 }

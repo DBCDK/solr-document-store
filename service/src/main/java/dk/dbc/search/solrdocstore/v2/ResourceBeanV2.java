@@ -1,5 +1,6 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
+import dk.dbc.search.solrdocstore.response.BibliographicResourceSchemaAnnotated;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
@@ -10,6 +11,9 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
+import dk.dbc.search.solrdocstore.Marshaller;
+import dk.dbc.search.solrdocstore.OpenAgencyBean;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemFieldKey;
 import dk.dbc.search.solrdocstore.request.ResourceRestRequest;
 import java.sql.SQLException;
@@ -43,21 +47,21 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import static dk.dbc.log.LogWith.track;
 
 @Stateless
-@Path("resource")
-public class ResourceBean {
+@Path("v2/resource")
+public class ResourceBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(ResourceBean.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceBeanV2.class);
 
     private static final Marshaller MARSHALLER = new Marshaller();
 
     @Inject
-    OpenAgencyBean openAgency;
+    public OpenAgencyBean openAgency;
 
     @Inject
-    EnqueueSupplierBean enqueueSupplier;
+    public EnqueueSupplierBean enqueueSupplier;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @POST
     @Consumes({MediaType.APPLICATION_JSON})

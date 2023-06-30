@@ -1,6 +1,9 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.BibliographicResourceRetrieveBean;
+import dk.dbc.search.solrdocstore.OpenAgencyBean;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
@@ -43,10 +46,10 @@ import static dk.dbc.log.LogWith.track;
  * @author DBC {@literal <dbc.dk>}
  */
 @Stateless
-@Path("retrieve")
-public class DocumentRetrieveBean {
+@Path("v2/retrieve")
+public class DocumentRetrieveBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(DocumentRetrieveBean.class);
+    private static final Logger log = LoggerFactory.getLogger(DocumentRetrieveBeanV2.class);
 
     private static final String SELECT_HOLDINGS_ITEMS_JPA =
             "SELECT h FROM HoldingsToBibliographicEntity h2b" +
@@ -72,16 +75,16 @@ public class DocumentRetrieveBean {
             " WHERE be.work = :workId";
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @Inject
-    BibliographicRetrieveBean brBean;
+    public BibliographicRetrieveBean brBean;
 
     @Inject
-    BibliographicResourceRetrieveBean brrBean;
+    public BibliographicResourceRetrieveBean brrBean;
 
     @Inject
-    OpenAgencyBean oaBean;
+    public OpenAgencyBean oaBean;
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})

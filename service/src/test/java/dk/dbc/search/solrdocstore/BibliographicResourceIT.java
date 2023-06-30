@@ -5,6 +5,7 @@ import dk.dbc.search.solrdocstore.request.AddResourceRequest;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
 import org.junit.Before;
 import org.junit.Test;
 import jakarta.persistence.TypedQuery;
@@ -32,7 +33,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testAddResource");
         AddResourceRequest request = new AddResourceRequest(870970, "23556455", "hasCoverUrl", true);
         jpa(em -> {
-            ResourceBean bean = createResourceBean(em);
+            ResourceBeanV2 bean = createResourceBean(em);
             bean.addResource(MARSHALLER.marshall(request));
             TypedQuery<BibliographicResourceEntity> query = em.createQuery(
                     "SELECT r FROM BibliographicResourceEntity r WHERE r.agencyId=:agencyId AND " +
@@ -49,7 +50,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testAddResourceOntoDeleted");
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
-            ResourceBean bean = createResourceBean(em);
+            ResourceBeanV2 bean = createResourceBean(em);
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", null, null, true, null, "track:1"));
             bean.addResource(MARSHALLER.marshall(request));
@@ -62,7 +63,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("testAddNonFBSdResourceEnqueue");
         AddResourceRequest request = new AddResourceRequest(890890, "45454545", "hasCoverUrl", true);
         jpa(em -> {
-            ResourceBean bean = createResourceBean(em);
+            ResourceBeanV2 bean = createResourceBean(em);
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new BibliographicEntity(890890, "classifier1", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicEntity(890890, "classifier2", "45454545", "repo", "work:1", "unit:1", false, null, "track:1"));
@@ -109,7 +110,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
 
     private void runCommonEnqueueTest(AddResourceRequest request) {
         jpa(em -> {
-            ResourceBean bean = createResourceBean(em);
+            ResourceBeanV2 bean = createResourceBean(em);
             // Setup
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new OpenAgencyEntity(870970, LibraryType.NonFBS, false, false, false));
@@ -142,7 +143,7 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
     public void testGetResourcesByBibItem() {
         System.out.println("testGetResourcesByBibItem");
         jpa(em -> {
-            ResourceBean bean = createResourceBean(em);
+            ResourceBeanV2 bean = createResourceBean(em);
             Response response = bean.getResourcesByBibItem(870970, "11111111");
             List<BibliographicResourceEntity> result = (List<BibliographicResourceEntity>) response.getEntity();
             assertThat(result, containsInAnyOrder(new BibliographicResourceEntity(870970, "11111111", "hasCoverUrl", true),

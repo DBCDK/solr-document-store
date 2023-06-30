@@ -5,6 +5,7 @@ import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import java.util.List;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;

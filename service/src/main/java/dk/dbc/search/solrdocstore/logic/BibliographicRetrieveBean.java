@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
@@ -16,7 +16,7 @@ import org.eclipse.persistence.exceptions.JPQLException;
 public class BibliographicRetrieveBean {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @Timed
     public List<BibliographicEntity> getBibliographicEntities(String bibliographicRecordId) {

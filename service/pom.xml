@@ -26,6 +26,18 @@
 
         <dependency>
             <groupId>dk.dbc</groupId>
+            <artifactId>holdings-items-documents-bindings</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
+            <artifactId>dbc-commons-payara-helpers</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-testcontainers-postgres</artifactId>
         </dependency>
 

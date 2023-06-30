@@ -25,7 +25,7 @@ public class HoldingsItemEntityIT extends JpaSolrDocStoreIntegrationTester {
             doc2.put("titel", Collections.singletonList("unix bogen"));
             doc2.put("id", Collections.singletonList("argle"));
             doc2.put("dyr", Collections.singletonList("hest"));
-            em.persist(new HoldingsItemEntity(200, "1234", IndexKeysList.from(doc1, doc2), ""));
+            em.persist(new HoldingsItemEntity(200, "1234", IndexKeysList.from(doc1, doc2), null, ""));
         });
 
         jpa(em -> {

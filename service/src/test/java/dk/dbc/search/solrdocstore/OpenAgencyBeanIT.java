@@ -102,7 +102,7 @@ public class OpenAgencyBeanIT extends JpaSolrDocStoreIntegrationTester {
             OpenAgencyBean openAgency = createOpenAgencyBean(em);
             em.persist(makeOpenAgencyEntity(COMMON_AGENCY));
             em.persist(makeOpenAgencyEntity(711100, true, true, false));
-            em.persist(new HoldingsItemEntity(711100, "1", ON_SHELF, ""));
+            em.persist(new HoldingsItemEntity(711100, "1", ON_SHELF, null, ""));
             em.flush();
             openAgency.verifyOpenAgencyCache();
 

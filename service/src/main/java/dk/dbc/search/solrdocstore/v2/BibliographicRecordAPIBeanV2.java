@@ -1,10 +1,13 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.v2;
 
+import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import dk.dbc.search.solrdocstore.response.FrontendReturnListType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.log.LogWith;
+import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
+import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,24 +25,24 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 
 import static dk.dbc.log.LogWith.track;
 
 @Stateless
-@Path("")
-public class BibliographicRecordAPIBean {
+@Path("v2/")
+public class BibliographicRecordAPIBeanV2 {
 
-    private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBean.class);
-
-    @Inject
-    BibliographicRetrieveBean brBean;
+    private static final Logger log = LoggerFactory.getLogger(BibliographicRecordAPIBeanV2.class);
 
     @Inject
-    HoldingsItemBean holdingsItemBean;
+    public BibliographicRetrieveBean brBean;
+
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     private int pageCount(long resCount, int pageSize) {
         return (int) Math.ceil((double) resCount / pageSize);
@@ -141,8 +144,21 @@ public class BibliographicRecordAPIBean {
         try (LogWith logWith = track(null)) {
             log.info("Requesting bibliographic record id: {} and bibliographic agency id: {}",
                      bibliographicRecordId, bibliographicAgencyId);
-            List<HoldingsItemEntity> res = holdingsItemBean.getRelatedHoldingsWithIndexKeys(bibliographicRecordId, bibliographicAgencyId);
+            List<HoldingsItemEntity> res = getRelatedHoldingsWithIndexKeys(bibliographicRecordId, bibliographicAgencyId);
             return Response.ok(new FrontendReturnListType<>(res, 0), MediaType.APPLICATION_JSON).build();
         }
     }
+
+        public List<HoldingsItemEntity> getRelatedHoldingsWithIndexKeys(String bibliographicRecordId, int bibliographicAgencyId) {
+        return entityManager.createQuery("SELECT h2b FROM HoldingsToBibliographicEntity h2b" +
+                                         " WHERE h2b.bibliographicAgencyId = :bibliographicAgencyId" +
+                                         "  AND h2b.bibliographicRecordId = :bibliographicRecordId", HoldingsToBibliographicEntity.class)
+                .setParameter("bibliographicAgencyId", bibliographicAgencyId)
+                .setParameter("bibliographicRecordId", bibliographicRecordId)
+                .getResultStream()
+                .map(h2b -> entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(h2b.getHoldingsAgencyId(), h2b.getBibliographicRecordId())))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
 }
