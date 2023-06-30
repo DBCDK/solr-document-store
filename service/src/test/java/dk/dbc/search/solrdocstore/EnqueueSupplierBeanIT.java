@@ -94,7 +94,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
         System.out.println("checkConfig");
         jpa(em -> {
             BibliographicBeanV2 bibliographicBean = BeanFactoryUtil.createBibliographicBean(em, null);
-            HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
+            HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBeanV1(em);
             assertEquals(LibraryType.NonFBS, bibliographicBean.openAgency.lookup(nonfbsAgency).getLibraryType());
             assertEquals(LibraryType.FBS, bibliographicBean.openAgency.lookup(fbsAgency).getLibraryType());
             assertEquals(LibraryType.FBSSchool, bibliographicBean.openAgency.lookup(schoolAgency).getLibraryType());
@@ -281,7 +281,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem("work:0")));
 
         jpa(em -> {
-            HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
+            HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBeanV1(em);
             HoldingsItemEntity hold = h.get();
             hold.setTrackingId("NEW");
             holdingsItemBean.putIndexKeys(hold.getAgencyId(), hold.getBibliographicRecordId(), hold.getIndexKeys(), hold.getTrackingId());
@@ -341,7 +341,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private HoldingsItemEntity addHoldings(EntityManager em, int holdingAgency, String holdingBibliographicId) throws SQLException {
         // Dummy holding - ensure enqueue from non existing to this
         HoldingsItemEntity e = new HoldingsItemEntity(holdingAgency, holdingBibliographicId, SolrIndexKeys.ON_SHELF, null, "IT");
-        HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBean(em);
+        HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBeanV1(em);
         holdingsItemBean.putIndexKeys(e.getAgencyId(), e.getBibliographicRecordId(), e.getIndexKeys(), e.getTrackingId());
         return e;
     }

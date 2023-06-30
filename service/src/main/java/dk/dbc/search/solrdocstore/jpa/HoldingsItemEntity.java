@@ -1,5 +1,6 @@
 package dk.dbc.search.solrdocstore.jpa;
 
+import dk.dbc.holdingsitemsdocuments.bindings.HoldingsItemsDocuments;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.AbstractMap;
@@ -32,6 +33,7 @@ import static jakarta.persistence.FetchType.LAZY;
                   attributeNodes = @NamedAttributeNode("indexKeys"))
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
+
     private static final long serialVersionUID = 2469572172167117328L;
 
     @Id
@@ -50,6 +52,14 @@ public class HoldingsItemEntity implements Serializable {
 
     private Timestamp modified;
 
+    public static HoldingsItemEntity from(HoldingsItemsDocuments hid) {
+        IndexKeysList indexKeys = new IndexKeysList();
+        List<Map<String, List<String>>> documents = hid.getDocuments();
+        if (documents != null) {
+            documents.forEach(doc -> indexKeys.add(IndexKeys.from(doc)));
+        }
+        return new HoldingsItemEntity(hid.getAgencyId(), hid.getBibliographicRecordId(), indexKeys, Timestamp.from(hid.getModified()), "");
+    }
 
     public HoldingsItemEntity() {
     }
@@ -73,6 +83,35 @@ public class HoldingsItemEntity implements Serializable {
             return this;
         }
         return new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, modified, trackingId);
+    }
+
+    public boolean update(HoldingsItemsDocuments hid) {
+        if (modified != null &&
+            getModified().isAfter(hid.getModified())) {
+            return false;
+        }
+        setModified(hid.getModified());
+        setTrackingId("");
+        IndexKeysList newIndexKeys = new IndexKeysList();
+        List<Map<String, List<String>>> documents = hid.getDocuments();
+        if (documents != null) {
+            documents.forEach(doc -> newIndexKeys.add(IndexKeys.from(doc)));
+        }
+        if (indexKeys.equals(newIndexKeys)) {
+            return false;
+        }
+        setIndexKeys(newIndexKeys);
+        return true;
+    }
+
+    public HoldingsItemsDocuments toHoldingsItemsDocuments() {
+        return new HoldingsItemsDocuments()
+                .withAgencyId(agencyId)
+                .withBibliographicRecordId(bibliographicRecordId)
+                .withModified(getModified())
+                .withDocuments(indexKeys.stream()
+                        .map(e -> (Map<String, List<String>>) e)
+                        .collect(toList()));
     }
 
     @Override

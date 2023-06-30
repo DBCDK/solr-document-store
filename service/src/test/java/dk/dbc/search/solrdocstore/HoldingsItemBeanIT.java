@@ -1,171 +1,128 @@
-/*
- * Copyright (C) 2020 DBC A/S (http://dbc.dk/)
- *
- * This is part of solr-doc-store-service
- *
- * solr-doc-store-service is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * solr-doc-store-service is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package dk.dbc.search.solrdocstore;
 
-import dk.dbc.search.solrdocstore.jpa.QueueType;
-import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
+import dk.dbc.holdingsitemsdocuments.bindings.HoldingsItemsDocuments;
+import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
+import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
-import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
+import dk.dbc.search.solrdocstore.v2.HoldingsItemBeanV2;
+import jakarta.ws.rs.NotFoundException;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import jakarta.persistence.EntityManager;
+import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 
-import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
-import static dk.dbc.search.solrdocstore.HoldingItemIndexKeys.indexKeysList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThrows;
 
-/**
- *
- * @author Morten Bøgeskov (mb@dbc.dk)
- */
 public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test(timeout = 2_000L)
-    public void testEnqueueNewChangeAndDelete() throws Exception {
-        System.out.println("testEnqueueNewChangeAndDelete");
+    public void testCase() throws Exception {
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            assertThrows(NotFoundException.class, () -> {
+                     bean.getHoldings(700000, "25912233");
+                 });
+        });
+        assertThat(queueContentAndClear(), empty());
 
         jpa(em -> {
-            BibliographicBeanV2 bib = createBibliographicBean(em, null);
-            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
+            BibliographicBeanV2 bean = BeanFactoryUtil.createBibliographicBean(em, new Config());
+            bean.addBibliographicKeys(
+                    new BibliographicEntity(870970, "basis", "25912233",
+                                            "870970-basis:25912233", "work:1", "unit:1",
+                                            false, IndexKeys.from(Map.of("id", List.of("i-d"))),
+                                            "track"), false);
         });
-        queueContentAndClear();
-        jpa(em -> {
-            holdingsItemBeanWithAllRules(em)
-                    .putHoldings(indexKeysList(710100, "25912233")
-                            .add(b -> b
-                                    .itemId("a")
-                                    .status("Online"))
-                            .add(b -> b.itemId("b", "c")
-                                    .status("OnShelf"))
-                            .json(), 710100, "25912233", "x");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
-
-        // Major change (online -> gone, shelf->loan
-        jpa(em -> {
-            holdingsItemBeanWithAllRules(em)
-                    .putHoldings(indexKeysList(710100, "25912233")
-                            .add(b -> b.itemId("b", "c")
-                                    .status("OnLoan"))
-                            .json(), 710100, "25912233", "x");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
-
-        // Minor Change (all still on loan)
-        jpa(em -> {
-            holdingsItemBeanWithAllRules(em)
-                    .putHoldings(indexKeysList(710100, "25912233")
-                            .add(b -> b.itemId("b")
-                                    .status("OnLoan"))
-                            .json(), 710100, "25912233", "x");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
-
-        // Major & first/last
-        jpa(em -> {
-            holdingsItemBeanWithAllRules(em)
-                    .putHoldings(indexKeysList(710100, "25912233")
-                            .add(b -> b.itemId("b")
-                                    .status("Lost"))
-                            .json(), 710100, "25912233", "x");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
-
-        // Delete no major change
-        jpa(em -> {
-            holdingsItemBeanWithAllRules(em)
-                    .deleteHoldings(710100, "25912233", "x");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", "b,unit:1", "c,work:1"));
-
-    }
-
-    @Test(timeout = 2_000L)
-    public void enqueueWhenHoldingsItemSet() throws Exception {
-        System.out.println("enqueueWhenHoldingsItemSet");
-        jpa(em -> {
-            BibliographicBeanV2 bib = createBibliographicBean(em, null);
-
-            bib.addBibliographicKeys(true, jsonRequestBibl("870970-25912233", Instant.now()));
-        });
-        assertThat(queueRemovePostponed(), empty());
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", // Not postponed
-                   "b,unit:1",
-                   "c,work:1"));
+        assertThat(queueContentAndClear(), not(empty()));
 
         jpa(em -> {
-            HoldingsItemBeanV1 holWithoutDelay = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.HOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNIT, 0),
-                    new QueueRuleEntity("c", QueueType.WORK, 0));
-            holWithoutDelay.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2020-01-01T12:34:56Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("1")))),
+                             700000, "25912233");
         });
-        assertThat(queueRemovePostponed(), empty());
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "a,870970-basis:25912233", // Not postponed
-                   "b,unit:1",
-                   "c,work:1"));
+        assertThat(queueContentAndClear(), not(empty()));
+
+        // Same nothing queued
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2020-01-01T12:34:56Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("1")))),
+                             700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), empty());
+
+        // Older nothing queued
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2020-01-01T00:00:00Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("2")))),
+                             700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), empty());
+
+        // Younger queued
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2022-12-12T12:12:12Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("2")))),
+                             700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), not(empty()));
+
+        // Even younger with same content nothing is queued (this wont happen when modified is part of the documents
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2022-12-31T23:59:59Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("2")))),
+                             700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), empty());
+
+        // Removed holdings
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2023-01-01T00:00:00Z"))
+                    .withDocuments(List.of()),
+                             700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), not(empty()));
+
+        // Resurrected holdings
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2023-01-02T00:00:00Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("3")))),
+                             700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), not(empty()));
 
         jpa(em -> {
-            HoldingsItemBeanV1 holWithDelay = holdingsItemBeanWithRules(
-                    em,
-                    new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
-                    new QueueRuleEntity("b", QueueType.UNIT, 0),
-                    new QueueRuleEntity("c", QueueType.WORK, 0));
-            holWithDelay.putHoldings(jsonRequestHold("710100-25912233-b"), 710100, "25912233", "t");
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            assertThat(bean.getHoldings(700000, "25912233"), notNullValue());
         });
-        assertThat(queueRemovePostponed(), containsInAnyOrder(
-                   "a,870970-basis:25912233")); // Postponed
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   "b,unit:1", // Not postponed
-                   "c,work:1"));
-    }
-
-
-    private static HoldingsItemBeanV1 holdingsItemBeanWithRules(EntityManager em, QueueRuleEntity... rules) {
-        HoldingsItemBeanV1 hol = createHoldingsItemBean(em);
-        hol.enqueueSupplier = new EnqueueSupplierBean() {
-            @Override
-            protected Collection<QueueRuleEntity> getQueueRules() {
-                return Arrays.asList(rules);
-            }
-        };
-        hol.enqueueSupplier.entityManager = em;
-        hol.brBean = createBibliographicRetrieveBean(em);
-        return hol;
-    }
-
-    private HoldingsItemBeanV1 holdingsItemBeanWithAllRules(EntityManager em) {
-        return holdingsItemBeanWithRules(
-                em,
-                new QueueRuleEntity("a", QueueType.HOLDING, 0),
-                new QueueRuleEntity("b", QueueType.UNIT, 0),
-                new QueueRuleEntity("c", QueueType.WORK, 0));
     }
 }

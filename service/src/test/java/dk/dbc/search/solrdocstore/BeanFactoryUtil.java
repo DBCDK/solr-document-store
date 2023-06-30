@@ -14,6 +14,7 @@ import dk.dbc.search.solrdocstore.v2.BibliographicRecordAPIBeanV2;
 import dk.dbc.search.solrdocstore.v2.DocumentRetrieveBeanV2;
 import dk.dbc.search.solrdocstore.v2.ExistenceBeanV2;
 import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
+import dk.dbc.search.solrdocstore.v2.HoldingsItemBeanV2;
 import dk.dbc.search.solrdocstore.v2.OpenAgencyStatusBeanV2;
 import dk.dbc.search.solrdocstore.v2.QueueBeanV2;
 import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
@@ -51,8 +52,17 @@ public class BeanFactoryUtil {
         return bean;
     }
 
-    public static HoldingsItemBeanV1 createHoldingsItemBean(EntityManager em) {
+    public static HoldingsItemBeanV1 createHoldingsItemBeanV1(EntityManager em) {
         HoldingsItemBeanV1 bean = new HoldingsItemBeanV1();
+        bean.entityManager = em;
+        bean.h2bBean = createHoldingsToBibliographicBean(em);
+        bean.brBean = createBibliographicRetrieveBean(em);
+        bean.enqueueSupplier = createEnqueueSupplier(em);
+        return bean;
+    }
+
+    public static HoldingsItemBeanV2 createHoldingsItemBean(EntityManager em) {
+        HoldingsItemBeanV2 bean = new HoldingsItemBeanV2();
         bean.entityManager = em;
         bean.h2bBean = createHoldingsToBibliographicBean(em);
         bean.brBean = createBibliographicRetrieveBean(em);
