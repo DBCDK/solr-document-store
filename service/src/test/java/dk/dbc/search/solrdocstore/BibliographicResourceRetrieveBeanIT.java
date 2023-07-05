@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.logic.BibliographicResourceRetrieveBean;
 import java.util.List;
 import org.junit.Test;
 

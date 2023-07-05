@@ -25,6 +25,7 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.logic.EnqueueSupplierBean;
 import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
 import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import java.sql.SQLException;

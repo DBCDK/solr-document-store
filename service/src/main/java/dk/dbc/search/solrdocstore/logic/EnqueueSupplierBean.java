@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
@@ -34,7 +34,7 @@ import jakarta.persistence.PersistenceContext;
 public class EnqueueSupplierBean {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     public EnqueueCollector getEnqueueCollector() {
         Connection connection = entityManager.unwrap(Connection.class);

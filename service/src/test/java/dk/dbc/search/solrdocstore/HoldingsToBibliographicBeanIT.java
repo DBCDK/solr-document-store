@@ -9,6 +9,8 @@ import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.logic.HoldingsToBibliographicBean;
+import dk.dbc.search.solrdocstore.logic.OpenAgencyBean;
 import jakarta.persistence.EntityManager;
 import org.junit.Test;
 import org.mockito.Mockito;

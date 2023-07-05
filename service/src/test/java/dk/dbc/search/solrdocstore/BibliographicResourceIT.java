@@ -5,6 +5,7 @@ import dk.dbc.search.solrdocstore.request.AddResourceRequest;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.logic.Marshaller;
 import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
 import org.junit.Before;
 import org.junit.Test;

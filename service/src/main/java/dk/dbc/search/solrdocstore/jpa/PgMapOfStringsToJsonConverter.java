@@ -21,7 +21,7 @@
 package dk.dbc.search.solrdocstore.jpa;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dk.dbc.search.solrdocstore.Marshaller;
+import dk.dbc.search.solrdocstore.logic.Marshaller;
 import org.postgresql.util.PGobject;
 
 import jakarta.persistence.AttributeConverter;

@@ -1,11 +1,10 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
-import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import java.util.List;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
@@ -23,13 +22,13 @@ public class HoldingsToBibliographicBean {
     private static final Logger log = LoggerFactory.getLogger(HoldingsToBibliographicBean.class);
 
     @Inject
-    OpenAgencyBean openAgency;
+    public OpenAgencyBean openAgency;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @Inject
-    BibliographicRetrieveBean brBean;
+    public BibliographicRetrieveBean brBean;
 
     @Timed
     public void tryToAttachToBibliographicRecord(int hAgencyId, String hBibliographicRecordId, EnqueueCollector enqueue, QueueType... enqueueSources) {

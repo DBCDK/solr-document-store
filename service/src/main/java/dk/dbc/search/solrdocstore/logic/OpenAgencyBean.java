@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.RecordType;
@@ -12,6 +12,8 @@ import jakarta.ejb.TransactionAttribute;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +32,10 @@ public class OpenAgencyBean {
     private static final long MISSING_AGENCY_TIMEOUT = 60_000L;
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @Inject
-    OpenAgencyProxyBean proxy;
+    public OpenAgencyProxyBean proxy;
 
     public RecordType getRecordType(int agency) {
         switch (agency) {
@@ -51,22 +53,24 @@ public class OpenAgencyBean {
     }
 
     public OpenAgencyEntity lookup(int agencyId, boolean fail_missing) {
-        OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
+        try (AgencyLock lock = new AgencyLock(agencyId)) {
+            OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
 
-        // If someone keeps hammering with an unknown agencyid, multiple requests
-        if (entity == null ||
-            entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
-            entity = proxy.loadOpenAgencyEntry(agencyId);
-            entityManager.persist(entity);
-        }
-        if (entity.getLibraryType() == LibraryType.Missing) {
-            log.warn("Agency is missing");
-            if (fail_missing) {
-                throw new EJBException("Cannot find openagency entry for: " + agencyId);
+            // If someone keeps hammering with an unknown agencyid, multiple requests
+            if (entity == null ||
+                entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
+                entity = proxy.loadOpenAgencyEntry(agencyId);
+                entityManager.persist(entity);
             }
-            return null;
+            if (entity.getLibraryType() == LibraryType.Missing) {
+                log.warn("Agency is missing");
+                if (fail_missing) {
+                    throw new EJBException("Cannot find openagency entry for: " + agencyId);
+                }
+                return null;
+            }
+            return entity;
         }
-        return entity;
     }
 
     /**
@@ -77,7 +81,8 @@ public class OpenAgencyBean {
      */
     @Timed
     public void verifyOpenAgencyCache() {
-        List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class)
+        List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class
+        )
                 .getResultList();
         for (OpenAgencyEntity entry : entries) {
             if (entry.getLibraryType() == LibraryType.Missing) {
@@ -107,9 +112,11 @@ public class OpenAgencyBean {
      * @param oldEntry how things was before
      * @param newEntry how things are supposed to be now
      */
-    void agencyHasChanged(OpenAgencyEntity oldEntry, OpenAgencyEntity newEntry) {
+    public void agencyHasChanged(OpenAgencyEntity oldEntry, OpenAgencyEntity newEntry) {
         int agencyId = oldEntry.getAgencyId();
-        boolean hasNoHoldings = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId", HoldingsItemEntity.class)
+
+        boolean hasNoHoldings = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId", HoldingsItemEntity.class
+        )
                 .setParameter("agencyId", agencyId)
                 .setMaxResults(1)
                 .getResultList()
@@ -134,12 +141,14 @@ public class OpenAgencyBean {
      *
      * @param agencyId agency that needs purging
      */
-    void purgeHoldingFor(int agencyId) {
-        List<HoldingsToBibliographicEntity> h2b = entityManager.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.holdingsAgencyId = :agencyId", HoldingsToBibliographicEntity.class)
+    public void purgeHoldingFor(int agencyId) {
+        List<HoldingsToBibliographicEntity> h2b = entityManager.createQuery("SELECT h FROM HoldingsToBibliographicEntity h WHERE h.holdingsAgencyId = :agencyId", HoldingsToBibliographicEntity.class
+        )
                 .setParameter("agencyId", agencyId)
                 .getResultList();
         h2b.forEach(entityManager::remove);
-        List<HoldingsItemEntity> h = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId", HoldingsItemEntity.class)
+        List<HoldingsItemEntity> h = entityManager.createQuery("SELECT h FROM HoldingsItemEntity h WHERE h.agencyId = :agencyId", HoldingsItemEntity.class
+        )
                 .setParameter("agencyId", agencyId)
                 .getResultList();
         h.forEach(entityManager::remove);
@@ -160,5 +169,23 @@ public class OpenAgencyBean {
         OpenAgencyEntity remote = proxy.loadOpenAgencyEntry(agencyId);
         local.setPartOfBibDk(remote.getPartOfBibDk());
         entityManager.merge(local);
+
+    }
+
+    private static class AgencyLock implements AutoCloseable {
+
+        private static final ConcurrentHashMap<Integer, ReentrantLock> LOCKS = new ConcurrentHashMap<>();
+
+        private final ReentrantLock lock;
+
+        public AgencyLock(int agencyId) {
+            this.lock = LOCKS.computeIfAbsent(agencyId, x -> new ReentrantLock());
+            this.lock.lock();
+        }
+
+        @Override
+        public void close() {
+            this.lock.unlock();
+        }
     }
 }

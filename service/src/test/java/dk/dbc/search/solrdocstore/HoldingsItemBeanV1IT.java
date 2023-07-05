@@ -20,6 +20,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
+import dk.dbc.search.solrdocstore.logic.EnqueueSupplierBean;
 import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
 import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import java.time.Instant;

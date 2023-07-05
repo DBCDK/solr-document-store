@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.logic.Marshaller;
 
 import org.junit.Test;
 
