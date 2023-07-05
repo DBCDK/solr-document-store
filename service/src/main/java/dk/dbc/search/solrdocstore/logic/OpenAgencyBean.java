@@ -66,7 +66,7 @@ public class OpenAgencyBean {
         }
     }
 
-    public OpenAgencyEntity lookupNoFail(int agencyId, boolean fail_missing) {
+    public OpenAgencyEntity lookupNoFail(int agencyId) {
         try (AgencyLock lock = new AgencyLock(agencyId)) {
             OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
             log.debug("entity = {}", entity);
@@ -180,7 +180,7 @@ public class OpenAgencyBean {
      */
     @TransactionAttribute(REQUIRES_NEW)
     public void migratePartOfBibDk(int agencyId) {
-        OpenAgencyEntity local = lookupNoFail(agencyId, false);
+        OpenAgencyEntity local = lookupNoFail(agencyId);
         if (local == null) {
             log.error("Could not get local copy of OpenAgencyCache {}", agencyId);
             return;
