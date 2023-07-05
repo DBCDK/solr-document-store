@@ -56,6 +56,7 @@ public class OpenAgencyBean {
     public OpenAgencyEntity lookup(int agencyId, boolean fail_missing) {
         try (AgencyLock lock = new AgencyLock(agencyId)) {
             OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
+            log.debug("entity = {}", entity);
 
             // If someone keeps hammering with an unknown agencyid, multiple requests
             if (entity == null) {
