@@ -50,27 +50,36 @@ public class OpenAgencyBean {
     @Timed
     @TransactionAttribute(REQUIRES_NEW)
     public OpenAgencyEntity lookup(int agencyId) {
-        return lookup(agencyId, true);
+        try (AgencyLock lock = new AgencyLock(agencyId)) {
+            OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
+            if (entity == null) {
+                entity = proxy.loadOpenAgencyEntry(agencyId);
+                entityManager.persist(entity);
+            }
+            if (entity.getLibraryType() == LibraryType.Missing) {
+                log.warn("Agency {} is missing", agencyId);
+                throw new EJBException("Cannot find openagency entry for: " + agencyId);
+            }
+            return entity;
+        }
     }
 
-    public OpenAgencyEntity lookup(int agencyId, boolean fail_missing) {
+    public OpenAgencyEntity lookupNoFail(int agencyId, boolean fail_missing) {
         try (AgencyLock lock = new AgencyLock(agencyId)) {
             OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
             log.debug("entity = {}", entity);
 
-            // If someone keeps hammering with an unknown agencyid, multiple requests
             if (entity == null) {
                 entity = proxy.loadOpenAgencyEntry(agencyId);
                 entityManager.persist(entity);
-            } else if(entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
+            } else if (entity.getLibraryType() == LibraryType.Missing) {
+                entityManager.remove(entity);
+                entityManager.flush();
                 entity = proxy.loadOpenAgencyEntry(agencyId);
-                entityManager.merge(entity);
+                entityManager.persist(entity);
             }
             if (entity.getLibraryType() == LibraryType.Missing) {
-                log.warn("Agency is missing");
-                if (fail_missing) {
-                    throw new EJBException("Cannot find openagency entry for: " + agencyId);
-                }
+                log.warn("Agency {} is missing", agencyId);
                 return null;
             }
             return entity;
@@ -165,7 +174,7 @@ public class OpenAgencyBean {
      */
     @TransactionAttribute(REQUIRES_NEW)
     public void migratePartOfBibDk(int agencyId) {
-        OpenAgencyEntity local = lookup(agencyId, false);
+        OpenAgencyEntity local = lookupNoFail(agencyId, false);
         if (local == null) {
             log.error("Could not get local copy of OpenAgencyCache {}", agencyId);
             return;

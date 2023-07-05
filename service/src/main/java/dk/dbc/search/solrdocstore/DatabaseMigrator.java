@@ -83,7 +83,7 @@ public class DatabaseMigrator {
         for (Integer agencyId : knownAgencies) {
             log.info("Reloading agency: {}", agencyId);
             try {
-                openAgency.lookup(agencyId, false);
+                openAgency.lookupNoFail(agencyId, false);
             } catch (RuntimeException e) {
                 log.error("Error loading agency: {}: {}", agencyId, e.getMessage());
                 log.debug("Error loading agency: {}: ", agencyId, e);
