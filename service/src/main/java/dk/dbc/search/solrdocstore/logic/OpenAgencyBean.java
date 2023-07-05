@@ -48,6 +48,7 @@ public class OpenAgencyBean {
     }
 
     @Timed
+    @TransactionAttribute(REQUIRES_NEW)
     public OpenAgencyEntity lookup(int agencyId) {
         return lookup(agencyId, true);
     }
@@ -59,7 +60,9 @@ public class OpenAgencyBean {
             // If someone keeps hammering with an unknown agencyid, multiple requests
             if (entity == null ||
                 entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
+                log.debug("Fetching: {}", agencyId);
                 entity = proxy.loadOpenAgencyEntry(agencyId);
+                log.debug("Persisting: {}", agencyId);
                 entityManager.persist(entity);
             }
             if (entity.getLibraryType() == LibraryType.Missing) {
