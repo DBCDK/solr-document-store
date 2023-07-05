@@ -53,7 +53,9 @@ public class OpenAgencyBean {
         try (AgencyLock lock = new AgencyLock(agencyId)) {
             OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
             if (entity == null) {
+                log.info("Fetching: {}", agencyId);
                 entity = proxy.loadOpenAgencyEntry(agencyId);
+                log.info("Persisting: {}", agencyId);
                 entityManager.persist(entity);
             }
             if (entity.getLibraryType() == LibraryType.Missing) {
@@ -70,12 +72,16 @@ public class OpenAgencyBean {
             log.debug("entity = {}", entity);
 
             if (entity == null) {
+                log.info("Fetching: {}", agencyId);
                 entity = proxy.loadOpenAgencyEntry(agencyId);
+                log.info("Persisting: {}", agencyId);
                 entityManager.persist(entity);
             } else if (entity.getLibraryType() == LibraryType.Missing) {
                 entityManager.remove(entity);
                 entityManager.flush();
+                log.info("Fetching: {} ({})", agencyId, entity);
                 entity = proxy.loadOpenAgencyEntry(agencyId);
+                log.info("Persisting: {}", agencyId);
                 entityManager.persist(entity);
             }
             if (entity.getLibraryType() == LibraryType.Missing) {
