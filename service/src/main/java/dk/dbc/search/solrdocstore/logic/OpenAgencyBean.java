@@ -69,8 +69,6 @@ public class OpenAgencyBean {
     public OpenAgencyEntity lookupNoFail(int agencyId) {
         try (AgencyLock lock = new AgencyLock(agencyId)) {
             OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
-            log.debug("entity = {}", entity);
-
             if (entity == null) {
                 log.info("Fetching: {}", agencyId);
                 entity = proxy.loadOpenAgencyEntry(agencyId);
