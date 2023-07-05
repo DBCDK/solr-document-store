@@ -29,8 +29,6 @@ public class OpenAgencyBean {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAgencyBean.class);
 
-    private static final long MISSING_AGENCY_TIMEOUT = 60_000L;
-
     @PersistenceContext(unitName = "solrDocumentStore_PU")
     public EntityManager entityManager;
 
