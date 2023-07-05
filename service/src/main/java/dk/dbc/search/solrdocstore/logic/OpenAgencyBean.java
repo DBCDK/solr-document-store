@@ -58,12 +58,12 @@ public class OpenAgencyBean {
             OpenAgencyEntity entity = entityManager.find(OpenAgencyEntity.class, agencyId);
 
             // If someone keeps hammering with an unknown agencyid, multiple requests
-            if (entity == null ||
-                entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
-                log.debug("Fetching: {}", agencyId);
+            if (entity == null) {
                 entity = proxy.loadOpenAgencyEntry(agencyId);
-                log.debug("Persisting: {}", agencyId);
                 entityManager.persist(entity);
+            } else if(entity.getLibraryType() == LibraryType.Missing && entity.getFetchedAgeMs() > MISSING_AGENCY_TIMEOUT) {
+                entity = proxy.loadOpenAgencyEntry(agencyId);
+                entityManager.merge(entity);
             }
             if (entity.getLibraryType() == LibraryType.Missing) {
                 log.warn("Agency is missing");
