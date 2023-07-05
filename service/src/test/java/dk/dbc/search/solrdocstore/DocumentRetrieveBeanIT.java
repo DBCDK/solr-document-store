@@ -9,6 +9,7 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
+import dk.dbc.search.solrdocstore.logic.HoldingsToBibliographicBean;
 import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
 import dk.dbc.search.solrdocstore.v2.DocumentRetrieveBeanV2;
 import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;

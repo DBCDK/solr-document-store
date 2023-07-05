@@ -1,8 +1,8 @@
 package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.holdingsitemsdocuments.bindings.HoldingsItemsDocuments;
-import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
-import dk.dbc.search.solrdocstore.HoldingsToBibliographicBean;
+import dk.dbc.search.solrdocstore.logic.EnqueueSupplierBean;
+import dk.dbc.search.solrdocstore.logic.HoldingsToBibliographicBean;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;

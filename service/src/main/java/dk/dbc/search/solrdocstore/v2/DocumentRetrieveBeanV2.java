@@ -2,8 +2,8 @@ package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
 import dk.dbc.log.LogWith;
-import dk.dbc.search.solrdocstore.BibliographicResourceRetrieveBean;
-import dk.dbc.search.solrdocstore.OpenAgencyBean;
+import dk.dbc.search.solrdocstore.logic.BibliographicResourceRetrieveBean;
+import dk.dbc.search.solrdocstore.logic.OpenAgencyBean;
 import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;

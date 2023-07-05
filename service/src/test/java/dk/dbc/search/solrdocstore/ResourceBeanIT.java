@@ -8,6 +8,7 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
+import dk.dbc.search.solrdocstore.logic.EnqueueSupplierBean;
 import dk.dbc.search.solrdocstore.v2.ResourceBeanV2;
 import java.util.Arrays;
 import java.util.Collection;

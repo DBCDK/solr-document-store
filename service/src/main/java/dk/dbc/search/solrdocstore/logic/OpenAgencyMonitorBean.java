@@ -1,5 +1,6 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
+import dk.dbc.search.solrdocstore.Config;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;

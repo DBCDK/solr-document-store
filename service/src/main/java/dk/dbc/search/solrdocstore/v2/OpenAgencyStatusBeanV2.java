@@ -1,7 +1,7 @@
 package dk.dbc.search.solrdocstore.v2;
 
-import dk.dbc.search.solrdocstore.EnqueueSupplierBean;
-import dk.dbc.search.solrdocstore.OpenAgencyProxyBean;
+import dk.dbc.search.solrdocstore.logic.EnqueueSupplierBean;
+import dk.dbc.search.solrdocstore.logic.OpenAgencyProxyBean;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.response.OpenAgencyStatusResponse;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;

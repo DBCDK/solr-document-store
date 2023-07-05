@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 /**
  * This is a try again later error

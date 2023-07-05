@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import dk.dbc.search.solrdocstore.logic.OpenAgencyProxyBean;
 import jakarta.ejb.EJBException;
 import org.junit.Before;
 import org.junit.Test;

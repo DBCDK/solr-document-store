@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
@@ -13,7 +13,7 @@ import org.eclipse.microprofile.metrics.annotation.Timed;
 public class BibliographicResourceRetrieveBean {
 
     @PersistenceContext(unitName = "solrDocumentStore_PU")
-    EntityManager entityManager;
+    public EntityManager entityManager;
 
     @Timed
     public List<BibliographicResourceEntity> getResourcesFor(int agencyId, String bibliographicRecordId) {

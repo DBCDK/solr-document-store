@@ -6,6 +6,7 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
+import dk.dbc.search.solrdocstore.logic.Marshaller;
 import dk.dbc.search.solrdocstore.v2.BibliographicBeanV2;
 import dk.dbc.search.solrdocstore.v1.HoldingsItemBeanV1;
 import org.junit.Before;

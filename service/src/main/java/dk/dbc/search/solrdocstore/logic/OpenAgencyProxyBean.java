@@ -1,4 +1,4 @@
-package dk.dbc.search.solrdocstore;
+package dk.dbc.search.solrdocstore.logic;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.openagency.http.OpenAgencyException;
 import dk.dbc.openagency.http.VipCoreHttpClient;
+import dk.dbc.search.solrdocstore.Config;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import java.io.IOException;

@@ -1,6 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
+import dk.dbc.search.solrdocstore.logic.OpenAgencyBean;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashSet;
 import java.util.List;
@@ -82,7 +83,7 @@ public class DatabaseMigrator {
         for (Integer agencyId : knownAgencies) {
             log.info("Reloading agency: {}", agencyId);
             try {
-                openAgency.lookup(agencyId, false);
+                openAgency.lookupNoFail(agencyId);
             } catch (RuntimeException e) {
                 log.error("Error loading agency: {}: {}", agencyId, e.getMessage());
                 log.debug("Error loading agency: {}: ", agencyId, e);
