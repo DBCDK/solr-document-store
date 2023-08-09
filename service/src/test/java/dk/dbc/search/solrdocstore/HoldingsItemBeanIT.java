@@ -18,7 +18,7 @@ import static org.junit.Assert.assertThrows;
 public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
 
     @Test(timeout = 2_000L)
-    public void testCase() throws Exception {
+    public void testCase() {
         jpa(em -> {
             HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
             assertThrows(NotFoundException.class, () -> {
@@ -48,7 +48,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), not(empty()));
 
-        // Same nothing queued
+        // Same data nothing queued
         jpa(em -> {
             HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
             bean.putHoldings(new HoldingsItemsDocuments()
@@ -59,6 +59,18 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
                              700000, "25912233");
         });
         assertThat(queueContentAndClear(), empty());
+
+        // Updated data from same time stamp
+        jpa(em -> {
+            HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
+            bean.putHoldings(new HoldingsItemsDocuments()
+                            .withAgencyId(700000)
+                            .withBibliographicRecordId("25912233")
+                            .withModified(Instant.parse("2020-01-01T12:34:56Z"))
+                            .withDocuments(List.of(Map.of("v", List.of("1", "2")))),
+                    700000, "25912233");
+        });
+        assertThat(queueContentAndClear(), not(empty()));
 
         // Older nothing queued
         jpa(em -> {
@@ -72,7 +84,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), empty());
 
-        // Younger queued
+        // Younger with new data is queued
         jpa(em -> {
             HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
             bean.putHoldings(new HoldingsItemsDocuments()
@@ -84,7 +96,7 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         });
         assertThat(queueContentAndClear(), not(empty()));
 
-        // Even younger with same content nothing is queued (this wont happen when modified is part of the documents
+        // Even younger with same content nothing is queued
         jpa(em -> {
             HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
             bean.putHoldings(new HoldingsItemsDocuments()
