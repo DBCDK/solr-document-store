@@ -46,11 +46,6 @@ public class HoldingsToBibliographicBean {
                 break;
             }
 
-            case FBSSchool: {
-                attachToBibliographicRecord(hAgencyId, hBibliographicRecordId, false, enqueue, enqueueSources, hAgencyId, LibraryType.SCHOOL_COMMON_AGENCY, LibraryType.COMMON_AGENCY);
-                break;
-            }
-
             default: {
                 break;
             }

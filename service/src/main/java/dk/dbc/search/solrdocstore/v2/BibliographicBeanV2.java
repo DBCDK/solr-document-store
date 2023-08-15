@@ -266,17 +266,6 @@ public class BibliographicBeanV2 {
                 case NonFBS: // Ignore holdings for Non FBS libraries
                     continue;
                 case FBS:
-                    if (agency == LibraryType.SCHOOL_COMMON_AGENCY) {
-                        continue;
-                    }
-                    if (bibRecords.contains(holdingsAgency)) {
-                        continue;
-                    }
-                    break;
-                case FBSSchool:
-                    if (agency == LibraryType.COMMON_AGENCY && bibRecords.contains(LibraryType.SCHOOL_COMMON_AGENCY)) {
-                        continue;
-                    }
                     if (bibRecords.contains(holdingsAgency)) {
                         continue;
                     }

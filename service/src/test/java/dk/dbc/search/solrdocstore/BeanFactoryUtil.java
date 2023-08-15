@@ -1,9 +1,7 @@
 package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
-import dk.dbc.search.solrdocstore.jpa.RecordType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -123,17 +121,6 @@ public class BeanFactoryUtil {
             @Override
             public OpenAgencyEntity lookup(int agencyId) {
                 return makeOpenAgencyEntity(agencyId);
-            }
-
-            @Override
-            public RecordType getRecordType(int agencyId) {
-                if (agencyId == LibraryType.COMMON_AGENCY) {
-                    return RecordType.CommonRecord;
-                }
-                if (agencyId == LibraryType.SCHOOL_COMMON_AGENCY) {
-                    return RecordType.CommonRecord;
-                }
-                return RecordType.SingleRecord;
             }
         };
     }

@@ -36,13 +36,7 @@ public class OpenAgencyBean {
     public OpenAgencyProxyBean proxy;
 
     public RecordType getRecordType(int agency) {
-        switch (agency) {
-            case LibraryType.COMMON_AGENCY:  // Common Record Agency For School Libraries
-            case LibraryType.SCHOOL_COMMON_AGENCY:  // Common Record Agency For All Libraries
-                return RecordType.CommonRecord;
-            default:
-                return RecordType.SingleRecord;
-        }
+        return agency == LibraryType.COMMON_AGENCY ? RecordType.CommonRecord : RecordType.SingleRecord;
     }
 
     @Timed

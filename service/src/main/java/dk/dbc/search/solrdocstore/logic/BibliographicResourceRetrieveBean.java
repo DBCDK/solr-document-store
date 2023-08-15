@@ -32,9 +32,9 @@ public class BibliographicResourceRetrieveBean {
                 "SELECT br FROM BibliographicResourceEntity br" +
                 " JOIN OpenAgencyEntity AS oa" +
                 " ON br.agencyId = oa.agencyId " +
-                " WHERE oa.libraryType IN :types" +
+                " WHERE oa.libraryType = :type" +
                 " AND br.bibliographicRecordId = :bibId", BibliographicResourceEntity.class);
-        return query.setParameter("types", LibraryType.FBS_LIBS)
+        return query.setParameter("type", LibraryType.FBS)
                 .setParameter("bibId", bibliographicRecordId)
                 .getResultList();
     }

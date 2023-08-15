@@ -59,8 +59,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             assertThat(l, containsInAnyOrder(
                        new HoldingsToBibliographicEntity(700000, "new", 870970, true),
                        new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                       new HoldingsToBibliographicEntity(300100, "new", 870970, false),
-                       new HoldingsToBibliographicEntity(300200, "new", 870970, false)
+                       new HoldingsToBibliographicEntity(300100, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(300200, "new", 870970, true)
                ));
         });
 
@@ -84,8 +84,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             assertThat(l, containsInAnyOrder(
                        new HoldingsToBibliographicEntity(700000, "new", 700000, true),
                        new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                       new HoldingsToBibliographicEntity(300100, "new", 870970, false),
-                       new HoldingsToBibliographicEntity(300200, "new", 870970, false)
+                       new HoldingsToBibliographicEntity(300100, "new", 870970, true),
+                       new HoldingsToBibliographicEntity(300200, "new", 870970, true)
                ));
         });
 
@@ -108,32 +108,8 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             assertThat(l, containsInAnyOrder(
                        new HoldingsToBibliographicEntity(700000, "new", 700000, true),
                        new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                       new HoldingsToBibliographicEntity(300100, "new", 300100, false),
-                       new HoldingsToBibliographicEntity(300200, "new", 870970, false)
-               ));
-        });
-
-        String b300000 = makeBibliographicRequestJson(300000);
-
-        jpa(em -> {
-            BibliographicBeanV2 bean = createBibliographicBean(em, new Config() {
-                                                         @Override
-                                                         public long getReviveOlderWhenDeletedForAtleast() {
-                                                             return TimeUnit.HOURS.toMillis(8);
-                                                         }
-                                                     });
-
-            Response r = bean.addBibliographicKeys(false, b300000);
-            assertThat(r.getStatus(), is(200));
-        });
-
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = em.createQuery("SELECT h FROM HoldingsToBibliographicEntity as h WHERE h.bibliographicRecordId='new'", HoldingsToBibliographicEntity.class).getResultList();
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(700000, "new", 700000, true),
-                       new HoldingsToBibliographicEntity(700100, "new", 870970, true),
-                       new HoldingsToBibliographicEntity(300100, "new", 300100, false),
-                       new HoldingsToBibliographicEntity(300200, "new", 300000, false)
+                       new HoldingsToBibliographicEntity(300100, "new", 300100, true),
+                       new HoldingsToBibliographicEntity(300200, "new", 870970, true)
                ));
         });
     }
@@ -340,32 +316,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
                        new HoldingsToBibliographicEntity(620521, "onDelete", 600521, true)
                ));
         });
-        // Before common FBS School update
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchool");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300200, false),
-                       new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
-               ));
-        });
-        // Update common FBS School, moved one level up
-        runDeleteUpdate(300200, "onDeleteSchool", true);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchool");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 300000, false),
-                       new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 300000, false)
-               ));
-        });
-        // Update common FBS School, moved up yet again
-        runDeleteUpdate(300000, "onDeleteSchool", true);
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onDeleteSchool");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(320520, "onDeleteSchool", 870970, false),
-                       new HoldingsToBibliographicEntity(320521, "onDeleteSchool", 870970, false)
-               ));
-        });
 
         // Update single record (no ancestor) holdings does not change
         runDeleteUpdate(633333, "onDeleteSingle", true);
@@ -402,23 +352,6 @@ public class BibliographicBeanIT extends JpaSolrDocStoreIntegrationTester {
             List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreate");
             assertThat(l, containsInAnyOrder(
                        new HoldingsToBibliographicEntity(600300, "onRecreate", 600300, true)
-               ));
-        });
-        // Before update of FBS School
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchool");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300000, false)
-               ));
-        });
-        // Recreate FBS School
-        runDeleteUpdate(300300, "onRecreateSchool", false);
-
-        // Ensure related holdings are moved to a higher level
-        jpa(em -> {
-            List<HoldingsToBibliographicEntity> l = getRelatedHoldings(em, "onRecreateSchool");
-            assertThat(l, containsInAnyOrder(
-                       new HoldingsToBibliographicEntity(300300, "onRecreateSchool", 300300, false)
                ));
         });
         // Recreate no holdings on lower level, nothing is moved

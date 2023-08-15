@@ -10,7 +10,6 @@ import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 public class OpenAgencyUtil {
 
     public static int COMMON_AGENCY = LibraryType.COMMON_AGENCY;
-    public static int SCHOOL_COMMON_AGENCY = LibraryType.SCHOOL_COMMON_AGENCY;
 
     /**
      *
@@ -25,9 +24,6 @@ public class OpenAgencyUtil {
         if (agencyId == LibraryType.COMMON_AGENCY) {
             return makeOpenAgencyEntity(LibraryType.COMMON_AGENCY, true, false, true);
         }
-        if (agencyId == LibraryType.SCHOOL_COMMON_AGENCY) {
-            return makeOpenAgencyEntity(LibraryType.SCHOOL_COMMON_AGENCY, false, false, false);
-        }
         boolean partOfDanbib = ( agencyId / 1 ) % 10 < 5;
         boolean authCreateCommonRecord = ( agencyId / 10 ) % 10 < 5;
         return makeOpenAgencyEntity(agencyId, authCreateCommonRecord, partOfDanbib, partOfDanbib);
@@ -35,9 +31,6 @@ public class OpenAgencyUtil {
 
     public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId, boolean authCreateCommonRecord, boolean partOfBibDk, boolean partOfDanbib) {
         LibraryType type = LibraryType.FBS;
-        if (agencyId < 400000) {
-            type = LibraryType.FBSSchool;
-        }
         if (agencyId >= 800000) {
             type = LibraryType.NonFBS;
         }
