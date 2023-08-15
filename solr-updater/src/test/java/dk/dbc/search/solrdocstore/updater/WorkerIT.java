@@ -63,7 +63,7 @@ public class WorkerIT extends IntegrationTestBase {
             PreparedQueueSupplier supplier = new QueueSupplier<>(QueueJob.STORAGE_ABSTRACTION)
                     .preparedSupplier(connection);
 
-            supplier.enqueue("test", QueueJob.manifestation(300000, "clazzifier", "23645564"));
+            supplier.enqueue("test", QueueJob.manifestation(870970, "clazzifier", "23645564"));
             supplier.enqueue("test", QueueJob.work("work:1")); // This is expected to be in the queue_error table
 
             int maxRuns = 2500 / 50;
@@ -128,7 +128,7 @@ public class WorkerIT extends IntegrationTestBase {
             @Override
             public VipCoreLibraryRule libraryRulesFor(String agencyId) {
                 switch (agencyId) {
-                    case "300000":
+                    case "870970":
                     case "300101":
                     case "300102":
                     case "300103":

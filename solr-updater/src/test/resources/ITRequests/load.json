@@ -1,7 +1,7 @@
 {
     "test1-part1": {
         "bibliographic": [
-            "b-300000-23645564.json"
+            "b-870970-23645564.json"
         ],
         "holdings": [
             "h-300101-23645564.json",
@@ -11,7 +11,7 @@
     },
     "test1-part2": {
         "bibliographic": [
-            "b-300000-23645564_deleted.json"
+            "b-870970-23645564_deleted.json"
         ]
     },
     "test1-part3": {
