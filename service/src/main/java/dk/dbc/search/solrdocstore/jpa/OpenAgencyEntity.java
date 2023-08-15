@@ -53,7 +53,7 @@ public class OpenAgencyEntity implements Serializable {
 
     private static boolean getLibraryRuleBoolean(List<LibraryRule> libraryRuleList, String libraryRuleName) {
         for (LibraryRule libraryRule : libraryRuleList) {
-            if(libraryRule.getName().equals(libraryRuleName))
+            if (libraryRule.getName().equals(libraryRuleName))
                 return libraryRule.getBool();
         }
         return false;
@@ -62,11 +62,7 @@ public class OpenAgencyEntity implements Serializable {
     private LibraryType getLibraryTypeFromLibraryRules(LibraryRules libraryRules) {
         LibraryType agencyType = LibraryType.NonFBS;
         if (getLibraryRuleBoolean(libraryRules.getLibraryRule(), "use_enrichments")) {
-            if (SCHOOLLIBRARY.equals(libraryRules.getAgencyType())) {
-                agencyType = LibraryType.FBSSchool;
-            } else {
-                agencyType = LibraryType.FBS;
-            }
+            agencyType = LibraryType.FBS;
         }
         return agencyType;
     }

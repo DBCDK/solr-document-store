@@ -166,8 +166,7 @@ public class ResourceBeanV2 {
         // Enqueue all related bib items
         List<BibliographicEntity> bibliographicEntities;
         if (LibraryType.COMMON_AGENCY == resource.getAgencyId() ||
-            LibraryType.SCHOOL_COMMON_AGENCY == resource.getAgencyId() ||
-            libraryType == LibraryType.FBS || libraryType == LibraryType.FBSSchool) {
+            libraryType == LibraryType.FBS) {
             bibliographicEntities = commonRelatedBibEntities(resource);
         } else {
             bibliographicEntities = nonFBSBibEntries(resource);
@@ -193,14 +192,12 @@ public class ResourceBeanV2 {
                 "SELECT b FROM BibliographicEntity  b " +
                 " JOIN OpenAgencyEntity AS oa" +
                 " ON b.agencyId = oa.agencyId " +
-                "WHERE (b.agencyId=:commonAgency1 " +
-                "OR b.agencyId=:commonAgency2 " +
-                "OR oa.libraryType IN :types) " +
+                "WHERE (b.agencyId=:commonAgency " +
+                "OR oa.libraryType = :type) " +
                 "AND b.bibliographicRecordId=:recId", BibliographicEntity.class);
-        query.setParameter("commonAgency1", LibraryType.COMMON_AGENCY);
-        query.setParameter("commonAgency2", LibraryType.SCHOOL_COMMON_AGENCY);
+        query.setParameter("commonAgency", LibraryType.COMMON_AGENCY);
         query.setParameter("recId", resource.getBibliographicRecordId());
-        query.setParameter("types", LibraryType.FBS_LIBS);
+        query.setParameter("type", LibraryType.FBS);
         return query.getResultList();
     }
 

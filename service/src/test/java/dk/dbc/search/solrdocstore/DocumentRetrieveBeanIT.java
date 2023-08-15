@@ -56,19 +56,19 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
     @Test
     public void newCommonRecordWithExistingHoldings() throws Exception {
         jpa(em -> {
-            em.merge(new BibliographicEntity(300000, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
+            em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
             em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), null, "T2"));
             em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), null, "T3"));
-            em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 300000, false));
-            em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 300000, false));
+            em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 870970, false));
+            em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 870970, false));
         });
         jpa(em -> {
             DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
             BibliographicBeanV2 bibl = createBibliographicBean(em, null);
             HoldingsItemBeanV1 hold = createHoldingsItemBeanV1(em);
-            DocumentRetrieveResponse doc = bean.getDocumentWithHoldingsitems(300000, "clazzifier", "12345678");
+            DocumentRetrieveResponse doc = bean.getDocumentWithHoldingsitems(870970, "clazzifier", "12345678");
 
-            assertThat(doc.bibliographicRecord.getAgencyId(), is(300000));
+            assertThat(doc.bibliographicRecord.getAgencyId(), is(870970));
             assertThat(doc.bibliographicRecord.getBibliographicRecordId(), is("12345678"));
             assertThat(doc.holdingsItemRecords.size(), is(2));
         });

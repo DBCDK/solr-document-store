@@ -42,7 +42,7 @@ public class BibliographicResourceRetrieveBeanIT extends JpaSolrDocStoreIntegrat
         jpa(em -> {
             em.merge(new OpenAgencyEntity(888888, LibraryType.NonFBS, true, true, true));
             em.merge(new OpenAgencyEntity(710100, LibraryType.FBS, true, true, true));
-            em.merge(new OpenAgencyEntity(310100, LibraryType.FBSSchool, true, true, true));
+            em.merge(new OpenAgencyEntity(310100, LibraryType.FBS, true, true, true));
 
             em.merge(new BibliographicResourceEntity(888888, "a", "foo", true));
             em.merge(new BibliographicResourceEntity(710100, "a", "foo", true));

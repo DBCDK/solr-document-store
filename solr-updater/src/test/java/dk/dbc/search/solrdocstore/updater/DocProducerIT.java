@@ -69,11 +69,11 @@ public class DocProducerIT extends IntegrationTestBase {
 
         Requests.load(getClient(), "test1-part1", serviceBase());
 
-        deployAndSearch(300000, docProducer, config.getSolrCollections(), 5);
+        deployAndSearch(870970, docProducer, config.getSolrCollections(), 5);
 
         Requests.load(getClient(), "test1-part2", serviceBase());
 
-        deployAndSearch(300000, docProducer, config.getSolrCollections(), 0);
+        deployAndSearch(870970, docProducer, config.getSolrCollections(), 0);
     }
 
     @Test
@@ -82,11 +82,11 @@ public class DocProducerIT extends IntegrationTestBase {
 
         Requests.load(getClient(), "test1-part1", serviceBase());
 
-        deployAndSearch(300000, docProducer, config.getSolrCollections(), 5);
+        deployAndSearch(870970, docProducer, config.getSolrCollections(), 5);
 
         Requests.load(getClient(), "test1-part3", serviceBase());
 
-        deployAndSearch(300000, docProducer, config.getSolrCollections(), 3);
+        deployAndSearch(870970, docProducer, config.getSolrCollections(), 3);
     }
 
     @Test
@@ -173,7 +173,7 @@ public class DocProducerIT extends IntegrationTestBase {
             @Override
             public VipCoreLibraryRule libraryRulesFor(String agencyId) {
                 switch (agencyId) {
-                    case "300000":
+                    case "870970":
                     case "300101":
                     case "300102":
                     case "300103":

@@ -275,7 +275,6 @@ public class DocumentRetrieveBeanV2 {
 
     private static boolean agencyLibTypeCommon(int agencyId, LibraryType lt) {
         return LibraryType.COMMON_AGENCY == agencyId ||
-               LibraryType.SCHOOL_COMMON_AGENCY == agencyId ||
-               lt == LibraryType.FBS || lt == LibraryType.FBSSchool;
+               lt == LibraryType.FBS;
     }
 }

@@ -2,14 +2,14 @@
     "indexKeys": [
         {
             "rec.bibliographicRecordId": ["23645564"],
-            "holdingsitem.agencyId": ["300000"],
-            "holdingsitem.itemId": ["300000_1"],
+            "holdingsitem.agencyId": ["870970"],
+            "holdingsitem.itemId": ["870970_1"],
             "holdingsitem.status": ["OnLoan"]
         },
         {
             "rec.bibliographicRecordId": ["23645564"],
-            "holdingsitem.agencyId": ["300000"],
-            "holdingsitem.itemId": ["300000_2"],
+            "holdingsitem.agencyId": ["870970"],
+            "holdingsitem.itemId": ["870970_2"],
             "holdingsitem.status": ["OnOrder"]
         }
     ]

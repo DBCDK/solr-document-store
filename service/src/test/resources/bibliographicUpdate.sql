@@ -109,22 +109,23 @@ VALUES (620520, 'onDelete', '[]' :: JSONB, 'track');
 --INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
 --VALUES (620521, 'onDelete', '[]' :: JSONB, 'track');
 -- FBS School
-INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
-VALUES (300000, 'clazzifier', 'onDeleteSchool', 'id#0', FALSE, '{"somethingElse": ["true"]}' :: JSONB, 'track:higher', 'unit:higher', 'work:higher');
-INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
-VALUES (870970, 'clazzifier', 'onDeleteSchool', 'id#0', FALSE, '{"somethingElse": ["true"]}' :: JSONB, 'track:higher', 'unit:higher', 'work:higher');
-INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
-VALUES (300200, 'clazzifier', 'onDeleteSchool', 'id#0', FALSE, '{"something": ["true"]}' :: JSONB, 'track', 'unit:3', 'work:3');
 
-INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID, ISCOMMONDERIVED)
-VALUES (320520,'onDeleteSchool',300200, FALSE);
-INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID, ISCOMMONDERIVED)
-VALUES (320521,'onDeleteSchool',300000, FALSE);
-
-INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
-VALUES (320520, 'onDeleteSchool', '[]' :: JSONB, 'track');
-INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
-VALUES (320521, 'onDeleteSchool', '[]' :: JSONB, 'track');
+-- INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
+-- VALUES (300000, 'clazzifier', 'onDeleteSchool', 'id#0', FALSE, '{"somethingElse": ["true"]}' :: JSONB, 'track:higher', 'unit:higher', 'work:higher');
+-- INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
+-- VALUES (870970, 'clazzifier', 'onDeleteSchool', 'id#0', FALSE, '{"somethingElse": ["true"]}' :: JSONB, 'track:higher', 'unit:higher', 'work:higher');
+-- INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
+-- VALUES (300200, 'clazzifier', 'onDeleteSchool', 'id#0', FALSE, '{"something": ["true"]}' :: JSONB, 'track', 'unit:3', 'work:3');
+--
+-- INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID, ISCOMMONDERIVED)
+-- VALUES (320520,'onDeleteSchool',300200, FALSE);
+-- INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID, ISCOMMONDERIVED)
+-- VALUES (320521,'onDeleteSchool',300000, FALSE);
+--
+-- INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
+-- VALUES (320520, 'onDeleteSchool', '[]' :: JSONB, 'track');
+-- INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
+-- VALUES (320521, 'onDeleteSchool', '[]' :: JSONB, 'track');
 -- No ancestor
 INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
 VALUES (633333, 'clazzifier', 'onDeleteSingle', 'id#0', FALSE, '{"something": ["true"]}' :: JSONB, 'track', 'unit:3', 'work:3');
@@ -148,17 +149,17 @@ VALUES (600300,'onRecreate',870970, TRUE);
 INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
 VALUES (600300, 'onRecreate', '[]' :: JSONB, 'track');
 -- FBS School
-INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
-VALUES (300000, 'clazzifier', 'onRecreateSchool', 'id#0', FALSE, '{"somethingElse": ["true"]}' :: JSONB, 'track:higher', 'unit:higher', 'work:higher');
-
-INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
-VALUES (300300, 'clazzifier', 'onRecreateSchool', 'id#0', TRUE, '{"something": ["true"]}' :: JSONB, 'track', 'unit:3', 'work:3');
-
-INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID, ISCOMMONDERIVED)
-VALUES (300300,'onRecreateSchool',300000, FALSE);
-
-INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
-VALUES (300300, 'onRecreateSchool', '[]' :: JSONB, 'track');
+-- INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
+-- VALUES (300000, 'clazzifier', 'onRecreateSchool', 'id#0', FALSE, '{"somethingElse": ["true"]}' :: JSONB, 'track:higher', 'unit:higher', 'work:higher');
+--
+-- INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
+-- VALUES (300300, 'clazzifier', 'onRecreateSchool', 'id#0', TRUE, '{"something": ["true"]}' :: JSONB, 'track', 'unit:3', 'work:3');
+--
+-- INSERT INTO holdingsToBibliographic (HOLDINGSAGENCYID, BIBLIOGRAPHICRECORDID, BIBLIOGRAPHICAGENCYID, ISCOMMONDERIVED)
+-- VALUES (300300,'onRecreateSchool',300000, FALSE);
+--
+-- INSERT INTO holdingsitemssolrkeys (AGENCYID, BIBLIOGRAPHICRECORDID, INDEXKEYS, TRACKINGID)
+-- VALUES (300300, 'onRecreateSchool', '[]' :: JSONB, 'track');
 -- No ancestor
 INSERT INTO bibliographicSolrKeys (AGENCYID, CLASSIFIER, BIBLIOGRAPHICRECORDID, REPOSITORYID, DELETED, INDEXKEYS, TRACKINGID, UNIT, WORK)
 VALUES (655555, 'clazzifier', 'onRecreateSingle', 'id#0', TRUE, '{"something": ["true"]}' :: JSONB, 'track', 'unit:3', 'work:3');

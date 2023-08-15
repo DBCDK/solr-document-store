@@ -89,13 +89,6 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
     }
 
     @Test
-    public void testAddSchoolCommonResourceEnqueue() {
-        System.out.println("testAddSchoolCommonResourceEnqueue");
-        AddResourceRequest request = new AddResourceRequest(300000, "12121212", "hasCoverUrl", true);
-        runCommonEnqueueTest(request);
-    }
-
-    @Test
     public void testAddFBSResourceEnqueue() {
         System.out.println("testAddFBSResourceEnqueue");
         AddResourceRequest request = new AddResourceRequest(610610, "12121212", "hasCoverUrl", true);
@@ -115,24 +108,20 @@ public class BibliographicResourceIT extends JpaSolrDocStoreIntegrationTester {
             // Setup
             em.merge(new OpenAgencyEntity(890890, LibraryType.NonFBS, false, false, false));
             em.merge(new OpenAgencyEntity(870970, LibraryType.NonFBS, false, false, false));
-            em.merge(new OpenAgencyEntity(300000, LibraryType.NonFBS, false, false, false));
             em.merge(new OpenAgencyEntity(610610, LibraryType.FBS, false, false, false));
-            em.merge(new OpenAgencyEntity(312000, LibraryType.FBSSchool, false, false, false));
+            em.merge(new OpenAgencyEntity(312000, LibraryType.FBS, false, false, false));
             em.merge(new BibliographicEntity(870970, "classifier1", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
-            em.merge(new BibliographicEntity(300000, "classifier1", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicEntity(610610, "classifier2", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
             em.merge(new BibliographicEntity(312000, "classifier3", "12121212", "repo", "work:1", "unit:1", false, null, "track:1"));
             // Elements that should not be enqueued
             em.merge(new BibliographicEntity(312000, "classifier3", "21212121", "repo", "work:1", "unit:1", false, null, "track:1")); // Non-matching bibliographicRecordId
             em.merge(new BibliographicEntity(890890, "classifier3", "12121212", "repo", "work:1", "unit:1", false, null, "track:1")); // NonFBS should not be enqueued
             // Resource
-            em.merge(new BibliographicResourceEntity(300000, "12121212", "hasCoverUrl", true));
             bean.addResource(MARSHALLER.marshall(request));
         });
         // Enqueues all posts with the recordId, since they might inherit this value from common
         assertThat(queueContentAndClear(), containsInAnyOrder(
                    queueItem(870970, "classifier1", "12121212"),
-                   queueItem(300000, "classifier1", "12121212"),
                    queueItem(610610, "classifier2", "12121212"),
                    queueItem(312000, "classifier3", "12121212"),
                    queueItem("unit:1"),

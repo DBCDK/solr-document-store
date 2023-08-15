@@ -88,7 +88,6 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     private static final Integer schoolAgency = 300111;
     private static final Integer fbsAgency = 600111;
     private static final Integer commonAgency = LibraryType.COMMON_AGENCY;
-    private static final Integer schoolCommonAgency = LibraryType.SCHOOL_COMMON_AGENCY;
 
     @Test(timeout = 2_000L)
     public void checkConfig() {
@@ -98,7 +97,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             HoldingsItemBeanV1 holdingsItemBean = BeanFactoryUtil.createHoldingsItemBeanV1(em);
             assertEquals(LibraryType.NonFBS, bibliographicBean.openAgency.lookup(nonfbsAgency).getLibraryType());
             assertEquals(LibraryType.FBS, bibliographicBean.openAgency.lookup(fbsAgency).getLibraryType());
-            assertEquals(LibraryType.FBSSchool, bibliographicBean.openAgency.lookup(schoolAgency).getLibraryType());
+            assertEquals(LibraryType.FBS, bibliographicBean.openAgency.lookup(schoolAgency).getLibraryType());
         });
     }
 
@@ -201,61 +200,6 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                    queueItem(fbsAgency, "clazzifier", "test"),
                    queueItem("unit:0"),
                    queueItem("work:0")));
-    }
-
-    @Test(timeout = 2_000L)
-    public void commonAndSchoolRecords() {
-        System.out.println("commonAndSchoolRecords");
-        /*
-         * Common & School records
-         * -----------------------
-         * add Bib (870970), queue includes new Bib
-         * add Bib (300000)
-         * Queue contains [870970, 300000], clear queue
-         * Queue is empty
-         *
-         * add Holding (SCHOOL) -> Holding attaches to Bib (300000)
-         * Queue contains [300000], clear queue
-         *
-         * Delete Bib(300000)
-         * Holding reattaches to 870970
-         * Queue contains [870970, 300000]
-         *
-         * Delete Bib(OWN)
-         * Holding reattaches to (FBS).
-         * Queue contains (OWN, 870970)
-         *
-         */
-        AtomicReference<BibliographicEntity> toDelete = new AtomicReference<>();
-        jpa(em -> {
-            addBibliographic(em, commonAgency, "test");
-            BibliographicEntity entity = addBibliographic(em, schoolCommonAgency, "test");
-            toDelete.set(entity);
-        });
-        assertThat(queueContentAndClear(),
-                   containsInAnyOrder(
-                           queueItem(commonAgency, "clazzifier", "test"),
-                           queueItem(schoolCommonAgency, "clazzifier", "test"),
-                           queueItem("unit:0"),
-                           queueItem("work:0")));
-
-        jpa(em -> {
-            addHoldings(em, schoolAgency, "test");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(schoolCommonAgency, "clazzifier", "test"),
-                   queueItem("unit:0"),
-                   queueItem("work:0")));
-
-        jpa(em -> {
-            deleteBibliographic(em, toDelete.get());
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test"),
-                   queueItem(schoolCommonAgency, "clazzifier", "test"),
-                   queueItem("unit:0"),
-                   queueItem("work:0")));
-
     }
 
     @Test(timeout = 2_000L)
