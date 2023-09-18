@@ -130,7 +130,7 @@ public class DocProducerIT extends IntegrationTestBase {
 
     private void deployAndSearch(int agencyId, DocProducer docProducer, Collection<SolrCollection> solrCollections, int expected) throws SolrServerException, IOException, PostponedNonFatalQueueError {
         for (SolrCollection solrCollection : solrCollections) {
-            SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, "clazzifier", "23645564"));
+            SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, agencyId == 870970 ? "basis" : "katalog", "23645564"));
             SolrInputDocument doc = docProducer.createSolrDocument(sourceDoc, solrCollection);
             String bibliographicShardId = DocProducer.bibliographicShardId(sourceDoc);
             docProducer.updateSolr(bibliographicShardId, doc, solrCollection);
