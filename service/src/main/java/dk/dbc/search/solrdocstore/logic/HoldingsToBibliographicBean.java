@@ -8,7 +8,6 @@ import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
-import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +48,7 @@ public class HoldingsToBibliographicBean {
 
     @Timed
     public void updateBibliographic(int agencyId, String bibliographicRecordId, boolean deleted, EnqueueCollector enqueue) {
-        HoldingsToBibliographicBean.this.updateBibliographic(agencyId, bibliographicRecordId, deleted)
+        updateBibliographic(agencyId, bibliographicRecordId, deleted)
                 .forEach(b -> enqueue.add(b, QueueType.HOLDING, QueueType.UNITHOLDING, QueueType.WORKHOLDING));
     }
 
@@ -140,7 +139,7 @@ public class HoldingsToBibliographicBean {
                 .getResultStream()
                 .map(entity -> {
                     log.debug("entity = {}", entity);
-                    if (openAgency.lookup(entity.getAgencyId()).getLibraryType() == LibraryType.FBS) {
+                    if (openAgency.lookup(entity.getAgencyId()).getLibraryType() == FBS) {
                         HoldingsToBibliographicEntity existingEntity = find(entity.getAgencyId(), bibliographicRecordId);
                         if (existingEntity == null) {
                             em.persist(new HoldingsToBibliographicEntity(entity.getAgencyId(), COMMON_AGENCY, bibliographicRecordId, true));
@@ -294,10 +293,6 @@ public class HoldingsToBibliographicBean {
      */
     private Stream<BibliographicEntity> moveToCommon(int agencyId, String bibliographicRecordId) {
         log.debug("tryMoveToCommon");
-//        HoldingsItemEntity holdings = findHoldings(agencyId, bibliographicRecordId);
-//        if (holdings == null) {
-//            return Stream.empty();
-//        }
         HoldingsToBibliographicEntity entity = find(agencyId, bibliographicRecordId);
         BibliographicEntity common = findCommonRecord(bibliographicRecordId, false);
         if (common != null) {

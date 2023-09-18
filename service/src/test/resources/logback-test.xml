@@ -7,7 +7,6 @@
         </encoder>
     </appender>
 
-    <logger name="dk.dbc.PG" level="ERROR" />
     <logger name="dk.dbc" level="DEBUG" />
 
     <root level="WARN">

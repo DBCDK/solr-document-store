@@ -133,8 +133,6 @@ public class BibliographicEntity implements Serializable {
         return "BibliographicEntity{" + "agencyId=" + agencyId + ", classifier=" + classifier + ", bibliographicRecordId=" + bibliographicRecordId + ", repositoryId=" + repositoryId + ", work=" + work + ", unit=" + unit + ", deleted=" + deleted + ", indexKeys=" + indexKeys + ", trackingId=" + trackingId + '}';
     }
 
-    
-
     /**
      * Ensure the class is of type Entity, if needed make a shallow copy
      *

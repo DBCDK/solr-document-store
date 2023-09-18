@@ -48,8 +48,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
     public void testEnqueueAddsTotTables() throws Exception {
         System.out.println("testEnqueueAddsTotTables");
 
-        jpa( em -> {
-            for( var e : Arrays.asList(
+        jpa(em -> {
+            for (var e : Arrays.asList(
                     new QueueRuleEntity("a", QueueType.MANIFESTATION, 0),
                     new QueueRuleEntity("b", QueueType.MANIFESTATION, 5),
                     new QueueRuleEntity("c", QueueType.HOLDING, 0),
@@ -57,7 +57,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
                     new QueueRuleEntity("g", QueueType.WORK, 0),
                     new QueueRuleEntity("h", QueueType.WORK, 100),
                     new QueueRuleEntity("k", QueueType.UNIT, 0),
-                    new QueueRuleEntity("l", QueueType.UNIT, 100)) ) {
+                    new QueueRuleEntity("l", QueueType.UNIT, 100))) {
                 em.persist(e);
             }
         });

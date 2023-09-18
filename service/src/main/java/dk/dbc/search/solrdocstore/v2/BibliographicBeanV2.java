@@ -1,10 +1,8 @@
 package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.search.solrdocstore.logic.BibliographicRetrieveBean;
-import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
-import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.log.LogWith;
@@ -14,8 +12,6 @@ import dk.dbc.search.solrdocstore.logic.HoldingsToBibliographicBean;
 import dk.dbc.search.solrdocstore.logic.IntermittentErrorException;
 import dk.dbc.search.solrdocstore.logic.Marshaller;
 import dk.dbc.search.solrdocstore.logic.OpenAgencyBean;
-import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
-import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.request.BibliographicEntitySchemaAnnotated;
 import dk.dbc.search.solrdocstore.response.StatusResponse;
@@ -29,7 +25,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.POST;
@@ -39,9 +34,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
@@ -51,7 +44,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import static dk.dbc.log.LogWith.track;
-import static dk.dbc.search.solrdocstore.jpa.RecordType.SingleRecord;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Stateless
@@ -169,7 +161,6 @@ public class BibliographicBeanV2 {
             if (!bibliographicEntity.isDeleted()) {
                 // Only update holdings for this, if manifestation isn't deleted
                 h2bBean.updateBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), false, enqueue);
-//                updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
             }
             // Record creates queue even id said not to
         } else {
@@ -198,27 +189,13 @@ public class BibliographicBeanV2 {
                 // If incoming bib entity is deleted, we mark it as delete so the enqueue adapter
                 // will delay the queue job, to prevent race conditions with updates to this same
                 // bib entity
-                if (bibliographicEntity.isDeleted()) {
-                    enqueue.add(dbbe, QueueType.MANIFESTATION_DELETED, QueueType.UNIT, QueueType.WORK);
-                } else {
-                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
-//                    h2bBean.updateHoldingForBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), false, enqueue);
-//                    updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
-                }
+                enqueue.add(dbbe, bibliographicEntity.isDeleted() ? QueueType.MANIFESTATION_DELETED : QueueType.MANIFESTATION,
+                                  QueueType.UNIT, QueueType.WORK);
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
-// We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
-//                entityManager.flush();
 
                 h2bBean.updateBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId(), bibliographicEntity.isDeleted(), enqueue);
 
-//                List<HoldingsToBibliographicEntity> relatedHoldings =
-//                        bibliographicEntity.isDeleted() ?
-//                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
-//                        h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
-//                for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings) {
-//                    h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
-//                }
             } else {
                 // Going from deleted to deleted shouldn't result in queue jobs
                 if (!bibliographicEntity.isDeleted()) {
@@ -242,66 +219,4 @@ public class BibliographicBeanV2 {
             return null;
         return Instant.parse(dates.get(0));
     }
-
-//    /*
-//     *
-//     */
-//    private void updateHoldingsToBibliographic(int agency, String recordId, EnqueueCollector enqueue) {
-//        if (openAgency.getRecordType(agency) == SingleRecord) {
-//            updateHoldingsSingleRecord(agency, recordId, enqueue);
-//        } else {
-//            updateHoldingsForCommonRecords(agency, recordId, enqueue);
-//        }
-//    }
-//
-//    private void updateHoldingsForCommonRecords(int agency, String recordId, EnqueueCollector enqueue) {
-//        TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
-//        query.setParameter("bibId", recordId);
-//
-//        TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
-//                                                          "WHERE b.deleted=FALSE AND b.bibliographicRecordId = :recId", Integer.class);
-//
-//        q.setParameter("recId", recordId);
-//
-//        Set<Integer> bibRecords = new HashSet<>(q.getResultList());
-//
-//        for (Integer holdingsAgency : query.getResultList()) {
-//            switch (openAgency.lookup(holdingsAgency).getLibraryType()) {
-//                case NonFBS: // Ignore holdings for Non FBS libraries
-//                    continue;
-//                case FBS:
-//                    if (bibRecords.contains(holdingsAgency)) {
-//                        continue;
-//                    }
-//                    break;
-//                case Missing:
-//                    throw new IllegalStateException("This state should not have leaked");
-//            }
-//            addHoldingsToBibliographic(agency, recordId, holdingsAgency, enqueue, QueueType.MANIFESTATION);
-//        }
-//    }
-//
-//    private void updateHoldingsSingleRecord(int agency, String recordId, EnqueueCollector enqueue) {
-//        HoldingsItemEntity holding = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(agency, recordId));
-//        if (holding != null) {
-//            if (openAgency.lookup(agency).getLibraryType() == LibraryType.NonFBS) {
-//                addHoldingsToBibliographic(agency, recordId, agency, enqueue, QueueType.MANIFESTATION);
-//            } else {
-//                addHoldingsToBibliographic(agency, agency, recordId, enqueue, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
-//            }
-//        }
-//    }
-//
-//    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, EnqueueCollector enqueue, QueueType... enqueueSources) {
-//        addHoldingsToBibliographic(agency, holdingsAgency, recordId, enqueue, enqueueSources);
-//    }
-//
-//    private void addHoldingsToBibliographic(int agency, int holdingsAgency, String bibliographicRecordId, EnqueueCollector enqueue, QueueType... enqueueSources) {
-//        LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
-//        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-//                holdingsAgency, agency, bibliographicRecordId
-//        );
-//        h2bBean.attachToAgency(h2b, enqueue, enqueueSources);
-//    }
-
 }

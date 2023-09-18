@@ -148,7 +148,6 @@ public class HoldingsItemBeanV1IT extends JpaSolrDocStoreIntegrationTester {
                    "c,work:1"));
     }
 
-
     private static HoldingsItemBeanV1 holdingsItemBeanWithRules(EntityManager em, QueueRuleEntity... rules) {
         HoldingsItemBeanV1 hol = createHoldingsItemBeanV1(em);
         hol.enqueueSupplier = new EnqueueSupplierBean() {
