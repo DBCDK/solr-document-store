@@ -90,8 +90,9 @@ public class HoldingsItemBeanV2 {
                 entity = HoldingsItemEntity.from(hid);
                 entityManager.persist(entity);
                 if (!entity.getIndexKeys().isEmpty()) {
-                    h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
-                                                             QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                    h2bBean.updateHolding(agencyId, bibliographicRecordId, false, enqueue);
+//                    h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
+//                                                             QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
                 }
             } else {
                 boolean hadNoIndexKeys = entity.getIndexKeys().isEmpty();
@@ -100,15 +101,17 @@ public class HoldingsItemBeanV2 {
                     if (entity.getIndexKeys().isEmpty()) {
                         log.info("Removed holdings for {}-{}", agencyId, bibliographicRecordId);
                         queueRelatedBibliographic(entity, enqueue, QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
-                        HoldingsToBibliographicKey h2bKey = new HoldingsToBibliographicKey(agencyId, bibliographicRecordId);
-                        HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
-                        if (binding != null) {
-                            entityManager.remove(binding);
-                        }
+                        h2bBean.updateHolding(agencyId, bibliographicRecordId, true, enqueue);
+//                        HoldingsToBibliographicKey h2bKey = new HoldingsToBibliographicKey(agencyId, bibliographicRecordId);
+//                        HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
+//                        if (binding != null) {
+//                            entityManager.remove(binding);
+//                        }
                     } else if (hadNoIndexKeys) {
                         log.info("Resurrected holdings for {}-{}", agencyId, bibliographicRecordId);
-                        h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
-                                                                 QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                        h2bBean.updateHolding(agencyId, bibliographicRecordId, false, enqueue);
+//                        h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
+//                                                                 QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
                     } else {
                         log.info("Updated holdings for {}-{}", agencyId, bibliographicRecordId);
                         queueRelatedBibliographic(entity, enqueue, QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
@@ -124,8 +127,7 @@ public class HoldingsItemBeanV2 {
     @Path("{agencyId : \\d+}-{bibliographicRecordId}")
     @Timed
     public StatusResponse deleteHoldings(@PathParam("agencyId") int agencyId,
-                                         @PathParam("bibliographicRecordId") String bibliographicRecordId
-    ) throws SQLException {
+                                         @PathParam("bibliographicRecordId") String bibliographicRecordId) throws SQLException {
         AgencyItemKey key = new AgencyItemKey(agencyId, bibliographicRecordId);
         HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, key);
         if (entity != null) {

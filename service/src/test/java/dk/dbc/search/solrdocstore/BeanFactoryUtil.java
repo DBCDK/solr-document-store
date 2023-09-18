@@ -75,7 +75,7 @@ public class BeanFactoryUtil {
 
     public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em) {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
-        bean.entityManager = em;
+        bean.em = em;
         bean.openAgency = createOpenAgencyBean();
         bean.brBean = createBibliographicRetrieveBean(em);
         return bean;
@@ -104,8 +104,10 @@ public class BeanFactoryUtil {
                         new QueueRuleEntity("a", QueueType.HOLDING, 0),
                         new QueueRuleEntity("a", QueueType.RESOURCE, 0),
                         new QueueRuleEntity("b", QueueType.UNIT, 0),
+                        new QueueRuleEntity("b", QueueType.UNITHOLDING, 0),
                         new QueueRuleEntity("b", QueueType.UNITRESOURCE, 0),
                         new QueueRuleEntity("c", QueueType.WORK, 0),
+                        new QueueRuleEntity("c", QueueType.WORKHOLDING, 0),
                         new QueueRuleEntity("c", QueueType.WORKRESOURCE, 0),
                         new QueueRuleEntity("e", QueueType.ENDPOINT, 0),
                         new QueueRuleEntity("e", QueueType.WORKENDPOINT, 0));
@@ -166,7 +168,7 @@ public class BeanFactoryUtil {
 
     public static HoldingsToBibliographicBean createHoldingsToBibliographicBean(EntityManager em, OpenAgencyBean openAgency, EnqueueSupplierBean queue, BibliographicRetrieveBean brBean) {
         HoldingsToBibliographicBean bean = new HoldingsToBibliographicBean();
-        bean.entityManager = em;
+        bean.em = em;
         bean.openAgency = openAgency;
         bean.brBean = brBean;
         return bean;

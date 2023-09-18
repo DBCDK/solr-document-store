@@ -3,13 +3,13 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 
+import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
+
 /**
  *
  * @author DBC {@literal <dbc.dk>}
  */
 public class OpenAgencyUtil {
-
-    public static int COMMON_AGENCY = LibraryType.COMMON_AGENCY;
 
     /**
      *
@@ -21,8 +21,8 @@ public class OpenAgencyUtil {
      * @return
      */
     public static OpenAgencyEntity makeOpenAgencyEntity(int agencyId) {
-        if (agencyId == LibraryType.COMMON_AGENCY) {
-            return makeOpenAgencyEntity(LibraryType.COMMON_AGENCY, true, false, true);
+        if (agencyId == COMMON_AGENCY) {
+            return makeOpenAgencyEntity(COMMON_AGENCY, true, false, true);
         }
         boolean partOfDanbib = ( agencyId / 1 ) % 10 < 5;
         boolean authCreateCommonRecord = ( agencyId / 10 ) % 10 < 5;

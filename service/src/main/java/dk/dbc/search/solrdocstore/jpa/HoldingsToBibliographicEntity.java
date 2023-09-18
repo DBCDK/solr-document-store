@@ -25,10 +25,6 @@ public class HoldingsToBibliographicEntity implements Serializable {
     public HoldingsToBibliographicEntity() {
     }
 
-    public HoldingsToBibliographicEntity(int holdingsAgencyId, String bibliographicRecordId, int bibliographicAgencyId, boolean isCommonDerived) {
-        this(holdingsAgencyId, bibliographicAgencyId, bibliographicRecordId, isCommonDerived);
-    }
-
     public HoldingsToBibliographicEntity(int holdingsAgencyId, int bibliographicAgencyId, String bibliographicRecordId, boolean isCommonDerived) {
         this.holdingsAgencyId = holdingsAgencyId;
         this.bibliographicRecordId = bibliographicRecordId;

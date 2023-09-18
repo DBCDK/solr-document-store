@@ -226,7 +226,7 @@ public class BibliographicRecordAPIBeanIT extends JpaSolrDocStoreIntegrationTest
         for (int i = 0 ; i < agencies.length ; i++) {
             em.persist(new HoldingsItemEntity(agencies[i], bibliographicRecordId, SolrIndexKeys.ON_SHELF, null, "track"));
             HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-                    agencies[i], bibliographicRecordId, agencyId, false
+                    agencies[i], agencyId, bibliographicRecordId, false
             );
             em.persist(h2b);
         }

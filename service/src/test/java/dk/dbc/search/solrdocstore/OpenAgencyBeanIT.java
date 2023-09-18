@@ -1,20 +1,17 @@
 package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
-import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
-import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
-import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.logic.OpenAgencyBean;
 import java.util.HashSet;
 import jakarta.persistence.EntityManager;
-import org.junit.Before;
 import org.junit.Test;
 
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 import static dk.dbc.search.solrdocstore.SolrIndexKeys.*;
+import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
 
 import static org.junit.Assert.*;
 

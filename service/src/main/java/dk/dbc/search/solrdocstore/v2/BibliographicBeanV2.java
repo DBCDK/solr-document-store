@@ -168,7 +168,8 @@ public class BibliographicBeanV2 {
             entityManager.merge(bibliographicEntity.asBibliographicEntity());
             if (!bibliographicEntity.isDeleted()) {
                 // Only update holdings for this, if manifestation isn't deleted
-                updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
+                h2bBean.updateBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), false, enqueue);
+//                updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
             }
             // Record creates queue even id said not to
         } else {
@@ -201,20 +202,23 @@ public class BibliographicBeanV2 {
                     enqueue.add(dbbe, QueueType.MANIFESTATION_DELETED, QueueType.UNIT, QueueType.WORK);
                 } else {
                     enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
-                    updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
+//                    h2bBean.updateHoldingForBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), false, enqueue);
+//                    updateHoldingsToBibliographic(bibliographicEntity.getAgencyId(), bibliographicEntity.getBibliographicRecordId(), enqueue);
                 }
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
-                // We must flush since the tryAttach looks at the deleted field
+// We must flush since the tryAttach looks at the deleted field
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
-                entityManager.flush();
+//                entityManager.flush();
 
-                List<HoldingsToBibliographicEntity> relatedHoldings =
-                        bibliographicEntity.isDeleted() ?
-                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
-                        h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
-                for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings) {
-                    h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
-                }
+                h2bBean.updateBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId(), bibliographicEntity.isDeleted(), enqueue);
+
+//                List<HoldingsToBibliographicEntity> relatedHoldings =
+//                        bibliographicEntity.isDeleted() ?
+//                        h2bBean.getRelatedHoldingsToBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId()) :
+//                        h2bBean.findRecalcCandidates(dbbe.getBibliographicRecordId());
+//                for (HoldingsToBibliographicEntity relatedHolding : relatedHoldings) {
+//                    h2bBean.tryToAttachToBibliographicRecord(relatedHolding.getHoldingsAgencyId(), relatedHolding.getBibliographicRecordId(), enqueue, QueueType.MANIFESTATION);
+//                }
             } else {
                 // Going from deleted to deleted shouldn't result in queue jobs
                 if (!bibliographicEntity.isDeleted()) {
@@ -239,66 +243,65 @@ public class BibliographicBeanV2 {
         return Instant.parse(dates.get(0));
     }
 
-    /*
-     *
-     */
-    private void updateHoldingsToBibliographic(int agency, String recordId, EnqueueCollector enqueue) {
-        if (openAgency.getRecordType(agency) == SingleRecord) {
-            updateHoldingsSingleRecord(agency, recordId, enqueue);
-        } else {
-            updateHoldingsForCommonRecords(agency, recordId, enqueue);
-        }
-    }
-
-    private void updateHoldingsForCommonRecords(int agency, String recordId, EnqueueCollector enqueue) {
-        TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
-        query.setParameter("bibId", recordId);
-
-        TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
-                                                          "WHERE b.deleted=FALSE AND b.bibliographicRecordId = :recId", Integer.class);
-
-        q.setParameter("recId", recordId);
-
-        Set<Integer> bibRecords = new HashSet<>(q.getResultList());
-
-        for (Integer holdingsAgency : query.getResultList()) {
-            switch (openAgency.lookup(holdingsAgency).getLibraryType()) {
-                case NonFBS: // Ignore holdings for Non FBS libraries
-                    continue;
-                case FBS:
-                    if (bibRecords.contains(holdingsAgency)) {
-                        continue;
-                    }
-                    break;
-                case Missing:
-                    throw new IllegalStateException("This state should not have leaked");
-            }
-            addHoldingsToBibliographic(agency, recordId, holdingsAgency, enqueue, QueueType.MANIFESTATION);
-        }
-    }
-
-    private void updateHoldingsSingleRecord(int agency, String recordId, EnqueueCollector enqueue) {
-        HoldingsItemEntity holding = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(agency, recordId));
-        if (holding != null) {
-            if (openAgency.lookup(agency).getLibraryType() == LibraryType.NonFBS) {
-                addHoldingsToBibliographic(agency, recordId, agency, enqueue, QueueType.MANIFESTATION);
-            } else {
-                addHoldingsToBibliographic(agency, agency, recordId, enqueue, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
-            }
-        }
-    }
-
-    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, EnqueueCollector enqueue, QueueType... enqueueSources) {
-        addHoldingsToBibliographic(agency, holdingsAgency, recordId, enqueue, enqueueSources);
-    }
-
-    private void addHoldingsToBibliographic(int agency, int holdingsAgency, String bibliographicRecordId, EnqueueCollector enqueue, QueueType... enqueueSources) {
-        LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
-        boolean isCommonDerived = libraryType == LibraryType.FBS && h2bBean.bibliographicEntityExists(agency, bibliographicRecordId);
-        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
-                holdingsAgency, agency, bibliographicRecordId, isCommonDerived
-        );
-        h2bBean.attachToAgency(h2b, enqueue, enqueueSources);
-    }
+//    /*
+//     *
+//     */
+//    private void updateHoldingsToBibliographic(int agency, String recordId, EnqueueCollector enqueue) {
+//        if (openAgency.getRecordType(agency) == SingleRecord) {
+//            updateHoldingsSingleRecord(agency, recordId, enqueue);
+//        } else {
+//            updateHoldingsForCommonRecords(agency, recordId, enqueue);
+//        }
+//    }
+//
+//    private void updateHoldingsForCommonRecords(int agency, String recordId, EnqueueCollector enqueue) {
+//        TypedQuery<Integer> query = entityManager.createQuery("SELECT h.agencyId FROM HoldingsItemEntity h  WHERE h.bibliographicRecordId = :bibId", Integer.class);
+//        query.setParameter("bibId", recordId);
+//
+//        TypedQuery<Integer> q = entityManager.createQuery("SELECT b.agencyId FROM BibliographicEntity b " +
+//                                                          "WHERE b.deleted=FALSE AND b.bibliographicRecordId = :recId", Integer.class);
+//
+//        q.setParameter("recId", recordId);
+//
+//        Set<Integer> bibRecords = new HashSet<>(q.getResultList());
+//
+//        for (Integer holdingsAgency : query.getResultList()) {
+//            switch (openAgency.lookup(holdingsAgency).getLibraryType()) {
+//                case NonFBS: // Ignore holdings for Non FBS libraries
+//                    continue;
+//                case FBS:
+//                    if (bibRecords.contains(holdingsAgency)) {
+//                        continue;
+//                    }
+//                    break;
+//                case Missing:
+//                    throw new IllegalStateException("This state should not have leaked");
+//            }
+//            addHoldingsToBibliographic(agency, recordId, holdingsAgency, enqueue, QueueType.MANIFESTATION);
+//        }
+//    }
+//
+//    private void updateHoldingsSingleRecord(int agency, String recordId, EnqueueCollector enqueue) {
+//        HoldingsItemEntity holding = entityManager.find(HoldingsItemEntity.class, new AgencyItemKey(agency, recordId));
+//        if (holding != null) {
+//            if (openAgency.lookup(agency).getLibraryType() == LibraryType.NonFBS) {
+//                addHoldingsToBibliographic(agency, recordId, agency, enqueue, QueueType.MANIFESTATION);
+//            } else {
+//                addHoldingsToBibliographic(agency, agency, recordId, enqueue, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
+//            }
+//        }
+//    }
+//
+//    private void addHoldingsToBibliographic(int agency, String recordId, int holdingsAgency, EnqueueCollector enqueue, QueueType... enqueueSources) {
+//        addHoldingsToBibliographic(agency, holdingsAgency, recordId, enqueue, enqueueSources);
+//    }
+//
+//    private void addHoldingsToBibliographic(int agency, int holdingsAgency, String bibliographicRecordId, EnqueueCollector enqueue, QueueType... enqueueSources) {
+//        LibraryType libraryType = openAgency.lookup(holdingsAgency).getLibraryType();
+//        HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(
+//                holdingsAgency, agency, bibliographicRecordId
+//        );
+//        h2bBean.attachToAgency(h2b, enqueue, enqueueSources);
+//    }
 
 }

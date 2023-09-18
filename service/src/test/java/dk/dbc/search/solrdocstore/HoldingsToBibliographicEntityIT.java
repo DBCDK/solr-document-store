@@ -14,7 +14,7 @@ public class HoldingsToBibliographicEntityIT extends JpaSolrDocStoreIntegrationT
         executeSqlScript("entityTestData.sql");
 
         jpa(em -> {
-            HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(300, "4321", 200, true);
+            HoldingsToBibliographicEntity h2b = new HoldingsToBibliographicEntity(300, 200, "4321", true);
             em.persist(h2b);
         });
     }

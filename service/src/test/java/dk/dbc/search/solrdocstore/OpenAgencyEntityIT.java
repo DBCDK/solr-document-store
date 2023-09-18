@@ -21,7 +21,7 @@ public class OpenAgencyEntityIT extends JpaSolrDocStoreIntegrationTester {
             OpenAgencyEntity foundBefore = em.find(OpenAgencyEntity.class, LibraryType.COMMON_AGENCY);
             assertNull(foundBefore);
 
-            OpenAgencyEntity oa870970 = makeOpenAgencyEntity(COMMON_AGENCY);
+            OpenAgencyEntity oa870970 = makeOpenAgencyEntity(LibraryType.COMMON_AGENCY);
             em.persist(oa870970);
             em.getEntityManagerFactory().getCache().evictAll();
 

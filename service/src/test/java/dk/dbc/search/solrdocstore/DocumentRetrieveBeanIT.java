@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createBibliographicBean;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createDocumentRetrieveBean;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsToBibliographicBean;
-import static dk.dbc.search.solrdocstore.OpenAgencyUtil.COMMON_AGENCY;
 import static dk.dbc.search.solrdocstore.OpenAgencyUtil.makeOpenAgencyEntity;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static dk.dbc.search.solrdocstore.BeanFactoryUtil.createHoldingsItemBeanV1;
+import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
 
 public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
@@ -59,8 +59,8 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
             em.merge(new BibliographicEntity(870970, "clazzifier", "12345678", "id#1", "work:0", "unit:0", false, new IndexKeys(), "T1"));
             em.merge(new HoldingsItemEntity(300101, "12345678", new IndexKeysList(), null, "T2"));
             em.merge(new HoldingsItemEntity(300102, "12345678", new IndexKeysList(), null, "T3"));
-            em.merge(new HoldingsToBibliographicEntity(300101, "12345678", 870970, false));
-            em.merge(new HoldingsToBibliographicEntity(300102, "12345678", 870970, false));
+            em.merge(new HoldingsToBibliographicEntity(300101, 870970, "12345678", false));
+            em.merge(new HoldingsToBibliographicEntity(300102, 870970, "12345678", false));
         });
         jpa(em -> {
             DocumentRetrieveBeanV2 bean = createDocumentRetrieveBean(em);
@@ -212,7 +212,7 @@ public class DocumentRetrieveBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         private Build holdings(IndexKeysList content) throws SQLException {
             hold.putIndexKeys(holdingsAgencyId, holdingsId, content, "t1");
-            h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId, EnqueueCollector.VOID, QueueType.HOLDING);
+//            h2b.tryToAttachToBibliographicRecord(holdingsAgencyId, holdingsId, EnqueueCollector.VOID, QueueType.HOLDING);
             return this;
         }
 

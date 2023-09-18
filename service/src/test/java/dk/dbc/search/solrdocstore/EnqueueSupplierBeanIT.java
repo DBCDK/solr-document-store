@@ -174,13 +174,13 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
 
         AtomicReference<BibliographicEntity> fbsToDelete = new AtomicReference<>();
         jpa(em -> {
-            addBibliographic(em, commonAgency, "test");
-            BibliographicEntity entity = addBibliographic(em, fbsAgency, "test");
+            addBibliographic(em, commonAgency, "basis", "test");
+            BibliographicEntity entity = addBibliographic(em, fbsAgency, "katalog", "test");
             fbsToDelete.set(entity);
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test"),
-                   queueItem(fbsAgency, "clazzifier", "test"),
+                   queueItem(commonAgency, "basis", "test"),
+                   queueItem(fbsAgency, "katalog", "test"),
                    queueItem("unit:0"),
                    queueItem("work:0")));
 
@@ -188,7 +188,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             addHoldings(em, fbsAgency, "test");
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(fbsAgency, "clazzifier", "test"),
+                   queueItem(fbsAgency, "katalog", "test"),
                    queueItem("unit:0"),
                    queueItem("work:0")));
 
@@ -196,8 +196,8 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             deleteBibliographic(em, fbsToDelete.get());
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test"),
-                   queueItem(fbsAgency, "clazzifier", "test"),
+                   queueItem(commonAgency, "basis", "test"),
+                   queueItem(fbsAgency, "katalog", "test"),
                    queueItem("unit:0"),
                    queueItem("work:0")));
     }
@@ -216,12 +216,12 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
          */
         AtomicReference<HoldingsItemEntity> h = new AtomicReference<>();
         jpa(em -> {
-            addBibliographic(em, commonAgency, "test");
+            addBibliographic(em, commonAgency, "basis", "test");
             HoldingsItemEntity entity = addHoldings(em, fbsAgency, "test");
             h.set(entity);
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test"),
+                   queueItem(commonAgency, "basis", "test"),
                    queueItem("unit:0"),
                    queueItem("work:0")));
 
@@ -232,36 +232,7 @@ public class EnqueueSupplierBeanIT extends JpaSolrDocStoreIntegrationTester {
             holdingsItemBean.putIndexKeys(hold.getAgencyId(), hold.getBibliographicRecordId(), hold.getIndexKeys(), hold.getTrackingId());
         });
         assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "clazzifier", "test"),
-                   queueItem("unit:0"),
-                   queueItem("work:0")));
-    }
-
-    @Test(timeout = 2_000L)
-    public void multipleClassifiersMoveHolding() {
-        System.out.println("multipleClassifiersMoveHolding");
-        jpa(em -> {
-            addBibliographic(em, commonAgency, "foo", "a");
-            addBibliographic(em, commonAgency, "bar", "a");
-        });
-        queueContentAndClear();
-
-        jpa(em -> {
-            addHoldings(em, 777777, "a");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "foo", "a"),
-                   queueItem(commonAgency, "bar", "a"),
-                   queueItem("unit:0"),
-                   queueItem("work:0")));
-
-        jpa(em -> {
-            addBibliographic(em, 777777, "woop", "a");
-        });
-        assertThat(queueContentAndClear(), containsInAnyOrder(
-                   queueItem(commonAgency, "foo", "a"),
-                   queueItem(commonAgency, "bar", "a"),
-                   queueItem(777777, "woop", "a"),
+                   queueItem(commonAgency, "basis", "test"),
                    queueItem("unit:0"),
                    queueItem("work:0")));
     }

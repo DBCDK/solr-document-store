@@ -21,6 +21,7 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
+import dk.dbc.search.solrdocstore.queue.QueueJob;
 import java.sql.SQLException;
 import java.util.HashSet;
 
@@ -34,8 +35,11 @@ public class MockEnqueueCollector extends EnqueueCollector {
 
     @Override
     public void add(BibliographicEntity entity, QueueType supplier) {
-        String jobName = supplier.toString() + ":" + entity.asQueueJobFor(supplier).getJobId();
-        jobs.add(jobName);
+        QueueJob queueJob = entity.asQueueJobFor(supplier);
+        if (queueJob != null) {
+            String jobName = supplier.toString() + ":" + queueJob.getJobId();
+            jobs.add(jobName);
+        }
     }
 
     @Override
@@ -44,5 +48,9 @@ public class MockEnqueueCollector extends EnqueueCollector {
 
     public HashSet<String> getJobs() {
         return jobs;
+    }
+
+    public void clear() {
+        jobs.clear();
     }
 }

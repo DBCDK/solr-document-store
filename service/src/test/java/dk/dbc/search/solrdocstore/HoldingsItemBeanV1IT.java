@@ -123,8 +123,8 @@ public class HoldingsItemBeanV1IT extends JpaSolrDocStoreIntegrationTester {
             HoldingsItemBeanV1 holWithoutDelay = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.HOLDING, 0),
-                    new QueueRuleEntity("b", QueueType.UNIT, 0),
-                    new QueueRuleEntity("c", QueueType.WORK, 0));
+                    new QueueRuleEntity("b", QueueType.UNITHOLDING, 0),
+                    new QueueRuleEntity("c", QueueType.WORKHOLDING, 0));
             holWithoutDelay.putHoldings(jsonRequestHold("710100-25912233-a"), 710100, "25912233", "t");
         });
         assertThat(queueRemovePostponed(), empty());
@@ -137,8 +137,8 @@ public class HoldingsItemBeanV1IT extends JpaSolrDocStoreIntegrationTester {
             HoldingsItemBeanV1 holWithDelay = holdingsItemBeanWithRules(
                     em,
                     new QueueRuleEntity("a", QueueType.HOLDING, 100_000),
-                    new QueueRuleEntity("b", QueueType.UNIT, 0),
-                    new QueueRuleEntity("c", QueueType.WORK, 0));
+                    new QueueRuleEntity("b", QueueType.UNITHOLDING, 0),
+                    new QueueRuleEntity("c", QueueType.WORKHOLDING, 0));
             holWithDelay.putHoldings(jsonRequestHold("710100-25912233-b"), 710100, "25912233", "t");
         });
         assertThat(queueRemovePostponed(), containsInAnyOrder(
@@ -166,7 +166,7 @@ public class HoldingsItemBeanV1IT extends JpaSolrDocStoreIntegrationTester {
         return holdingsItemBeanWithRules(
                 em,
                 new QueueRuleEntity("a", QueueType.HOLDING, 0),
-                new QueueRuleEntity("b", QueueType.UNIT, 0),
-                new QueueRuleEntity("c", QueueType.WORK, 0));
+                new QueueRuleEntity("b", QueueType.UNITHOLDING, 0),
+                new QueueRuleEntity("c", QueueType.WORKHOLDING, 0));
     }
 }

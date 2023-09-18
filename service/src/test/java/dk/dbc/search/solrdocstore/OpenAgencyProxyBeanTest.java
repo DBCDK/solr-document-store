@@ -31,9 +31,9 @@ public class OpenAgencyProxyBeanTest {
     public void openAgencyParser() throws Exception {
         System.out.println("openAgencyParser");
 
-        OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(COMMON_AGENCY);
+        OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(LibraryType.COMMON_AGENCY);
         System.out.println("COMMON_AGENCY = " + openAgency);
-        assertEquals(makeOpenAgencyEntity(COMMON_AGENCY), openAgency);
+        assertEquals(makeOpenAgencyEntity(LibraryType.COMMON_AGENCY), openAgency);
     }
 
     @Test
