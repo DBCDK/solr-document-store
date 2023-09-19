@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.EntityManager;
+import java.util.Map;
 
 import org.eclipse.persistence.annotations.Mutable;
 import org.slf4j.Logger;
@@ -154,12 +155,22 @@ public class BibliographicEntity implements Serializable {
         this.agencyId = agencyId;
     }
 
+    public BibliographicEntity withAgencyId(int agencyId) {
+        this.agencyId = agencyId;
+        return this;
+    }
+
     public String getClassifier() {
         return classifier;
     }
 
     public void setClassifier(String classifier) {
         this.classifier = classifier;
+    }
+
+    public BibliographicEntity withClassifier(String classifier) {
+        this.classifier = classifier;
+        return this;
     }
 
     public String getBibliographicRecordId() {
@@ -170,12 +181,22 @@ public class BibliographicEntity implements Serializable {
         this.bibliographicRecordId = bibliographicRecordId;
     }
 
+    public BibliographicEntity withBibliographicRecordId(String bibliographicRecordId) {
+        this.bibliographicRecordId = bibliographicRecordId;
+        return this;
+    }
+
     public String getRepositoryId() {
         return repositoryId;
     }
 
     public void setRepositoryId(String repositoryId) {
         this.repositoryId = repositoryId;
+    }
+
+    public BibliographicEntity withRepositoryId(String repositoryId) {
+        this.repositoryId = repositoryId;
+        return this;
     }
 
     public String getWork() {
@@ -186,12 +207,22 @@ public class BibliographicEntity implements Serializable {
         this.work = work;
     }
 
+    public BibliographicEntity withWork(String work) {
+        this.work = work;
+        return this;
+    }
+
     public String getUnit() {
         return unit;
     }
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    public BibliographicEntity withUnit(String unit) {
+        this.unit = unit;
+        return this;
     }
 
     public String getTrackingId() {
@@ -202,12 +233,22 @@ public class BibliographicEntity implements Serializable {
         this.trackingId = trackingId;
     }
 
+    public BibliographicEntity withTrackingId(String trackingId) {
+        this.trackingId = trackingId;
+        return this;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public BibliographicEntity withDeleted(boolean deleted) {
+        this.deleted = deleted;
+        return this;
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP")
@@ -218,6 +259,12 @@ public class BibliographicEntity implements Serializable {
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public void setIndexKeys(IndexKeys indexKeys) {
         this.indexKeys = indexKeys;
+    }
+
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public BibliographicEntity withIndexKeys(Map<String, List<String>> indexKeys) {
+        this.indexKeys = IndexKeys.from(indexKeys);
+        return this;
     }
 
     public AgencyClassifierItemKey asAgencyClassifierItemKey() {

@@ -64,11 +64,11 @@ public class HoldingsItemBeanIT extends JpaSolrDocStoreIntegrationTester {
         jpa(em -> {
             HoldingsItemBeanV2 bean = BeanFactoryUtil.createHoldingsItemBean(em);
             bean.putHoldings(new HoldingsItemsDocuments()
-                            .withAgencyId(700000)
-                            .withBibliographicRecordId("25912233")
-                            .withModified(Instant.parse("2020-01-01T12:34:56Z"))
-                            .withDocuments(List.of(Map.of("v", List.of("1", "2")))),
-                    700000, "25912233");
+                    .withAgencyId(700000)
+                    .withBibliographicRecordId("25912233")
+                    .withModified(Instant.parse("2020-01-01T12:34:56Z"))
+                    .withDocuments(List.of(Map.of("v", List.of("1", "2")))),
+                             700000, "25912233");
         });
         assertThat(queueContentAndClear(), not(empty()));
 

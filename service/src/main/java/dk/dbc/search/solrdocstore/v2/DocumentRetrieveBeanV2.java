@@ -96,6 +96,7 @@ public class DocumentRetrieveBeanV2 {
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId,
                                                  @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
         try (LogWith logWith = track(null)) {
+            log.info("getDocumentWithHoldingsitems");
             DocumentRetrieveResponse response = getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId);
             if (response == null) {
                 return Response.status(Response.Status.NOT_FOUND).header("X-DBC-Status", "200").entity("Record not found").build();
@@ -158,6 +159,7 @@ public class DocumentRetrieveBeanV2 {
     public Response getUnitDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
                                                       @PathParam("unitid") String unitId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
+        log.info("getUnitDocumentsWithHoldingsItems");
         log.debug("Fetching manifestations for unit {}, includeHIIK: {}", unitId, includeHoldingsItemsIndexKeys);
         try (LogWith logWith = track(null)) {
             List<DocumentRetrieveResponse> responses = getDocumentsForUnit(unitId, includeHoldingsItemsIndexKeys);
@@ -189,6 +191,7 @@ public class DocumentRetrieveBeanV2 {
     public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
                                                       @PathParam("workid") String workId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
+        log.info("getWorkDocumentsWithHoldingsItems");
         log.debug("Fetching manifestations for work {}, includeHIIK: {}", workId, includeHoldingsItemsIndexKeys);
         try (LogWith logWith = track(null)) {
             List<DocumentRetrieveResponse> responses = getDocumentsForWork(workId, includeHoldingsItemsIndexKeys);

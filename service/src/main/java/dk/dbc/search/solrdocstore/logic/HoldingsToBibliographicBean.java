@@ -321,7 +321,8 @@ public class HoldingsToBibliographicBean {
     }
 
     private HoldingsItemEntity findHoldings(int agencyId, String bibliographicRecordId) {
-        return em.find(HoldingsItemEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
+        HoldingsItemEntity holdings = em.find(HoldingsItemEntity.class, new AgencyItemKey(agencyId, bibliographicRecordId));
+        return holdings == null || holdings.getIndexKeys().isEmpty() ? null : holdings;
     }
 
     private BibliographicEntity findCommonRecord(String bibliographicRecordId, boolean allowDeleted) {
