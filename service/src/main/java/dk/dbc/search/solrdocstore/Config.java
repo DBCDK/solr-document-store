@@ -4,16 +4,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJBException;
 import jakarta.ejb.Startup;
 import jakarta.ejb.Stateless;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -25,30 +20,29 @@ public class Config {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
-    private long jobPruneMinutes;
     private String systemName;
     private int[] openAgencyValidateTime;
     private String vipCoreEndpoint;
     private long reviveOlderWhenDeletedForAtleast;
 
-    @PostConstruct
-    public void loadProperties() {
-        Properties props = findProperties("solr-doc-store-service");
-        jobPruneMinutes = getValue(props, "jobPruneMinutes", "JOB_PRUNE_MINUTES", "60", null, Long::parseUnsignedLong);
+    public Config() {
+        loadPropertied(System.getenv());
+    }
+
+    public Config(Map<String, String> env) {
+        loadPropertied(env);
+    }
+
+    private void loadPropertied(Map<String, String> env) {
         // Name displayed in frontend to tell the user which system they are looking at (FBSTest, Cisterne etc.)
-        systemName = getValue(props, "systemName", "SYSTEM_NAME", "System navn ikke konfigureret", null);
-        openAgencyValidateTime = getValue(props, "openAgencyValidateTime", "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
-        // Number of milliseconds to delay bib entities that are being deleted
-        vipCoreEndpoint = getValue(props, "vipCoreEndpoint", "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
-        reviveOlderWhenDeletedForAtleast = getValue(props, "reviveOlderWhenDeletedForAtleast", "REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST", "8h", null, Config::ms);
+        systemName = getValue(env, "SYSTEM_NAME", "System navn ikke konfigureret", null);
+        openAgencyValidateTime = getValue(env, "OPEN_AGENCY_VALIDATE_TIME", "04:23:17", null, Config::validateTime);
+        vipCoreEndpoint = getValue(env, "VIPCORE_ENDPOINT", "http://vipcore.iscrum-vip-staging.svc.cloud.dbc.dk", "No URL found for VipCore");
+        reviveOlderWhenDeletedForAtleast = getValue(env, "REVIVE_OLDER_WHEN_DELETED_FOR_ATLEAST", "8h", null, Config::ms);
     }
 
     public String getVipCoreEndpoint() {
         return vipCoreEndpoint;
-    }
-
-    public long getJobPruneMinutes() {
-        return jobPruneMinutes;
     }
 
     public String getSystemName() {
@@ -64,48 +58,20 @@ public class Config {
         return reviveOlderWhenDeletedForAtleast;
     }
 
-    private static String getValue(Properties props, String propertyName, String envName, String defaultValue, String error) {
-        String value = props.getProperty(propertyName);
-        if (value == null) {
-            value = System.getenv(envName);
-        }
+    private static String getValue(Map<String, String> env, String name, String defaultValue, String error) {
+        String value = env.get(name);
         if (value == null) {
             value = defaultValue;
         }
         if (value == null) {
             throw new EJBException(error + ". " +
-                                   "Please provide env:" + envName +
-                                   " or property:" + propertyName);
+                                   "Please provide env:" + name);
         }
         return value;
     }
 
-    private static <T> T getValue(Properties props, String propertyName, String envName, String defaultValue, String error, Function<String, T> mapper) {
-        return mapper.apply(getValue(props, propertyName, envName, defaultValue, error));
-    }
-
-    private Properties findProperties(String resourceName) {
-        try {
-            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(resourceName + ".properties");
-            if (resource != null) {
-                Properties fromFile = new Properties();
-                try {
-                    fromFile.load(resource);
-                    return fromFile;
-                } catch (IOException e) {
-                    throw new EJBException("Property file" + resourceName + ".properties exists. But I can't load it?", e);
-                }
-            }
-            Object lookup = InitialContext.doLookup(resourceName);
-            if (lookup instanceof Properties) {
-                return (Properties) lookup;
-            } else if (lookup != null) {
-                throw new NamingException("Found " + resourceName + ", but not of type Properties of type: " + lookup.getClass().getTypeName());
-            }
-        } catch (NamingException ex) {
-            log.debug("Exception: {}", ex.getMessage());
-        }
-        return new Properties();
+    private static <T> T getValue(Map<String, String> env, String name, String defaultValue, String error, Function<String, T> mapper) {
+        return mapper.apply(getValue(env, name, defaultValue, error));
     }
 
     private static int[] validateTime(String time) {

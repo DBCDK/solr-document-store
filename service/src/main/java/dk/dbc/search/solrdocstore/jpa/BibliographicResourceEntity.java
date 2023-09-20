@@ -67,6 +67,10 @@ public class BibliographicResourceEntity implements Serializable {
         this.value = value;
     }
 
+    public AgencyItemFieldKey asKey() {
+        return new AgencyItemFieldKey(agencyId, bibliographicRecordId, field);
+    }
+
     @Override
     public int hashCode() {
         int hash = 5;

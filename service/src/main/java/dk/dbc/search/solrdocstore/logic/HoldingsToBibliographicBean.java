@@ -103,9 +103,6 @@ public class HoldingsToBibliographicBean {
 
     private Stream<BibliographicEntity> removeAllHoldingsFromCommon(String bibliographicRecordId) {
         log.debug("removeAllHoldingsFromCommon");
-        BibliographicEntity commonRecord = findCommonRecord(bibliographicRecordId, true);
-        if (commonRecord == null)
-            return Stream.empty();
         return em.createQuery(
                 "SELECT h FROM HoldingsToBibliographicEntity h WHERE " +
                 "h.bibliographicRecordId=:bibId",
@@ -130,8 +127,10 @@ public class HoldingsToBibliographicBean {
     private Stream<BibliographicEntity> attachHoldingsToCommon(String bibliographicRecordId) {
         log.debug("attachHoldingsToCommon");
         BibliographicEntity commonRecord = findCommonRecord(bibliographicRecordId, false);
-        if (commonRecord == null)
+        if (commonRecord == null) {
+            log.warn("No common record to attach to for id: {}", bibliographicRecordId);
             return Stream.empty();
+        }
         return em.createQuery("SELECT h FROM HoldingsItemEntity h WHERE " +
                               "h.bibliographicRecordId=:bibId",
                               HoldingsItemEntity.class)

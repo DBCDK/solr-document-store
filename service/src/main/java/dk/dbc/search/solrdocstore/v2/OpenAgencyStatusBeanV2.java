@@ -2,17 +2,14 @@ package dk.dbc.search.solrdocstore.v2;
 
 import dk.dbc.search.solrdocstore.logic.EnqueueSupplierBean;
 import dk.dbc.search.solrdocstore.logic.OpenAgencyProxyBean;
-import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.response.OpenAgencyStatusResponse;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
-import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import jakarta.ejb.Stateless;
@@ -26,6 +23,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +73,9 @@ public class OpenAgencyStatusBeanV2 {
         try {
             String hash = hash(agencyId);
             if (hash.equals(reqUuid)) {
-                ArrayList<String> resp = purgeAgency(agencyId);
+                List<String> resp = purgeAgency(agencyId);
                 if (resp.isEmpty()) {
-                    resp.add("SUCCESS");
+                    resp = List.of("SUCCESS");
                 }
                 return Response.ok(resp).build();
             } else {
@@ -109,11 +107,8 @@ public class OpenAgencyStatusBeanV2 {
                 .replaceAll("[+/=]", "-"); //uri safe
     }
 
-    ArrayList<String> purgeAgency(int agencyId) throws SQLException {
-        ArrayList<String> resp = new ArrayList<>();
-        EnqueueCollector enqueue = supplier.getEnqueueCollector();
-        // Queue related records
-        entityManager.createQuery(
+    List<String> purgeAgency(int agencyId) throws SQLException {
+        List<BibliographicEntity> resp = entityManager.createQuery(
                 "SELECT b FROM BibliographicEntity b" +
                 " JOIN HoldingsToBibliographicEntity h2b" +
                 " JOIN HoldingsItemEntity hi" +
@@ -121,10 +116,8 @@ public class OpenAgencyStatusBeanV2 {
                 " AND hi.agencyId = h2b.holdingsAgencyId AND hi.bibliographicRecordId = h2b.bibliographicRecordId" +
                 " WHERE h2b.holdingsAgencyId = :agencyId", BibliographicEntity.class)
                 .setParameter("agencyId", agencyId)
-                .getResultList()
-                .stream()
-                .forEach(entity -> enqueue.add(entity, QueueType.MANIFESTATION));
-        enqueue.commit();
+                .getResultList();
+        System.out.println("resp = " + resp);
         // Purge holdings if no error occured
         if (resp.isEmpty()) {
             // Purge h2b
@@ -150,6 +143,8 @@ public class OpenAgencyStatusBeanV2 {
                 entityManager.remove(oa);
             }
         }
-        return resp;
+        return resp.stream()
+                .map(e -> e.getAgencyId() + "-" + e.getClassifier() + ":" + e.getBibliographicRecordId())
+                .collect(Collectors.toList());
     }
 }

@@ -189,16 +189,24 @@ public class BibliographicBeanV2 {
                 // If incoming bib entity is deleted, we mark it as delete so the enqueue adapter
                 // will delay the queue job, to prevent race conditions with updates to this same
                 // bib entity
-                enqueue.add(dbbe, bibliographicEntity.isDeleted() ? QueueType.MANIFESTATION_DELETED : QueueType.MANIFESTATION,
-                                  QueueType.UNIT, QueueType.WORK);
+                if (!dbbe.isDeleted()) {
+                    enqueue.add(dbbe, QueueType.UNIT, QueueType.WORK);
+                }
                 log.info("AddBibliographicKeys - Delete or recreate, going from {} -> {}", dbbe.isDeleted(), bibliographicEntity.isDeleted());
                 entityManager.merge(bibliographicEntity.asBibliographicEntity());
+
+                if (bibliographicEntity.isDeleted()) {
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION_DELETED);
+                } else {
+                    enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
+                }
 
                 h2bBean.updateBibliographic(dbbe.getAgencyId(), dbbe.getBibliographicRecordId(), bibliographicEntity.isDeleted(), enqueue);
 
             } else {
                 // Going from deleted to deleted shouldn't result in queue jobs
                 if (!bibliographicEntity.isDeleted()) {
+                    enqueue.add(dbbe, QueueType.UNIT, QueueType.WORK); // Might have moedv work/unit
                     enqueue.add(bibliographicEntity, QueueType.MANIFESTATION, QueueType.UNIT, QueueType.WORK);
                 }
                 // Simple update

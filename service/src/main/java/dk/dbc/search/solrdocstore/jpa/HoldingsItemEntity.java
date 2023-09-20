@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
@@ -175,32 +173,6 @@ public class HoldingsItemEntity implements Serializable {
         this.modified = modified == null ? null : Timestamp.from(modified);
     }
 
-    public Set<String> getLocations() {
-        if (indexKeys == null) {
-            return EMPTY_SET;
-        }
-        return indexKeys.stream()
-                .flatMap(holding -> holding.getOrDefault("holdingsitem.status", (List<String>) EMPTY_LIST)
-                        .stream()
-                        .map(status -> status.toLowerCase(Locale.ROOT))
-                        .flatMap(status -> {
-                            switch (status) {
-                                case "online":
-                                    return Stream.of(agencyId + "-online");
-                                case "onshelf":
-                                case "notforloan":
-                                    return Stream.concat(
-                                            Stream.of(agencyId + "-" + status),
-                                            holding.getOrDefault("holdingsitem.branchId", (List<String>) EMPTY_LIST)
-                                                    .stream()
-                                                    .map((String branchId) -> agencyId + "-" + branchId + "-" + status));
-                                default:
-                                    return Stream.empty();
-                            }
-                        }))
-                .collect(toSet());
-    }
-
     public Map<String, Integer> getStatusCount() {
         if (indexKeys == null)
             return EMPTY_MAP;
@@ -216,19 +188,22 @@ public class HoldingsItemEntity implements Serializable {
     }
 
     public HoldingsItemEntity copyForLightweightPresentation() {
-        Set<String> locationsCopy = getLocations();
         Map<String, Integer> statusCountCopy = getStatusCount();
-
         return new HoldingsItemEntity(agencyId, bibliographicRecordId, null, modified, trackingId) {
-            @Override
-            public Set<String> getLocations() {
-                return locationsCopy;
-            }
-
             @Override
             public Map<String, Integer> getStatusCount() {
                 return statusCountCopy;
             }
         };
+    }
+
+    @Override
+    public String toString() {
+        return "HoldingsItemEntity{" + "agencyId=" + agencyId + ", " +
+               "bibliographicRecordId=" + bibliographicRecordId + ", " +
+               "indexKeys=" + indexKeys + ", " +
+               "trackingId=" + trackingId + ", " +
+               "modified=" + modified +
+               '}';
     }
 }

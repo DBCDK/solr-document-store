@@ -90,8 +90,7 @@ public class OpenAgencyBean {
      */
     @Timed
     public void verifyOpenAgencyCache() {
-        List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class
-        )
+        List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class)
                 .getResultList();
         for (OpenAgencyEntity entry : entries) {
             if (entry.getLibraryType() == LibraryType.Missing) {
@@ -99,6 +98,8 @@ public class OpenAgencyBean {
             }
             log.debug("verifying openagency status for: {}", entry.getAgencyId());
             OpenAgencyEntity newEntry = proxy.loadOpenAgencyEntry(entry.getAgencyId());
+            System.out.println("entry = " + entry);
+            System.out.println("newEntry = " + newEntry);
             if (!entry.equals(newEntry)) {
                 agencyHasChanged(entry, newEntry);
             } else {

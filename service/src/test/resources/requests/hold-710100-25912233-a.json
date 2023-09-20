@@ -1,8 +1,0 @@
-{
-    "indexKeys": [
-        {
-            "holdingsitem.branchId": ["123456"],
-            "holdingsitem.status": ["OnShelf"]
-        }
-    ]
-}

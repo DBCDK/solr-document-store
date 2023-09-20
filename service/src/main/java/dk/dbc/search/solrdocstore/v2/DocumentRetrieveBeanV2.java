@@ -29,10 +29,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -90,8 +88,7 @@ public class DocumentRetrieveBeanV2 {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ classifier }/{ bibliographicRecordId : .*}")
     @Timed
-    public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
-                                                 @PathParam("agencyId") Integer agencyId,
+    public Response getDocumentWithHoldingsitems(@PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId,
                                                  @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
@@ -116,12 +113,11 @@ public class DocumentRetrieveBeanV2 {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}-{ classifier : [a-z0-9]+ }:{ bibliographicRecordId : .*}")
     @Timed
-    public Response getDocumentWithHoldingsitems2(@Context UriInfo uriInfo,
-                                                  @PathParam("agencyId") Integer agencyId,
+    public Response getDocumentWithHoldingsitems2(@PathParam("agencyId") Integer agencyId,
                                                   @PathParam("classifier") String classifier,
                                                   @PathParam("bibliographicRecordId") String bibliographicRecordId,
                                                   @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
-        return getDocumentWithHoldingsitems(uriInfo, agencyId, classifier, bibliographicRecordId, deleted404);
+        return getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId, deleted404);
     }
 
     public DocumentRetrieveResponse getDocumentWithHoldingsitems(int agencyId, String classifier, String bibliographicRecordId) throws Exception {
@@ -156,8 +152,7 @@ public class DocumentRetrieveBeanV2 {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("unit/{ unitid }")
     @Timed
-    public Response getUnitDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
-                                                      @PathParam("unitid") String unitId,
+    public Response getUnitDocumentsWithHoldingsItems(@PathParam("unitid") String unitId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
         log.info("getUnitDocumentsWithHoldingsItems");
         log.debug("Fetching manifestations for unit {}, includeHIIK: {}", unitId, includeHoldingsItemsIndexKeys);
@@ -188,8 +183,7 @@ public class DocumentRetrieveBeanV2 {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("work/{ workid }")
     @Timed
-    public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
-                                                      @PathParam("workid") String workId,
+    public Response getWorkDocumentsWithHoldingsItems(@PathParam("workid") String workId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
         log.info("getWorkDocumentsWithHoldingsItems");
         log.debug("Fetching manifestations for work {}, includeHIIK: {}", workId, includeHoldingsItemsIndexKeys);
