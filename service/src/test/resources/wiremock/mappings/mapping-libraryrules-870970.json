@@ -1,0 +1,17 @@
+{
+  "id": "ebbc7a0b-07f3-32c9-9024-4a0a3aad2f8d",
+  "request": {
+    "url": "/vipcore/libraryrules/870970",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "body-libraryrules-870970.json",
+    "headers": {
+      "server": "Payara Micro #badassfish",
+      "content-type": "application/json",
+      "x-frame-options": "SAMEORIGIN"
+    }
+  },
+  "uuid": "ebbc7a0b-07f3-32c9-9024-4a0a3aad2f8d"
+}
