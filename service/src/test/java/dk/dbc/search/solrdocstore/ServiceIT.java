@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.*;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-public class ServiceTest extends ServiceTester {
+public class ServiceIT extends ServiceTester {
 
     @Test
     public void testBibliographicAndHoldings() throws Exception {
