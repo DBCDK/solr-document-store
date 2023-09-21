@@ -95,16 +95,14 @@ public class HoldingsItemBeanV1 {
             log.trace("create");
             entity = new HoldingsItemEntity(agencyId, bibliographicRecordId, indexKeys, null, trackingId);
             entityManager.persist(entity);
-
-            h2bBean.tryToAttachToBibliographicRecord(agencyId, bibliographicRecordId, enqueue,
-                                                     QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+            h2bBean.updateHolding(agencyId, bibliographicRecordId, false, enqueue);
         } else {
             log.trace("update");
             entity.setIndexKeys(indexKeys);
             entityManager.merge(entity);
 
             queueRelatedBibliographic(entity, enqueue,
-                                      QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
+                                      QueueType.HOLDING, QueueType.UNITHOLDING, QueueType.WORKHOLDING);
         }
 
         enqueue.commit();
@@ -127,14 +125,7 @@ public class HoldingsItemBeanV1 {
             HoldingsItemEntity entity = entityManager.find(HoldingsItemEntity.class, key);
             if (entity != null) {
                 EnqueueCollector enqueue = enqueueSupplier.getEnqueueCollector();
-                HoldingsToBibliographicKey h2bKey = new HoldingsToBibliographicKey(agencyId, bibliographicRecordId);
-                HoldingsToBibliographicEntity binding = entityManager.find(HoldingsToBibliographicEntity.class, h2bKey);
-                if (binding != null) {
-                    log.trace("binding = {} - enqueue", binding);
-                    queueRelatedBibliographic(entity, enqueue,
-                                              QueueType.HOLDING, QueueType.UNIT, QueueType.WORK);
-                    entityManager.remove(binding);
-                }
+                h2bBean.updateHolding(agencyId, bibliographicRecordId, true, enqueue);
                 entityManager.remove(entity);
                 enqueue.commit();
             }

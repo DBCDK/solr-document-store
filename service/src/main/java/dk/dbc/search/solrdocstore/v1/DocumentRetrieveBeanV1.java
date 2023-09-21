@@ -11,10 +11,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 
 /**
  *
@@ -31,43 +29,39 @@ public class DocumentRetrieveBeanV1 {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}/{ classifier }/{ bibliographicRecordId : .*}")
     @Timed
-    public Response getDocumentWithHoldingsitems(@Context UriInfo uriInfo,
-                                                 @PathParam("agencyId") Integer agencyId,
+    public Response getDocumentWithHoldingsitems(@PathParam("agencyId") Integer agencyId,
                                                  @PathParam("classifier") String classifier,
                                                  @PathParam("bibliographicRecordId") String bibliographicRecordId,
                                                  @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
-        return proxy.getDocumentWithHoldingsitems(uriInfo, agencyId, classifier, bibliographicRecordId, deleted404);
+        return proxy.getDocumentWithHoldingsitems(agencyId, classifier, bibliographicRecordId, deleted404);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("combined/{ agencyId : \\d+}-{ classifier : [a-z0-9]+ }:{ bibliographicRecordId : .*}")
     @Timed
-    public Response getDocumentWithHoldingsitems2(@Context UriInfo uriInfo,
-                                                  @PathParam("agencyId") Integer agencyId,
+    public Response getDocumentWithHoldingsitems2(@PathParam("agencyId") Integer agencyId,
                                                   @PathParam("classifier") String classifier,
                                                   @PathParam("bibliographicRecordId") String bibliographicRecordId,
                                                   @QueryParam("deleted404") @DefaultValue("false") boolean deleted404) throws Exception {
-        return proxy.getDocumentWithHoldingsitems2(uriInfo, agencyId, classifier, bibliographicRecordId, deleted404);
+        return proxy.getDocumentWithHoldingsitems2(agencyId, classifier, bibliographicRecordId, deleted404);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("unit/{ unitid }")
     @Timed
-    public Response getUnitDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
-                                                      @PathParam("unitid") String unitId,
+    public Response getUnitDocumentsWithHoldingsItems(@PathParam("unitid") String unitId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
-        return proxy.getUnitDocumentsWithHoldingsItems(uriInfo, unitId, includeHoldingsItemsIndexKeys);
+        return proxy.getUnitDocumentsWithHoldingsItems(unitId, includeHoldingsItemsIndexKeys);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("work/{ workid }")
     @Timed
-    public Response getWorkDocumentsWithHoldingsItems(@Context UriInfo uriInfo,
-                                                      @PathParam("workid") String workId,
+    public Response getWorkDocumentsWithHoldingsItems(@PathParam("workid") String workId,
                                                       @DefaultValue("false") @QueryParam("includeHoldingsItemsIndexKeys") boolean includeHoldingsItemsIndexKeys) throws Exception {
-        return proxy.getWorkDocumentsWithHoldingsItems(uriInfo, workId, includeHoldingsItemsIndexKeys);
+        return proxy.getWorkDocumentsWithHoldingsItems(workId, includeHoldingsItemsIndexKeys);
     }
 }

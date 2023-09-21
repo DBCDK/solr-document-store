@@ -4,11 +4,7 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.logic.OpenAgencyProxyBean;
 import jakarta.ejb.EJBException;
-import org.junit.Before;
 import org.junit.Test;
-
-import static dk.dbc.search.solrdocstore.BeanFactoryUtil.*;
-import static dk.dbc.search.solrdocstore.OpenAgencyUtil.*;
 
 import static org.junit.Assert.*;
 
@@ -18,22 +14,15 @@ import static org.junit.Assert.*;
  */
 public class OpenAgencyProxyBeanTest {
 
-    OpenAgencyProxyBean openAgencyLoader;
-
-    private OpenAgencyProxyBean proxy;
-
-    @Before
-    public void setUp() {
-        proxy = createOpenAgencyProxyBean();
-    }
+    private OpenAgencyProxyBean proxy = new MockOpenAgencyProxyBean();
 
     @Test
     public void openAgencyParser() throws Exception {
         System.out.println("openAgencyParser");
 
-        OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(COMMON_AGENCY);
+        OpenAgencyEntity openAgency = proxy.loadOpenAgencyEntry(LibraryType.COMMON_AGENCY);
         System.out.println("COMMON_AGENCY = " + openAgency);
-        assertEquals(makeOpenAgencyEntity(COMMON_AGENCY), openAgency);
+        assertEquals(new OpenAgencyEntity(LibraryType.COMMON_AGENCY, LibraryType.NonFBS, true, false, true), openAgency);
     }
 
     @Test
@@ -56,5 +45,4 @@ public class OpenAgencyProxyBeanTest {
         } catch (EJBException ex) {
         }
     }
-
 }

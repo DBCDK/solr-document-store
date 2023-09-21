@@ -37,9 +37,11 @@ public enum QueueType {
     RESOURCE("resource", JobType.MANIFESTATION),
     ENDPOINT("endpoint", JobType.MANIFESTATION),
     UNIT("unit", JobType.UNIT),
+    UNITHOLDING("unitholding", JobType.UNIT),
     UNITRESOURCE("unitresource", JobType.UNIT),
     UNITENDPOINT("unitendpoint", JobType.UNIT),
     WORK("work", JobType.WORK),
+    WORKHOLDING("workholding", JobType.WORK),
     WORKRESOURCE("workresource", JobType.WORK),
     WORKENDPOINT("workendpoint", JobType.WORK);
 

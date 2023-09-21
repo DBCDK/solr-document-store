@@ -105,6 +105,7 @@ public class BibliographicEntity implements Serializable {
         hash = 43 * hash + Objects.hashCode(this.work);
         hash = 43 * hash + Objects.hashCode(this.unit);
         hash = 43 * hash + ( this.deleted ? 1 : 0 );
+        hash = 43 * hash + Objects.hashCode(this.indexKeys);
         hash = 43 * hash + Objects.hashCode(this.trackingId);
         return hash;
     }
@@ -125,7 +126,13 @@ public class BibliographicEntity implements Serializable {
                Objects.equals(work, that.work) &&
                Objects.equals(unit, that.unit) &&
                deleted == that.deleted &&
+               Objects.equals(indexKeys, that.indexKeys) &&
                Objects.equals(trackingId, that.trackingId);
+    }
+
+    @Override
+    public String toString() {
+        return "BibliographicEntity{" + "agencyId=" + agencyId + ", classifier=" + classifier + ", bibliographicRecordId=" + bibliographicRecordId + ", repositoryId=" + repositoryId + ", work=" + work + ", unit=" + unit + ", deleted=" + deleted + ", indexKeys=" + indexKeys + ", trackingId=" + trackingId + '}';
     }
 
     /**
@@ -224,14 +231,14 @@ public class BibliographicEntity implements Serializable {
             case MANIFESTATION:
                 return QueueJob.manifestation(agencyId, classifier, bibliographicRecordId);
             case UNIT:
-                if (deleted) {
-                    log.warn("Not queueing for UNIT type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);
+                if (unit == null) {
+                    log.warn("Not queueing for UNIT type because {}-{}:{} {}has no unit", agencyId, classifier, bibliographicRecordId, deleted ? "(deleted) " : "");
                     return null;
                 }
                 return QueueJob.unit(unit);
             case WORK:
-                if (deleted) {
-                    log.warn("Not queueing for WORK type because {}-{}:{} is deleted", agencyId, classifier, bibliographicRecordId);
+                if (work == null) {
+                    log.warn("Not queueing for WORK type because {}-{}:{} {}has no work", agencyId, classifier, bibliographicRecordId, deleted ? "(deleted) " : "");
                     return null;
                 }
                 return QueueJob.work(work);

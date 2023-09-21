@@ -90,8 +90,7 @@ public class OpenAgencyBean {
      */
     @Timed
     public void verifyOpenAgencyCache() {
-        List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class
-        )
+        List<OpenAgencyEntity> entries = entityManager.createQuery("SELECT oa FROM OpenAgencyEntity oa", OpenAgencyEntity.class)
                 .getResultList();
         for (OpenAgencyEntity entry : entries) {
             if (entry.getLibraryType() == LibraryType.Missing) {

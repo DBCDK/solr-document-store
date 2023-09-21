@@ -3,14 +3,10 @@ package dk.dbc.search.solrdocstore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import dk.dbc.commons.jdbc.util.JDBCUtil;
 import dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import java.sql.Connection;
@@ -52,7 +48,7 @@ public class JpaSolrDocStoreIntegrationTester extends AbstractJpaTestBase {
     public void executeSqlScript(String resourcePath) {
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            try (Connection connection = PG.createConnection() ;
+            try (Connection connection = PG.createConnection();
                  Statement stmt = connection.createStatement()) {
                 stmt.execute(content);
             }
@@ -103,8 +99,8 @@ public class JpaSolrDocStoreIntegrationTester extends AbstractJpaTestBase {
 
     protected Set<String> queueContentAndClear() {
         HashSet<String> enqueued = new HashSet<>();
-        try (Connection connection = PG.createConnection() ;
-             Statement stmt = connection.createStatement() ;
+        try (Connection connection = PG.createConnection();
+             Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery("DELETE FROM queue RETURNING consumer || ',' || jobid")) {
             while (resultSet.next()) {
                 enqueued.add(resultSet.getString(1));
@@ -119,8 +115,8 @@ public class JpaSolrDocStoreIntegrationTester extends AbstractJpaTestBase {
 
     protected Set<String> queueRemovePostponed() {
         HashSet<String> enqueued = new HashSet<>();
-        try (Connection connection = PG.createConnection() ;
-             Statement stmt = connection.createStatement() ;
+        try (Connection connection = PG.createConnection();
+             Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery("DELETE FROM queue WHERE dequeueafter > NOW() RETURNING consumer || ',' || jobid")) {
             while (resultSet.next()) {
                 enqueued.add(resultSet.getString(1));

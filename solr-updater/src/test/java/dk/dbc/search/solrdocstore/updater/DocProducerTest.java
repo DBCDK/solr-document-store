@@ -112,7 +112,7 @@ public class DocProducerTest {
             }
         };
 
-        SolrDocStoreResponse node = docProducer.fetchSourceDoc(QueueJob.manifestation(300101, "clazzifier", "23645564"));
+        SolrDocStoreResponse node = docProducer.fetchSourceDoc(QueueJob.manifestation(300101, "katalog", "23645564"));
 
         System.out.println("node = " + node);
 

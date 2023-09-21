@@ -44,8 +44,8 @@ public class StatusBeanV2 {
     public Response getStatus() {
         log.trace("getStatus called ");
 
-        try (Connection connection = getConnection() ;
-             Statement stmt = connection.createStatement() ;
+        try (Connection connection = getConnection();
+             Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery("SELECT NOW()")) {
             if (resultSet.next()) {
                 resultSet.getTimestamp(1);
