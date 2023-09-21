@@ -23,12 +23,12 @@ public class OpenAgencyBeanTest extends BeanTester {
         Set<Integer> changedAgencies = new HashSet<>();
         Set<Integer> purgedAgencies = new HashSet<>();
 
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false));
 
         bean(bf -> {
             bf.openAgencyBean(collectingOpenAgencyBean(changedAgencies, purgedAgencies));
-            bf.openAgencyProxyBean(openAgencyProxyBeanWith(openAgencyEntityCommonAgency,
+            bf.openAgencyProxyBean(openAgencyProxyBeanWith(OPEN_AGENCY_COMMON_AGNECY,
                                                            new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false)));
             bf.openAgencyBean()
                     .verifyOpenAgencyCache();
@@ -78,12 +78,12 @@ public class OpenAgencyBeanTest extends BeanTester {
         Set<Integer> changedAgencies = new HashSet<>();
         Set<Integer> purgedAgencies = new HashSet<>();
 
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false));
 
         bean(bf -> {
             bf.openAgencyBean(collectingOpenAgencyBean(changedAgencies, purgedAgencies));
-            bf.openAgencyProxyBean(openAgencyProxyBeanWith(openAgencyEntityCommonAgency,
+            bf.openAgencyProxyBean(openAgencyProxyBeanWith(OPEN_AGENCY_COMMON_AGNECY,
                                                            new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true)));
             bf.openAgencyBean()
                     .verifyOpenAgencyCache();
@@ -107,13 +107,13 @@ public class OpenAgencyBeanTest extends BeanTester {
         Set<Integer> changedAgencies = new HashSet<>();
         Set<Integer> purgedAgencies = new HashSet<>();
 
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false),
                 Doc.holdingsItem(711100, "n").addHolding(filler -> filler.itemId("x").status("OnShelf")));
 
         bean(bf -> {
             bf.openAgencyBean(collectingOpenAgencyBean(changedAgencies, purgedAgencies));
-            bf.openAgencyProxyBean(openAgencyProxyBeanWith(openAgencyEntityCommonAgency,
+            bf.openAgencyProxyBean(openAgencyProxyBeanWith(OPEN_AGENCY_COMMON_AGNECY,
                                                            new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true)));
             bf.openAgencyBean()
                     .verifyOpenAgencyCache();

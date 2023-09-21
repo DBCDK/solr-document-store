@@ -21,7 +21,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
 
     @Test
     public void newCommonRecordWithExistingHoldings() throws Exception {
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(300101, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(300102, LibraryType.FBS, true, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", "a")),
@@ -50,7 +50,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
          * 700?1? authCreateCommonRecord
          * 700??1 partOfDanbib
          */
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700111, LibraryType.FBS, true, false, true),
                 new OpenAgencyEntity(700115, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(700151, LibraryType.FBS, false, false, true),
@@ -126,7 +126,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     @Test
     public void getDocumentWithHoldings() throws Exception {
         System.out.println("getDocumentWithHoldings");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700055, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800055, LibraryType.NonFBS, true, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", "a")),
@@ -147,7 +147,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     @Test
     public void getWorkWithHoldings() throws Exception {
         System.out.println("getWorkWithHoldings");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700055, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800055, LibraryType.NonFBS, true, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", "a")),
@@ -169,7 +169,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     @Test
     public void getUnitWithHoldings() throws Exception {
         System.out.println("getUnitWithHoldings");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700055, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800055, LibraryType.NonFBS, true, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", "a")),

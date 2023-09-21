@@ -28,7 +28,7 @@ public class BeanTester extends AbstractJpaTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(BeanTester.class);
 
-    public static final OpenAgencyEntity openAgencyEntityCommonAgency = new OpenAgencyEntity(COMMON_AGENCY, LibraryType.FBS, false, false, false);
+    public static final OpenAgencyEntity OPEN_AGENCY_COMMON_AGNECY = new OpenAgencyEntity(COMMON_AGENCY, LibraryType.FBS, false, false, false);
 
     @FunctionalInterface
     public static interface BeanScope {

@@ -20,7 +20,7 @@ public class ResourceBeanTest extends BeanTester {
     public void testAddResource() throws Exception {
         System.out.println("testAddResource");
 
-        persist(openAgencyEntityCommonAgency);
+        persist(OPEN_AGENCY_COMMON_AGNECY);
         Doc.AddResourceRequestBuilder builder = Doc.resource(LibraryType.COMMON_AGENCY, BIB_ID).field("hasCoverUrl");
         BibliographicResourceEntity entity = builder.entity();
         String request = builder.json();
@@ -81,7 +81,7 @@ public class ResourceBeanTest extends BeanTester {
     @Test
     public void testAddCommonSharedResourceEnqueue() {
         System.out.println("testAddCommonSharedResourceEnqueue");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800000, LibraryType.NonFBS, false, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)),
@@ -106,7 +106,7 @@ public class ResourceBeanTest extends BeanTester {
     @Test
     public void testAddFBSSharedResourceEnqueue() {
         System.out.println("testAddFBSSharedResourceEnqueue");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800000, LibraryType.NonFBS, false, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)),
@@ -131,7 +131,7 @@ public class ResourceBeanTest extends BeanTester {
     @Test
     public void testAddNonFBSSharedResourceEnqueue() {
         System.out.println("testAddNonFBSSharedResourceEnqueue");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800000, LibraryType.NonFBS, false, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)),
@@ -155,7 +155,7 @@ public class ResourceBeanTest extends BeanTester {
     @Test
     public void testGetResourcesByBibItem() {
         System.out.println("testGetResourcesByBibItem");
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(800000, LibraryType.NonFBS, false, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)),

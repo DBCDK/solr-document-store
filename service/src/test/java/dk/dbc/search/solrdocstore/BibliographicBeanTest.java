@@ -22,7 +22,7 @@ public class BibliographicBeanTest extends BeanTester {
 
     @Test
     public void newCommonRecordWithExistingHoldings() throws Exception {
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
                 new OpenAgencyEntity(700100, LibraryType.FBS, true, false, false),
                 Doc.holdingsItem(700000, BIB_ID).addHolding(filler -> filler.status("OnShelf").itemId("a")),
@@ -88,7 +88,7 @@ public class BibliographicBeanTest extends BeanTester {
 
         BibliographicEntity docBefore = Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("foo", "bar")).build();
         String docUpdate = Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("foo", "buh")).json();
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 docBefore);
 
         jpa(em -> {
@@ -154,10 +154,35 @@ public class BibliographicBeanTest extends BeanTester {
         });
     }
 
+    @Test(timeout = 2_000L)
+    public void testMovedRecordEnqueuesAllUnitsAndWorks() throws Exception {
+        System.out.println("testMovedRecordEnqueuesAllUnitsAndWorks");
+
+        persist(OPEN_AGENCY_COMMON_AGNECY);
+        stdQueueRules();
+
+        bean(bf -> {
+            Response resp = bf.bibliographicBeanV2()
+                    .addBibliographicKeys(false, Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)).json());
+            assertThat(resp.getStatus(), is(200));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder("a,870970-basis:record", "b,unit:1", "c,work:1"));
+
+        bean(bf -> {
+            Response resp = bf.bibliographicBeanV2()
+                    .addBibliographicKeys(false, Doc.bibliographic(BIB_ID)
+                                          .unit("unit:2")
+                                          .work("work:2")
+                                          .indexKeys(filler -> filler.add("id", BIB_ID)).json());
+            assertThat(resp.getStatus(), is(200));
+        });
+        assertThat(queueContentAndClear(), containsInAnyOrder("a,870970-basis:record", "b,unit:1", "c,work:1", "b,unit:2", "c,work:2"));
+    }
+
     @Test
     public void updateExistingBibliographicPostToDeletedQueueIsDelayedAndResurrect() throws Exception {
         System.out.println("updateExistingBibliographicPostToDeletedQueueIsDelayedAndResurrect");
-        persist(openAgencyEntityCommonAgency);
+        persist(OPEN_AGENCY_COMMON_AGNECY);
         stdQueueRules();
 
         bean(bf -> {
@@ -191,7 +216,7 @@ public class BibliographicBeanTest extends BeanTester {
     public void skipQueueParameter() throws Exception {
         System.out.println("skipQueueParameter");
 
-        persist(openAgencyEntityCommonAgency);
+        persist(OPEN_AGENCY_COMMON_AGNECY);
         stdQueueRules();
 
         // New record shall always be queued
@@ -239,7 +264,7 @@ public class BibliographicBeanTest extends BeanTester {
     public void testHoldingsUponCommonStaysIfDeletedManifestationIsCreated() throws Exception {
         System.out.println("testHoldingsUponCommonStaysIfDeletedManifestationIsCreated");
 
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)),
                 Doc.holdingsItem(700000, BIB_ID).addHolding(filler -> filler.status("OnShelf").itemId("a")),

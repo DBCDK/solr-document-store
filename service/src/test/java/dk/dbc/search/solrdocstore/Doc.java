@@ -1,8 +1,10 @@
 package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -122,6 +124,35 @@ public class Doc {
 
         public BibliographicEntityBuilder work(String work) {
             entity.setWork(work);
+            return this;
+        }
+
+
+        public BibliographicEntityBuilder indexKeys(String json) throws JsonProcessingException {
+            JsonNode tree = O
+                    .enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES,
+                            JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
+                    .readTree(json);
+            if (!tree.isObject()) 
+                throw new IllegalStateException("indexKeys should be an object");
+            HashMap<String, List<String>> indeKeys = new HashMap<>();
+            tree.fields().forEachRemaining(e -> {
+                List<String> list = indeKeys.computeIfAbsent(e.getKey(), k -> new ArrayList<>());
+                JsonNode value = e.getValue();
+                if (value.isArray()) {
+                    value.forEach(v -> {
+                        if (v.isObject() || v.isArray() || v.isNull()) {
+                            throw new IllegalStateException("Nested values should be arrays of primitives");
+                        }
+                        list.add(v.asText());
+                    });
+                } else if (value.isObject()) {
+                    throw new IllegalStateException("Nested values should be in arrays");
+                } else {
+                    list.add(value.asText());
+                }
+            });
+            entity.setIndexKeys(IndexKeys.from(indeKeys));
             return this;
         }
 

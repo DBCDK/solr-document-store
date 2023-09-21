@@ -19,7 +19,7 @@ public class HoldingsItemBeanV1Test extends BeanTester {
     public void testEnqueueNewChangeAndDelete() throws Exception {
         System.out.println("testEnqueueNewChangeAndDelete");
 
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(710100, LibraryType.FBS, true, false, false),
                 Doc.bibliographic("25912233").indexKeys(filler -> filler.add("id", "25912233")),
                 new QueueRuleEntity("a", QueueType.HOLDING, 0),

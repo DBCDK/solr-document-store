@@ -60,7 +60,7 @@ public class OpenAgencyStatusBeanTest extends BeanTester {
     public void purgeEnqueuesWhenHasLiveHoldings() throws Exception {
         System.out.println("purgeEnqueuesWhenHasLiveHoldings");
 
-        persist(openAgencyEntityCommonAgency,
+        persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(711111, LibraryType.FBS, true, true, true),
                 Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("id", BIB_ID)),
                 Doc.holdingsItem(711111, BIB_ID).addHolding(filler -> filler.status("OnShelf")),
