@@ -98,8 +98,6 @@ public class OpenAgencyBean {
             }
             log.debug("verifying openagency status for: {}", entry.getAgencyId());
             OpenAgencyEntity newEntry = proxy.loadOpenAgencyEntry(entry.getAgencyId());
-            System.out.println("entry = " + entry);
-            System.out.println("newEntry = " + newEntry);
             if (!entry.equals(newEntry)) {
                 agencyHasChanged(entry, newEntry);
             } else {

@@ -117,7 +117,6 @@ public class OpenAgencyStatusBeanV2 {
                 " WHERE h2b.holdingsAgencyId = :agencyId", BibliographicEntity.class)
                 .setParameter("agencyId", agencyId)
                 .getResultList();
-        System.out.println("resp = " + resp);
         // Purge holdings if no error occured
         if (resp.isEmpty()) {
             // Purge h2b
