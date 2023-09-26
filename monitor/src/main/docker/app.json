@@ -1,11 +1,30 @@
 {
-    "appName": "solr-docstore-monitor",
+    "appName": "solr-doc-store-monitor",
     "jdbc": {
         "jdbc/solr-doc-store": {
             "xa": false,
             "url": "${DOCSTORE_POSTGRES_URL}",
             "maxSize": "${POOL_SIZE}",
             "steadySize": 0
+        }
+    },
+    "hazelcast": {
+        "clusterName": "${HAZELCAST_CLUSTER}",
+        "mapConfig": {
+            "known_queues": {
+                "ttl": "PT72H",
+                "maxIdle": "PT24H",
+                "sizePerNode": 1000,
+                "format": "BINARY",
+                "backupCount": 0,
+                "asyncBackupCount":  0,
+                "nearCache": {
+                    "ttl": "PT24H",
+                    "maxIdle": "PT24H",
+                    "sizePerNode": 100,
+                    "format": "OBJECT"
+                }
+            }
         }
     }
 }
