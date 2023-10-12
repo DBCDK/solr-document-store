@@ -154,6 +154,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
         GenericContainer solr = new GenericContainer(image)
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("dk.dbc.SOLR")))
                 .withEnv("ZKSTRING", "localhost")
+                .withEnv("SOLR_ENABLE_STREAM_BODY", "true")
                 .withExposedPorts(8983)
                 .waitingFor(Wait.forHttp("/solr/corepo-1/select?q=*:*"))
                 .withStartupTimeout(Duration.ofMinutes(1));
