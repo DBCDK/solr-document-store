@@ -1,4 +1,4 @@
-def workerNode = 'devel10'
+def workerNode = 'devel11'
 def dockerRepository = 'https://docker-de.artifacts.dbccloud.dk'
 
 if (env.BRANCH_NAME == 'master') {
@@ -15,7 +15,7 @@ if (env.BRANCH_NAME == 'master') {
     ])
 }
 pipeline {
-    agent { label "devel10" }
+    agent { label workerNode }
     tools {
         maven "Maven 3"
         jdk "jdk11"
