@@ -20,7 +20,6 @@ import java.util.Objects;
 public class OpenAgencyEntity implements Serializable {
 
     private static final long serialVersionUID = 2352663426617537636L;
-    private static final String SCHOOLLIBRARY = "Skolebibliotek";
 
     @Id
     private int agencyId;

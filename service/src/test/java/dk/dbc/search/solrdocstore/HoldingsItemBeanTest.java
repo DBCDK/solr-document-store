@@ -26,8 +26,7 @@ public class HoldingsItemBeanTest extends BeanTester {
             assertThrows(NotFoundException.class, () -> {
                      bf.holdingsItemBeanV2().getHoldings(700000, "25912233");
                  });
-        }
-        );
+        });
         assertThat(queueContentAndClear(), empty());
 
         bean(bf -> {
@@ -134,6 +133,16 @@ public class HoldingsItemBeanTest extends BeanTester {
         bean(bf -> {
             HoldingsItemsDocuments doc = bf.holdingsItemBeanV2().getHoldings(700000, "25912233");
             assertThat(doc, notNullValue());
+        });
+
+        bean(bf -> {
+            bf.holdingsItemBeanV2().deleteHoldings(700000, "25912233");
+        });
+
+        bean(bf -> {
+            assertThrows(NotFoundException.class, () -> {
+                     bf.holdingsItemBeanV2().getHoldings(700000, "25912233");
+                 });
         });
     }
 }
