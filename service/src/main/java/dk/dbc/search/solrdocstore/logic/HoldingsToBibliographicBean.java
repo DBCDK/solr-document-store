@@ -295,9 +295,7 @@ public class HoldingsToBibliographicBean {
         HoldingsToBibliographicEntity entity = find(agencyId, bibliographicRecordId);
         BibliographicEntity common = findCommonRecord(bibliographicRecordId, false);
         if (common != null) {
-            if (entity == null) {
-                em.persist(new HoldingsToBibliographicEntity(agencyId, COMMON_AGENCY, bibliographicRecordId, true));
-            } else if (entity.getBibliographicAgencyId() != COMMON_AGENCY) {
+            if (entity != null && entity.getBibliographicAgencyId() != COMMON_AGENCY) {
                 entity.setBibliographicAgencyId(COMMON_AGENCY);
                 entity.setIsCommonDerived(true);
                 em.merge(entity);
