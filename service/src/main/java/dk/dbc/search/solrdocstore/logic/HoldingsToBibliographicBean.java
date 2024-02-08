@@ -246,6 +246,8 @@ public class HoldingsToBibliographicBean {
      * @return list of affected
      */
     private Stream<BibliographicEntity> attachToLocalOrCommon(int agencyId, String bibliographicRecordId, boolean includeSelf) {
+        if(findHoldings(agencyId, bibliographicRecordId) == null)
+            return Stream.empty(); // Nothing to attach to
         log.debug("attachToCommon");
         Stream.Builder<BibliographicEntity> builder = Stream.builder();
         BibliographicEntity bibl = findLocalRecord(agencyId, bibliographicRecordId, false);
