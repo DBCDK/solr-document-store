@@ -2,13 +2,15 @@ package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,11 +20,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase.PG;
 
 public class JpaSolrDocStoreIntegrationTester extends AbstractJpaTestBase {
 
@@ -72,7 +69,7 @@ public class JpaSolrDocStoreIntegrationTester extends AbstractJpaTestBase {
                 throw new FileNotFoundException(file);
             JsonNode tree = O.readTree(is);
             if (fedoraStreamDate != null) {
-                ( (ArrayNode) tree.with("indexKeys").withArray("rec.fedoraStreamDate") )
+                tree.withObject("indexKeys").withArray("rec.fedoraStreamDate")
                         .removeAll()
                         .add(fedoraStreamDate.toString());
             }
