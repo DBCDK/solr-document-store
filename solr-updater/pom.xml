@@ -10,6 +10,20 @@
     <artifactId>solr-doc-store-updater</artifactId>
     <packaging>war</packaging>
 
+    <repositories>
+        <repository>
+            <id>payara-patched-externals</id>
+            <name>Payara Patched Externals</name>
+            <url>https://nexus.payara.fish/repository/payara-artifacts/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -112,7 +126,7 @@
         <dependency>
             <groupId>fish.payara.api</groupId>
             <artifactId>payara-api</artifactId>
-            <version>${payara.major.minor.version}</version>
+            <version>6.9.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
