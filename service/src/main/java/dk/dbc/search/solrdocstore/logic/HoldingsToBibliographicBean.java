@@ -8,6 +8,8 @@ import dk.dbc.search.solrdocstore.jpa.AgencyClassifierItemKey;
 import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
+import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
+import jakarta.ejb.EJBException;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,7 @@ public class HoldingsToBibliographicBean {
     }
 
     private Stream<BibliographicEntity> updateHolding(int agencyId, boolean delete, String bibliographicRecordId) {
-        switch (openAgency.lookup(agencyId).getLibraryType()) {
+        switch (retryingLookup(agencyId).getLibraryType()) {
             case NonFBS:
                 if (delete) {
                     return detachHolding(agencyId, bibliographicRecordId);
@@ -71,6 +73,18 @@ public class HoldingsToBibliographicBean {
                 break;
         }
         return Stream.empty();
+    }
+
+    private OpenAgencyEntity retryingLookup(int agencyId) throws RuntimeException {
+        for (int i = 0 ; i < 3 ; i++) {
+            try {
+                return openAgency.lookup(agencyId);
+            } catch (EJBException e) {
+                if (i == 2)
+                    throw e;
+            }
+        }
+        throw new IllegalStateException("Cannot get here");
     }
 
     private Stream<BibliographicEntity> updateBibliographic(int agencyId, String bibliographicRecordId, boolean deleted) {
@@ -246,7 +260,7 @@ public class HoldingsToBibliographicBean {
      * @return list of affected
      */
     private Stream<BibliographicEntity> attachToLocalOrCommon(int agencyId, String bibliographicRecordId, boolean includeSelf) {
-        if(findHoldings(agencyId, bibliographicRecordId) == null)
+        if (findHoldings(agencyId, bibliographicRecordId) == null)
             return Stream.empty(); // Nothing to attach to
         log.debug("attachToCommon");
         Stream.Builder<BibliographicEntity> builder = Stream.builder();
