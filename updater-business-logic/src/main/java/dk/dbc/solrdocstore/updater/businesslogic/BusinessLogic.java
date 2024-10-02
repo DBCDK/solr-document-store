@@ -253,6 +253,7 @@ public class BusinessLogic {
             switch (resourceName) {
                 case "hasCoverUrl": // Anyone has
                 case "hasDDFCoverUrl":
+                case "hasFBICoverUrl":
                     add = owners.values().contains(Boolean.TRUE);
                     break;
                 default:
