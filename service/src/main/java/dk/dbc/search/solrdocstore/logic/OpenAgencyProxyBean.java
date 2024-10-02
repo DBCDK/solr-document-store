@@ -43,7 +43,7 @@ public class OpenAgencyProxyBean {
             }
             final List<LibraryRules> libraryRuleList = libraryRulesResponse.getLibraryRules();
             if (libraryRuleList == null || libraryRuleList.isEmpty()) {
-                return null;
+                return new OpenAgencyEntity(agencyId, LibraryType.Unknown, false, false, false);
             } else {
                 return new OpenAgencyEntity(libraryRuleList.get(0));
             }
