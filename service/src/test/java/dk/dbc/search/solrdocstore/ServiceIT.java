@@ -45,5 +45,10 @@ public class ServiceIT extends ServiceTester {
                 .as(DocumentRetrieveResponse.class);
         assertThat(withoutHoldings.bibliographicRecord.getRepositoryId(), is("870970-basis:25912233"));
         assertThat(withoutHoldings.holdingsItemRecords, empty());
+
+        // Test api/v2/resource/hasFBICoverUrl/710100%3A38622617 with and witout escaping
+        // @Path("{fieldName}/{agencyId}:{bibliographicRecordId}")
+        put(apiV2("resources", "hasFBICoverUrl", "870970:38622617") ).send("{\"has\":true}").statusIs(Response.Status.OK);
+        put(apiV2("resources", "hasFBICoverUrl", "870970%3A38622617") ).send("{\"has\":true}").statusIs(Response.Status.OK); // 404 not found
     }
 }
