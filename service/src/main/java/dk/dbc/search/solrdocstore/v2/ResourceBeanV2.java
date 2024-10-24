@@ -91,7 +91,7 @@ public class ResourceBeanV2 {
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @Path("{fieldName}/{agencyId}:{bibliographicRecordId}")
+    @Path("{fieldName}/{agencyId}{separator: :|%3A|%3a}{bibliographicRecordId}")
     @Operation(
             operationId = "add/update-resource",
             summary = "Adds/updates/removes a resource to/from an item",
@@ -121,7 +121,7 @@ public class ResourceBeanV2 {
     @DELETE
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    @Path("{fieldName}/{agencyId}:{bibliographicRecordId}")
+    @Path("{fieldName}/{agencyId}{separator: :|%3A|%3a}{bibliographicRecordId}")
     @Operation(
             operationId = "delete-resource",
             summary = "Removes a resource to an item",
