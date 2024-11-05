@@ -136,6 +136,7 @@ pipeline {
                     dir("deploy") {
                         sh "set-new-version services/search/solr-doc-store.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
                         sh "set-new-version services/search/solr-doc-store-updater.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
+                        sh "set-new-version services/search/solr-doc-store-updater-holdings.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
                     }
                 }
             }
