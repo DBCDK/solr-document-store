@@ -1,4 +1,4 @@
-def workerNode = 'devel12'
+def workerNode = 'devel11'
 def dockerRepository = 'https://docker-de.artifacts.dbccloud.dk'
 
 if (env.BRANCH_NAME == 'master') {
