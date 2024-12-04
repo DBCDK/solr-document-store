@@ -1,4 +1,4 @@
-def workerNode = 'devel11'
+def workerNode = 'devel12'
 def dockerRepository = 'https://docker-de.artifacts.dbccloud.dk'
 
 if (env.BRANCH_NAME == 'master') {
@@ -16,10 +16,6 @@ if (env.BRANCH_NAME == 'master') {
 }
 pipeline {
     agent { label workerNode }
-    tools {
-        maven "Maven 3"
-        jdk "jdk11"
-    }
     environment {
         MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
         DOCKER_PUSH_TAG = "${env.BUILD_NUMBER}"
