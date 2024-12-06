@@ -14,8 +14,11 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import static dk.dbc.commons.testcontainers.postgres.AbstractPgTestBase.PG;
 
@@ -37,8 +41,6 @@ import static dk.dbc.commons.testcontainers.postgres.AbstractPgTestBase.PG;
 public class ServiceTester extends AbstractJpaAndRestTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceTester.class);
-
-    private static final String DOCKER_POSTFIX = System.getProperty("docker.image.postfix", "-current:latest");
 
     private static final Client CLIENT = clientBuilderWithObjectMapper(new ObjectMapper()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
@@ -122,7 +124,8 @@ public class ServiceTester extends AbstractJpaAndRestTestBase {
     }
 
     private static GenericContainer makeService(URI wiremockUrl, DBCPostgreSQLContainer pg) {
-        GenericContainer container = new GenericContainer("solr-doc-store-service" + DOCKER_POSTFIX)
+        String dockerImageName = Docker.build();
+        GenericContainer container = new GenericContainer(dockerImageName)
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("dk.dbc.SERVICE")))
                 .withEnv("SYSTEM_NAME", "devel")
                 .withEnv("DEVELOPER_MODE", "true")

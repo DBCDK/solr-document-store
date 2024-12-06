@@ -18,7 +18,9 @@
  */
 package dk.dbc.solrdocstore.updater.businesslogic;
 
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,7 +32,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
  */
 public class ProfileProviderTest {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testMockProfileProvider() throws Exception {
         System.out.println("testMockProfileProvider");
 

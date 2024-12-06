@@ -37,7 +37,6 @@ import static dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase.PG;
  */
 public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
 
-    private static final String DOCKER_POSTFIX = System.getProperty("docker.image.postfix", "-current:latest");
 
     public static final int WIREMOCK_PORT = getWiremockPort();
     public static final WireMockFromDirectory WIREMOCK = makeWireMock(WIREMOCK_PORT);
@@ -163,7 +162,8 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
     }
 
     private static GenericContainer makeService(URI wiremockUrl, DBCPostgreSQLContainer pg) {
-        GenericContainer container = new GenericContainer("solr-doc-store-service" + DOCKER_POSTFIX)
+        String dockerImageName = Docker.build();
+        GenericContainer container = new GenericContainer(dockerImageName.replace("-updater:", "-service:"))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("dk.dbc.SERVICE")))
                 .withEnv("SYSTEM_NAME", "devel")
                 .withEnv("DEVELOPER_MODE", "true")

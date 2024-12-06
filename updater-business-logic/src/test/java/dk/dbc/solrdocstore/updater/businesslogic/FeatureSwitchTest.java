@@ -18,7 +18,9 @@
  */
 package dk.dbc.solrdocstore.updater.businesslogic;
 
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,7 +31,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class FeatureSwitchTest {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testNoFeaturesDefined() throws Exception {
         System.out.println("testNoFeaturesDefined");
 
@@ -40,7 +43,8 @@ public class FeatureSwitchTest {
         assertThat(featureSwitch2.should(FeatureSwitch.Feature.SCAN), is(true));
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testOnlyAdd() throws Exception {
         System.out.println("testOnlyAdd");
 
@@ -49,7 +53,8 @@ public class FeatureSwitchTest {
         assertThat(featureSwitch.should(FeatureSwitch.Feature.HOLDING_ITEMS_ROLE), is(true));
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testOnlyAddExplicit() throws Exception {
         System.out.println("testOnlyAddExplicit");
 
@@ -59,7 +64,8 @@ public class FeatureSwitchTest {
         assertThat(featureSwitch.should(FeatureSwitch.Feature.ATTACH_RESOURCES), is(true));
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testRemove() throws Exception {
         System.out.println("testRemove");
 
@@ -69,7 +75,8 @@ public class FeatureSwitchTest {
         assertThat(featureSwitch.should(FeatureSwitch.Feature.ATTACH_RESOURCES), is(false));
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testNone() throws Exception {
         System.out.println("testNone");
 

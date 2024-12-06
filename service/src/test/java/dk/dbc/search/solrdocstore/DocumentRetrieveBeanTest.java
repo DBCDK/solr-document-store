@@ -5,11 +5,12 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import org.hamcrest.Matchers;
-import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -20,6 +21,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     private static final String BIB_ID = "12345678";
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void newCommonRecordWithExistingHoldings() throws Exception {
         persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(300101, LibraryType.FBS, true, false, false),
@@ -40,6 +42,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void getPartOfDanbibCommon() throws Exception {
         System.out.println("getPartOfDanbibCommon");
         /*
@@ -117,13 +120,14 @@ public class DocumentRetrieveBeanTest extends BeanTester {
             List<Integer> agencies = bf.documentRetrieveBeanV2()
                     .getPartOfDanbibCommon(BIB_ID);
             System.out.println("agencies = " + agencies);
-            assertThat(agencies, Matchers.containsInAnyOrder(700111, 700115, 700151,
-                                                             700211, 700215, 700251,
-                                                             700311, 700315, 700351));
+            assertThat(agencies, containsInAnyOrder(700111, 700115, 700151,
+                                                    700211, 700215, 700251,
+                                                    700311, 700315, 700351));
         });
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void getDocumentWithHoldings() throws Exception {
         System.out.println("getDocumentWithHoldings");
         persist(OPEN_AGENCY_COMMON_AGNECY,
@@ -145,6 +149,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void getWorkWithHoldings() throws Exception {
         System.out.println("getWorkWithHoldings");
         persist(OPEN_AGENCY_COMMON_AGNECY,
@@ -167,6 +172,7 @@ public class DocumentRetrieveBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void getUnitWithHoldings() throws Exception {
         System.out.println("getUnitWithHoldings");
         persist(OPEN_AGENCY_COMMON_AGNECY,

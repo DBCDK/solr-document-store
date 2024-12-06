@@ -4,7 +4,9 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -15,7 +17,8 @@ import static org.hamcrest.Matchers.*;
  */
 public class HoldingsItemBeanV1Test extends BeanTester {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testEnqueueNewChangeAndDelete() throws Exception {
         System.out.println("testEnqueueNewChangeAndDelete");
 

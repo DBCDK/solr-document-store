@@ -6,7 +6,9 @@ import dk.dbc.search.solrdocstore.logic.OpenAgencyBean;
 import dk.dbc.search.solrdocstore.logic.OpenAgencyProxyBean;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.junit.Assert.*;
 
@@ -17,6 +19,7 @@ import static org.junit.Assert.*;
 public class OpenAgencyBeanTest extends BeanTester {
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyVerify() throws Exception {
         System.out.println("openAgencyVerify");
 
@@ -38,6 +41,7 @@ public class OpenAgencyBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyVerifyChangesOpenAgencyReverted() throws Exception {
         System.out.println("openAgencyVerifyChangesOpenAgencyReverted");
 
@@ -72,6 +76,7 @@ public class OpenAgencyBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyVerifyChangesCanMigrateNoHoldings() throws Exception {
         System.out.println("openAgencyVerifyChangesCanMigrateNoHoldings");
 
@@ -101,6 +106,7 @@ public class OpenAgencyBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyVerifyChangesCantMigrate() throws Exception {
         System.out.println("openAgencyVerifyChangesCantMigrate");
 

@@ -28,8 +28,6 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +35,10 @@ import jakarta.ws.rs.client.Client;
 import java.io.IOException;
 import java.util.Collection;
 import jakarta.ws.rs.core.UriBuilderException;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dk.dbc.search.solrdocstore.updater.IntegrationTestBase.serviceBase;
 import static org.junit.Assert.assertEquals;
@@ -53,7 +55,7 @@ public class DocProducerIT extends IntegrationTestBase {
 
     private DocProducer docProducer;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         config = makeConfig(getClient());
         config.getSolrCollections().forEach(this::wipe);
@@ -64,6 +66,7 @@ public class DocProducerIT extends IntegrationTestBase {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void loadAndDelete() throws Exception {
         System.out.println("loadAndDelete");
 
@@ -77,6 +80,7 @@ public class DocProducerIT extends IntegrationTestBase {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void loadAndFewerHolding() throws Exception {
         System.out.println("loadAndFewerHolding");
 
@@ -90,6 +94,7 @@ public class DocProducerIT extends IntegrationTestBase {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void creatAndDeleteWithoutHoldings() throws Exception {
         System.out.println("creatAndDeleteWithoutHoldings");
 
@@ -103,6 +108,7 @@ public class DocProducerIT extends IntegrationTestBase {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void changeHoldingsCount() throws Exception {
         System.out.println("changeHoldingsCount");
 

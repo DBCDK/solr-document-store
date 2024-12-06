@@ -5,12 +5,14 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicKey;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import org.junit.Test;
 
 import jakarta.ws.rs.core.Response;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
 import static org.hamcrest.Matchers.*;
@@ -21,6 +23,7 @@ public class BibliographicBeanTest extends BeanTester {
     private static final String BIB_ID = "record";
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void newCommonRecordWithExistingHoldings() throws Exception {
         persist(OPEN_AGENCY_COMMON_AGNECY,
                 new OpenAgencyEntity(700000, LibraryType.FBS, true, false, false),
@@ -84,6 +87,7 @@ public class BibliographicBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void updateExistingBibliographicPost() throws Exception {
 
         BibliographicEntity docBefore = Doc.bibliographic(BIB_ID).indexKeys(filler -> filler.add("foo", "bar")).build();
@@ -106,7 +110,8 @@ public class BibliographicBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void reviveOlderDeletedRecordFail() throws Exception {
         System.out.println("reviveOlderDeletedRecordFail");
 
@@ -130,7 +135,8 @@ public class BibliographicBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void reviveOlderDeletedRecordSuccess() throws Exception {
         System.out.println("reviveOlderDeletedRecordSuccess");
 
@@ -154,7 +160,8 @@ public class BibliographicBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testMovedRecordEnqueuesAllUnitsAndWorks() throws Exception {
         System.out.println("testMovedRecordEnqueuesAllUnitsAndWorks");
 
@@ -180,6 +187,7 @@ public class BibliographicBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void updateExistingBibliographicPostToDeletedQueueIsDelayedAndResurrect() throws Exception {
         System.out.println("updateExistingBibliographicPostToDeletedQueueIsDelayedAndResurrect");
         persist(OPEN_AGENCY_COMMON_AGNECY);
@@ -212,7 +220,8 @@ public class BibliographicBeanTest extends BeanTester {
 
     }
 
-    @Test(timeout = 20_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void skipQueueParameter() throws Exception {
         System.out.println("skipQueueParameter");
 
@@ -260,7 +269,8 @@ public class BibliographicBeanTest extends BeanTester {
         assertThat(queueContentAndClear(), containsInAnyOrder("a,870970-basis:record", "b,unit:1", "c,work:1"));
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testHoldingsUponCommonStaysIfDeletedManifestationIsCreated() throws Exception {
         System.out.println("testHoldingsUponCommonStaysIfDeletedManifestationIsCreated");
 

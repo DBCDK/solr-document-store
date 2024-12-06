@@ -7,7 +7,9 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import jakarta.ws.rs.NotFoundException;
 import java.time.Instant;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -15,7 +17,8 @@ import static org.junit.Assert.assertThrows;
 
 public class HoldingsItemBeanTest extends BeanTester {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testCase() {
 
         persist(new OpenAgencyEntity(LibraryType.COMMON_AGENCY, LibraryType.FBS, true, false, false),

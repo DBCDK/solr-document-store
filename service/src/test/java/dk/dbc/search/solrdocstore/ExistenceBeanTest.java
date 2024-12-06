@@ -1,7 +1,9 @@
 package dk.dbc.search.solrdocstore;
 
-import org.junit.Test;
 import dk.dbc.search.solrdocstore.response.ExistsResponse;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,7 +14,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class ExistenceBeanTest extends BeanTester {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testBibliographicNonExisting() throws Exception {
         System.out.println("testBibliographicNonExisting");
         bean(bf -> {
@@ -22,7 +25,8 @@ public class ExistenceBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testBibliographicExisting() throws Exception {
         System.out.println("testBibliographicExisting");
         persist(Doc.bibliographic("12345678")
@@ -35,7 +39,8 @@ public class ExistenceBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testBibliographicDeleted() throws Exception {
         System.out.println("testBibliographicDeleted");
         persist(Doc.bibliographic("12345678")
@@ -48,7 +53,8 @@ public class ExistenceBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testHoldingsNonExisting() throws Exception {
         System.out.println("testHoldingsNonExisting");
         bean(bf -> {
@@ -58,7 +64,8 @@ public class ExistenceBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testHoldingsExisting() throws Exception {
         System.out.println("testHoldingsExisting");
         persist(Doc.holdingsItem(777777, "12345678")

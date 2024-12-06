@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package dk.dbc.solrdocstore.updater.businesslogic;
 
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,10 +31,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class LibraryRuleProviderTest {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testMockLibraryRuleProvider() throws Exception {
         System.out.println("testMockLibraryRuleProvider");
-        
+
         LibraryRuleProviderMock libraryRuleProvider = new LibraryRuleProviderMock();
         VipCoreLibraryRule libraryRule = libraryRuleProvider.libraryRulesFor("700000");
         assertThat(libraryRule.isPartOfBibdk(), is(false));

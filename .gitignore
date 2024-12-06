@@ -31,6 +31,7 @@ nb-*.xml
 
 # docker
 src/main/docker/solr-doc-store*.war
+/*/docker.out
 
 # targets
 target/

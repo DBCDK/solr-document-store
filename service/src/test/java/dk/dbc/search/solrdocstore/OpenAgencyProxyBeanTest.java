@@ -4,7 +4,9 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.logic.OpenAgencyProxyBean;
 import jakarta.ejb.EJBException;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.junit.Assert.*;
 
@@ -17,6 +19,7 @@ public class OpenAgencyProxyBeanTest {
     private OpenAgencyProxyBean proxy = new MockOpenAgencyProxyBean();
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyParser() throws Exception {
         System.out.println("openAgencyParser");
 
@@ -26,6 +29,7 @@ public class OpenAgencyProxyBeanTest {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyParser15() throws Exception {
         System.out.println("openAgencyParser15");
 
@@ -35,6 +39,7 @@ public class OpenAgencyProxyBeanTest {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void openAgencyParserAgencyGone() throws Exception {
         System.out.println("openAgencyParserAgencyGone");
 

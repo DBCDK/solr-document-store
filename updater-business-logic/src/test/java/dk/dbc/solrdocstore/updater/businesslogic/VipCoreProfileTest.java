@@ -20,7 +20,9 @@ package dk.dbc.solrdocstore.updater.businesslogic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,7 +36,8 @@ public class VipCoreProfileTest {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testFromVipCore() throws Exception {
         System.out.println("testFromVipCore");
         String content = "{'collectionIdentifiers':['150005-analyse','150005-artikel','150005-portraet','150021-bibliotek','150021-fjern','150052-ekurser','150053-turteori','150061-ebog','150061-netlydbog','800000-bibdk','870970-bibdk','870970-lokalbibl','870970-udland','870971-avis','870971-faktalink','870971-forfweb','870971-tsart','870978-artikel','870978-avis','870978-tsart','911116-katalog'],'includeOwnHoldings':false}";

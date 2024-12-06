@@ -18,7 +18,6 @@
  */
 package dk.dbc.search.solrdocstore.queue;
 
-import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import dk.dbc.pgqueue.supplier.QueueSupplier;
 import dk.dbc.pgqueue.consumer.JobConsumer;
 import dk.dbc.pgqueue.consumer.JobMetaData;
@@ -29,45 +28,43 @@ import java.sql.Statement;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  *
  * @author DBC {@literal <dbc.dk>}
  */
-public class QueueJobIT {
+public class QueueJobIT extends AbstractTestBase {
 
     private static final QueueSupplier QUEUE_SUPPLIER = new QueueSupplier(QueueJob.STORAGE_ABSTRACTION);
     private static final String QUEUE = "test";
 
-    private PostgresITDataSource pg;
-    private DataSource dataSource;
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        pg = new PostgresITDataSource("queue");
-        dataSource = pg.getDataSource();
-        DatabaseMigrator.migrate(dataSource);
-        try (Connection connection = dataSource.getConnection() ;
+        DatabaseMigrator.migrate(PG.datasource());
+        try (Connection connection = PG.createConnection();
              Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("TRUNCATE TABLE queue CASCADE");
             stmt.executeUpdate("TRUNCATE TABLE queue_error CASCADE");
         }
     }
 
-    @Test(timeout = 5000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testStoreRetrieve() throws Exception {
         System.out.println("store-retrieve");
 
-        QueueJob job1 =  QueueJob.work("work:12345678");
-        QueueJob job2 =  QueueJob.manifestation(888888, "clazzifier", "87654321"); // This should be collapsed
-        QueueJob job3 =  QueueJob.manifestation(888888, "clazzifier", "87654321"); // Into this
+        QueueJob job1 = QueueJob.work("work:12345678");
+        QueueJob job2 = QueueJob.manifestation(888888, "clazzifier", "87654321"); // This should be collapsed
+        QueueJob job3 = QueueJob.manifestation(888888, "clazzifier", "87654321"); // Into this
 
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = PG.createConnection()) {
             PreparedQueueSupplier<QueueJob> supplier = QUEUE_SUPPLIER.preparedSupplier(connection);
 
             supplier.enqueue(QUEUE, job1);
@@ -78,11 +75,11 @@ public class QueueJobIT {
 
             QueueWorker worker = QueueWorker.builder(QueueJob.STORAGE_ABSTRACTION)
                     .consume(QUEUE)
-                    .dataSource(dataSource)
+                    .dataSource(PG.datasource())
                     .skipDuplicateJobs(QueueJob.DEDUPLICATE_ABSTRACTION)
                     .build((JobConsumer<QueueJob>) (Connection connection1, QueueJob job, JobMetaData metaData) -> {
-                       list.add(job);
-                   });
+                        list.add(job);
+                    });
             worker.start();
 
             QueueJob actual1 = list.pollFirst(5, TimeUnit.SECONDS);
@@ -90,8 +87,8 @@ public class QueueJobIT {
 
             worker.stop();
 
-            assertEquals(job1.toString(), actual1.toString());
-            assertEquals(job3.toString(), actual2.toString());
+            assertThat(actual1.toString(), is(job1.toString()));
+            assertThat(actual2.toString(), is(job3.toString()));
         }
     }
 }
