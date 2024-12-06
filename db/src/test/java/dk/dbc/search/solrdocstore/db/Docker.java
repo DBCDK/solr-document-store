@@ -15,7 +15,7 @@ import org.testcontainers.utility.DockerImageName;
 
 public class Docker {
 
-    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-postgresql";
+    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-postgresql-2.0";
 
     private Docker() {
     }

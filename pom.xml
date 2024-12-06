@@ -26,9 +26,7 @@
         <module>service</module>
         <module>updater-business-logic</module>
         <module>solr-updater</module>
-        <!--<module>postgresql</module>-->
         <module>monitor</module>
-        <!--<module>emulator</module>-->
     </modules>
 
     <groupId>dk.dbc</groupId>

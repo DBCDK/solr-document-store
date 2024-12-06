@@ -88,10 +88,10 @@ pipeline {
                     if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
                         docker.withRegistry(dockerRepository, 'docker') {
                             for(def image : ["solr-doc-store-monitor", "solr-doc-store-updater", "solr-doc-store-postgresql", "solr-doc-store-service"]) {
-                                def app = docker.image("docker-de.artifacts.dbccloud.dk/${image}:${label}")
-                                app.push("docker-de.artifacts.dbccloud.dk/${image}-${version}:${label}")
+                                def app = docker.image("docker-de.artifacts.dbccloud.dk/${image}-${version}:${label}")
+                                app.push
                                 if (env.BRANCH_NAME == "master") {
-                                    app.push "docker-de.artifacts.dbccloud.dk/${image}-${version}:latest"
+                                    app.push "latest"
                                 }
                             }
                         }

@@ -15,7 +15,7 @@ import org.testcontainers.utility.DockerImageName;
 
 public class Docker {
 
-    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-monitor";
+    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-monitor-2.0";
 
     private Docker() {
     }
