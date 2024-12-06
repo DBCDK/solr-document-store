@@ -163,7 +163,7 @@ public class IntegrationTestBase extends AbstractJpaAndRestTestBase {
 
     private static GenericContainer makeService(URI wiremockUrl, DBCPostgreSQLContainer pg) {
         String dockerImageName = Docker.build();
-        GenericContainer container = new GenericContainer(dockerImageName.replace("-updater:", "-service:"))
+        GenericContainer container = new GenericContainer(dockerImageName.replace("-updater-2.0:", "-service-2.0:"))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("dk.dbc.SERVICE")))
                 .withEnv("SYSTEM_NAME", "devel")
                 .withEnv("DEVELOPER_MODE", "true")
