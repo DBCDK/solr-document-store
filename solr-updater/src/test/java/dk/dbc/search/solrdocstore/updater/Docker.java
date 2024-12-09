@@ -42,7 +42,7 @@ public class Docker {
             // in CI environment
             Map<String, String> env = System.getenv();
             final String branch_name = env.getOrDefault("CHANGE_BRANCH", env.get("BRANCH_NAME"));
-            if ("main".equals(branch_name)) {
+            if ("master".equals(branch_name)) {
                 tag = build_number;
             } else {
                 tag = branch_name + "-" + build_number;
