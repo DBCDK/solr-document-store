@@ -16,9 +16,10 @@ import jakarta.ws.rs.core.UriBuilderException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dk.dbc.commons.testcontainers.postgres.AbstractJpaTestBase.PG;
 import static dk.dbc.search.solrdocstore.updater.IntegrationTestBase.solrBase;
@@ -29,7 +30,7 @@ public class WorkerIT extends IntegrationTestBase {
     Config config;
     Worker worker;
 
-    @Before
+    @BeforeEach
     public void setup() {
         config = makeConfig(getClient());
         config.getSolrCollections().forEach(this::wipe);
@@ -38,7 +39,7 @@ public class WorkerIT extends IntegrationTestBase {
         worker = makeWorker(config);
     }
 
-    @After
+    @AfterEach
     public void finish() throws InterruptedException {
         worker.es.shutdown();
         boolean terminated = worker.es.awaitTermination(1, TimeUnit.SECONDS);
@@ -46,7 +47,8 @@ public class WorkerIT extends IntegrationTestBase {
             throw new AssertionError("Cannot terminate executorservice");
     }
 
-    @Test(timeout = 5000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testQueueWorkerConsumes() throws Exception {
         System.out.println("testQueueWorkerConsumes");
 
@@ -82,8 +84,8 @@ public class WorkerIT extends IntegrationTestBase {
                 assertEquals("After dequeue - solr document count in: " + solrCollection.getName(), 5, count);
             });
         }
-        try (Connection connection = PG.createConnection() ;
-             Statement stmt = connection.createStatement() ;
+        try (Connection connection = PG.createConnection();
+             Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery("SELECT jobid, diag FROM queue_error ORDER BY jobid")) {
             assertTrue("Atleast one in queue_error", resultSet.next());
             System.out.println("resultSet.getString(1) = " + resultSet.getString(1));

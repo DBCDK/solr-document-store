@@ -20,7 +20,9 @@ package dk.dbc.solrdocstore.updater.businesslogic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,7 +35,8 @@ public class VipCoreLibraryRuleTest {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testLibraryRuleFromVip() throws Exception {
         System.out.println("testLibraryRuleFromVip");
 

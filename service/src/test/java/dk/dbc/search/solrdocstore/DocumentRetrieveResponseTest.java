@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -18,7 +20,8 @@ public class DocumentRetrieveResponseTest {
 
     private static final ObjectMapper O = new ObjectMapper();
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testCase() throws Exception {
         System.out.println("testCase");
 

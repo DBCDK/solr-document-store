@@ -6,13 +6,15 @@ import dk.dbc.search.solrdocstore.jpa.BibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.dbc.search.solrdocstore.v2.BibliographicRecordAPIBeanV2;
-import org.junit.Before;
-import org.junit.Test;
 
 import jakarta.ws.rs.core.Response;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,7 +26,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     private static final String BIB_ID = "page-order";
     private static final String REPO_ID = "870970-basis:" + BIB_ID;
 
-    @Before
+    @BeforeEach
     public void before() {
         persist(Doc.bibliographic(103862, BIB_ID).commonRepositoryId().unit("unit:6").work("work:2").trackingId("track:8").indexKeys(filler -> filler.add("id", BIB_ID)),
                 Doc.bibliographic(207130, BIB_ID).commonRepositoryId().unit("unit:3").work("work:0").trackingId("track:5").deleted(),
@@ -52,6 +54,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testGetRelatedHoldings() {
         bean(bf -> {
             Response resp = bf.bibliographicRecordAPIBeanV2()
@@ -63,6 +66,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testGetBibliographicKeys() {
         bean(bf -> {
             Response resp = bf.bibliographicRecordAPIBeanV2()
@@ -74,6 +78,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testPagingBibliographicRecordId() {
         // Should have 8 results, which with a pagesize of 5 is 2 pages
 
@@ -87,6 +92,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testPagingRepositoryId() throws JsonProcessingException {
         // Should have 8 results, which with a pagesize of 5 is 2 pages
         bean(bf -> {
@@ -99,6 +105,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testAgencyIdOrderingBibliographicRecordId() {
         String bibliographicRecordId = "page-order";
         bean(bf -> {
@@ -112,6 +119,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testTrackingIdBibliographicRecordId() {
         bean(bf -> {
             List<String> result = getColumnOfBib(bf.bibliographicRecordAPIBeanV2(), BIB_ID, "trackingId", false, bibItem -> bibItem.getTrackingId());
@@ -124,6 +132,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testDeletedOrderingBibliographicRecordId() {
         bean(bf -> {
             List<Boolean> result = getColumnOfBib(bf.bibliographicRecordAPIBeanV2(), BIB_ID, "deleted", false, bibItem -> bibItem.isDeleted());
@@ -136,6 +145,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testAgencyIdOrderingRepositoryId() throws JsonProcessingException {
         bean(bf -> {
             List<Integer> result = getColumnOfRepo(bf.bibliographicRecordAPIBeanV2(), REPO_ID, "agencyId", false, bibItem -> bibItem.getAgencyId());
@@ -148,6 +158,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testTrackingIdOrderingRepositoryId() throws JsonProcessingException {
         bean(bf -> {
             List<String> result = getColumnOfRepo(bf.bibliographicRecordAPIBeanV2(), REPO_ID, "trackingId", false, bibItem -> bibItem.getTrackingId());
@@ -160,6 +171,7 @@ public class BibliographicRecordAPIBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testDeletedOrderingRepositoryId() throws JsonProcessingException {
         bean(bf -> {
             List<Boolean> result = getColumnOfRepo(bf.bibliographicRecordAPIBeanV2(), REPO_ID, "deleted", false, bibItem -> bibItem.isDeleted());

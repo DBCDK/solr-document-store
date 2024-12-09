@@ -10,14 +10,17 @@ import dk.dbc.search.solrdocstore.jpa.AgencyItemKey;
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import jakarta.persistence.EntityManager;
 import java.util.Set;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class HoldingsToBibliographicBeanTest extends BeanTester {
 
-    @Test(timeout = 10_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testBibliographicFirst() throws Exception {
         System.out.println("testBibliographicFirst");
 
@@ -133,7 +136,8 @@ public class HoldingsToBibliographicBeanTest extends BeanTester {
         enqueueCollector.clear();
     }
 
-    @Test(timeout = 10_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testHoldingsFirst() throws Exception {
         System.out.println("testHoldingsFirst");
 

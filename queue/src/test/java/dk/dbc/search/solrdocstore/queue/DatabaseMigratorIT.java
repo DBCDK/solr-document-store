@@ -18,34 +18,17 @@
  */
 package dk.dbc.search.solrdocstore.queue;
 
-import dk.dbc.commons.testutils.postgres.connection.PostgresITDataSource;
 import java.sql.Connection;
 import java.sql.Statement;
-import javax.sql.DataSource;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
+public class DatabaseMigratorIT extends AbstractTestBase {
 
-/**
- *
- * @author DBC {@literal <dbc.dk>}
- */
-public class DatabaseMigratorIT {
-
-    private static PostgresITDataSource pg;
-    private static DataSource dataSource;
-
-    @Before
-    public void setUp() throws Exception {
-        pg = new PostgresITDataSource("queue");
-        dataSource = pg.getDataSource();
-    }
-
-    @After
+    @AfterEach
     public void shutDown() throws Exception {
-        try(Connection connection = dataSource.getConnection();
-            Statement stmt = connection.createStatement()) {
+        try (Connection connection = PG.createConnection();
+             Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("DROP TABLE queue");
             stmt.executeUpdate("DROP TABLE queue_error CASCADE");
             stmt.executeUpdate("DROP TABLE solr_doc_store_queue_version");
@@ -53,11 +36,9 @@ public class DatabaseMigratorIT {
         }
     }
 
-
     @Test
     public void testMigrate() throws Exception {
         System.out.println("migrate");
-        DatabaseMigrator.migrate(dataSource);
+        DatabaseMigrator.migrate(PG.datasource());
     }
-
 }

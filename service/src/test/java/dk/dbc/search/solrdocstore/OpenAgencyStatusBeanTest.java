@@ -6,7 +6,9 @@ import dk.dbc.search.solrdocstore.jpa.HoldingsToBibliographicEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import dk.dbc.search.solrdocstore.v2.OpenAgencyStatusBeanV2;
 import java.net.URLEncoder;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,6 +23,7 @@ public class OpenAgencyStatusBeanTest extends BeanTester {
     private static final String BIB_ID = "23645564";
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void getStatusOk() throws Exception {
         System.out.println("getStatusOk");
         persist(new OpenAgencyEntity(711100, LibraryType.FBS, true, true, true));
@@ -31,6 +34,7 @@ public class OpenAgencyStatusBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void getStatusNotOk() throws Exception {
         System.out.println("getStatusNotOk");
         OpenAgencyEntity entity = new OpenAgencyEntity(711100, LibraryType.FBS, true, false, false);
@@ -47,6 +51,7 @@ public class OpenAgencyStatusBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void hashProducesUriSafe() throws Exception {
         System.out.println("hashProducesUriSafe");
         for (int i = 0 ; i < 33 ; i++) {
@@ -57,6 +62,7 @@ public class OpenAgencyStatusBeanTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void purgeEnqueuesWhenHasLiveHoldings() throws Exception {
         System.out.println("purgeEnqueuesWhenHasLiveHoldings");
 

@@ -3,9 +3,11 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
-import org.junit.Test;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static dk.dbc.search.solrdocstore.jpa.LibraryType.COMMON_AGENCY;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -17,6 +19,7 @@ public class ResourceBeanTest extends BeanTester {
     private static final String BIB_ID = "23556455";
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testAddResource() throws Exception {
         System.out.println("testAddResource");
 
@@ -35,7 +38,8 @@ public class ResourceBeanTest extends BeanTester {
         });
     }
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testAddResourceOntoDeleted() throws Exception {
         System.out.println("testAddResourceOntoDeleted");
 

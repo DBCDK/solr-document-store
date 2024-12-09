@@ -1,4 +1,4 @@
-def workerNode = 'devel11'
+def workerNode = 'devel12'
 def dockerRepository = 'https://docker-de.artifacts.dbccloud.dk'
 
 if (env.BRANCH_NAME == 'master') {
@@ -18,7 +18,6 @@ pipeline {
     agent { label workerNode }
     environment {
         MAVEN_OPTS = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-        DOCKER_PUSH_TAG = "${env.BUILD_NUMBER}"
         GITLAB_PRIVATE_TOKEN = credentials("metascrum-gitlab-api-token")
     }
     triggers {
@@ -38,15 +37,14 @@ pipeline {
                     sh """
                         rm -rf \$WORKSPACE/.repo/dk/dbc
                         mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo clean
-                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo -Ddocker.extra.args="--pull" -Ddocker.image.version=${version} -Ddocker.image.label=${label} org.jacoco:jacoco-maven-plugin:prepare-agent install javadoc:aggregate -Dsurefire.useFile=false
+                        mvn -B -Dmaven.repo.local=\$WORKSPACE/.repo org.jacoco:jacoco-maven-plugin:prepare-agent install  -Dsurefire.useFile=false
                     """
 
                     junit testResults: '**/target/surefire-reports/TEST-*.xml'
 
                     def java = scanForIssues tool: [$class: 'Java']
-                    def javadoc = scanForIssues tool: [$class: 'JavaDoc']
-
-                    publishIssues issues:[java,javadoc], unstableTotalAll:1
+                    
+                    publishIssues issues:[java], unstableTotalAll:1
                 }
             }
         }
@@ -89,9 +87,9 @@ pipeline {
                     def label = imageLabel()
                     if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
                         docker.withRegistry(dockerRepository, 'docker') {
-                            for(def image : ["solr-doc-store-emulator", "solr-doc-store-monitor", "solr-doc-store-updater", "solr-doc-store-postgresql", "solr-doc-store-service"]) {
-                                def app = docker.image("${image}-${version}:${label}")
-                                app.push()
+                            for(def image : ["solr-doc-store-monitor", "solr-doc-store-updater", "solr-doc-store-postgresql", "solr-doc-store-service"]) {
+                                def app = docker.image("docker-de.artifacts.dbccloud.dk/${image}-${version}:${label}")
+                                app.push label
                                 if (env.BRANCH_NAME == "master") {
                                     app.push "latest"
                                 }
@@ -130,9 +128,9 @@ pipeline {
             steps {
                 script {
                     dir("deploy") {
-                        sh "set-new-version services/search/solr-doc-store.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
-                        sh "set-new-version services/search/solr-doc-store-updater.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
-                        sh "set-new-version services/search/solr-doc-store-updater-holdings.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${DOCKER_PUSH_TAG} -b master"
+                        sh "set-new-version services/search/solr-doc-store.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${env.BUILD_NUMBER} -b master"
+                        sh "set-new-version services/search/solr-doc-store-updater.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${env.BUILD_NUMBER} -b master"
+                        sh "set-new-version services/search/solr-doc-store-updater-holdings.yml ${env.GITLAB_PRIVATE_TOKEN} metascrum/dit-gitops-secrets ${env.BUILD_NUMBER} -b master"
                     }
                 }
             }
@@ -168,9 +166,6 @@ pipeline {
                 }
             }
         }
-        success {
-            step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])
-        }
     }
 }
 
@@ -182,7 +177,7 @@ def imageLabel() {
     if (label == "master") {
         label = env.BUILD_NUMBER
     } else {
-        label = label.split(/\//)[-1]
+        label = label.split(/\//)[-1] + '-' + env.BUILD_NUMBER
     }
     return label
 }

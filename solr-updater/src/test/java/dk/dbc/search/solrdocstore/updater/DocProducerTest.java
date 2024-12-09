@@ -28,7 +28,6 @@ import dk.dbc.solrdocstore.updater.businesslogic.VipCoreLibraryRule;
 import dk.dbc.solrdocstore.updater.businesslogic.VipCoreProfile;
 import java.io.FileInputStream;
 import org.apache.solr.common.SolrInputDocument;
-import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import jakarta.ws.rs.client.Client;
@@ -37,6 +36,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -55,6 +57,7 @@ public class DocProducerTest {
     private static final Client CLIENT = ClientBuilder.newClient();
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void test() throws Exception {
         System.out.println("test");
 

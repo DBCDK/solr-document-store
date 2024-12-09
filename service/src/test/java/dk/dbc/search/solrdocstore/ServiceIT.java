@@ -2,7 +2,9 @@ package dk.dbc.search.solrdocstore;
 
 import dk.dbc.search.solrdocstore.response.DocumentRetrieveResponse;
 import jakarta.ws.rs.core.Response;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -14,6 +16,7 @@ import static org.hamcrest.Matchers.*;
 public class ServiceIT extends ServiceTester {
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testBibliographicAndHoldings() throws Exception {
         System.out.println("testBibliographicAndHoldings");
 
@@ -48,6 +51,7 @@ public class ServiceIT extends ServiceTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testResources() throws Exception {
         System.out.println("testResources");
 
@@ -62,13 +66,13 @@ public class ServiceIT extends ServiceTester {
 
         // Test api/v2/resource/hasFBICoverUrl/870970%3A38622617 with and witout escaping
         // @Path("{fieldName}/{agencyId}{separator: :|%3A|%3a}{bibliographicRecordId}")
-        put(apiV2("resource", "hasFBICoverUrl", "870970:38622617") ).send("{\"has\":true}").statusIs(Response.Status.OK);
-        delete(apiV2("resource", "hasFBICoverUrl", "870970:38622617") ).statusIs(Response.Status.OK);
+        put(apiV2("resource", "hasFBICoverUrl", "870970:38622617")).send("{\"has\":true}").statusIs(Response.Status.OK);
+        delete(apiV2("resource", "hasFBICoverUrl", "870970:38622617")).statusIs(Response.Status.OK);
 
-        put(apiV2("resource", "hasFBICoverUrl", "870970%3A38622617") ).send("{\"has\":true}").statusIs(Response.Status.OK);
-        delete(apiV2("resource", "hasFBICoverUrl", "870970%3A38622617") ).statusIs(Response.Status.OK);
+        put(apiV2("resource", "hasFBICoverUrl", "870970%3A38622617")).send("{\"has\":true}").statusIs(Response.Status.OK);
+        delete(apiV2("resource", "hasFBICoverUrl", "870970%3A38622617")).statusIs(Response.Status.OK);
 
-        put(apiV2("resource", "hasFBICoverUrl", "870970%3a38622617") ).send("{\"has\":true}").statusIs(Response.Status.OK);
-        delete(apiV2("resource", "hasFBICoverUrl", "870970%3a38622617") ).statusIs(Response.Status.OK);
+        put(apiV2("resource", "hasFBICoverUrl", "870970%3a38622617")).send("{\"has\":true}").statusIs(Response.Status.OK);
+        delete(apiV2("resource", "hasFBICoverUrl", "870970%3a38622617")).statusIs(Response.Status.OK);
     }
 }

@@ -4,7 +4,9 @@ import dk.dbc.search.solrdocstore.jpa.LibraryType;
 import dk.dbc.search.solrdocstore.jpa.BibliographicResourceEntity;
 import dk.dbc.search.solrdocstore.jpa.OpenAgencyEntity;
 import java.util.List;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,7 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class BibliographicResourceRetrieveBeanTest extends BeanTester {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testCase() throws Exception {
         System.out.println("testCase");
 

@@ -6,10 +6,12 @@ import dk.dbc.search.solrdocstore.jpa.IndexKeys;
 import dk.dbc.search.solrdocstore.logic.Marshaller;
 import java.sql.Statement;
 
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,6 +21,7 @@ public class BibliographicEntityTest extends BeanTester {
     private static final Marshaller MARSHALLER = new Marshaller();
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void simpleEncode() throws Exception {
         IndexKeys indexKeys = new IndexKeys();
         indexKeys.put("title", Arrays.asList("unix bogen", "title2"));
@@ -30,6 +33,7 @@ public class BibliographicEntityTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void simpleDecode() throws Exception {
         String jsonContent = "{\"agencyId\":200,\"classifier\":\"clazzifier\",\"bibliographicRecordId\":\"1234\",\"repositoryId\":\"id#1\",\"work\":\"work:1\",\"unit\":\"unit:2\",\"deleted\":false,\"indexKeys\":{\"title\": [\"unix bogen\", \"title2\"], \"id\": [\"argle\"] },\"trackingId\":\"\"}";
 
@@ -50,6 +54,7 @@ public class BibliographicEntityTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void StoreEntity() {
         jpa(em -> {
             IndexKeys indexKeys = new IndexKeys();
@@ -70,6 +75,7 @@ public class BibliographicEntityTest extends BeanTester {
     }
 
     @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void LoadEntity() throws Exception {
         sql(connection -> {
             try (Statement stmt = connection.createStatement()) {
@@ -96,5 +102,4 @@ public class BibliographicEntityTest extends BeanTester {
             assertThat(be.getTrackingId(), is("track"));
         });
     }
-
 }

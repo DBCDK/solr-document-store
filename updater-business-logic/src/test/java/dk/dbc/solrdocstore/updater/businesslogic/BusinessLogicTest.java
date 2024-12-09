@@ -36,15 +36,14 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.solr.common.SolrInputDocument;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.is;
@@ -54,7 +53,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
  *
  * @author Morten Bøgeskov (mb@dbc.dk)
  */
-@RunWith(Parameterized.class)
 public class BusinessLogicTest {
 
     private static final ObjectMapper O = new ObjectMapper()
@@ -68,20 +66,13 @@ public class BusinessLogicTest {
         }
     };
 
-    private final String name;
-    private final Path directory;
-
-    public BusinessLogicTest(String name, Path directory) {
-        this.name = name;
-        this.directory = directory;
-    }
-
-    @Test
-    public void testProcess() throws Exception {
+    @ParameterizedTest
+    @MethodSource
+    public void testProcess(String name, Path directory) throws Exception {
         System.out.println("process - " + name + " (in: " + directory + ")");
 
-        FeatureSwitch features = readFeatures();
-        JsonNode source = readJson("source.json");
+        FeatureSwitch features = readFeatures(directory);
+        JsonNode source = readJson("source.json", directory);
 
         /*
          * Build document without any features
@@ -116,7 +107,7 @@ public class BusinessLogicTest {
         /*
          * Create a diff of the with and without document
          */
-        String actual = computeDiff();
+        String actual = computeDiff(directory);
         try (OutputStream os = new FileOutputStream(directory.resolve("actual.txt").toFile())) {
             os.write(actual.getBytes(UTF_8));
         }
@@ -124,7 +115,7 @@ public class BusinessLogicTest {
         /*
          * Compare the diff to the expected result
          */
-        String expected = readExpected();
+        String expected = readExpected(directory);
         boolean equals = expected.equals(actual);
         if (!equals) {
             System.out.println("Expected:");
@@ -160,7 +151,7 @@ public class BusinessLogicTest {
                 });
     }
 
-    private FeatureSwitch readFeatures() throws IOException {
+    private FeatureSwitch readFeatures(Path directory) throws IOException {
         File featureFile = directory.resolve("features").toFile();
         if (!featureFile.exists())
             throw new IllegalArgumentException("No such featureFile: " + featureFile);
@@ -169,7 +160,7 @@ public class BusinessLogicTest {
         return new FeatureSwitch(featureString);
     }
 
-    private String readExpected() throws IOException {
+    private String readExpected(Path directory) throws IOException {
         File expectedFile = directory.resolve("expected.txt").toFile();
         if (!expectedFile.exists())
             throw new IllegalArgumentException("No such expectedFile: " + expectedFile);
@@ -177,7 +168,7 @@ public class BusinessLogicTest {
         return new String(readAllBytes, UTF_8);
     }
 
-    private JsonNode readJson(String fileName) throws IOException {
+    private JsonNode readJson(String fileName, Path directory) throws IOException {
         File jsonFile = directory.resolve(fileName).toFile();
         if (!jsonFile.exists())
             throw new IllegalArgumentException("No such jsonFile: " + jsonFile);
@@ -186,7 +177,7 @@ public class BusinessLogicTest {
         }
     }
 
-    private String computeDiff() throws IOException {
+    private String computeDiff(Path directory) throws IOException {
         List<String> original = Files.readAllLines(directory.resolve("before.json"));
         List<String> changed = Files.readAllLines(directory.resolve("after.json"));
         DiffRowGenerator generator = DiffRowGenerator.create()
@@ -204,7 +195,7 @@ public class BusinessLogicTest {
         if (same)
             return "";
 
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream() ;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              PrintStream printStream = new PrintStream(bos, true, UTF_8.name())) {
 
             Deque<String> queue = new LinkedList<>();
@@ -228,8 +219,7 @@ public class BusinessLogicTest {
         }
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> test() throws Exception {
+    public static Stream<Arguments> testProcess() throws Exception {
         File path = new File(BusinessLogicTest.class.getResource("/test-cases").toURI())
                 .toPath()
                 .toAbsolutePath()
@@ -237,8 +227,7 @@ public class BusinessLogicTest {
         return Arrays.stream(path.listFiles(File::isDirectory))
                 .map(TestCase::new)
                 .sorted()
-                .map(TestCase::asArguments)
-                .collect(Collectors.toList());
+                .map(TestCase::asArguments);
     }
 
     static class TestCase implements Comparable<TestCase> {
@@ -256,8 +245,8 @@ public class BusinessLogicTest {
             return name.compareTo(other.name);
         }
 
-        public Object[] asArguments() {
-            return new Object[] {name, directory};
+        public Arguments asArguments() {
+            return Arguments.of(name, directory);
         }
     }
 

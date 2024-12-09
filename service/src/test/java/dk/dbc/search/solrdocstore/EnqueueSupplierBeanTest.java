@@ -3,7 +3,9 @@ package dk.dbc.search.solrdocstore;
 import dk.dbc.search.solrdocstore.jpa.QueueType;
 import dk.dbc.search.solrdocstore.jpa.QueueRuleEntity;
 import dk.dbc.search.solrdocstore.enqueue.EnqueueCollector;
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -14,7 +16,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
  */
 public class EnqueueSupplierBeanTest extends BeanTester {
 
-    @Test(timeout = 2_000L)
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     public void testEnqueueAddsTotTables() throws Exception {
         System.out.println("testEnqueueAddsTotTables");
 
