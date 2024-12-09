@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,7 +40,8 @@ public class Docker {
         final String build_number = System.getenv("BUILD_NUMBER");
         if (build_number != null && !build_number.isBlank()) {
             // in CI environment
-            final String branch_name = System.getenv("BRANCH_NAME");
+            Map<String, String> env = System.getenv();
+            final String branch_name = env.getOrDefault("CHANGE_BRANCH", env.get("BRANCH_NAME"));
             if ("main".equals(branch_name)) {
                 tag = build_number;
             } else {
