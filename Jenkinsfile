@@ -89,7 +89,7 @@ pipeline {
                         docker.withRegistry(dockerRepository, 'docker') {
                             for(def image : ["solr-doc-store-monitor", "solr-doc-store-updater", "solr-doc-store-postgresql", "solr-doc-store-service"]) {
                                 def app = docker.image("docker-de.artifacts.dbccloud.dk/${image}-${version}:${label}")
-                                app.push
+                                app.push label
                                 if (env.BRANCH_NAME == "master") {
                                     app.push "latest"
                                 }
