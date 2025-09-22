@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,7 +92,7 @@ public class DockerImageIT {
             if ("master".equals(branch_name)) {
                 tag = build_number;
             } else {
-                tag = branch_name + "-" + build_number;
+                tag = branch_name.toLowerCase(Locale.ROOT) + "-" + build_number;
             }
         }
         return tag;
