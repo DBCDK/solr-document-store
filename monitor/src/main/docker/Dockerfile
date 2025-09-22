@@ -1,10 +1,5 @@
-FROM docker-dbc.artifacts.dbccloud.dk/payara6-micro:latest
-
-ENV APPLICATION_NAME=SolrDocStoreMonitor \
-    POOL_SIZE=2 \
-    LOG__dk_dbc=INFO
-
-LABEL DOCSTORE_POSTGRES_URL="Solr DocStore database url (required: user:pass@host:port/database)" \
-      HAZELCAST_CLUSTER="Name of hazelcast cluster"
-
-COPY target/${project.build.finalName}.war target/docker/app.json deployments/
+FROM docker-de.artifacts.dbccloud.dk/pg-queue-monitor:latest
+ENV JAVA_MAX_HEAP_SIZE=1g \
+    PG_QUEUE_DIAG_COLLAPSE_PERCENTAGE_MATCH=60 \
+    PG_QUEUE_SKIP_LIST=*-slow
+COPY target/${project.artifactId}-${project.version}.jar deployments/${project.artifactId}.jar
