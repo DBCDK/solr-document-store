@@ -1,3 +1,5 @@
+@Library('dependency-track')
+
 def workerNode = 'devel12'
 def dockerRepository = 'https://docker-de.artifacts.dbccloud.dk'
 
@@ -96,6 +98,18 @@ pipeline {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        stage("supply-chain gate") {
+            steps {
+                script {
+                    dependencyTrackGate(
+                        projectBom:  'target/sbom-java.json',
+                        projectTeam: 'de-team',
+                        projectType: 'java'
+                    )
                 }
             }
         }
