@@ -45,7 +45,7 @@ public class OpenAgencyProxyBean {
             if (libraryRuleList == null || libraryRuleList.isEmpty()) {
                 return new OpenAgencyEntity(agencyId, LibraryType.Unknown, false, false, false);
             } else {
-                return new OpenAgencyEntity(libraryRuleList.get(0));
+                return new OpenAgencyEntity(libraryRuleList.getFirst());
             }
         } catch (JsonProcessingException e) {
             log.error("Unable to unmarshall response from vipCore from agency {}, error: {}", agencyId, e.getMessage());

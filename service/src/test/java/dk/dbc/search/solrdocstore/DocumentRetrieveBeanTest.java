@@ -143,8 +143,8 @@ public class DocumentRetrieveBeanTest extends BeanTester {
                     .getDocumentWithHoldingsitems(COMMON_AGENCY, "basis", BIB_ID);
             List<HoldingsItemEntity> holdingsItemRecords = doc.holdingsItemRecords;
             assertThat(holdingsItemRecords.size(), is(1));
-            assertThat(holdingsItemRecords.get(0).getAgencyId(), is(700055));
-            assertThat(holdingsItemRecords.get(0).getBibliographicRecordId(), is(BIB_ID));
+            assertThat(holdingsItemRecords.getFirst().getAgencyId(), is(700055));
+            assertThat(holdingsItemRecords.getFirst().getBibliographicRecordId(), is(BIB_ID));
         });
     }
 
@@ -164,10 +164,10 @@ public class DocumentRetrieveBeanTest extends BeanTester {
             List<DocumentRetrieveResponse> docs = bf.documentRetrieveBeanV2()
                     .getDocumentsForWork("work:1", true);
             assertThat(docs.size(), is(1));
-            List<HoldingsItemEntity> holdingsItemRecords = docs.get(0).holdingsItemRecords;
+            List<HoldingsItemEntity> holdingsItemRecords = docs.getFirst().holdingsItemRecords;
             assertThat(holdingsItemRecords.size(), is(1));
-            assertThat(holdingsItemRecords.get(0).getAgencyId(), is(700055));
-            assertThat(holdingsItemRecords.get(0).getBibliographicRecordId(), is(BIB_ID));
+            assertThat(holdingsItemRecords.getFirst().getAgencyId(), is(700055));
+            assertThat(holdingsItemRecords.getFirst().getBibliographicRecordId(), is(BIB_ID));
         });
     }
 
@@ -187,10 +187,10 @@ public class DocumentRetrieveBeanTest extends BeanTester {
             List<DocumentRetrieveResponse> docs = bf.documentRetrieveBeanV2()
                     .getDocumentsForUnit("unit:1", true);
             assertThat(docs.size(), is(1));
-            List<HoldingsItemEntity> holdingsItemRecords = docs.get(0).holdingsItemRecords;
+            List<HoldingsItemEntity> holdingsItemRecords = docs.getFirst().holdingsItemRecords;
             assertThat(holdingsItemRecords.size(), is(1));
-            assertThat(holdingsItemRecords.get(0).getAgencyId(), is(700055));
-            assertThat(holdingsItemRecords.get(0).getBibliographicRecordId(), is(BIB_ID));
+            assertThat(holdingsItemRecords.getFirst().getAgencyId(), is(700055));
+            assertThat(holdingsItemRecords.getFirst().getBibliographicRecordId(), is(BIB_ID));
         });
     }
 

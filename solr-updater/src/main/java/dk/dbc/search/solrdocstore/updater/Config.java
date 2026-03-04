@@ -238,8 +238,8 @@ public class Config {
     private Properties findProperties(String resourceName) {
         try {
             Object loopup = InitialContext.doLookup(resourceName);
-            if (loopup instanceof Properties) {
-                return (Properties) loopup;
+            if (loopup instanceof Properties properties) {
+                return properties;
             } else {
                 throw new NamingException("Found " + resourceName + ", but not of type Properties of type: " + loopup.getClass().getTypeName());
             }

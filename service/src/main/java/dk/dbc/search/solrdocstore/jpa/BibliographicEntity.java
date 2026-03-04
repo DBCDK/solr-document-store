@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore.jpa;
 
 import dk.dbc.search.solrdocstore.queue.QueueJob;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
 import java.io.Serializable;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Convert;
@@ -35,6 +36,7 @@ public class BibliographicEntity implements Serializable {
     public static final List<String> sortableColumns = Collections.unmodifiableList(Arrays.asList(
             "agencyId", "bibliographicRecordId", "deleted", "trackingId"));
 
+    @Serial
     private static final long serialVersionUID = -2773872842011755768L;
 
     private static final String SELECT_MANIFESTATIONS_FOR_UNIT_JPA =

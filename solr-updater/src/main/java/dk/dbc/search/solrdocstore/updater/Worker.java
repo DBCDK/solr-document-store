@@ -119,7 +119,7 @@ public class Worker {
                         case 0:
                             throw new IllegalStateException("No collection to put " + pid + " into");
                         case 1:
-                            tasks.get(0).run();
+                            tasks.getFirst().run();
                             break;
                         default: {
                             RuntimeException rex = null;
@@ -133,8 +133,8 @@ public class Worker {
                                     rex = new RuntimeException(ex);
                                 } catch (ExecutionException ex) {
                                     Throwable cause = ex.getCause();
-                                    if (cause instanceof RuntimeException) {
-                                        rex = (RuntimeException) cause;
+                                    if (cause instanceof RuntimeException exception) {
+                                        rex = exception;
                                     } else {
                                         rex = new RuntimeException(cause);
                                     }
@@ -149,8 +149,7 @@ public class Worker {
                 } catch (RuntimeException ex) {
                     Throwable cause = ex;
                     while (cause != null) {
-                        if (cause instanceof RethrowableException) {
-                            RethrowableException ex1 = (RethrowableException) cause;
+                        if (cause instanceof RethrowableException ex1) {
                             ex1.throwAs(IOException.class);
                             ex1.throwAs(SolrServerException.class);
                             ex1.throwAs(FatalQueueError.class);

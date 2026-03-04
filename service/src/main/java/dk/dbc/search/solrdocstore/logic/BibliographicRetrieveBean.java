@@ -31,7 +31,7 @@ public class BibliographicRetrieveBean {
         if (entities.isEmpty()) {
             return null;
         } else {
-            return entities.get(0);
+            return entities.getFirst();
         }
     }
 
@@ -48,7 +48,7 @@ public class BibliographicRetrieveBean {
         if (entities.isEmpty()) {
             return null;
         } else {
-            return entities.get(0);
+            return entities.getFirst();
         }
     }
 

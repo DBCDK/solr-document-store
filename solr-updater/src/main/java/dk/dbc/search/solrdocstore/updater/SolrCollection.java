@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -165,11 +166,10 @@ public class SolrCollection {
      * @return url as string
      */
     private static String getHttpUrl(SolrClient client) {
-        if (client instanceof Http2SolrClient) {
-            return ( (Http2SolrClient) client ).getBaseURL();
+        if (client instanceof Http2SolrClient http2SolrClient) {
+            return http2SolrClient.getBaseURL();
         }
-        if (client instanceof CloudSolrClient) {
-            CloudSolrClient cloud = (CloudSolrClient) client;
+        if (client instanceof CloudSolrClient cloud) {
 
             String collectionName = cloud.getDefaultCollection();
             ClusterState state = cloud.getClusterState();
@@ -187,7 +187,7 @@ public class SolrCollection {
                 throw new IllegalArgumentException("Zookeeper don't know any live replicas");
             }
 
-            Replica replica = liveReplicas.get((int) Math.floor(Math.random() * liveReplicas.size()));
+            Replica replica = liveReplicas.get((int) Math.floor(ThreadLocalRandom.current().nextDouble() * liveReplicas.size()));
             return replica.getBaseUrl() + "/" + collectionName;
         }
         throw new IllegalStateException("Don't know about this solr client type: " + client.getClass().getSimpleName());

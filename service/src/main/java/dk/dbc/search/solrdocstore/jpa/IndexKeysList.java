@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.jpa;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Schema(name = IndexKeysList.NAME, type = SchemaType.ARRAY, ref = IndexKeys.NAME, hidden = true)
 public class IndexKeysList extends ArrayList<IndexKeys> {
 
+    @Serial
     private static final long serialVersionUID = 0x047574A122149A20L;
 
     public static final String NAME = "index-keys-list";

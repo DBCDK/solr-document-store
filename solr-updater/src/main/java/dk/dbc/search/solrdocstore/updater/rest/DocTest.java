@@ -63,7 +63,7 @@ public class DocTest {
                         .filter(c -> c.getName().equalsIgnoreCase(collection))
                         .findAny();
             }
-            if (!solrCollection.isPresent())
+            if (solrCollection.isEmpty())
                 throw new InternalServerErrorException("Cannot find collection");
 
             SolrInputDocument document = docProducer.createSolrDocument(sourceDoc, solrCollection.get());

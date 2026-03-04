@@ -1,5 +1,5 @@
 package dk.dbc.search.solrdocstore.jpa;
-
+import java.io.Serial;
 import java.io.Serializable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,6 +12,7 @@ import jakarta.persistence.IdClass;
 @IdClass(AgencyItemFieldKey.class)
 public class BibliographicResourceEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -2173176418488104877L;
 
     @Id

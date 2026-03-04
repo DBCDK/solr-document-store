@@ -249,17 +249,12 @@ public class BusinessLogic {
 
     private void addResources(Map<String, List<String>> indexKeys, Map<String, Map<Integer, Boolean>> resources, int agencyId) {
         resources.forEach((resourceName, owners) -> {
-            boolean add;
-            switch (resourceName) {
+            boolean add = switch (resourceName) {
                 case "hasCoverUrl": // Anyone has
                 case "hasDDFCoverUrl":
-                case "hasFBICoverUrl":
-                    add = owners.values().contains(Boolean.TRUE);
-                    break;
-                default:
-                    add = owners.getOrDefault(agencyId, false);
-                    break;
-            }
+                case "hasFBICoverUrl": yield owners.values().contains(Boolean.TRUE);
+                default: yield owners.getOrDefault(agencyId, false);
+            };
             if (add) {
                 indexKeys.put("rec." + resourceName, singletonList("true"));
             }

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,6 +13,7 @@ import java.util.Objects;
 @IdClass(HoldingsToBibliographicKey.class)
 public class HoldingsToBibliographicEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0xBFDEE68ED3A91178L;
 
     @Id
