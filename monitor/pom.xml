@@ -8,7 +8,6 @@
     </parent>
 
     <artifactId>solr-doc-store-monitor</artifactId>
-    <version>21.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>

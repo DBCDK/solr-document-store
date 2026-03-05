@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -16,14 +17,14 @@ import org.testcontainers.utility.DockerImageName;
 
 public class Docker {
 
-    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-updater-21.2.0";
+    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-updater:" + Docker.getDockerImageTag();
 
     private Docker() {
     }
 
     public static String build() {
         Docker.dockerPull(Docker.getDockerBaseImage());
-        String dockerImageName = new ImageFromDockerfile(Docker.IMAGE + ":" + Docker.getDockerImageTag(), false)
+        String dockerImageName = new ImageFromDockerfile(Docker.IMAGE, false)
                 .withFileFromPath(".", Path.of("."))
                 .withFileFromPath("Dockerfile", Path.of("target/docker/Dockerfile"))
                 .get();
@@ -41,11 +42,11 @@ public class Docker {
         if (build_number != null && !build_number.isBlank()) {
             // in CI environment
             Map<String, String> env = System.getenv();
-            final String branch_name = env.getOrDefault("CHANGE_BRANCH", env.get("BRANCH_NAME"));
+            final String branch_name = env.get("BRANCH_NAME");
             if ("master".equals(branch_name)) {
                 tag = build_number;
             } else {
-                tag = branch_name + "-" + build_number;
+                tag = branch_name.toLowerCase(Locale.ROOT) + "-" + build_number;
             }
         }
         return tag;
