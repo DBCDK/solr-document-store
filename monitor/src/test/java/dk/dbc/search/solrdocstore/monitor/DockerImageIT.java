@@ -10,30 +10,25 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.jupiter.api.Test;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 public class DockerImageIT {
 
-    public static final String IMAGE_NAME = "docker-de.artifacts.dbccloud.dk";
+    public static final String IMAGE = "docker-de.artifacts.dbccloud.dk/solr-doc-store-monitor:" + getDockerImageTag();
 
     @Test
-    public void buildDockerImage() throws Exception {
+    public void buildDockerImage() {
         String containerName = dockerBuild("target/docker/Dockerfile").getDockerImageName();
         System.out.println("Docker image built as " + containerName);
     }
 
     public static GenericContainer dockerBuild(String dockerfile) {
-        return dockerBuild(getImageNameFromPomXml(IMAGE_NAME), dockerfile);
+        return dockerBuild(IMAGE, dockerfile);
     }
 
     public static GenericContainer dockerBuild(String image, String dockerfile) {
@@ -50,41 +45,8 @@ public class DockerImageIT {
         return container;
     }
 
-    private static String getImageNameFromPomXml(String repository) {
-        try {
-            Element doc = DocumentBuilderFactory.newDefaultNSInstance()
-                    .newDocumentBuilder()
-                    .parse("pom.xml")
-                    .getDocumentElement();
-            String artifactId = null;
-            String version = null;
-            for (Node toplevel = doc.getFirstChild() ; toplevel != null ; toplevel = toplevel.getNextSibling()) {
-                if (toplevel.getNodeType() == Node.ELEMENT_NODE && "artifactId".equals(toplevel.getNodeName())) {
-                    for (Node artifactIdNode = toplevel.getFirstChild() ; artifactIdNode != null ; artifactIdNode = artifactIdNode.getNextSibling()) {
-                        if (artifactIdNode.getNodeType() == Node.TEXT_NODE) {
-                            artifactId = artifactIdNode.getNodeValue();
-                        }
-                    }
-                }
-                if (toplevel.getNodeType() == Node.ELEMENT_NODE && "version".equals(toplevel.getNodeName())) {
-                    for (Node versionNode = toplevel.getFirstChild() ; versionNode != null ; versionNode = versionNode.getNextSibling()) {
-                        if (versionNode.getNodeType() == Node.TEXT_NODE) {
-                            version = versionNode.getNodeValue();
-                        }
-                    }
-                }
-            }
-            if (artifactId == null || artifactId.isBlank() ||
-                version == null || version.isBlank())
-                throw new IllegalStateException("Could not find 'artifactId' or 'version' in pom.xml");
-            return repository + "/" + artifactId + "-" + version.replace("-SNAPSHOT", "") + ":" + getDockerImageTag();
-        } catch (IOException | ParserConfigurationException | DOMException | SAXException ex) {
-            throw new IllegalStateException("Could not parse pom.xml", ex);
-        }
-    }
-
     public static String getDockerImageTag() {
-        String tag = "latest";
+        String tag = "devel";
         final String build_number = System.getenv("BUILD_NUMBER");
         if (build_number != null && !build_number.isBlank()) {
             // in CI environment
