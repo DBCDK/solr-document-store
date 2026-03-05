@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package dk.dbc.search.solrdocstore.jpa;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import jakarta.persistence.Column;
@@ -31,6 +31,7 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class QueueRuleKey implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0x0433D2646AAD92BFL;
 
     @Column(name = "queue", updatable = false, insertable = false, nullable = false)

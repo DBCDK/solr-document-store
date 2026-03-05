@@ -1,5 +1,5 @@
 package dk.dbc.search.solrdocstore.jpa;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import jakarta.persistence.Column;
@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 @Table(name = "queueRule")
 public class QueueRuleEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0x5DF7F2B355D4530EL;
 
     public QueueRuleEntity() {

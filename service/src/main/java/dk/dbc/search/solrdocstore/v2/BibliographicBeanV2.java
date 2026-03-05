@@ -225,6 +225,6 @@ public class BibliographicBeanV2 {
         List<String> dates = indexKeys.get("rec.fedoraStreamDate");
         if (dates == null || dates.size() != 1)
             return null;
-        return Instant.parse(dates.get(0));
+        return Instant.parse(dates.getFirst());
     }
 }

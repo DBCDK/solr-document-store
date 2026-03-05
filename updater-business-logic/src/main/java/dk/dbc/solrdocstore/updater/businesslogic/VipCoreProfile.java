@@ -20,6 +20,7 @@ package dk.dbc.solrdocstore.updater.businesslogic;
 
 import dk.dbc.vipcore.marshallers.ProfileServiceResponse;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import java.util.Collections;
  */
 public class VipCoreProfile implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0x3FDCC38B0E089069L;
 
     private final boolean includeOwnHoldings;

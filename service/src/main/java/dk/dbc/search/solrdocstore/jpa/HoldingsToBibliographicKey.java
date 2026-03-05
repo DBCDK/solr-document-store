@@ -1,10 +1,12 @@
 package dk.dbc.search.solrdocstore.jpa;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class HoldingsToBibliographicKey implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -2054293971622143423L;
 
     private int holdingsAgencyId;

@@ -59,8 +59,8 @@ public class BeanTester extends AbstractJpaTestBase {
 
     public void persist(Object... objs) {
         for (Object obj : objs) {
-            if (obj instanceof Doc.EntityProvider) {
-                jpa(em -> em.persist(( (Doc.EntityProvider) obj ).entity()));
+            if (obj instanceof Doc.EntityProvider provider) {
+                jpa(em -> em.persist(provider.entity()));
             } else {
                 jpa(em -> em.persist(obj));
             }

@@ -2,10 +2,13 @@ package dk.dbc.search.solrdocstore.request;
 
 import dk.dbc.search.solrdocstore.jpa.HoldingsItemEntity;
 import dk.dbc.search.solrdocstore.jpa.IndexKeysList;
+
+import java.io.Serial;
 import java.sql.Timestamp;
 
 public class HoldingsItemEntityRequest extends HoldingsItemEntity {
 
+    @Serial
     private static final long serialVersionUID = 1991771211227276502L;
 
     public HoldingsItemEntityRequest() {

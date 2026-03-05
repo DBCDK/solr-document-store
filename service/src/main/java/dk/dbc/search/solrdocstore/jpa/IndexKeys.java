@@ -18,6 +18,7 @@
  */
 package dk.dbc.search.solrdocstore.jpa;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Schema(name = IndexKeys.NAME, description = IndexKeys.DESCRIPTION)
 public class IndexKeys extends HashMap<String, List<String>> {
 
+    @Serial
     private static final long serialVersionUID = 0x2B8059AFD2C1051AL;
 
     public static final String DESCRIPTION = "Generic object representing a SolR document." +

@@ -116,13 +116,10 @@ public class FeatureSwitch {
     }
 
     private static EnumSet<Feature> featureSetOf(String name) {
-        switch (name.toLowerCase(Locale.ROOT)) {
-            case "all":
-                return EnumSet.allOf(Feature.class);
-            case "none":
-                return EnumSet.noneOf(Feature.class);
-            default:
-                return EnumSet.of(Feature.of(name));
-        }
+        return switch (name.toLowerCase(Locale.ROOT)) {
+            case "all" -> EnumSet.allOf(Feature.class);
+            case "none" -> EnumSet.noneOf(Feature.class);
+            default -> EnumSet.of(Feature.of(name));
+        };
     }
 }

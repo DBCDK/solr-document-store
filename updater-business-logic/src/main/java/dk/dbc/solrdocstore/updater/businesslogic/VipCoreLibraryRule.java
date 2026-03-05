@@ -22,6 +22,8 @@ import dk.dbc.vipcore.marshallers.LibraryRule;
 import dk.dbc.vipcore.marshallers.LibraryRules;
 import dk.dbc.vipcore.marshallers.LibraryRulesResponse;
 import dk.dbc.vipcore.marshallers.LibraryType;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,7 @@ import static java.util.stream.Collectors.toMap;
  */
 public class VipCoreLibraryRule implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0x8AB5E83AAD0849B0L;
 
     private final Map<String, Boolean> booleans;
@@ -93,6 +96,6 @@ public class VipCoreLibraryRule implements Serializable {
             throw new IllegalArgumentException("LibraryRulesResponse from vipcore is empty");
         if (libraryRules.size() > 1)
             throw new IllegalArgumentException("LibraryRulesResponse from vipcore has too many answers");
-        return libraryRules.get(0);
+        return libraryRules.getFirst();
     }
 }

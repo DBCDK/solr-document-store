@@ -2,6 +2,7 @@ package dk.dbc.search.solrdocstore.jpa;
 
 import dk.dbc.holdingsitemsdocuments.bindings.HoldingsItemsDocuments;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import org.eclipse.persistence.annotations.Mutable;
@@ -32,6 +33,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @IdClass(AgencyItemKey.class)
 public class HoldingsItemEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2469572172167117328L;
 
     @Id

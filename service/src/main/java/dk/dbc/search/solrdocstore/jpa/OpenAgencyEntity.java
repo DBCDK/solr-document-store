@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @Table(name = "OpenAgencyCache")
 public class OpenAgencyEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2352663426617537636L;
 
     @Id

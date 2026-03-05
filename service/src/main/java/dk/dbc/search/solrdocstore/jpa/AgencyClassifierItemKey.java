@@ -2,12 +2,14 @@ package dk.dbc.search.solrdocstore.jpa;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
 public class AgencyClassifierItemKey implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -2054293971622143423L;
 
     private int agencyId;
