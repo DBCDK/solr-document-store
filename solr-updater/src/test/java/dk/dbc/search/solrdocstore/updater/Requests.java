@@ -20,11 +20,10 @@ package dk.dbc.search.solrdocstore.updater;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +34,8 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
+import java.util.Iterator;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +67,7 @@ public class Requests {
             throw new IllegalStateException("Don't know about test: " + testName);
         }
         System.out.println("evict-all: " + client.target(solrDocStoreUrl.clone().path("api/evict-all")).request().get().toString());
-        for (Iterator<Map.Entry<String, JsonNode>> iterator = test.fields() ; iterator.hasNext() ;) {
-            Map.Entry<String, JsonNode> entry = iterator.next();
+        for (Map.Entry<String, JsonNode> entry : test.properties()) {
             String api = entry.getKey();
             JsonNode array = entry.getValue();
             if (!array.isArray()) {

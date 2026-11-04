@@ -25,10 +25,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
@@ -39,10 +37,11 @@ import java.util.stream.Collectors;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriBuilder;
+import java.util.stream.Stream;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudHttp2SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.impl.Http2SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.cloud.ClusterState;
 import org.apache.solr.common.cloud.Replica;
 import org.slf4j.Logger;
@@ -166,21 +165,20 @@ public class SolrCollection {
      * @return url as string
      */
     private static String getHttpUrl(SolrClient client) {
-        if (client instanceof Http2SolrClient http2SolrClient) {
-            return http2SolrClient.getBaseURL();
+        if (client instanceof HttpSolrClient httpSolrClient) {
+            return httpSolrClient.getBaseURL();
         }
         if (client instanceof CloudSolrClient cloud) {
 
             String collectionName = cloud.getDefaultCollection();
-            ClusterState state = cloud.getClusterState();
+            ClusterState state = cloud.getClusterStateProvider().getClusterState();
             Set<String> nodes = state.getLiveNodes();
             if (nodes.isEmpty()) {
                 throw new IllegalArgumentException("Zookeeper don't know about live nodes");
             }
 
             List<Replica> liveReplicas = state.getCollection(collectionName)
-                    .getReplicas()
-                    .stream()
+                    .replicaStream()
                     .filter(r -> nodes.contains(r.getNodeName()))
                     .collect(Collectors.toList());
             if (liveReplicas.isEmpty()) {
@@ -215,17 +213,18 @@ public class SolrCollection {
     public static SolrClient makeSolrClient(String solrUrl) {
         Matcher zkMatcher = ZK.matcher(solrUrl);
         if (zkMatcher.matches()) {
-            Optional<String> zkChroot = Optional.empty();
-            if (zkMatcher.group(2) != null) {
-                zkChroot = Optional.of(zkMatcher.group(2));
-            }
-            List<String> zkHosts = Arrays.asList(zkMatcher.group(1).split(","));
-            CloudHttp2SolrClient solrClient = new CloudHttp2SolrClient.Builder(zkHosts, zkChroot)
+            String zkConnectString = Stream.of(zkMatcher.group(1).split(","))
+                    .map(s -> s.indexOf(':') == -1 ? s + ":2181" : s) // ensure port
+                    .collect(Collectors.joining(","));
+            if (zkMatcher.group(2) != null)
+                zkConnectString = zkConnectString + zkMatcher.group(2);
+
+            CloudHttp2SolrClient solrClient = new CloudHttp2SolrClient.Builder(zkConnectString)
                     .withDefaultCollection(zkMatcher.group(3))
                     .build();
             return solrClient;
         } else {
-            return new Http2SolrClient.Builder(solrUrl)
+            return HttpSolrClient.builder(solrUrl)
                     .build();
         }
     }

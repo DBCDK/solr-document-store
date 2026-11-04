@@ -5,8 +5,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import dk.dbc.holdingsitemsdocuments.bindings.HoldingsItemsDocuments;
@@ -27,10 +29,12 @@ import java.util.stream.Collectors;
 
 public class Doc {
 
-    public static final ObjectMapper O = new ObjectMapper()
+    public static final ObjectMapper O = JsonMapper.builder()
+            .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .defaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .build()
             .registerModule(new JakartaXmlBindAnnotationModule())
             .registerModule(new JavaTimeModule());
 
@@ -127,18 +131,16 @@ public class Doc {
             return this;
         }
 
-
         public BibliographicEntityBuilder indexKeys(String json) throws JsonProcessingException {
             JsonNode tree = O
                     .enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES,
                             JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
                     .readTree(json);
-            if (!tree.isObject()) 
+            if (!tree.isObject())
                 throw new IllegalStateException("indexKeys should be an object");
             HashMap<String, List<String>> indeKeys = new HashMap<>();
-            tree.fields().forEachRemaining(e -> {
-                List<String> list = indeKeys.computeIfAbsent(e.getKey(), k -> new ArrayList<>());
-                JsonNode value = e.getValue();
+            tree.forEachEntry((key, value) -> {
+                List<String> list = indeKeys.computeIfAbsent(key, k -> new ArrayList<>());
                 if (value.isArray()) {
                     value.forEach(v -> {
                         if (v.isObject() || v.isArray() || v.isNull()) {

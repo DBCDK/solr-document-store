@@ -21,6 +21,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +50,7 @@ public class DocTest {
                            @PathParam("bibliographicRecordId") String bibliographicRecordId,
                            @QueryParam("collection") String collection) throws InterruptedException, ExecutionException, IOException {
         log.debug("agencyId = {}; bibliographicRecordId = {}", agencyId, bibliographicRecordId);
-        try {
+        try (StringWriter writer = new StringWriter()) {
             SolrDocStoreResponse sourceDoc = docProducer.fetchSourceDoc(QueueJob.manifestation(agencyId, classifier, bibliographicRecordId));
             if (sourceDoc.bibliographicRecord.deleted) {
                 return Response.noContent().build();
@@ -67,9 +68,10 @@ public class DocTest {
                 throw new InternalServerErrorException("Cannot find collection");
 
             SolrInputDocument document = docProducer.createSolrDocument(sourceDoc, solrCollection.get());
-            String xml = ClientUtils.toXML(document);
 
-            return Response.ok(xml, MediaType.APPLICATION_XML_TYPE).build();
+            ClientUtils.writeXML(document, writer);
+
+            return Response.ok(writer.toString(), MediaType.APPLICATION_XML_TYPE).build();
         } catch (IOException | RuntimeException ex) {
             log.error("Exception: {}", ex.getMessage());
             log.debug("Exception:", ex);
