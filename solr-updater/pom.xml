@@ -135,21 +135,10 @@
             <artifactId>jakarta.jakartaee-api</artifactId>
         </dependency>
 
-        <!--
-        This block is instead of fish.payara.extras:payara-embedded-all
-        which provides another ClientBuilder - client, which is incompatible
-        with running in unittests
-        -->
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-common -->
         <dependency>
