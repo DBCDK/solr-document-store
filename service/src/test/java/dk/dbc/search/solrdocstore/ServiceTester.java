@@ -2,8 +2,9 @@ package dk.dbc.search.solrdocstore;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -14,11 +15,8 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import static dk.dbc.commons.testcontainers.postgres.AbstractPgTestBase.PG;
 
@@ -41,13 +38,14 @@ import static dk.dbc.commons.testcontainers.postgres.AbstractPgTestBase.PG;
 public class ServiceTester extends AbstractJpaAndRestTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceTester.class);
-
-    private static final Client CLIENT = clientBuilderWithObjectMapper(new ObjectMapper()
+    private static final Client CLIENT = clientBuilderWithObjectMapper(JsonMapper.builder()
+            .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .registerModule(new JakartaXmlBindAnnotationModule())
-            .registerModule(new JavaTimeModule())).build();
+            .defaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .build()
+            .registerModule(new JavaTimeModule())
+            .registerModule(new JakartaXmlBindAnnotationModule())).build();
 
     public static final int WIREMOCK_PORT = getWiremockPort();
     public static final WireMockFromDirectory WIREMOCK = makeWireMock(WIREMOCK_PORT);

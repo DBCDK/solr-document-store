@@ -18,6 +18,7 @@
 
     <properties>
         <pg-queue.version>21.2.0-SNAPSHOT</pg-queue.version>
+        <solr.version>10.1.0</solr.version>
         <netty.version>4.1.137.Final</netty.version>
     </properties>
 

@@ -55,7 +55,25 @@
         <dependency>
             <groupId>dk.dbc</groupId>
             <artifactId>dbc-commons-log</artifactId>
-            <version>1.3-SNAPSHOT</version>
+            <version>21.2.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>${solr.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj-zookeeper</artifactId>
+            <version>${solr.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj-jetty</artifactId>
+            <version>${solr.version}</version>
         </dependency>
 
         <dependency>
@@ -66,7 +84,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
-            <version>${jackson.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -118,21 +135,10 @@
             <artifactId>jakarta.jakartaee-api</artifactId>
         </dependency>
 
-        <!--
-        This block is instead of fish.payara.extras:payara-embedded-all
-        which provides another ClientBuilder - client, which is incompatible
-        with running in unittests
-        -->
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-common -->
         <dependency>
@@ -263,7 +269,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
                 <executions>
                 </executions>
             </plugin>
